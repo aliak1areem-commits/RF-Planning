@@ -939,7 +939,7 @@ body {
     <div class="stats-bar">
       <div class="stats-bar-item">📡 <b id="statTotal">0</b> Cells</div>
       <div class="stats-bar-item">📍 <b id="statSites">0</b> Sites</div>
-      <div class="stats-bar-item">🌐 <b id="statBands">0</b> Bands</div>
+            <div class="stats-bar-item">🌐 <b id="statBands">0</b> Regions</div>
       <div class="stats-bar-item">⚠️ <b id="statPCI">0</b> PCI Conflicts</div>
       <div class="stats-bar-item" style="margin-left:auto;">🎯 Visible: <b id="statVisible">0</b></div>
     </div>
@@ -954,9 +954,7 @@ body {
           <div class="filter-group">
             <input type="text" class="filter-search" id="searchFilter" placeholder="🔍 Cell name, site, PCI..." oninput="applyFilters()">
           </div>
-          <h3>Filter by Band</h3>
-          <div class="filter-group" id="bandFilters"></div>
-          <h3>Filter by PCI</h3>
+                    <h3>Filter by PCI</h3>
           <div class="filter-group">
             <input type="text" class="filter-search" id="pciFilter" placeholder="PCI number..." oninput="applyFilters()">
           </div>
@@ -1024,8 +1022,8 @@ body {
           <button class="basemap-btn" data-basemap="terrain">Terrain</button>
         </div>
 
-        <div class="legend" id="legend">
-          <div class="legend-title">Band Legend</div>
+                <div class="legend" id="legend" style="display:none;">
+          <div class="legend-title">Legend</div>
           <div id="legendItems"></div>
         </div>
 
@@ -1453,12 +1451,11 @@ body {
                 <option value="no">No (Points only)</option>
               </select>
             </div>
-            <div class="form-field">
-              <label>Color by Band</label>
+                       <div class="form-field">
+              <label>Color Mode</label>
               <select id="kml_color">
-                <option value="band">By Band</option>
                 <option value="sector">By Sector (A/B/C)</option>
-                <option value="status">Single Color</option>
+                <option value="status">Single Color (Red)</option>
               </select>
             </div>
             <div class="form-field">
@@ -1514,17 +1511,8 @@ const SUPABASE_KEY = 'sb_publishable_HAf79ZGumF-BKQhnJoW9ZQ_5V2ubxqT';
 /* =========================================================
    COLORS
    ========================================================= */
-const BAND_COLORS = {
-  'LAN':   '#124191',
-  'LBG':   '#1F9D55',
-  'LCW':   '#D64545',
-  'LSA':   '#F2A900',
-  'UCW':   '#8A5A00',
-  'LSA26': '#8B5CF6',
-  'LNB':   '#0891B2',
-  'LNC':   '#DB2777',
-  'DEFAULT': '#6B7FA0'
-};
+// كل الخلايا = أحمر
+const CELL_COLOR = '#D64545';
 
 const SECTOR_COLORS = {
   'A': '#D64545',
@@ -1755,8 +1743,8 @@ async function loadCells() {
    ========================================================= */
 function normalizeCell(row) {
   const name = row.cell_name || '';
-  const bandMatch = name.match(/^[A-Z]+/);
-  const band = bandMatch ? bandMatch[0] : 'UNKNOWN';
+  const prefixMatch = name.match(/^[A-Z]+/);
+  const region = prefixMatch ? prefixMatch[0] : 'UNKNOWN';
   const site = name.replace(/[A-Z]$/, '');
   const sector = name.slice(-1);
 
@@ -1770,13 +1758,12 @@ function normalizeCell(row) {
     lat: parseFloat(row.lat) || 0,
     long: parseFloat(row.long) || 0,
     bore: row.bore || 0,
-    band: band,
+    region: region,
     site: site,
     sector: sector,
-    color: SECTOR_COLORS[sector] || BAND_COLORS[band] || BAND_COLORS.DEFAULT
+    color: CELL_COLOR
   };
 }
-
 /* =========================================================
    STATS
    ========================================================= */
@@ -1787,9 +1774,8 @@ function updateStats() {
   const sites = new Set(allCells.map(c => c.site));
   if (el('statSites')) el('statSites').textContent = sites.size;
 
-  const bands = new Set(allCells.map(c => c.band));
-  if (el('statBands')) el('statBands').textContent = bands.size;
-
+    const regions = new Set(allCells.map(c => c.region));
+  if (el('statBands')) el('statBands').textContent = regions.size;
   const pciCount = {};
   allCells.forEach(c => { pciCount[c.pci] = (pciCount[c.pci] || 0) + 1; });
   const conflicts = Object.values(pciCount).filter(v => v > 1).length;
@@ -1802,46 +1788,16 @@ function updateStats() {
    BAND FILTERS
    ========================================================= */
 function renderBandFilters() {
-  const container = document.getElementById('bandFilters');
-  if (!container) return;
-
-  const bands = {};
-  allCells.forEach(function(c) {
-    if (!bands[c.band]) bands[c.band] = { count: 0, color: c.color };
-    bands[c.band].count++;
-  });
-
-  const html = Object.keys(bands).sort().map(function(band) {
-    const info = bands[band];
-    return '<label class="filter-checkbox">' +
-      '<input type="checkbox" value="' + band + '" checked onchange="applyFilters()">' +
-      '<span class="filter-color" style="background:' + info.color + ';"></span>' +
-      '<span>' + band + '</span>' +
-      '<span class="filter-count">' + info.count + '</span>' +
-      '</label>';
-  }).join('');
-
-  container.innerHTML = html;
+  // لا يوجد فلتر band بعد الآن — الدالة فاضية
+  return;
 }
 
 /* =========================================================
    LEGEND
    ========================================================= */
 function renderLegend() {
-  const container = document.getElementById('legendItems');
-  if (!container) return;
-
-  const bands = {};
-  allCells.forEach(c => {
-    if (!bands[c.band]) bands[c.band] = c.color;
-  });
-
-  container.innerHTML = Object.keys(bands).sort().map(band =>
-    '<div class="legend-item">' +
-      '<span class="legend-dot" style="background:' + bands[band] + ';"></span>' +
-      '<span>' + band + '</span>' +
-    '</div>'
-  ).join('');
+  // لا يوجد legend بعد الآن
+  return;
 }
 
 /* =========================================================
@@ -1861,13 +1817,7 @@ function applyFilters() {
   const search = (searchEl.value || '').toLowerCase().trim();
   const pciQuery = (pciEl.value || '').trim();
 
-  const selectedBands = new Set(
-    Array.from(document.querySelectorAll('#bandFilters input[type="checkbox"]:checked'))
-      .map(i => i.value)
-  );
-
   visibleCells = allCells.filter(function(c) {
-    if (!selectedBands.has(c.band)) return false;
     if (search) {
       const hay = (c.cell_name + ' ' + c.site + ' ' + c.pci + ' ' + c.cell_id).toLowerCase();
       if (hay.indexOf(search) === -1) return false;
@@ -1881,7 +1831,6 @@ function applyFilters() {
     document.getElementById('statVisible').textContent = visibleCells.length;
   }
 }
-
 /* =========================================================
    RENDER MAP
    ========================================================= */
@@ -1904,13 +1853,13 @@ function renderMap() {
     visibleCells.forEach(cell => {
       if (!cell.lat || !cell.long) return;
       if (!sites[cell.site]) {
-        sites[cell.site] = { lat: cell.lat, long: cell.long, cells: [], band: cell.band };
+        sites[cell.site] = { lat: cell.lat, long: cell.long, cells: [], region: cell.region };
       }
       sites[cell.site].cells.push(cell);
     });
 
     Object.entries(sites).forEach(([siteName, info]) => {
-      const color = BAND_COLORS[info.band] || BAND_COLORS.DEFAULT;
+      const color = CELL_COLOR;
       const count = info.cells.length;
 
       const circle = L.circleMarker([info.lat, info.long], {
@@ -1926,7 +1875,7 @@ function renderMap() {
         '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:200px;">' +
           '<div style="font-weight:800;font-size:14px;font-family:monospace;margin-bottom:8px;color:#0C1B3D;">' + escapeHtml(siteName) + '</div>' +
           '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;"><span style="color:#5A6B87;">Cells:</span><b>' + count + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:#5A6B87;">Band:</span><b>' + escapeHtml(info.band) + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:#5A6B87;">Region:</span><b>' + escapeHtml(info.region) + '</b></div>' +
         '</div>'
       );
 
@@ -2079,7 +2028,6 @@ function fitAllCells() {
 function clearFilters() {
   document.getElementById('searchFilter').value = '';
   document.getElementById('pciFilter').value = '';
-  document.querySelectorAll('#bandFilters input[type="checkbox"]').forEach(i => i.checked = true);
   applyFilters();
   toast('Filters cleared', 'info');
 }
@@ -2308,7 +2256,7 @@ function importParseRows(rows) {
 function importRenderPreview() {
   document.getElementById('importPreviewCard').style.display = 'block';
 
-  const bands = new Set(importPreviewData.map(r => {
+  const regions = new Set(importPreviewData.map(r => {
     const m = r.cell_name.match(/^[A-Z]+/);
     return m ? m[0] : null;
   }).filter(Boolean));
@@ -2324,8 +2272,8 @@ function importRenderPreview() {
       '<div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">Sites</div>' +
     '</div>' +
     '<div style="background:#EAF2FB;border-radius:10px;padding:14px;">' +
-      '<div style="font-family:monospace;font-size:20px;font-weight:700;color:#0C1B3D;">' + bands.size + '</div>' +
-      '<div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">Bands</div>' +
+      '<div style="font-family:monospace;font-size:20px;font-weight:700;color:#0C1B3D;">' + regions.size + '</div>' +
+      '<div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">Regions</div>' +
     '</div>';
 
   const preview = importPreviewData.slice(0, 30);
@@ -2592,10 +2540,9 @@ function exportKML() {
     return 'ff' + b + g + r;
   }
 
-  function getColor(cell) {
-    if (colorMode === 'band') return cell.color;
-    if (colorMode === 'sector') return SECTOR_COLORS[cell.sector] || cell.color;
-    return '#124191';
+    function getColor(cell) {
+    if (colorMode === 'sector') return SECTOR_COLORS[cell.sector] || CELL_COLOR;
+    return CELL_COLOR;
   }
 
   let kml = '<?xml version="1.0" encoding="UTF-8"?>\n';
@@ -2632,7 +2579,7 @@ function exportKML() {
     kml += '        <b>Cell:</b> ' + escapeHtml(cell.cell_name) + '<br/>';
     kml += '        <b>Site:</b> ' + escapeHtml(cell.site) + '<br/>';
     kml += '        <b>Sector:</b> ' + escapeHtml(cell.sector) + '<br/>';
-    kml += '        <b>Band:</b> ' + escapeHtml(cell.band) + '<br/>';
+       kml += '        <b>Region:</b> ' + escapeHtml(cell.region) + '<br/>';
     kml += '        <b>PCI:</b> ' + cell.pci + '<br/>';
     kml += '        <b>RSI:</b> ' + cell.rsi + '<br/>';
     kml += '        <b>Azimuth:</b> ' + cell.bore + '&deg;<br/>';
@@ -3210,9 +3157,9 @@ function exportSelectedCells() {
   if (!selectedCellIds.size) { toast('No cells selected', 'error'); return; }
 
   const selected = allCells.filter(c => selectedCellIds.has(c.id));
-  const rows = [['Cell Name', 'PCI', 'RSI', 'Lat', 'Long', 'Azimuth', 'Site', 'Band', 'Sector']];
+    const rows = [['Cell Name', 'PCI', 'RSI', 'Lat', 'Long', 'Azimuth', 'Site', 'Region', 'Sector']];
   selected.forEach(c => {
-    rows.push([c.cell_name, c.pci, c.rsi, c.lat, c.long, c.bore, c.site, c.band, c.sector]);
+    rows.push([c.cell_name, c.pci, c.rsi, c.lat, c.long, c.bore, c.site, c.region, c.sector]);
   });
 
   const csv = rows.map(r => r.join(',')).join('\n');
@@ -3247,7 +3194,7 @@ function showSiteInfo(cell) {
     '<div class="info-row"><span class="k">Cell Name</span><span class="v">' + escapeHtml(cell.cell_name) + '</span></div>' +
     '<div class="info-row"><span class="k">Site</span><span class="v">' + escapeHtml(cell.site) + '</span></div>' +
     '<div class="info-row"><span class="k">Sector</span><span class="v">' + escapeHtml(cell.sector) + '</span></div>' +
-    '<div class="info-row"><span class="k">Band</span><span class="v">' + escapeHtml(cell.band) + '</span></div>' +
+          '<div class="info-row"><span class="k">Region</span><span class="v">' + escapeHtml(cell.region) + '</span></div>' +
     '<div class="info-row"><span class="k">Cell ID</span><span class="v">' + cell.cell_id + '</span></div>' +
 
     '<div class="info-section-title">🔢 RF Parameters</div>' +
