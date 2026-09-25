@@ -958,11 +958,10 @@ body {
   </select>
 </div>
          <h3>Actions</h3>
-<div class="filter-group">
-  <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="fitAllCells()">🎯 Fit to View</button>
-  <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="clearFilters()">🗑️ Clear Filters</button>
   <button class="btn btn-ghost" id="multiSelectBtn" style="width:100%;justify-content:center;" onclick="toggleMultiSelectMode()">🎯 Multi-Select Mode</button>
 </div>
+</div>  <!-- ← هذا الـ </div> الجديد: يغلق .map-sidebar -->
+
 <div id="map"></div>
 
 <!-- Multi-Select Info Bar -->
@@ -984,22 +983,24 @@ body {
       <div style="font-size:13px;">Click a sector to view details</div>
     </div>
   </div>
-</div>        <div class="basemap-switcher">
-          <button class="basemap-btn active" data-basemap="street">Street</button>
-          <button class="basemap-btn" data-basemap="satellite">Satellite</button>
-          <button class="basemap-btn" data-basemap="terrain">Terrain</button>
-        </div>
-        <div class="legend" id="legend">
-          <div class="legend-title">Band Legend</div>
-          <div id="legendItems"></div>
-        </div>
-        <div class="loading-overlay" id="loadingOverlay">
-          <div class="spinner"></div>
-          <div class="text">Loading cells from Supabase...</div>
-        </div>
-      </div>
-    </section>
+</div>
 
+<div class="basemap-switcher">
+  <button class="basemap-btn active" data-basemap="street">Street</button>
+  <button class="basemap-btn" data-basemap="satellite">Satellite</button>
+  <button class="basemap-btn" data-basemap="terrain">Terrain</button>
+</div>
+<div class="legend" id="legend">
+  <div class="legend-title">Band Legend</div>
+  <div id="legendItems"></div>
+</div>
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="text">Loading cells from Supabase...</div>
+</div>
+
+</div>  <!-- ← يغلق .map-container -->
+</section>
     <!-- ============ PAGE: DASHBOARD ============ -->
     <section class="page" id="page-dashboard">
       <div style="padding:24px;overflow-y:auto;flex:1;">
