@@ -1108,6 +1108,8 @@ async function loadCells() {
     document.getElementById('loadingOverlay').style.display = 'none';
   }
 }
+    
+    
 /* =========================================================
    NORMALIZE CELL DATA
    ========================================================= */
@@ -1137,7 +1139,8 @@ function normalizeCell(row) {
     band:      band,
     site:      site,
     sector:    sector,
-   color: SECTOR_COLORS[sector] || BAND_COLORS[band] || BAND_COLORS.DEFAULT
+  color: BAND_COLORS[band] || BAND_COLORS.DEFAULT
+
   };
 }
 
@@ -1324,46 +1327,45 @@ function renderMap() {
 }
 
 /* =========================================================
-   MAKE SECTOR COORDINATES (120° Triangle)
-   ========================================================= */
-/* =========================================================
-   SECTOR SHAPE — Atoll-like 3-Sector Visualization
-   شكل Sector صغير وواضح مثل برنامج Atoll
-   ========================================================= */
-/* =========================================================
-   SECTOR SHAPE — Small & Professional (Atoll-like)
-   ========================================================= */
-/* =========================================================
-   SECTOR SHAPE — Small & Professional (Atoll-like)
-   ========================================================= */
-/* =========================================================
-   SECTOR SHAPE — Small & Professional (Atoll-like)
+   SECTOR SHAPE — 5-Point Atoll-like Polygon
+   شكل Sector احترافي — 5 نقاط (مثل QGIS/Atoll)
    ========================================================= */
 function makeSectorCoords(lat, lng, azimuth, radiusM, beamWidth) {
-  // ⭐ حجم Sector يتغير حسب الـ Zoom
+  // ⭐ حجم Sector حسب الـ Zoom
   const zoom = map.getZoom();
-  let visualSizeM;
+  let radius_m, half_width_m;
   
   if (zoom >= 16) {
-    visualSizeM = 200;   // قريب جداً: 200 متر
+    radius_m = 150;  half_width_m = 45;
   } else if (zoom >= 14) {
-    visualSizeM = 400;   // قريب: 400 متر
+    radius_m = 350;  half_width_m = 100;
   } else if (zoom >= 12) {
-    visualSizeM = 800;   // متوسط: 800 متر
+    radius_m = 800;  half_width_m = 230;
   } else if (zoom >= 10) {
-    visualSizeM = 2000;  // بعيد: 2 كم
+    radius_m = 2000; half_width_m = 570;
   } else {
-    visualSizeM = 5000;  // بعيد جداً: 5 كم
+    radius_m = 5000; half_width_m = 1400;
   }
   
-  const halfBeam = beamWidth / 2;
-  const point1 = destinationPoint(lat, lng, azimuth - halfBeam, visualSizeM);
-  const point2 = destinationPoint(lat, lng, azimuth + halfBeam, visualSizeM);
-
+  // ⭐ نقاط Sector (5 نقاط — نفس QGIS)
+  const near_d = radius_m * 0.04;
+  const far_d  = radius_m;
+  const near_w = half_width_m * 0.30;
+  const far_w  = half_width_m;
+  
+  function pt(fwd_m, right_m) {
+    const distance = Math.sqrt(fwd_m * fwd_m + right_m * right_m);
+    const offsetAngle = Math.atan2(right_m, fwd_m) * 180 / Math.PI;
+    const bearing = azimuth + offsetAngle;
+    return destinationPoint(lat, lng, bearing, distance);
+  }
+  
   return [
-    [lat, lng],
-    point1,
-    point2
+    pt(0, 0),                    // مركز
+    pt(near_d, -near_w),         // قريب يمين
+    pt(far_d, -far_w),           // بعيد يمين
+    pt(far_d, far_w),            // بعيد يسار
+    pt(near_d, near_w)           // قريب يسار
   ];
 }
 
