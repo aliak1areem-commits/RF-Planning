@@ -782,15 +782,63 @@ body {
     </section>
 
     <!-- ============ PAGE: IMPORT ============ -->
-    <section class="page" id="page-import">
-      <div style="padding:24px;overflow-y:auto;flex:1;">
-        <div style="background:#fff;border-radius:12px;padding:32px;text-align:center;color:#5A6B87;">
-          <div style="font-size:56px;margin-bottom:16px;">📥</div>
-          <h3 style="color:#0C1B3D;margin-bottom:8px;">Import Cells</h3>
-          <p>Coming soon...</p>
-        </div>
+    <!-- ============ PAGE: IMPORT ============ -->
+<section class="page" id="page-import">
+  <div style="padding:24px;overflow-y:auto;flex:1;max-width:900px;margin:0 auto;width:100%;">
+    
+    <div style="margin-bottom:20px;">
+      <h3 style="font-size:18px;color:#0C1B3D;margin:0 0 4px;">📥 Import Cells</h3>
+      <p style="color:#5A6B87;font-size:13px;margin:0;">Upload Excel or CSV to add cells</p>
+    </div>
+    
+    <!-- Step 1: Choose Project -->
+    <div style="background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:16px;border:1px solid #E9EEF6;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#124191;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">1</div>
+        <h4 style="margin:0;font-size:14px;color:#0C1B3D;">Select Project</h4>
       </div>
-    </section>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <select id="importProjectSelect" style="flex:1;min-width:220px;padding:10px 14px;border:1.5px solid #D7DEEA;border-radius:8px;font-size:13px;background:#fff;font-family:inherit;">
+          <option value="">— Choose Project —</option>
+        </select>
+        <button class="btn btn-ghost" onclick="openCreateProjectModal()">+ New Project</button>
+      </div>
+    </div>
+    
+    <!-- Step 2: Upload File -->
+    <div style="background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:16px;border:1px solid #E9EEF6;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#124191;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">2</div>
+        <h4 style="margin:0;font-size:14px;color:#0C1B3D;">Upload Excel / CSV</h4>
+      </div>
+      <div id="importDropZone" style="border:2px dashed #C9D4E4;border-radius:12px;padding:48px 20px;text-align:center;background:#FBFCFE;cursor:pointer;transition:all .2s;">
+        <div style="font-size:48px;margin-bottom:12px;">📄</div>
+        <div style="font-weight:700;font-size:15px;color:#0C1B3D;margin-bottom:6px;">Drag file here or click</div>
+        <div style="font-size:12.5px;color:#5A6B87;">Supports: .xlsx, .xls, .csv</div>
+      </div>
+      <input type="file" id="importFileInput" accept=".xlsx,.xls,.csv" style="display:none;">
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-ghost" onclick="document.getElementById('importFileInput').click()">📁 Choose File</button>
+        <button class="btn btn-ghost" onclick="importPasteFromClipboard()">📋 Paste from Clipboard</button>
+      </div>
+    </div>
+    
+    <!-- Step 3: Preview & Save -->
+    <div id="importPreviewCard" style="display:none;background:#fff;border-radius:12px;padding:20px 24px;border:1px solid #E9EEF6;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#124191;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">3</div>
+        <h4 style="margin:0;font-size:14px;color:#0C1B3D;">Preview & Save</h4>
+      </div>
+      <div id="importPreviewStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:16px;"></div>
+      <div id="importPreviewTable" style="overflow:auto;max-height:300px;border:1px solid #E9EEF6;border-radius:8px;"></div>
+      <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-danger" onclick="importClearPreview()">Cancel</button>
+        <button class="btn btn-gold" id="importSaveBtn" onclick="importSaveToSupabase()">💾 Save to Supabase</button>
+      </div>
+    </div>
+    
+  </div>
+</section>
 <!-- ============ PAGE: PROJECTS ============ -->
 <section class="page" id="page-projects">
   <div style="padding:24px;overflow-y:auto;flex:1;">
