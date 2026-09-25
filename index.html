@@ -2047,7 +2047,6 @@ function makePopupContent(cell) {
 }
 
 
-}
 function fitAllCells() {
   if (!visibleCells.length) { toast('No cells to fit', 'error'); return; }
   const bounds = L.latLngBounds(visibleCells.map(c => [c.lat, c.long]));
