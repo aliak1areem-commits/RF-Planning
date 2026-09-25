@@ -1006,7 +1006,12 @@ function initMap() {
     zoomControl: true,
     preferCanvas: true
   });
-
+  // ⭐ تحديث Sectors عند تغيير Zoom
+  map.on('zoomend', function() {
+    if (visibleCells.length && document.getElementById('showSectors').checked) {
+      renderMap();
+    }
+  });
   // Basemaps
   basemaps.street = L.tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -1030,12 +1035,6 @@ function initMap() {
   sectorLayer = L.layerGroup().addTo(map);
   labelLayer = L.layerGroup().addTo(map);
   coverageLayer = L.layerGroup();
-  // ⭐ تحديث Sectors عند تغيير Zoom
-  map.on('zoomend', function() {
-    if (visibleCells.length && document.getElementById('showSectors').checked) {
-      renderMap();
-    }
-  });
 
   // Basemap switcher
   document.querySelectorAll('.basemap-btn').forEach(function(btn) {
