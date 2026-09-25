@@ -2035,6 +2035,21 @@ function makePopupContent(cell) {
 /* =========================================================
    ACTIONS
    ========================================================= */
+      function toggleLayer(type) {
+  if (type === 'coverage') {
+    if (document.getElementById('showCoverage') && document.getElementById('showCoverage').checked) {
+      if (!map.hasLayer(coverageLayer)) coverageLayer.addTo(map);
+    } else {
+      if (map.hasLayer(coverageLayer)) map.removeLayer(coverageLayer);
+    }
+  }
+  renderMap();
+}
+
+function fitAllCells() {
+  if (!visibleCells.length) { toast('No cells to fit', 'error'); return; }
+  ...
+}
 function fitAllCells() {
   if (!visibleCells.length) { toast('No cells to fit', 'error'); return; }
   const bounds = L.latLngBounds(visibleCells.map(c => [c.lat, c.long]));
