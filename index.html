@@ -4,15 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RF Planning Pro | MFC</title>
-<meta name="description" content="RF Planning Professional Tool - LTE Cell Management & Visualization">
 
-<!-- ============ EXTERNAL LIBRARIES ============ -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<!-- ============ FONTS ============ -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -20,35 +18,18 @@
 /* =========================================================
    RESET & BASE
    ========================================================= */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-html, body {
-  height: 100%;
-  overflow: hidden;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   background: #0A1628;
   color: #1B1F2A;
   -webkit-font-smoothing: antialiased;
 }
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #3A4A6A;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #5A6B87;
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #3A4A6A; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #5A6B87; }
 
 /* =========================================================
    APP LAYOUT
@@ -89,27 +70,26 @@ body {
   font-family: 'JetBrains Mono', monospace;
   font-weight: 800;
   font-size: 14px;
-  color: #fff;
   flex-shrink: 0;
   box-shadow: 0 6px 18px rgba(0,161,224,.35);
 }
-.sidebar-brand-text h1 {
-  font-size: 14px;
-  margin: 0;
-  font-weight: 700;
-  letter-spacing: .3px;
-}
-.sidebar-brand-text span {
-  font-size: 10px;
-  color: #AEB9D4;
-  letter-spacing: 1.2px;
-}
+.sidebar-brand-text h1 { font-size: 14px; font-weight: 700; letter-spacing: .3px; }
+.sidebar-brand-text span { font-size: 10px; color: #AEB9D4; letter-spacing: 1.2px; }
+
 .sidebar-nav {
   padding: 14px 10px;
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 3px;
+}
+.nav-section {
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #5A6B87;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 12px 14px 4px;
 }
 .nav-item {
   display: flex;
@@ -128,20 +108,9 @@ body {
   width: 100%;
   font-family: inherit;
 }
-.nav-item:hover {
-  background: rgba(255,255,255,.06);
-  color: #fff;
-}
-.nav-item.active {
-  background: rgba(0,161,224,.16);
-  color: #fff;
-  font-weight: 600;
-}
-.nav-item .icon {
-  font-size: 16px;
-  width: 20px;
-  text-align: center;
-}
+.nav-item:hover { background: rgba(255,255,255,.06); color: #fff; }
+.nav-item.active { background: rgba(0,161,224,.16); color: #fff; font-weight: 600; }
+.nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
 .nav-item .badge {
   margin-left: auto;
   background: rgba(0,161,224,.2);
@@ -161,7 +130,7 @@ body {
 }
 
 /* =========================================================
-   MAIN CONTENT
+   MAIN
    ========================================================= */
 .main {
   position: relative;
@@ -170,10 +139,6 @@ body {
   overflow: hidden;
   background: #F4F7FB;
 }
-
-/* =========================================================
-   TOPBAR
-   ========================================================= */
 .topbar {
   height: 56px;
   background: #fff;
@@ -193,17 +158,8 @@ body {
   align-items: center;
   gap: 10px;
 }
-.topbar-title .subtitle {
-  font-size: 12px;
-  color: #5A6B87;
-  font-weight: 500;
-}
-.topbar-actions {
-  margin-left: auto;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
+.topbar-title .subtitle { font-size: 12px; color: #5A6B87; font-weight: 500; }
+.topbar-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
 
 /* =========================================================
    BUTTONS
@@ -234,7 +190,8 @@ body {
 .btn-gold:hover:not(:disabled) { background: #d99500; }
 .btn-danger { background: #FCEAEA; color: #D64545; }
 .btn-danger:hover:not(:disabled) { background: #f8d6d6; }
-.btn-icon { padding: 8px; width: 38px; height: 38px; justify-content: center; }
+.btn-success { background: #1F9D55; color: #fff; }
+.btn-success:hover:not(:disabled) { background: #18803f; }
 
 /* =========================================================
    STATS BAR
@@ -249,12 +206,7 @@ body {
   flex-shrink: 0;
   flex-wrap: wrap;
 }
-.stats-bar-item {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #5A6B87;
-}
+.stats-bar-item { display: flex; align-items: center; gap: 7px; color: #5A6B87; }
 .stats-bar-item b {
   font-family: 'JetBrains Mono', monospace;
   color: #0C1B3D;
@@ -265,28 +217,15 @@ body {
 /* =========================================================
    PAGES
    ========================================================= */
-.page {
-  display: none;
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-}
-.page.active {
-  display: flex;
-  flex-direction: column;
-}
+.page { display: none; flex: 1; overflow: hidden; position: relative; }
+.page.active { display: flex; flex-direction: column; }
 
 /* =========================================================
-   MAP CONTAINER
+   MAP
    ========================================================= */
-.map-container {
-  display: flex;
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-}
+.map-container { display: flex; flex: 1; position: relative; overflow: hidden; }
 .map-sidebar {
-  width: 300px;
+  width: 320px;
   background: #fff;
   border-right: 1px solid #E9EEF6;
   overflow-y: auto;
@@ -304,15 +243,8 @@ body {
   align-items: center;
   gap: 6px;
 }
-.map-sidebar h3::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: #E9EEF6;
-}
-.filter-group {
-  margin-bottom: 20px;
-}
+.map-sidebar h3::after { content: ""; flex: 1; height: 1px; background: #E9EEF6; }
+.filter-group { margin-bottom: 20px; }
 .filter-search {
   width: 100%;
   padding: 9px 12px;
@@ -321,12 +253,8 @@ body {
   font-size: 13px;
   font-family: inherit;
   outline: none;
-  transition: all .15s;
 }
-.filter-search:focus {
-  border-color: #00A1E0;
-  box-shadow: 0 0 0 3px rgba(0,161,224,.1);
-}
+.filter-search:focus { border-color: #00A1E0; box-shadow: 0 0 0 3px rgba(0,161,224,.1); }
 .filter-checkbox {
   display: flex;
   align-items: center;
@@ -335,12 +263,9 @@ body {
   border-radius: 6px;
   cursor: pointer;
   font-size: 13px;
-  transition: background .15s;
   user-select: none;
 }
-.filter-checkbox:hover {
-  background: #F4F7FB;
-}
+.filter-checkbox:hover { background: #F4F7FB; }
 .filter-checkbox input {
   width: 16px;
   height: 16px;
@@ -348,13 +273,7 @@ body {
   cursor: pointer;
   flex-shrink: 0;
 }
-.filter-color {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  flex-shrink: 0;
-  border: 1.5px solid rgba(0,0,0,.1);
-}
+.filter-color { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
 .filter-count {
   margin-left: auto;
   font-family: 'JetBrains Mono', monospace;
@@ -362,19 +281,15 @@ body {
   color: #5A6B87;
   font-weight: 600;
 }
+#map { flex: 1; z-index: 1; background: #0A1628; }
 
-#map {
-  flex: 1;
-  z-index: 1;
-  background: #0A1628;
-}
 /* =========================================================
    LEGEND
    ========================================================= */
 .legend {
   position: absolute;
   bottom: 20px;
-  left: 320px;
+  left: 340px;
   background: rgba(255,255,255,.98);
   backdrop-filter: blur(10px);
   border-radius: 10px;
@@ -400,12 +315,7 @@ body {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
 }
-.legend-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-  border: 1px solid rgba(0,0,0,.15);
-}
+.legend-dot { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.15); }
 
 /* =========================================================
    BASEMAP SWITCHER
@@ -431,103 +341,274 @@ body {
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all .15s;
   font-family: inherit;
 }
-.basemap-btn:hover {
-  background: #F4F7FB;
-  color: #124191;
+.basemap-btn:hover { background: #F4F7FB; color: #124191; }
+.basemap-btn.active { background: #124191; color: #fff; }
+
+/* =========================================================
+   TOOLS GRID
+   ========================================================= */
+.tools-grid {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  align-content: start;
 }
-.basemap-btn.active {
-  background: #124191;
-  color: #fff;
+.tool-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  border: 1px solid #E9EEF6;
+  box-shadow: 0 4px 12px rgba(12,27,61,.06);
+  cursor: pointer;
+  transition: all .25s;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 180px;
+}
+.tool-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(12,27,61,.15);
+  border-color: #124191;
+}
+.tool-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+.tool-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0C1B3D;
+}
+.tool-desc {
+  font-size: 12.5px;
+  color: #5A6B87;
+  line-height: 1.5;
+}
+.tool-tag {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 700;
+  margin-top: auto;
 }
 
 /* =========================================================
-   LEAFLET POPUP
+   TOOL PAGE
    ========================================================= */
-.leaflet-popup-content-wrapper {
-  border-radius: 10px;
-  padding: 0;
-  overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0,0,0,.2);
+.tool-page {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
 }
-.leaflet-popup-content {
-  margin: 0;
-  font-family: 'Inter', sans-serif;
-  font-size: 12.5px;
-  min-width: 280px;
-}
-.leaflet-popup-tip {
-  background: #fff;
-}
-.cell-popup {
-  padding: 0;
-}
-.cell-popup-header {
-  padding: 12px 16px;
-  color: #fff;
+.tool-page-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 16px;
+  margin-bottom: 24px;
 }
-.cell-popup-header .name {
-  font-weight: 700;
-  font-size: 14px;
-  font-family: 'JetBrains Mono', monospace;
-}
-.cell-popup-header .sector {
-  margin-left: auto;
-  background: rgba(255,255,255,.2);
-  padding: 2px 8px;
+.tool-page-header .back-btn {
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
-  font-size: 10.5px;
-  font-weight: 700;
-}
-.cell-popup-body {
-  padding: 12px 16px;
-}
-.cell-popup-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 5px 0;
-  border-bottom: 1px solid #F0F3F9;
-  font-size: 12px;
-}
-.cell-popup-row:last-child {
-  border-bottom: none;
-}
-.cell-popup-row .k {
+  background: #fff;
+  border: 1.5px solid #D7DEEA;
   color: #5A6B87;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+}
+.tool-page-header .back-btn:hover { background: #F4F7FB; color: #124191; }
+.tool-page-title { font-size: 22px; font-weight: 800; color: #0C1B3D; }
+.tool-page-sub { font-size: 13px; color: #5A6B87; margin-top: 2px; }
+
+.tool-section {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  border: 1px solid #E9EEF6;
+  box-shadow: 0 4px 12px rgba(12,27,61,.06);
+  margin-bottom: 20px;
+}
+.tool-section h3 {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0C1B3D;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #F0F3F9;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.form-field label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #5A6B87;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  margin-bottom: 6px;
+}
+.form-field input,
+.form-field select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #D7DEEA;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #0C1B3D;
+  outline: none;
+  background: #FBFCFE;
+}
+.form-field input:focus,
+.form-field select:focus {
+  border-color: #00A1E0;
+  box-shadow: 0 0 0 3px rgba(0,161,224,.1);
+  background: #fff;
+}
+.form-field .hint {
+  font-size: 11px;
+  color: #94A3B8;
+  margin-top: 4px;
   font-weight: 500;
 }
-.cell-popup-row .v {
-  color: #0C1B3D;
+.result-box {
+  background: linear-gradient(135deg, #EAF2FB, #DCEBFB);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 16px;
+  border-left: 4px solid #124191;
+}
+.result-box .label {
+  font-size: 11.5px;
   font-weight: 700;
+  color: #5A6B87;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 6px;
+}
+.result-box .value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 28px;
+  font-weight: 800;
+  color: #0C1B3D;
+  line-height: 1;
+}
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.result-item {
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px;
+  border: 1px solid #E9EEF6;
+}
+.result-item .label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #5A6B87;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  margin-bottom: 4px;
+}
+.result-item .value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0C1B3D;
+}
+.action-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+/* =========================================================
+   PCI CHECKER SPECIFIC
+   ========================================================= */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.kpi-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #E9EEF6;
+  text-align: center;
+}
+.kpi-card .kpi-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #5A6B87;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 6px;
+}
+.kpi-card .kpi-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 26px;
+  font-weight: 800;
+  color: #124191;
+  line-height: 1;
+}
+.kpi-card.warn .kpi-value { color: #F2A900; }
+.kpi-card.danger .kpi-value { color: #D64545; }
+.kpi-card.success .kpi-value { color: #1F9D55; }
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
   font-family: 'JetBrains Mono', monospace;
 }
-.cell-popup-footer {
-  padding: 10px 16px;
-  background: #FBFCFE;
-  border-top: 1px solid #F0F3F9;
-  display: flex;
-  gap: 8px;
+.data-table thead th {
+  background: #EAF2FB;
+  color: #124191;
+  text-align: left;
+  padding: 10px 12px;
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  border-bottom: 1px solid #D7DEEA;
+  white-space: nowrap;
 }
-.cell-popup-footer a {
-  flex: 1;
-  text-align: center;
-  padding: 7px;
-  background: #124191;
-  color: #fff;
-  border-radius: 6px;
-  font-size: 11.5px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background .15s;
+.data-table tbody td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #F0F3F9;
 }
-.cell-popup-footer a:hover {
-  background: #0e336f;
-}
+.data-table tbody tr:hover td { background: #F9FBFE; }
+.data-table tbody tr:last-child td { border-bottom: none; }
 
 /* =========================================================
    TOAST
@@ -549,34 +630,24 @@ body {
   transition: all .3s;
   max-width: 400px;
 }
-.toast.show {
-  transform: translateY(0);
-  opacity: 1;
-}
+.toast.show { transform: translateY(0); opacity: 1; }
 .toast.success { background: #1F9D55; }
 .toast.error { background: #D64545; }
 .toast.info { background: #124191; }
 
 /* =========================================================
-   LOADER
+   LOADING
    ========================================================= */
 .loader {
   display: inline-block;
-  width: 14px;
-  height: 14px;
+  width: 14px; height: 14px;
   border: 2px solid rgba(255,255,255,.3);
   border-top-color: #fff;
   border-radius: 50%;
   animation: spin .6s linear infinite;
   vertical-align: middle;
 }
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* =========================================================
-   LOADING OVERLAY
-   ========================================================= */
+@keyframes spin { to { transform: rotate(360deg); } }
 .loading-overlay {
   position: absolute;
   inset: 0;
@@ -589,56 +660,38 @@ body {
   gap: 16px;
 }
 .loading-overlay .spinner {
-  width: 48px;
-  height: 48px;
+  width: 48px; height: 48px;
   border: 4px solid #E9EEF6;
   border-top-color: #124191;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
-.loading-overlay .text {
-  font-size: 13px;
-  color: #5A6B87;
-  font-weight: 600;
-}
+.loading-overlay .text { font-size: 13px; color: #5A6B87; font-weight: 600; }
 
 /* =========================================================
    RESPONSIVE
    ========================================================= */
 @media (max-width: 900px) {
-  .app {
-    grid-template-columns: 60px 1fr;
-  }
+  .app { grid-template-columns: 60px 1fr; }
   .sidebar-brand-text,
   .nav-item span:not(.icon),
-  .sidebar-footer {
-    display: none;
-  }
-  .nav-item {
-    justify-content: center;
-    padding: 12px;
-  }
+  .nav-section,
+  .sidebar-footer { display: none; }
+  .nav-item { justify-content: center; padding: 12px; }
   .map-sidebar {
     position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
+    left: 0; top: 0; bottom: 0;
     z-index: 600;
     transform: translateX(-100%);
     transition: transform .3s;
   }
-  .map-sidebar.open {
-    transform: translateX(0);
-  }
-  .legend {
-    left: 16px;
-  }
+  .map-sidebar.open { transform: translateX(0); }
+  .legend { left: 16px; }
 }
 </style>
 </head>
 <body>
-
-<div class="app">
+   <div class="app">
 
   <!-- ============ SIDEBAR ============ -->
   <aside class="sidebar">
@@ -650,25 +703,46 @@ body {
       </div>
     </div>
     <nav class="sidebar-nav">
+      <div class="nav-section">Navigation</div>
       <button class="nav-item active" data-page="map">
         <span class="icon">🗺️</span><span>Map</span>
       </button>
       <button class="nav-item" data-page="dashboard">
         <span class="icon">📊</span><span>Dashboard</span>
       </button>
-     <button class="nav-item" data-page="projects">
-  <span class="icon">📁</span><span>Projects</span>
-</button>
-<button class="nav-item" data-page="import">
-  <span class="icon">📥</span><span>Import</span>
-</button>
+      <button class="nav-item" data-page="projects">
+        <span class="icon">📁</span><span>Projects</span>
+      </button>
+      <button class="nav-item" data-page="import">
+        <span class="icon">📥</span><span>Import</span>
+      </button>
       <button class="nav-item" data-page="cells">
         <span class="icon">📋</span><span>Cells</span>
         <span class="badge" id="navCellsCount">0</span>
       </button>
+
+      <div class="nav-section">Tools</div>
+      <button class="nav-item" data-page="tools">
+        <span class="icon">🔧</span><span>Tools</span>
+      </button>
+      <button class="nav-item" data-page="tool-pci-checker">
+        <span class="icon">🧮</span><span>PCI Checker</span>
+      </button>
+      <button class="nav-item" data-page="tool-distance">
+        <span class="icon">📐</span><span>Distance & Bearing</span>
+      </button>
+      <button class="nav-item" data-page="tool-azimuth">
+        <span class="icon">🎯</span><span>Azimuth & Tilt</span>
+      </button>
+      <button class="nav-item" data-page="tool-unit">
+        <span class="icon">🔢</span><span>Unit Converter</span>
+      </button>
+      <button class="nav-item" data-page="tool-kml">
+        <span class="icon">🗺️</span><span>Export KML</span>
+      </button>
     </nav>
     <div class="sidebar-footer">
-      v1.0 · Built for Ali Amer<br>
+      v2.0 · Built for Ali Amer<br>
       © 2026 MFC
     </div>
   </aside>
@@ -702,22 +776,17 @@ body {
     <!-- ============ PAGE: MAP ============ -->
     <section class="page active" id="page-map">
       <div class="map-container">
-
-        <!-- Map Sidebar (Filters) -->
         <div class="map-sidebar" id="mapSidebar">
           <h3>Search</h3>
           <div class="filter-group">
             <input type="text" class="filter-search" id="searchFilter" placeholder="🔍 Cell name, site, PCI..." oninput="applyFilters()">
           </div>
-
           <h3>Filter by Band</h3>
           <div class="filter-group" id="bandFilters"></div>
-
           <h3>Filter by PCI</h3>
           <div class="filter-group">
             <input type="text" class="filter-search" id="pciFilter" placeholder="PCI number..." oninput="applyFilters()">
           </div>
-
           <h3>Display Options</h3>
           <div class="filter-group">
             <label class="filter-checkbox">
@@ -728,45 +797,27 @@ body {
               <input type="checkbox" id="showLabels" checked onchange="toggleLayer('labels')">
               <span>Show Labels</span>
             </label>
-            <label class="filter-checkbox">
-              <input type="checkbox" id="showCoverage" onchange="toggleLayer('coverage')">
-              <span>Show Coverage Radius</span>
-            </label>
           </div>
-
           <h3>Actions</h3>
           <div class="filter-group">
-            <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="fitAllCells()">
-              🎯 Fit to View
-            </button>
-            <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="clearFilters()">
-              🗑️ Clear Filters
-            </button>
+            <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="fitAllCells()">🎯 Fit to View</button>
+            <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="clearFilters()">🗑️ Clear Filters</button>
           </div>
         </div>
-
-        <!-- Map -->
         <div id="map"></div>
-
-        <!-- Basemap Switcher -->
         <div class="basemap-switcher">
           <button class="basemap-btn active" data-basemap="street">Street</button>
           <button class="basemap-btn" data-basemap="satellite">Satellite</button>
           <button class="basemap-btn" data-basemap="terrain">Terrain</button>
         </div>
-
-        <!-- Legend -->
         <div class="legend" id="legend">
           <div class="legend-title">Band Legend</div>
           <div id="legendItems"></div>
         </div>
-
-        <!-- Loading -->
         <div class="loading-overlay" id="loadingOverlay">
           <div class="spinner"></div>
           <div class="text">Loading cells from Supabase...</div>
         </div>
-
       </div>
     </section>
 
@@ -781,83 +832,439 @@ body {
       </div>
     </section>
 
+    <!-- ============ PAGE: PROJECTS ============ -->
+    <section class="page" id="page-projects">
+      <div style="padding:24px;overflow-y:auto;flex:1;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h3 style="font-size:18px;color:#0C1B3D;margin:0 0 4px;">📁 Projects</h3>
+            <p style="color:#5A6B87;font-size:13px;margin:0;">Manage your RF projects</p>
+          </div>
+          <button class="btn btn-primary" onclick="openCreateProjectModal()">+ New Project</button>
+        </div>
+        <div id="projectsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
+          <div style="text-align:center;padding:40px;color:#5A6B87;grid-column:1/-1;">Loading projects...</div>
+        </div>
+      </div>
+    </section>
+
     <!-- ============ PAGE: IMPORT ============ -->
-<section class="page" id="page-import">
-  <div style="padding:24px;overflow-y:auto;flex:1;max-width:900px;margin:0 auto;width:100%;">
-    
-    <div style="margin-bottom:20px;">
-      <h3 style="font-size:18px;color:#0C1B3D;margin:0 0 4px;">📥 Import Cells</h3>
-      <p style="color:#5A6B87;font-size:13px;margin:0;">Upload Excel or CSV to add cells</p>
-    </div>
-    
-    <!-- Step 1: Choose Project -->
-    <div style="background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:16px;border:1px solid #E9EEF6;">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-        <div style="width:28px;height:28px;border-radius:50%;background:#124191;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">1</div>
-        <h4 style="margin:0;font-size:14px;color:#0C1B3D;">Select Project</h4>
+    <section class="page" id="page-import">
+      <div style="padding:24px;overflow-y:auto;flex:1;max-width:900px;margin:0 auto;width:100%;">
+        <div style="margin-bottom:20px;">
+          <h3 style="font-size:18px;color:#0C1B3D;margin:0 0 4px;">📥 Import Cells</h3>
+          <p style="color:#5A6B87;font-size:13px;margin:0;">Upload Excel or CSV to add cells</p>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:16px;border:1px solid #E9EEF6;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:#124191;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">1</div>
+            <h4 style="margin:0;font-size:14px;color:#0C1B3D;">Select Project</h4>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <select id="importProjectSelect" style="flex:1;min-width:220px;padding:10px 14px;border:1.5px solid #D7DEEA;border-radius:8px;font-size:13px;background:#fff;font-family:inherit;">
+              <option value="">— Choose Project —</option>
+            </select>
+            <button class="btn btn-ghost" onclick="openCreateProjectModal()">+ New Project</button>
+          </div>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:16px;border:1px solid #E9EEF6;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:#124191;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">2</div>
+            <h4 style="margin:0;font-size:14px;color:#0C1B3D;">Upload Excel / CSV</h4>
+          </div>
+          <div id="importDropZone" style="border:2px dashed #C9D4E4;border-radius:12px;padding:48px 20px;text-align:center;background:#FBFCFE;cursor:pointer;transition:all .2s;">
+            <div style="font-size:48px;margin-bottom:12px;">📄</div>
+            <div style="font-weight:700;font-size:15px;color:#0C1B3D;margin-bottom:6px;">Drag file here or click</div>
+            <div style="font-size:12.5px;color:#5A6B87;">Supports: .xlsx, .xls, .csv</div>
+          </div>
+          <input type="file" id="importFileInput" accept=".xlsx,.xls,.csv" style="display:none;">
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-ghost" onclick="document.getElementById('importFileInput').click()">📁 Choose File</button>
+            <button class="btn btn-ghost" onclick="importPasteFromClipboard()">📋 Paste</button>
+          </div>
+        </div>
+        <div id="importPreviewCard" style="display:none;background:#fff;border-radius:12px;padding:20px 24px;border:1px solid #E9EEF6;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:#124191;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">3</div>
+            <h4 style="margin:0;font-size:14px;color:#0C1B3D;">Preview & Save</h4>
+          </div>
+          <div id="importPreviewStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:16px;"></div>
+          <div id="importPreviewTable" style="overflow:auto;max-height:300px;border:1px solid #E9EEF6;border-radius:8px;"></div>
+          <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">
+            <button class="btn btn-danger" onclick="importClearPreview()">Cancel</button>
+            <button class="btn btn-gold" id="importSaveBtn" onclick="importSaveToSupabase()">💾 Save to Supabase</button>
+          </div>
+        </div>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <select id="importProjectSelect" style="flex:1;min-width:220px;padding:10px 14px;border:1.5px solid #D7DEEA;border-radius:8px;font-size:13px;background:#fff;font-family:inherit;">
-          <option value="">— Choose Project —</option>
-        </select>
-        <button class="btn btn-ghost" onclick="openCreateProjectModal()">+ New Project</button>
-      </div>
-    </div>
-    
-    <!-- Step 2: Upload File -->
-    <div style="background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:16px;border:1px solid #E9EEF6;">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-        <div style="width:28px;height:28px;border-radius:50%;background:#124191;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">2</div>
-        <h4 style="margin:0;font-size:14px;color:#0C1B3D;">Upload Excel / CSV</h4>
-      </div>
-      <div id="importDropZone" style="border:2px dashed #C9D4E4;border-radius:12px;padding:48px 20px;text-align:center;background:#FBFCFE;cursor:pointer;transition:all .2s;">
-        <div style="font-size:48px;margin-bottom:12px;">📄</div>
-        <div style="font-weight:700;font-size:15px;color:#0C1B3D;margin-bottom:6px;">Drag file here or click</div>
-        <div style="font-size:12.5px;color:#5A6B87;">Supports: .xlsx, .xls, .csv</div>
-      </div>
-      <input type="file" id="importFileInput" accept=".xlsx,.xls,.csv" style="display:none;">
-      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-ghost" onclick="document.getElementById('importFileInput').click()">📁 Choose File</button>
-        <button class="btn btn-ghost" onclick="importPasteFromClipboard()">📋 Paste from Clipboard</button>
-      </div>
-    </div>
-    
-    <!-- Step 3: Preview & Save -->
-    <div id="importPreviewCard" style="display:none;background:#fff;border-radius:12px;padding:20px 24px;border:1px solid #E9EEF6;">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-        <div style="width:28px;height:28px;border-radius:50%;background:#124191;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">3</div>
-        <h4 style="margin:0;font-size:14px;color:#0C1B3D;">Preview & Save</h4>
-      </div>
-      <div id="importPreviewStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:16px;"></div>
-      <div id="importPreviewTable" style="overflow:auto;max-height:300px;border:1px solid #E9EEF6;border-radius:8px;"></div>
-      <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">
-        <button class="btn btn-danger" onclick="importClearPreview()">Cancel</button>
-        <button class="btn btn-gold" id="importSaveBtn" onclick="importSaveToSupabase()">💾 Save to Supabase</button>
-      </div>
-    </div>
-    
-  </div>
-</section>
-<!-- ============ PAGE: PROJECTS ============ -->
-<section class="page" id="page-projects">
-  <div style="padding:24px;overflow-y:auto;flex:1;">
-    
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-      <div>
-        <h3 style="font-size:18px;color:#0C1B3D;margin:0 0 4px;">📁 Projects</h3>
-        <p style="color:#5A6B87;font-size:13px;margin:0;">Manage your RF projects</p>
-      </div>
-      <button class="btn btn-primary" onclick="openCreateProjectModal()">+ New Project</button>
-    </div>
-    
-    <div id="projectsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
-      <div style="text-align:center;padding:40px;color:#5A6B87;grid-column:1/-1;">Loading projects...</div>
-    </div>
-    
-  </div>
-</section>
+    </section>
 
+    <!-- ============ PAGE: CELLS ============ -->
+    <section class="page" id="page-cells">
+      <div style="padding:24px;overflow-y:auto;flex:1;">
+        <div style="background:#fff;border-radius:12px;padding:32px;text-align:center;color:#5A6B87;">
+          <div style="font-size:56px;margin-bottom:16px;">📋</div>
+          <h3 style="color:#0C1B3D;margin-bottom:8px;">Cells Database</h3>
+          <p>Coming soon...</p>
+        </div>
+      </div>
+    </section>
 
+    <!-- ============ PAGE: TOOLS GRID ============ -->
+    <section class="page" id="page-tools">
+      <div class="tools-grid">
+        <div class="tool-card" onclick="switchView('tool-pci-checker')">
+          <div class="tool-icon" style="background:linear-gradient(135deg,#124191,#00A1E0);color:#fff;">🧮</div>
+          <div class="tool-title">PCI Conflict Checker</div>
+          <div class="tool-desc">Detect Same PCI, MOD3, MOD6 conflicts, Face-to-Face antennas, and auto-optimize PCI assignments.</div>
+          <div class="tool-tag" style="background:#EAF2FB;color:#124191;">Optimization</div>
+        </div>
+        <div class="tool-card" onclick="switchView('tool-distance')">
+          <div class="tool-icon" style="background:linear-gradient(135deg,#1F9D55,#10B981);color:#fff;">📐</div>
+          <div class="tool-title">Distance & Bearing</div>
+          <div class="tool-desc">Calculate distance and true bearing between two sites using lat/long coordinates.</div>
+          <div class="tool-tag" style="background:#E7F7EE;color:#1F9D55;">Planning</div>
+        </div>
+        <div class="tool-card" onclick="switchView('tool-azimuth')">
+          <div class="tool-icon" style="background:linear-gradient(135deg,#F2A900,#D97706);color:#fff;">🎯</div>
+          <div class="tool-title">Azimuth & Tilt</div>
+          <div class="tool-desc">Calculate azimuth and tilt between sites with height consideration for antenna alignment.</div>
+          <div class="tool-tag" style="background:#FDF1DC;color:#8A5A00;">Planning</div>
+        </div>
+        <div class="tool-card" onclick="switchView('tool-unit')">
+          <div class="tool-icon" style="background:linear-gradient(135deg,#8B5CF6,#6D28D9);color:#fff;">🔢</div>
+          <div class="tool-title">Unit Converter</div>
+          <div class="tool-desc">Convert RF units: dBm, mW, W, dBi, dBd, km, miles, and more.</div>
+          <div class="tool-tag" style="background:#F5F3FF;color:#7C3AED;">Utilities</div>
+        </div>
+        <div class="tool-card" onclick="switchView('tool-kml')">
+          <div class="tool-icon" style="background:linear-gradient(135deg,#D64545,#DC2626);color:#fff;">🗺️</div>
+          <div class="tool-title">Export KML</div>
+          <div class="tool-desc">Export all cells as KML file for Google Earth visualization with sectors and labels.</div>
+          <div class="tool-tag" style="background:#FCEAEA;color:#B91C1C;">Export</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PAGE: PCI CHECKER ============ -->
+    <section class="page" id="page-tool-pci-checker">
+      <div class="tool-page">
+        <div class="tool-page-header">
+          <button class="back-btn" onclick="switchView('tools')">←</button>
+          <div>
+            <div class="tool-page-title">🧮 PCI Conflict Checker</div>
+            <div class="tool-page-sub">Detect and fix PCI conflicts · MOD3 · MOD6 · Face-to-Face</div>
+          </div>
+        </div>
+
+        <div class="tool-section">
+          <h3>⚙️ Settings & Scope</h3>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Same PCI Radius (m)</label>
+              <input type="number" id="pci_r_same" value="5000" step="100">
+            </div>
+            <div class="form-field">
+              <label>MOD3 Radius (m)</label>
+              <input type="number" id="pci_r_mod3" value="1000" step="100">
+            </div>
+            <div class="form-field">
+              <label>MOD6 Radius (m)</label>
+              <input type="number" id="pci_r_mod6" value="500" step="100">
+            </div>
+            <div class="form-field">
+              <label>Face-to-Face Radius (m)</label>
+              <input type="number" id="pci_r_ff" value="2000" step="100">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label>PCI Range — From</label>
+              <input type="number" id="pci_min" value="0" min="0" max="503">
+            </div>
+            <div class="form-field">
+              <label>PCI Range — To</label>
+              <input type="number" id="pci_max" value="503" min="0" max="503">
+            </div>
+            <div class="form-field">
+              <label>Check MOD6</label>
+              <select id="pci_check_mod6">
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+          </div>
+          <div class="action-row">
+            <button class="btn btn-primary" onclick="runPCIChecker()">🚀 Analyze & Optimize</button>
+            <button class="btn btn-ghost" onclick="clearPCIResults()">🗑️ Clear</button>
+          </div>
+        </div>
+
+        <div id="pciResults" style="display:none;">
+          <div class="tool-section">
+            <h3>📊 Summary</h3>
+            <div class="kpi-grid">
+              <div class="kpi-card"><div class="kpi-label">Total Cells</div><div class="kpi-value" id="kpi_total">0</div></div>
+              <div class="kpi-card warn"><div class="kpi-label">Conflicts</div><div class="kpi-value" id="kpi_conflicts">0</div></div>
+              <div class="kpi-card danger"><div class="kpi-label">Same PCI</div><div class="kpi-value" id="kpi_same">0</div></div>
+              <div class="kpi-card warn"><div class="kpi-label">MOD3</div><div class="kpi-value" id="kpi_mod3">0</div></div>
+              <div class="kpi-card warn"><div class="kpi-label">MOD6</div><div class="kpi-value" id="kpi_mod6">0</div></div>
+              <div class="kpi-card danger"><div class="kpi-label">Face-to-Face</div><div class="kpi-value" id="kpi_ff">0</div></div>
+              <div class="kpi-card success"><div class="kpi-label">Reassigned</div><div class="kpi-value" id="kpi_reassigned">0</div></div>
+              <div class="kpi-card" id="kpi_unresolved_card"><div class="kpi-label">Still Unresolved</div><div class="kpi-value" id="kpi_unresolved">0</div></div>
+            </div>
+          </div>
+
+          <div class="tool-section">
+            <h3>⚠️ Conflicts List</h3>
+            <div style="overflow:auto;max-height:400px;border:1px solid #E9EEF6;border-radius:10px;">
+              <table class="data-table" id="pciConflictsTable">
+                <thead>
+                  <tr>
+                    <th>Cell 1</th>
+                    <th>PCI 1</th>
+                    <th>Type</th>
+                    <th>Cell 2</th>
+                    <th>PCI 2</th>
+                    <th>Distance (m)</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="tool-section">
+            <h3>✅ Optimization Results</h3>
+            <div style="overflow:auto;max-height:400px;border:1px solid #E9EEF6;border-radius:10px;">
+              <table class="data-table" id="pciOptTable">
+                <thead>
+                  <tr>
+                    <th>Cell</th>
+                    <th>Original PCI</th>
+                    <th>New PCI</th>
+                    <th>MOD3 Group</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="action-row">
+              <button class="btn btn-success" onclick="exportPCIResults()">📥 Export CSV</button>
+              <button class="btn btn-secondary" onclick="showPCIOnMap()">🗺️ Show on Map</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PAGE: DISTANCE & BEARING ============ -->
+    <section class="page" id="page-tool-distance">
+      <div class="tool-page">
+        <div class="tool-page-header">
+          <button class="back-btn" onclick="switchView('tools')">←</button>
+          <div>
+            <div class="tool-page-title">📐 Distance & Bearing Calculator</div>
+            <div class="tool-page-sub">Calculate distance and true bearing between two sites</div>
+          </div>
+        </div>
+        <div class="tool-section">
+          <h3>📍 Site 1 (Source)</h3>
+          <div class="form-row">
+            <div class="form-field"><label>Latitude</label><input type="number" id="d_lat1" value="33.3" step="0.000001"></div>
+            <div class="form-field"><label>Longitude</label><input type="number" id="d_lon1" value="44.4" step="0.000001"></div>
+          </div>
+        </div>
+        <div class="tool-section">
+          <h3>📍 Site 2 (Target)</h3>
+          <div class="form-row">
+            <div class="form-field"><label>Latitude</label><input type="number" id="d_lat2" value="33.31" step="0.000001"></div>
+            <div class="form-field"><label>Longitude</label><input type="number" id="d_lon2" value="44.41" step="0.000001"></div>
+          </div>
+        </div>
+        <div class="tool-section">
+          <h3>📊 Results</h3>
+          <div class="action-row">
+            <button class="btn btn-primary" onclick="calcDistance()">🔍 Calculate</button>
+          </div>
+          <div class="result-grid" id="distanceResults" style="display:none;">
+            <div class="result-item"><div class="label">Distance (m)</div><div class="value" id="res_dist_m">—</div></div>
+            <div class="result-item"><div class="label">Distance (km)</div><div class="value" id="res_dist_km">—</div></div>
+            <div class="result-item"><div class="label">Bearing (°)</div><div class="value" id="res_bearing">—</div></div>
+            <div class="result-item"><div class="label">Direction</div><div class="value" id="res_direction">—</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PAGE: AZIMUTH & TILT ============ -->
+    <section class="page" id="page-tool-azimuth">
+      <div class="tool-page">
+        <div class="tool-page-header">
+          <button class="back-btn" onclick="switchView('tools')">←</button>
+          <div>
+            <div class="tool-page-title">🎯 Azimuth & Tilt Calculator</div>
+            <div class="tool-page-sub">Calculate azimuth and antenna tilt with height consideration</div>
+          </div>
+        </div>
+        <div class="tool-section">
+          <h3>📍 Site 1 (Source)</h3>
+          <div class="form-row">
+            <div class="form-field"><label>Latitude</label><input type="number" id="a_lat1" value="33.3" step="0.000001"></div>
+            <div class="form-field"><label>Longitude</label><input type="number" id="a_lon1" value="44.4" step="0.000001"></div>
+            <div class="form-field"><label>Antenna Height (m)</label><input type="number" id="a_h1" value="30" step="1"></div>
+          </div>
+        </div>
+        <div class="tool-section">
+          <h3>📍 Site 2 (Target)</h3>
+          <div class="form-row">
+            <div class="form-field"><label>Latitude</label><input type="number" id="a_lat2" value="33.31" step="0.000001"></div>
+            <div class="form-field"><label>Longitude</label><input type="number" id="a_lon2" value="44.41" step="0.000001"></div>
+            <div class="form-field"><label>Antenna Height (m)</label><input type="number" id="a_h2" value="25" step="1"></div>
+          </div>
+        </div>
+        <div class="tool-section">
+          <h3>📊 Results</h3>
+          <div class="action-row">
+            <button class="btn btn-primary" onclick="calcAzimuth()">🔍 Calculate</button>
+          </div>
+          <div class="result-grid" id="azimuthResults" style="display:none;">
+            <div class="result-item"><div class="label">Azimuth (°)</div><div class="value" id="res_azimuth">—</div></div>
+            <div class="result-item"><div class="label">Distance (m)</div><div class="value" id="res_az_dist">—</div></div>
+            <div class="result-item"><div class="label">Height Difference (m)</div><div class="value" id="res_az_hdiff">—</div></div>
+            <div class="result-item"><div class="label">Mechanical Tilt (°)</div><div class="value" id="res_az_tilt">—</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PAGE: UNIT CONVERTER ============ -->
+    <section class="page" id="page-tool-unit">
+      <div class="tool-page">
+        <div class="tool-page-header">
+          <button class="back-btn" onclick="switchView('tools')">←</button>
+          <div>
+            <div class="tool-page-title">🔢 RF Unit Converter</div>
+            <div class="tool-page-sub">Convert between common RF and telecom units</div>
+          </div>
+        </div>
+        <div class="tool-section">
+          <h3>⚡ Power Converter</h3>
+          <div class="form-row">
+            <div class="form-field"><label>Value</label><input type="number" id="u_power_val" value="1" step="any"></div>
+            <div class="form-field">
+              <label>From Unit</label>
+              <select id="u_power_from">
+                <option value="dbm">dBm</option>
+                <option value="mw">mW</option>
+                <option value="w">W</option>
+              </select>
+            </div>
+          </div>
+          <div class="action-row">
+            <button class="btn btn-primary" onclick="convertPower()">🔄 Convert</button>
+          </div>
+          <div class="result-grid" id="powerResults" style="display:none;">
+            <div class="result-item"><div class="label">dBm</div><div class="value" id="res_dbm">—</div></div>
+            <div class="result-item"><div class="label">mW</div><div class="value" id="res_mw">—</div></div>
+            <div class="result-item"><div class="label">W</div><div class="value" id="res_w">—</div></div>
+          </div>
+        </div>
+        <div class="tool-section">
+          <h3>📡 Antenna Gain</h3>
+          <div class="form-row">
+            <div class="form-field"><label>Value</label><input type="number" id="u_gain_val" value="18" step="0.1"></div>
+            <div class="form-field">
+              <label>From Unit</label>
+              <select id="u_gain_from">
+                <option value="dbi">dBi</option>
+                <option value="dbd">dBd</option>
+              </select>
+            </div>
+          </div>
+          <div class="action-row">
+            <button class="btn btn-primary" onclick="convertGain()">🔄 Convert</button>
+          </div>
+          <div class="result-grid" id="gainResults" style="display:none;">
+            <div class="result-item"><div class="label">dBi</div><div class="value" id="res_dbi">—</div></div>
+            <div class="result-item"><div class="label">dBd</div><div class="value" id="res_dbd">—</div></div>
+          </div>
+        </div>
+        <div class="tool-section">
+          <h3>📏 Distance</h3>
+          <div class="form-row">
+            <div class="form-field"><label>Value</label><input type="number" id="u_dist_val" value="1" step="any"></div>
+            <div class="form-field">
+              <label>From Unit</label>
+              <select id="u_dist_from">
+                <option value="m">Meters</option>
+                <option value="km">Kilometers</option>
+                <option value="mi">Miles</option>
+                <option value="ft">Feet</option>
+              </select>
+            </div>
+          </div>
+          <div class="action-row">
+            <button class="btn btn-primary" onclick="convertDistance()">🔄 Convert</button>
+          </div>
+          <div class="result-grid" id="distResults" style="display:none;">
+            <div class="result-item"><div class="label">Meters</div><div class="value" id="res_m">—</div></div>
+            <div class="result-item"><div class="label">Kilometers</div><div class="value" id="res_km">—</div></div>
+            <div class="result-item"><div class="label">Miles</div><div class="value" id="res_mi">—</div></div>
+            <div class="result-item"><div class="label">Feet</div><div class="value" id="res_ft">—</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PAGE: EXPORT KML ============ -->
+    <section class="page" id="page-tool-kml">
+      <div class="tool-page">
+        <div class="tool-page-header">
+          <button class="back-btn" onclick="switchView('tools')">←</button>
+          <div>
+            <div class="tool-page-title">🗺️ Export KML</div>
+            <div class="tool-page-sub">Download all cells as KML for Google Earth</div>
+          </div>
+        </div>
+        <div class="tool-section">
+          <h3>📋 Options</h3>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Include Sectors</label>
+              <select id="kml_sectors">
+                <option value="yes">Yes</option>
+                <option value="no">No (Points only)</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Color by Band</label>
+              <select id="kml_color">
+                <option value="band">By Band</option>
+                <option value="sector">By Sector (A/B/C)</option>
+                <option value="status">Single Color</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>File Name</label>
+              <input type="text" id="kml_filename" value="RF_Planning_Export">
+            </div>
+          </div>
+          <div class="action-row">
+            <button class="btn btn-gold" onclick="exportKML()">🗺️ Download KML</button>
+          </div>
+          <div class="result-box" style="margin-top:16px;">
+            <div class="label">📌 Note</div>
+            <div style="font-size:12.5px;color:#5A6B87;line-height:1.6;margin-top:8px;">
+              The KML file will open in Google Earth. Sectors will be drawn as 120° wedges colored by the selected option.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
 
 <!-- ============ MODAL: CREATE PROJECT ============ -->
 <div class="modal-backdrop" id="createProjectModal" style="position:fixed;inset:0;background:rgba(12,27,61,.65);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:3000;padding:20px;">
@@ -878,53 +1285,38 @@ body {
     </div>
   </div>
 </div>
-    <!-- ============ PAGE: CELLS ============ -->
-    <section class="page" id="page-cells">
-      <div style="padding:24px;overflow-y:auto;flex:1;">
-        <div style="background:#fff;border-radius:12px;padding:32px;text-align:center;color:#5A6B87;">
-          <div style="font-size:56px;margin-bottom:16px;">📋</div>
-          <h3 style="color:#0C1B3D;margin-bottom:8px;">Cells Database</h3>
-          <p>Coming soon...</p>
-        </div>
-      </div>
-    </section>
 
-  </main>
-</div>
-
-<div class="toast" id="toast"></div>  
-  <script>
+<div class="toast" id="toast"></div>
+   <script>
 /* =========================================================
    CONFIG — Supabase
    ========================================================= */
 const SUPABASE_URL = 'https://lwmymnxwrvroxnkixjts.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_HAf79ZGumF-BKQhnJoW9ZQ_5V2ubxqT';;
+const SUPABASE_KEY = 'sb_publishable_HAf79ZGumF-BKQhnJoW9ZQ_5V2ubxqT';
 
 /* =========================================================
-   BAND COLORS — Professional LTE Palette
+   COLORS
    ========================================================= */
-     /* =========================================================
-   SECTOR COLORS — A/B/C لكل Site
-   ========================================================= */
-const SECTOR_COLORS = {
-  'A': '#D64545',  // أحمر — Sector 1
-  'B': '#1F9D55',  // أخضر — Sector 2
-  'C': '#124191',  // أزرق — Sector 3
-  'D': '#F2A900',  // برتقالي
-  'E': '#8B5CF6',  // بنفسجي
-  'F': '#EC4899',  // وردي
-  'G': '#06B6D4',  // سماوي
-};
 const BAND_COLORS = {
-  'LAN':     '#124191',  // Dark Blue
-  'LBG':     '#1F9D55',  // Green
-  'LCW':     '#D64545',  // Red
-  'LSA':     '#F2A900',  // Orange
-  'UCW':     '#8A5A00',  // Brown
-  'LSA26':   '#8B5CF6',  // Purple
-  'LNB':     '#0891B2',  // Cyan
-  'LNC':     '#DB2777',  // Pink
-  'DEFAULT': '#6B7FA0'   // Gray
+  'LAN':   '#124191',
+  'LBG':   '#1F9D55',
+  'LCW':   '#D64545',
+  'LSA':   '#F2A900',
+  'UCW':   '#8A5A00',
+  'LSA26': '#8B5CF6',
+  'LNB':   '#0891B2',
+  'LNC':   '#DB2777',
+  'DEFAULT': '#6B7FA0'
+};
+
+const SECTOR_COLORS = {
+  'A': '#D64545',
+  'B': '#1F9D55',
+  'C': '#124191',
+  'D': '#F2A900',
+  'E': '#8B5CF6',
+  'F': '#EC4899',
+  'G': '#06B6D4'
 };
 
 /* =========================================================
@@ -943,9 +1335,13 @@ let sectorLayer = null;
 let labelLayer = null;
 let coverageLayer = null;
 let basemaps = {};
+let currentProjectId = null;
+let allProjects = [];
+let importPreviewData = [];
+let currentView = 'map';
 
 /* =========================================================
-   TOAST NOTIFICATION
+   TOAST
    ========================================================= */
 function toast(msg, type, duration) {
   type = type || 'info';
@@ -954,50 +1350,69 @@ function toast(msg, type, duration) {
   el.textContent = msg;
   el.className = 'toast show ' + type;
   clearTimeout(el._t);
-  el._t = setTimeout(function() {
-    el.className = 'toast ' + type;
-  }, duration);
+  el._t = setTimeout(function() { el.className = 'toast ' + type; }, duration);
 }
 
 /* =========================================================
-   PAGE NAVIGATION
+   ESCAPE HTML
+   ========================================================= */
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+/* =========================================================
+   PAGE TITLES
    ========================================================= */
 const PAGE_TITLES = {
-  map:       { icon: '🗺️', title: 'Cell Map',       sub: 'Visualize LTE cells on the map' },
-  dashboard: { icon: '📊', title: 'Dashboard',      sub: 'Overview and statistics' },
-  projects:  { icon: '📁', title: 'Projects',       sub: 'Manage RF projects' },
-  import:    { icon: '📥', title: 'Import',         sub: 'Import cells from Excel' },
-  cells:     { icon: '📋', title: 'Cells Database', sub: 'Manage all cells' }
+  'map':                 { icon: '🗺️', title: 'Cell Map',                sub: 'Visualize LTE cells on the map' },
+  'dashboard':           { icon: '📊', title: 'Dashboard',               sub: 'Overview and statistics' },
+  'projects':            { icon: '📁', title: 'Projects',                sub: 'Manage RF projects' },
+  'import':              { icon: '📥', title: 'Import',                  sub: 'Import cells from Excel' },
+  'cells':               { icon: '📋', title: 'Cells Database',          sub: 'Manage all cells' },
+  'tools':               { icon: '🔧', title: 'Tools',                   sub: 'RF optimization & planning tools' },
+  'tool-pci-checker':    { icon: '🧮', title: 'PCI Conflict Checker',    sub: 'Detect & fix PCI conflicts' },
+  'tool-distance':       { icon: '📐', title: 'Distance & Bearing',      sub: 'Calculate distance between sites' },
+  'tool-azimuth':        { icon: '🎯', title: 'Azimuth & Tilt',          sub: 'Calculate antenna angles' },
+  'tool-unit':           { icon: '🔢', title: 'Unit Converter',          sub: 'Convert RF units' },
+  'tool-kml':            { icon: '🗺️', title: 'Export KML',              sub: 'Export to Google Earth' }
 };
+
+/* =========================================================
+   VIEW SWITCHER
+   ========================================================= */
+function switchView(page) {
+  currentView = page;
+
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+  const navBtn = document.querySelector('[data-page="' + page + '"]');
+  if (navBtn) navBtn.classList.add('active');
+
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) pageEl.classList.add('active');
+
+  const info = PAGE_TITLES[page] || PAGE_TITLES['map'];
+  document.getElementById('pageIcon').textContent = info.icon;
+  document.getElementById('pageTitle').textContent = info.title;
+  document.getElementById('pageSubtitle').textContent = info.sub;
+
+  // Map needs invalidateSize when returning
+  if (page === 'map' && map) {
+    setTimeout(() => map.invalidateSize(), 100);
+  }
+}
 
 document.querySelectorAll('.nav-item').forEach(function(btn) {
   btn.addEventListener('click', function() {
-    const page = btn.dataset.page;
-
-    document.querySelectorAll('.nav-item').forEach(function(b) {
-      b.classList.remove('active');
-    });
-    document.querySelectorAll('.page').forEach(function(p) {
-      p.classList.remove('active');
-    });
-
-    btn.classList.add('active');
-    document.getElementById('page-' + page).classList.add('active');
-
-    document.getElementById('pageIcon').textContent = PAGE_TITLES[page].icon;
-    document.getElementById('pageTitle').textContent = PAGE_TITLES[page].title;
-    document.getElementById('pageSubtitle').textContent = PAGE_TITLES[page].sub;
-
-    if (page === 'map' && map) {
-      setTimeout(function() {
-        map.invalidateSize();
-      }, 100);
-    }
+    switchView(btn.dataset.page);
   });
 });
 
 /* =========================================================
-   MAP INITIALIZATION
+   MAP INIT
    ========================================================= */
 function initMap() {
   map = L.map('map', {
@@ -1006,178 +1421,152 @@ function initMap() {
     zoomControl: true,
     preferCanvas: true
   });
-  // ⭐ تحديث Sectors عند تغيير Zoom
-  map.on('zoomend', function() {
-    if (visibleCells.length && document.getElementById('showSectors').checked) {
-      renderMap();
-    }
-  });
-  // Basemaps
+
   basemaps.street = L.tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     { maxZoom: 19, attribution: '© OpenStreetMap' }
   );
-
   basemaps.satellite = L.tileLayer(
     'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     { maxZoom: 19, attribution: '© Esri' }
   );
-
   basemaps.terrain = L.tileLayer(
     'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
     { maxZoom: 17, attribution: '© OpenTopoMap' }
   );
 
-  // Default basemap
   basemaps.street.addTo(map);
 
-  // Layer groups
   sectorLayer = L.layerGroup().addTo(map);
   labelLayer = L.layerGroup().addTo(map);
   coverageLayer = L.layerGroup();
 
-  
-  // Basemap switcher
+  map.on('zoomend', function() {
+    if (visibleCells.length && document.getElementById('showSectors') && document.getElementById('showSectors').checked) {
+      renderMap();
+    }
+  });
+
   document.querySelectorAll('.basemap-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      document.querySelectorAll('.basemap-btn').forEach(function(b) {
-        b.classList.remove('active');
-      });
+      document.querySelectorAll('.basemap-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-
       const name = btn.dataset.basemap;
-
-      Object.keys(basemaps).forEach(function(key) {
-        map.removeLayer(basemaps[key]);
-      });
-
+      Object.keys(basemaps).forEach(k => map.removeLayer(basemaps[k]));
       basemaps[name].addTo(map);
     });
   });
 }
 
 /* =========================================================
-   LOAD CELLS FROM SUPABASE
+   LOAD CELLS
    ========================================================= */
 async function loadCells() {
-  document.getElementById('loadingOverlay').style.display = 'flex';
-  
+  const loadingEl = document.getElementById('loadingOverlay');
+  if (loadingEl) loadingEl.style.display = 'flex';
+
   try {
     let allData = [];
     let from = 0;
     const PAGE_SIZE = 1000;
     let hasMore = true;
-    
+
     while (hasMore) {
       let query = db
         .from('rf_cells')
         .select('*')
         .order('cell_name')
         .range(from, from + PAGE_SIZE - 1);
-      
+
       if (currentProjectId) {
         query = query.eq('project_id', currentProjectId);
       }
-      
+
       const { data, error } = await query;
       if (error) throw error;
-      
+
       if (data && data.length > 0) {
         allData = allData.concat(data);
-        console.log(`📥 Page ${Math.floor(from/PAGE_SIZE) + 1}: ${data.length} cells (total: ${allData.length})`);
         from += PAGE_SIZE;
         hasMore = data.length === PAGE_SIZE;
       } else {
         hasMore = false;
       }
     }
-    
-    console.log(`✅ Total: ${allData.length} cells`);
-    
+
     allCells = allData.map(normalizeCell);
     updateStats();
     renderBandFilters();
     renderLegend();
     applyFilters();
-    
-    toast(`Loaded ${allCells.length} cells`, 'success');
+
+    toast('Loaded ' + allCells.length + ' cells', 'success');
   } catch (e) {
     console.error(e);
     toast('Error loading cells: ' + e.message, 'error');
   } finally {
-    document.getElementById('loadingOverlay').style.display = 'none';
+    if (loadingEl) loadingEl.style.display = 'none';
   }
 }
-    
-    
+
 /* =========================================================
-   NORMALIZE CELL DATA
+   NORMALIZE
    ========================================================= */
 function normalizeCell(row) {
   const name = row.cell_name || '';
-
-  // Extract Band (first letters)
   const bandMatch = name.match(/^[A-Z]+/);
   const band = bandMatch ? bandMatch[0] : 'UNKNOWN';
-
-  // Extract Site (all but last letter)
   const site = name.replace(/[A-Z]$/, '');
-
-  // Extract Sector (last letter)
   const sector = name.slice(-1);
 
   return {
-    id:        row.id,
+    id: row.id,
     cell_name: name,
-    cell_id:   row.cell_id || 0,
-    pci:       row.pci || 0,
-    rsi:       row.rsi || 0,
-    radius:    row.cell_radius || 15000,
-    lat:       parseFloat(row.lat) || 0,
-    long:      parseFloat(row.long) || 0,
-    bore:      row.bore || 0,
-    band:      band,
-    site:      site,
-    sector:    sector,
-  color: BAND_COLORS[band] || BAND_COLORS.DEFAULT
-
+    cell_id: row.cell_id || 0,
+    pci: row.pci || 0,
+    rsi: row.rsi || 0,
+    radius: row.cell_radius || 15000,
+    lat: parseFloat(row.lat) || 0,
+    long: parseFloat(row.long) || 0,
+    bore: row.bore || 0,
+    band: band,
+    site: site,
+    sector: sector,
+    color: SECTOR_COLORS[sector] || BAND_COLORS[band] || BAND_COLORS.DEFAULT
   };
 }
 
 /* =========================================================
-   UPDATE STATS
+   STATS
    ========================================================= */
 function updateStats() {
-  document.getElementById('statTotal').textContent = allCells.length;
+  const el = (id) => document.getElementById(id);
+  if (el('statTotal')) el('statTotal').textContent = allCells.length;
 
-  const sites = new Set(allCells.map(function(c) { return c.site; }));
-  document.getElementById('statSites').textContent = sites.size;
+  const sites = new Set(allCells.map(c => c.site));
+  if (el('statSites')) el('statSites').textContent = sites.size;
 
-  const bands = new Set(allCells.map(function(c) { return c.band; }));
-  document.getElementById('statBands').textContent = bands.size;
+  const bands = new Set(allCells.map(c => c.band));
+  if (el('statBands')) el('statBands').textContent = bands.size;
 
-  // PCI Conflicts
   const pciCount = {};
-  allCells.forEach(function(c) {
-    pciCount[c.pci] = (pciCount[c.pci] || 0) + 1;
-  });
-  const conflicts = Object.values(pciCount).filter(function(v) { return v > 1; }).length;
-  document.getElementById('statPCI').textContent = conflicts;
+  allCells.forEach(c => { pciCount[c.pci] = (pciCount[c.pci] || 0) + 1; });
+  const conflicts = Object.values(pciCount).filter(v => v > 1).length;
+  if (el('statPCI')) el('statPCI').textContent = conflicts;
 
-  // Nav badge
-  document.getElementById('navCellsCount').textContent = allCells.length;
+  if (el('navCellsCount')) el('navCellsCount').textContent = allCells.length;
 }
 
 /* =========================================================
-   RENDER BAND FILTERS
+   BAND FILTERS
    ========================================================= */
 function renderBandFilters() {
-  const bands = {};
+  const container = document.getElementById('bandFilters');
+  if (!container) return;
 
+  const bands = {};
   allCells.forEach(function(c) {
-    if (!bands[c.band]) {
-      bands[c.band] = { count: 0, color: c.color };
-    }
+    if (!bands[c.band]) bands[c.band] = { count: 0, color: c.color };
     bands[c.band].count++;
   });
 
@@ -1191,62 +1580,63 @@ function renderBandFilters() {
       '</label>';
   }).join('');
 
-  document.getElementById('bandFilters').innerHTML = html;
+  container.innerHTML = html;
 }
 
 /* =========================================================
-   RENDER LEGEND
+   LEGEND
    ========================================================= */
 function renderLegend() {
-  const bands = {};
+  const container = document.getElementById('legendItems');
+  if (!container) return;
 
-  allCells.forEach(function(c) {
-    if (!bands[c.band]) {
-      bands[c.band] = c.color;
-    }
+  const bands = {};
+  allCells.forEach(c => {
+    if (!bands[c.band]) bands[c.band] = c.color;
   });
 
-  const html = Object.keys(bands).sort().map(function(band) {
-    return '<div class="legend-item">' +
+  container.innerHTML = Object.keys(bands).sort().map(band =>
+    '<div class="legend-item">' +
       '<span class="legend-dot" style="background:' + bands[band] + ';"></span>' +
       '<span>' + band + '</span>' +
-      '</div>';
-  }).join('');
-
-  document.getElementById('legendItems').innerHTML = html;
+    '</div>'
+  ).join('');
 }
 
 /* =========================================================
-   APPLY FILTERS
+   FILTERS
    ========================================================= */
 function applyFilters() {
-  const search = (document.getElementById('searchFilter').value || '').toLowerCase().trim();
-  const pciQuery = (document.getElementById('pciFilter').value || '').trim();
+  const searchEl = document.getElementById('searchFilter');
+  const pciEl = document.getElementById('pciFilter');
+  if (!searchEl || !pciEl) return;
+
+  const search = (searchEl.value || '').toLowerCase().trim();
+  const pciQuery = (pciEl.value || '').trim();
 
   const selectedBands = new Set(
     Array.from(document.querySelectorAll('#bandFilters input[type="checkbox"]:checked'))
-      .map(function(i) { return i.value; })
+      .map(i => i.value)
   );
 
   visibleCells = allCells.filter(function(c) {
     if (!selectedBands.has(c.band)) return false;
-
     if (search) {
       const hay = (c.cell_name + ' ' + c.site + ' ' + c.pci + ' ' + c.cell_id).toLowerCase();
       if (hay.indexOf(search) === -1) return false;
     }
-
     if (pciQuery && String(c.pci) !== pciQuery) return false;
-
     return true;
   });
 
   renderMap();
-  document.getElementById('statVisible').textContent = visibleCells.length;
+  if (document.getElementById('statVisible')) {
+    document.getElementById('statVisible').textContent = visibleCells.length;
+  }
 }
 
 /* =========================================================
-   RENDER MAP — SECTORS
+   RENDER MAP
    ========================================================= */
 function renderMap() {
   if (!map) return;
@@ -1255,48 +1645,36 @@ function renderMap() {
   labelLayer.clearLayers();
   coverageLayer.clearLayers();
 
-  const showSectors = document.getElementById('showSectors').checked;
-  const showLabels = document.getElementById('showLabels').checked;
-  const showCoverage = document.getElementById('showCoverage').checked;
+  const showSectors = document.getElementById('showSectors') && document.getElementById('showSectors').checked;
+  const showLabels = document.getElementById('showLabels') && document.getElementById('showLabels').checked;
 
   visibleCells.forEach(function(cell) {
     if (!cell.lat || !cell.long) return;
-
     const center = [cell.lat, cell.long];
 
-    // ============ 1. SECTOR (Triangle 120°) ============
     if (showSectors) {
-      const sectorCoords = makeSectorCoords(cell.lat, cell.long, cell.bore, cell.radius, 120);
-
-     const polygon = L.polygon(sectorCoords, {
-  color: cell.color,
-  weight: 0.8,
-  opacity: 1,
-  fillColor: cell.color,
-  fillOpacity: 0.65,
-  interactive: true,
-  lineJoin: 'round'
-});
+      const coords = makeSectorCoords(cell.lat, cell.long, cell.bore);
+      const polygon = L.polygon(coords, {
+        color: cell.color,
+        weight: 0.8,
+        opacity: 1,
+        fillColor: cell.color,
+        fillOpacity: 0.65,
+        interactive: true,
+        lineJoin: 'round'
+      });
 
       polygon.bindPopup(makePopupContent(cell), { maxWidth: 340 });
-
-      polygon.on('mouseover', function() {
-        this.setStyle({ fillOpacity: 0.6, weight: 2.5 });
-      });
-
-      polygon.on('mouseout', function() {
-        this.setStyle({ fillOpacity: 0.35, weight: 1.5 });
-      });
-
+      polygon.on('mouseover', function() { this.setStyle({ fillOpacity: 0.85, weight: 2 }); });
+      polygon.on('mouseout', function() { this.setStyle({ fillOpacity: 0.65, weight: 0.8 }); });
       sectorLayer.addLayer(polygon);
     }
 
-    // ============ 2. LABEL ============
-   if (showLabels && map.getZoom() >= 14) {
-  const label = L.marker(center, {
+    if (showLabels && map.getZoom() >= 14) {
+      const label = L.marker(center, {
         icon: L.divIcon({
           className: 'cell-label',
-          html: '<div style="background:' + cell.color + ';color:#fff;padding:2px 7px;border-radius:10px;font-family:\'JetBrains Mono\',monospace;font-size:9.5px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3);border:1.5px solid #fff;">' + cell.cell_name + '</div>',
+          html: '<div style="background:' + cell.color + ';color:#fff;padding:2px 7px;border-radius:10px;font-family:\'JetBrains Mono\',monospace;font-size:9.5px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3);border:1.5px solid #fff;">' + escapeHtml(cell.cell_name) + '</div>',
           iconSize: null,
           iconAnchor: [-6, 12]
         }),
@@ -1304,107 +1682,61 @@ function renderMap() {
       });
       labelLayer.addLayer(label);
     }
-
-    // ============ 3. COVERAGE CIRCLE ============
-    if (showCoverage) {
-      const circle = L.circle(center, {
-        radius: cell.radius,
-        color: cell.color,
-        weight: 1,
-        opacity: 0.3,
-        fillColor: cell.color,
-        fillOpacity: 0.05,
-        interactive: false
-      });
-      coverageLayer.addLayer(circle);
-    }
   });
-
-  // Add coverage layer if enabled
-  if (showCoverage && !map.hasLayer(coverageLayer)) {
-    coverageLayer.addTo(map);
-  }
 }
 
 /* =========================================================
-   SECTOR SHAPE — 5-Point Atoll-like Polygon
-   شكل Sector احترافي — 5 نقاط (مثل QGIS/Atoll)
+   SECTOR SHAPE — Atoll-like 5-point
    ========================================================= */
-function makeSectorCoords(lat, lng, azimuth, radiusM, beamWidth) {
-  // ⭐ حجم Sector حسب الـ Zoom
+function makeSectorCoords(lat, lng, azimuth) {
   const zoom = map.getZoom();
   let radius_m, half_width_m;
-  
-  if (zoom >= 16) {
-    radius_m = 150;  half_width_m = 45;
-  } else if (zoom >= 14) {
-    radius_m = 350;  half_width_m = 100;
-  } else if (zoom >= 12) {
-    radius_m = 800;  half_width_m = 230;
-  } else if (zoom >= 10) {
-    radius_m = 2000; half_width_m = 570;
-  } else {
-    radius_m = 5000; half_width_m = 1400;
-  }
-  
-  // ⭐ نقاط Sector (5 نقاط — نفس QGIS)
+  if (zoom >= 16) { radius_m = 150; half_width_m = 45; }
+  else if (zoom >= 14) { radius_m = 350; half_width_m = 100; }
+  else if (zoom >= 12) { radius_m = 800; half_width_m = 230; }
+  else if (zoom >= 10) { radius_m = 2000; half_width_m = 570; }
+  else { radius_m = 5000; half_width_m = 1400; }
+
   const near_d = radius_m * 0.04;
-  const far_d  = radius_m;
+  const far_d = radius_m;
   const near_w = half_width_m * 0.30;
-  const far_w  = half_width_m;
-  
+  const far_w = half_width_m;
+
   function pt(fwd_m, right_m) {
     const distance = Math.sqrt(fwd_m * fwd_m + right_m * right_m);
     const offsetAngle = Math.atan2(right_m, fwd_m) * 180 / Math.PI;
-    const bearing = azimuth + offsetAngle;
-    return destinationPoint(lat, lng, bearing, distance);
+    return destinationPoint(lat, lng, azimuth + offsetAngle, distance);
   }
-  
-  return [
-    pt(0, 0),                    // مركز
-    pt(near_d, -near_w),         // قريب يمين
-    pt(far_d, -far_w),           // بعيد يمين
-    pt(far_d, far_w),            // بعيد يسار
-    pt(near_d, near_w)           // قريب يسار
-  ];
+
+  return [pt(0, 0), pt(near_d, -near_w), pt(far_d, -far_w), pt(far_d, far_w), pt(near_d, near_w)];
 }
 
 /* =========================================================
-   DESTINATION POINT (given start, bearing, distance)
+   DESTINATION POINT
    ========================================================= */
 function destinationPoint(lat, lng, bearing, distanceM) {
-  const R = 6371000; // Earth radius in meters
+  const R = 6371000;
   const d = distanceM / R;
   const theta = bearing * Math.PI / 180;
   const phi1 = lat * Math.PI / 180;
   const lambda1 = lng * Math.PI / 180;
 
-  const phi2 = Math.asin(
-    Math.sin(phi1) * Math.cos(d) +
-    Math.cos(phi1) * Math.sin(d) * Math.cos(theta)
-  );
+  const phi2 = Math.asin(Math.sin(phi1) * Math.cos(d) + Math.cos(phi1) * Math.sin(d) * Math.cos(theta));
+  const lambda2 = lambda1 + Math.atan2(Math.sin(theta) * Math.sin(d) * Math.cos(phi1), Math.cos(d) - Math.sin(phi1) * Math.sin(phi2));
 
-  const lambda2 = lambda1 + Math.atan2(
-    Math.sin(theta) * Math.sin(d) * Math.cos(phi1),
-    Math.cos(d) - Math.sin(phi1) * Math.sin(phi2)
-  );
-
-  return [
-    phi2 * 180 / Math.PI,
-    lambda2 * 180 / Math.PI
-  ];
+  return [phi2 * 180 / Math.PI, lambda2 * 180 / Math.PI];
 }
 
 /* =========================================================
-   POPUP CONTENT
+   POPUP
    ========================================================= */
 function makePopupContent(cell) {
   const gmapsLink = 'https://www.google.com/maps/search/?api=1&query=' + cell.lat + ',' + cell.long;
 
   return '<div class="cell-popup">' +
     '<div class="cell-popup-header" style="background:' + cell.color + ';">' +
-      '<span class="name">' + cell.cell_name + '</span>' +
-      '<span class="sector">SEC ' + cell.sector + '</span>' +
+      '<span class="name">' + escapeHtml(cell.cell_name) + '</span>' +
+      '<span class="sector">SEC ' + escapeHtml(cell.sector) + '</span>' +
     '</div>' +
     '<div class="cell-popup-body">' +
       '<div class="cell-popup-row"><span class="k">Cell ID</span><span class="v">' + cell.cell_id + '</span></div>' +
@@ -1414,8 +1746,8 @@ function makePopupContent(cell) {
       '<div class="cell-popup-row"><span class="k">Radius</span><span class="v">' + (cell.radius / 1000).toFixed(1) + ' km</span></div>' +
       '<div class="cell-popup-row"><span class="k">Latitude</span><span class="v">' + cell.lat.toFixed(6) + '</span></div>' +
       '<div class="cell-popup-row"><span class="k">Longitude</span><span class="v">' + cell.long.toFixed(6) + '</span></div>' +
-      '<div class="cell-popup-row"><span class="k">Band</span><span class="v">' + cell.band + '</span></div>' +
-      '<div class="cell-popup-row"><span class="k">Site</span><span class="v">' + cell.site + '</span></div>' +
+      '<div class="cell-popup-row"><span class="k">Band</span><span class="v">' + escapeHtml(cell.band) + '</span></div>' +
+      '<div class="cell-popup-row"><span class="k">Site</span><span class="v">' + escapeHtml(cell.site) + '</span></div>' +
     '</div>' +
     '<div class="cell-popup-footer">' +
       '<a href="' + gmapsLink + '" target="_blank" rel="noopener">📍 Google Maps</a>' +
@@ -1424,77 +1756,35 @@ function makePopupContent(cell) {
 }
 
 /* =========================================================
-   TOGGLE LAYERS
-   ========================================================= */
-function toggleLayer(type) {
-  if (type === 'coverage') {
-    if (document.getElementById('showCoverage').checked) {
-      if (!map.hasLayer(coverageLayer)) {
-        coverageLayer.addTo(map);
-      }
-    } else {
-      if (map.hasLayer(coverageLayer)) {
-        map.removeLayer(coverageLayer);
-      }
-    }
-  }
-  renderMap();
-}
-
-/* =========================================================
-   FIT TO ALL CELLS
+   ACTIONS
    ========================================================= */
 function fitAllCells() {
-  if (!visibleCells.length) {
-    toast('No cells to fit', 'error');
-    return;
-  }
-
-  const bounds = L.latLngBounds(
-    visibleCells.map(function(c) {
-      return [c.lat, c.long];
-    })
-  );
-
+  if (!visibleCells.length) { toast('No cells to fit', 'error'); return; }
+  const bounds = L.latLngBounds(visibleCells.map(c => [c.lat, c.long]));
   map.fitBounds(bounds, { padding: [50, 50] });
   toast('Fitted to ' + visibleCells.length + ' cells', 'success');
 }
 
-/* =========================================================
-   CLEAR FILTERS
-   ========================================================= */
 function clearFilters() {
   document.getElementById('searchFilter').value = '';
   document.getElementById('pciFilter').value = '';
-
-  document.querySelectorAll('#bandFilters input[type="checkbox"]').forEach(function(i) {
-    i.checked = true;
-  });
-
+  document.querySelectorAll('#bandFilters input[type="checkbox"]').forEach(i => i.checked = true);
   applyFilters();
   toast('Filters cleared', 'info');
 }
 
 /* =========================================================
-   INIT APP
-   ========================================================= */
-/* =========================================================
    PROJECTS
    ========================================================= */
-let allProjects = [];
-let currentProjectId = null;
-let importPreviewData = [];
-
 async function loadProjects() {
   try {
     const { data, error } = await db
       .from('rf_projects')
       .select('*')
       .order('created_at', { ascending: false });
-    
+
     if (error) throw error;
     allProjects = data || [];
-    
     renderProjectsList();
     renderProjectSelect();
   } catch (e) {
@@ -1505,44 +1795,42 @@ async function loadProjects() {
 
 function renderProjectsList() {
   const container = document.getElementById('projectsList');
-  
+  if (!container) return;
+
   if (!allProjects.length) {
-    container.innerHTML = `
-      <div style="text-align:center;padding:60px 20px;color:#5A6B87;grid-column:1/-1;">
-        <div style="font-size:56px;opacity:.3;margin-bottom:14px;">📁</div>
-        <h3 style="color:#0C1B3D;margin-bottom:8px;">No Projects Yet</h3>
-        <p style="font-size:13px;">Click "New Project" to create your first one</p>
-      </div>
-    `;
+    container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#5A6B87;grid-column:1/-1;">' +
+      '<div style="font-size:56px;opacity:.3;margin-bottom:14px;">📁</div>' +
+      '<h3 style="color:#0C1B3D;margin-bottom:8px;">No Projects Yet</h3>' +
+      '<p style="font-size:13px;">Click "New Project" to create your first one</p>' +
+      '</div>';
     return;
   }
-  
-  container.innerHTML = allProjects.map(p => `
-    <div style="background:#fff;border-radius:12px;padding:18px 20px;border:1px solid #E9EEF6;box-shadow:0 2px 8px rgba(12,27,61,.05);transition:all .2s;cursor:pointer;" 
-         onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(12,27,61,.12)';" 
-         onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(12,27,61,.05)';"
-         onclick="openProject(${p.id})">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-        <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#124191,#00A1E0);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;">📁</div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-weight:700;font-size:14px;color:#0C1B3D;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(p.name)}</div>
-          <div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">${escapeHtml(p.description || 'No description')}</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:12px;padding-top:12px;border-top:1px solid #F0F3F9;font-size:11.5px;color:#5A6B87;">
-        <span>📅 ${new Date(p.created_at).toLocaleDateString('en-GB')}</span>
-        <span style="margin-left:auto;color:#124191;font-weight:600;">Open →</span>
-      </div>
-    </div>
-  `).join('');
+
+  container.innerHTML = allProjects.map(p =>
+    '<div style="background:#fff;border-radius:12px;padding:18px 20px;border:1px solid #E9EEF6;box-shadow:0 2px 8px rgba(12,27,61,.05);transition:all .2s;cursor:pointer;" ' +
+    'onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 8px 24px rgba(12,27,61,.12)\';" ' +
+    'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 2px 8px rgba(12,27,61,.05)\';" ' +
+    'onclick="openProject(' + p.id + ')">' +
+      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">' +
+        '<div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#124191,#00A1E0);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;">📁</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-weight:700;font-size:14px;color:#0C1B3D;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(p.name) + '</div>' +
+          '<div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">' + escapeHtml(p.description || 'No description') + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:12px;padding-top:12px;border-top:1px solid #F0F3F9;font-size:11.5px;color:#5A6B87;">' +
+        '<span>📅 ' + new Date(p.created_at).toLocaleDateString('en-GB') + '</span>' +
+        '<span style="margin-left:auto;color:#124191;font-weight:600;">Open →</span>' +
+      '</div>' +
+    '</div>'
+  ).join('');
 }
 
 function renderProjectSelect() {
   const sel = document.getElementById('importProjectSelect');
   if (!sel) return;
-  
-  sel.innerHTML = '<option value="">— Choose Project —</option>' + 
-    allProjects.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+  sel.innerHTML = '<option value="">— Choose Project —</option>' +
+    allProjects.map(p => '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>').join('');
 }
 
 function openCreateProjectModal() {
@@ -1559,23 +1847,19 @@ function closeCreateProjectModal() {
 async function createProject() {
   const name = document.getElementById('newProjectName').value.trim();
   const desc = document.getElementById('newProjectDesc').value.trim();
-  
-  if (!name) {
-    toast('Enter project name', 'error');
-    return;
-  }
-  
+  if (!name) { toast('Enter project name', 'error'); return; }
+
   const btn = document.getElementById('createProjectBtn');
   btn.disabled = true;
   btn.textContent = 'Creating...';
-  
+
   try {
     const { data, error } = await db
       .from('rf_projects')
       .insert([{ name, description: desc }])
       .select()
       .single();
-    
+
     if (error) {
       if (error.message.includes('duplicate')) {
         toast('Project name already exists', 'error');
@@ -1584,14 +1868,14 @@ async function createProject() {
       }
       return;
     }
-    
+
     toast('✅ Project created', 'success');
     closeCreateProjectModal();
     await loadProjects();
-    
-    // Auto-select new project in import
+
     if (data && data.id) {
-      document.getElementById('importProjectSelect').value = data.id;
+      const sel = document.getElementById('importProjectSelect');
+      if (sel) sel.value = data.id;
     }
   } catch (e) {
     toast('Error: ' + e.message, 'error');
@@ -1603,21 +1887,10 @@ async function createProject() {
 
 function openProject(projectId) {
   currentProjectId = projectId;
-  // Go to map
-  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelector('[data-page="map"]').classList.add('active');
-  document.getElementById('page-map').classList.add('active');
-  document.getElementById('pageIcon').textContent = '🗺️';
-  document.getElementById('pageTitle').textContent = 'Cell Map';
-  document.getElementById('pageSubtitle').textContent = 'Project: ' + (allProjects.find(p => p.id === projectId)?.name || '');
-  
+  switchView('map');
+  const proj = allProjects.find(p => p.id === projectId);
+  document.getElementById('pageSubtitle').textContent = 'Project: ' + (proj ? proj.name : '');
   loadCells();
-  setTimeout(() => map.invalidateSize(), 100);
-}
-
-function escapeHtml(s) {
-  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 /* =========================================================
@@ -1626,10 +1899,17 @@ function escapeHtml(s) {
 const importDropZone = document.getElementById('importDropZone');
 const importFileInput = document.getElementById('importFileInput');
 
-if (importDropZone) {
+if (importDropZone && importFileInput) {
   importDropZone.addEventListener('click', () => importFileInput.click());
-  importDropZone.addEventListener('dragover', e => { e.preventDefault(); importDropZone.style.borderColor = '#00A1E0'; importDropZone.style.background = '#EAF2FB'; });
-  importDropZone.addEventListener('dragleave', () => { importDropZone.style.borderColor = '#C9D4E4'; importDropZone.style.background = '#FBFCFE'; });
+  importDropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    importDropZone.style.borderColor = '#00A1E0';
+    importDropZone.style.background = '#EAF2FB';
+  });
+  importDropZone.addEventListener('dragleave', () => {
+    importDropZone.style.borderColor = '#C9D4E4';
+    importDropZone.style.background = '#FBFCFE';
+  });
   importDropZone.addEventListener('drop', e => {
     e.preventDefault();
     importDropZone.style.borderColor = '#C9D4E4';
@@ -1665,7 +1945,7 @@ async function importPasteFromClipboard() {
     const rows = lines.slice(1).map(line => {
       const cells = line.split('\t');
       const obj = {};
-      headers.forEach((h, i) => obj[h] = cells[i]?.trim() || '');
+      headers.forEach((h, i) => obj[h] = cells[i] ? cells[i].trim() : '');
       return obj;
     });
     importParseRows(rows);
@@ -1676,7 +1956,7 @@ async function importPasteFromClipboard() {
 
 function importParseRows(rows) {
   if (!rows.length) { toast('No data found', 'error'); return; }
-  
+
   const colMap = {
     cell_name:   ['Cell Name', 'cell_name', 'CELL_NAME'],
     cell_id:     ['Cell ID', 'cell_id', 'CELL_ID'],
@@ -1687,14 +1967,14 @@ function importParseRows(rows) {
     long:        ['Long', 'LONG', 'long', 'Longitude', 'longitude'],
     bore:        ['Bore', 'BORE', 'bore', 'Azimuth']
   };
-  
+
   function findVal(row, keys) {
     for (const k of keys) {
       if (row[k] !== undefined && row[k] !== '') return row[k];
     }
     return '';
   }
-  
+
   importPreviewData = rows.map(row => ({
     cell_name:   String(findVal(row, colMap.cell_name)).trim(),
     cell_id:     parseInt(findVal(row, colMap.cell_id)) || 0,
@@ -1705,68 +1985,65 @@ function importParseRows(rows) {
     long:        parseFloat(findVal(row, colMap.long)) || 0,
     bore:        parseInt(findVal(row, colMap.bore)) || 0
   })).filter(r => r.cell_name);
-  
+
   if (!importPreviewData.length) {
     toast('No valid cells detected. Check column names.', 'error');
     return;
   }
-  
+
   importRenderPreview();
 }
 
 function importRenderPreview() {
   document.getElementById('importPreviewCard').style.display = 'block';
-  
-  const bands = new Set(importPreviewData.map(r => r.cell_name.match(/^[A-Z]+/)?.[0]).filter(Boolean));
+
+  const bands = new Set(importPreviewData.map(r => {
+    const m = r.cell_name.match(/^[A-Z]+/);
+    return m ? m[0] : null;
+  }).filter(Boolean));
   const sites = new Set(importPreviewData.map(r => r.cell_name.replace(/[A-Z]$/, '')));
-  
-  document.getElementById('importPreviewStats').innerHTML = `
-    <div style="background:#EAF2FB;border-radius:10px;padding:14px;">
-      <div style="font-family:monospace;font-size:20px;font-weight:700;color:#0C1B3D;">${importPreviewData.length}</div>
-      <div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">Cells</div>
-    </div>
-    <div style="background:#EAF2FB;border-radius:10px;padding:14px;">
-      <div style="font-family:monospace;font-size:20px;font-weight:700;color:#0C1B3D;">${sites.size}</div>
-      <div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">Sites</div>
-    </div>
-    <div style="background:#EAF2FB;border-radius:10px;padding:14px;">
-      <div style="font-family:monospace;font-size:20px;font-weight:700;color:#0C1B3D;">${bands.size}</div>
-      <div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">Bands</div>
-    </div>
-  `;
-  
+
+  document.getElementById('importPreviewStats').innerHTML =
+    '<div style="background:#EAF2FB;border-radius:10px;padding:14px;">' +
+      '<div style="font-family:monospace;font-size:20px;font-weight:700;color:#0C1B3D;">' + importPreviewData.length + '</div>' +
+      '<div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">Cells</div>' +
+    '</div>' +
+    '<div style="background:#EAF2FB;border-radius:10px;padding:14px;">' +
+      '<div style="font-family:monospace;font-size:20px;font-weight:700;color:#0C1B3D;">' + sites.size + '</div>' +
+      '<div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">Sites</div>' +
+    '</div>' +
+    '<div style="background:#EAF2FB;border-radius:10px;padding:14px;">' +
+      '<div style="font-family:monospace;font-size:20px;font-weight:700;color:#0C1B3D;">' + bands.size + '</div>' +
+      '<div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">Bands</div>' +
+    '</div>';
+
   const preview = importPreviewData.slice(0, 30);
-  document.getElementById('importPreviewTable').innerHTML = `
-    <table style="width:100%;border-collapse:collapse;font-size:12px;font-family:monospace;">
-      <thead style="background:#EAF2FB;position:sticky;top:0;">
-        <tr>
-          <th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;text-transform:uppercase;">Cell Name</th>
-          <th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Cell ID</th>
-          <th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">PCI</th>
-          <th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">RSI</th>
-          <th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Radius</th>
-          <th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Lat</th>
-          <th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Long</th>
-          <th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Bore</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${preview.map(r => `
-          <tr style="border-bottom:1px solid #F0F3F9;">
-            <td style="padding:7px 10px;">${escapeHtml(r.cell_name)}</td>
-            <td style="padding:7px 10px;">${r.cell_id}</td>
-            <td style="padding:7px 10px;">${r.pci}</td>
-            <td style="padding:7px 10px;">${r.rsi}</td>
-            <td style="padding:7px 10px;">${r.cell_radius}</td>
-            <td style="padding:7px 10px;">${r.lat}</td>
-            <td style="padding:7px 10px;">${r.long}</td>
-            <td style="padding:7px 10px;">${r.bore}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-    ${importPreviewData.length > 30 ? `<div style="padding:10px;text-align:center;color:#5A6B87;font-size:11.5px;">... and ${importPreviewData.length - 30} more</div>` : ''}
-  `;
+  document.getElementById('importPreviewTable').innerHTML =
+    '<table style="width:100%;border-collapse:collapse;font-size:12px;font-family:monospace;">' +
+      '<thead style="background:#EAF2FB;position:sticky;top:0;">' +
+        '<tr>' +
+          '<th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Cell Name</th>' +
+          '<th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">PCI</th>' +
+          '<th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">RSI</th>' +
+          '<th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Lat</th>' +
+          '<th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Long</th>' +
+          '<th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Bore</th>' +
+        '</tr>' +
+      '</thead>' +
+      '<tbody>' +
+        preview.map(r =>
+          '<tr style="border-bottom:1px solid #F0F3F9;">' +
+            '<td style="padding:7px 10px;">' + escapeHtml(r.cell_name) + '</td>' +
+            '<td style="padding:7px 10px;">' + r.pci + '</td>' +
+            '<td style="padding:7px 10px;">' + r.rsi + '</td>' +
+            '<td style="padding:7px 10px;">' + r.lat + '</td>' +
+            '<td style="padding:7px 10px;">' + r.long + '</td>' +
+            '<td style="padding:7px 10px;">' + r.bore + '</td>' +
+          '</tr>'
+        ).join('') +
+      '</tbody>' +
+    '</table>' +
+    (importPreviewData.length > 30 ? '<div style="padding:10px;text-align:center;color:#5A6B87;font-size:11.5px;">... and ' + (importPreviewData.length - 30) + ' more</div>' : '');
 }
 
 function importClearPreview() {
@@ -1777,26 +2054,16 @@ function importClearPreview() {
 
 async function importSaveToSupabase() {
   const projectId = document.getElementById('importProjectSelect').value;
-  
-  if (!projectId) {
-    toast('Select a project first', 'error');
-    return;
-  }
-  
-  if (!importPreviewData.length) {
-    toast('No data to save', 'error');
-    return;
-  }
-  
+  if (!projectId) { toast('Select a project first', 'error'); return; }
+  if (!importPreviewData.length) { toast('No data to save', 'error'); return; }
+
   const btn = document.getElementById('importSaveBtn');
   btn.disabled = true;
   btn.textContent = 'Saving...';
-  
+
   try {
-    // Add project_id to each cell
-    const cellsWithProject = importPreviewData.map(c => ({ ...c, project_id: parseInt(projectId) }));
-    
-    // Batch insert
+    const cellsWithProject = importPreviewData.map(c => Object.assign({}, c, { project_id: parseInt(projectId) }));
+
     const BATCH = 500;
     let saved = 0;
     for (let i = 0; i < cellsWithProject.length; i += BATCH) {
@@ -1804,10 +2071,10 @@ async function importSaveToSupabase() {
       const { error } = await db.from('rf_cells').insert(batch);
       if (error) throw error;
       saved += batch.length;
-      btn.textContent = `Saving ${saved}/${cellsWithProject.length}...`;
+      btn.textContent = 'Saving ' + saved + '/' + cellsWithProject.length + '...';
     }
-    
-    toast(`✅ Saved ${saved} cells to project`, 'success');
+
+    toast('✅ Saved ' + saved + ' cells to project', 'success');
     importClearPreview();
     await loadProjects();
     await loadCells();
@@ -1819,14 +2086,6 @@ async function importSaveToSupabase() {
   }
 }
 
-
-
-/* =========================================================
-   UPDATE NAV TO INCLUDE PROJECTS
-   ========================================================= */
-// Add projects page title
-PAGE_TITLES.projects = { icon: '📁', title: 'Projects', sub: 'Manage RF projects' };
-
 /* =========================================================
    INIT
    ========================================================= */
@@ -1834,14 +2093,752 @@ window.addEventListener('DOMContentLoaded', function() {
   initMap();
   loadProjects();
   loadCells();
-  
-  // Close modal on backdrop click
-  document.getElementById('createProjectModal').addEventListener('click', function(e) {
-    if (e.target.id === 'createProjectModal') closeCreateProjectModal();
-  });
+
+  const modal = document.getElementById('createProjectModal');
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target.id === 'createProjectModal') closeCreateProjectModal();
+    });
+  }
 });
+     
+/* =========================================================
+   TOOL — DISTANCE & BEARING
+   ========================================================= */
+function calcDistance() {
+  const lat1 = parseFloat(document.getElementById('d_lat1').value);
+  const lon1 = parseFloat(document.getElementById('d_lon1').value);
+  const lat2 = parseFloat(document.getElementById('d_lat2').value);
+  const lon2 = parseFloat(document.getElementById('d_lon2').value);
+
+  if ([lat1, lon1, lat2, lon2].some(isNaN)) {
+    toast('Please enter valid coordinates', 'error');
+    return;
+  }
+
+  const R = 6371000;
+  const phi1 = lat1 * Math.PI / 180;
+  const phi2 = lat2 * Math.PI / 180;
+  const dphi = (lat2 - lat1) * Math.PI / 180;
+  const dlam = (lon2 - lon1) * Math.PI / 180;
+
+  const a = Math.sin(dphi / 2) ** 2 + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dlam / 2) ** 2;
+  const distM = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distKm = distM / 1000;
+
+  const y = Math.sin(dlam) * Math.cos(phi2);
+  const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dlam);
+  const bearing = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+
+  const dirs = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+  const direction = dirs[Math.round(bearing / 22.5) % 16];
+
+  document.getElementById('res_dist_m').textContent = distM.toFixed(2) + ' m';
+  document.getElementById('res_dist_km').textContent = distKm.toFixed(3) + ' km';
+  document.getElementById('res_bearing').textContent = bearing.toFixed(2) + '°';
+  document.getElementById('res_direction').textContent = direction;
+  document.getElementById('distanceResults').style.display = 'grid';
+
+  toast('Calculated: ' + distKm.toFixed(2) + ' km · ' + bearing.toFixed(1) + '°', 'success');
+}
+
+/* =========================================================
+   TOOL — AZIMUTH & TILT
+   ========================================================= */
+function calcAzimuth() {
+  const lat1 = parseFloat(document.getElementById('a_lat1').value);
+  const lon1 = parseFloat(document.getElementById('a_lon1').value);
+  const h1 = parseFloat(document.getElementById('a_h1').value);
+  const lat2 = parseFloat(document.getElementById('a_lat2').value);
+  const lon2 = parseFloat(document.getElementById('a_lon2').value);
+  const h2 = parseFloat(document.getElementById('a_h2').value);
+
+  if ([lat1, lon1, h1, lat2, lon2, h2].some(isNaN)) {
+    toast('Please enter valid values', 'error');
+    return;
+  }
+
+  const R = 6371000;
+  const phi1 = lat1 * Math.PI / 180;
+  const phi2 = lat2 * Math.PI / 180;
+  const dphi = (lat2 - lat1) * Math.PI / 180;
+  const dlam = (lon2 - lon1) * Math.PI / 180;
+
+  const a = Math.sin(dphi / 2) ** 2 + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dlam / 2) ** 2;
+  const distM = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  const y = Math.sin(dlam) * Math.cos(phi2);
+  const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dlam);
+  const azimuth = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+
+  const heightDiff = h2 - h1;
+  const tilt = Math.atan2(heightDiff, distM) * 180 / Math.PI;
+
+  document.getElementById('res_azimuth').textContent = azimuth.toFixed(2) + '°';
+  document.getElementById('res_az_dist').textContent = distM.toFixed(2) + ' m';
+  document.getElementById('res_az_hdiff').textContent = heightDiff.toFixed(2) + ' m';
+  document.getElementById('res_az_tilt').textContent = tilt.toFixed(3) + '°';
+  document.getElementById('azimuthResults').style.display = 'grid';
+
+  toast('Azimuth: ' + azimuth.toFixed(1) + '° · Tilt: ' + tilt.toFixed(2) + '°', 'success');
+}
+
+/* =========================================================
+   TOOL — UNIT CONVERTER
+   ========================================================= */
+function convertPower() {
+  const val = parseFloat(document.getElementById('u_power_val').value);
+  const from = document.getElementById('u_power_from').value;
+  if (isNaN(val)) { toast('Enter a valid number', 'error'); return; }
+
+  let dbm, mw, w;
+
+  if (from === 'dbm') {
+    dbm = val;
+    mw = Math.pow(10, val / 10);
+    w = mw / 1000;
+  } else if (from === 'mw') {
+    mw = val;
+    dbm = 10 * Math.log10(val);
+    w = val / 1000;
+  } else {
+    w = val;
+    mw = val * 1000;
+    dbm = 10 * Math.log10(mw);
+  }
+
+  document.getElementById('res_dbm').textContent = dbm.toFixed(4) + ' dBm';
+  document.getElementById('res_mw').textContent = mw.toFixed(6) + ' mW';
+  document.getElementById('res_w').textContent = w.toFixed(8) + ' W';
+  document.getElementById('powerResults').style.display = 'grid';
+
+  toast('Converted successfully', 'success');
+}
+
+function convertGain() {
+  const val = parseFloat(document.getElementById('u_gain_val').value);
+  const from = document.getElementById('u_gain_from').value;
+  if (isNaN(val)) { toast('Enter a valid number', 'error'); return; }
+
+  let dbi, dbd;
+  if (from === 'dbi') {
+    dbi = val;
+    dbd = val - 2.15;
+  } else {
+    dbd = val;
+    dbi = val + 2.15;
+  }
+
+  document.getElementById('res_dbi').textContent = dbi.toFixed(3) + ' dBi';
+  document.getElementById('res_dbd').textContent = dbd.toFixed(3) + ' dBd';
+  document.getElementById('gainResults').style.display = 'grid';
+
+  toast('Converted successfully', 'success');
+}
+
+function convertDistance() {
+  const val = parseFloat(document.getElementById('u_dist_val').value);
+  const from = document.getElementById('u_dist_from').value;
+  if (isNaN(val)) { toast('Enter a valid number', 'error'); return; }
+
+  let m, km, mi, ft;
+  if (from === 'm') {
+    m = val; km = val / 1000; mi = val * 0.000621371; ft = val * 3.28084;
+  } else if (from === 'km') {
+    m = val * 1000; km = val; mi = val * 0.621371; ft = val * 3280.84;
+  } else if (from === 'mi') {
+    m = val * 1609.34; km = val * 1.60934; mi = val; ft = val * 5280;
+  } else {
+    m = val * 0.3048; km = val * 0.0003048; mi = val * 0.000189394; ft = val;
+  }
+
+  document.getElementById('res_m').textContent = m.toFixed(3) + ' m';
+  document.getElementById('res_km').textContent = km.toFixed(6) + ' km';
+  document.getElementById('res_mi').textContent = mi.toFixed(6) + ' mi';
+  document.getElementById('res_ft').textContent = ft.toFixed(3) + ' ft';
+  document.getElementById('distResults').style.display = 'grid';
+
+  toast('Converted successfully', 'success');
+}
+
+/* =========================================================
+   TOOL — EXPORT KML
+   ========================================================= */
+function exportKML() {
+  if (!allCells.length) {
+    toast('No cells loaded', 'error');
+    return;
+  }
+
+  const includeSectors = document.getElementById('kml_sectors').value === 'yes';
+  const colorMode = document.getElementById('kml_color').value;
+  const filename = (document.getElementById('kml_filename').value.trim() || 'RF_Planning_Export') + '.kml';
+
+  function hexToKML(hex) {
+    // KML uses aabbggrr format
+    const r = hex.substring(1, 3);
+    const g = hex.substring(3, 5);
+    const b = hex.substring(5, 7);
+    return 'ff' + b + g + r; // alpha = ff (opaque)
+  }
+
+  function getColor(cell) {
+    if (colorMode === 'band') return cell.color;
+    if (colorMode === 'sector') return SECTOR_COLORS[cell.sector] || cell.color;
+    return '#124191';
+  }
+
+  let kml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  kml += '<kml xmlns="http://www.opengis.net/kml/2.2">\n';
+  kml += '<Document>\n';
+  kml += '  <name>' + filename + '</name>\n';
+  kml += '  <description>RF Planning Export — ' + allCells.length + ' cells</description>\n';
+
+  // Styles per band/sector
+  const stylesUsed = new Set();
+  allCells.forEach(c => stylesUsed.add(getColor(c)));
+
+  stylesUsed.forEach(color => {
+    const kmlColor = hexToKML(color);
+    kml += '  <Style id="style_' + color.substring(1) + '">\n';
+    kml += '    <LineStyle><color>' + kmlColor + '</color><width>1.5</width></LineStyle>\n';
+    kml += '    <PolyStyle><color>' + kmlColor.replace('ff', 'aa') + '</color></PolyStyle>\n';
+    kml += '    <IconStyle><color>' + kmlColor + '</color>\n';
+    kml += '      <Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>\n';
+    kml += '    </IconStyle>\n';
+    kml += '  </Style>\n';
+  });
+
+  kml += '  <Folder><name>Cells</name>\n';
+
+  allCells.forEach(cell => {
+    if (!cell.lat || !cell.long) return;
+
+    const color = getColor(cell);
+    const styleId = 'style_' + color.substring(1);
+
+    kml += '    <Placemark>\n';
+    kml += '      <name>' + escapeHtml(cell.cell_name) + '</name>\n';
+    kml += '      <description><![CDATA[\n';
+    kml += '        <b>Cell:</b> ' + escapeHtml(cell.cell_name) + '<br/>';
+    kml += '        <b>Site:</b> ' + escapeHtml(cell.site) + '<br/>';
+    kml += '        <b>Sector:</b> ' + escapeHtml(cell.sector) + '<br/>';
+    kml += '        <b>Band:</b> ' + escapeHtml(cell.band) + '<br/>';
+    kml += '        <b>PCI:</b> ' + cell.pci + '<br/>';
+    kml += '        <b>RSI:</b> ' + cell.rsi + '<br/>';
+    kml += '        <b>Azimuth:</b> ' + cell.bore + '&deg;<br/>';
+    kml += '        <b>Radius:</b> ' + (cell.radius / 1000).toFixed(1) + ' km<br/>';
+    kml += '        <b>Lat/Long:</b> ' + cell.lat.toFixed(6) + ', ' + cell.long.toFixed(6);
+    kml += '      ]]></description>\n';
+    kml += '      <styleUrl>#' + styleId + '</styleUrl>\n';
+
+    if (includeSectors) {
+      // Sector polygon (5 points like Atoll)
+      const coords = kmlSectorCoords(cell.lat, cell.long, cell.bore);
+      kml += '      <Polygon>\n';
+      kml += '        <outerBoundaryIs><LinearRing><coordinates>\n          ';
+      coords.forEach(c => {
+        kml += c[1].toFixed(6) + ',' + c[0].toFixed(6) + ',0 ';
+      });
+      kml += '\n        </coordinates></LinearRing></outerBoundaryIs>\n';
+      kml += '      </Polygon>\n';
+    } else {
+      kml += '      <Point><coordinates>' + cell.long.toFixed(6) + ',' + cell.lat.toFixed(6) + ',0</coordinates></Point>\n';
+    }
+
+    kml += '    </Placemark>\n';
+  });
+
+  kml += '  </Folder>\n';
+  kml += '</Document>\n';
+  kml += '</kml>\n';
+
+  // Download
+  const blob = new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  toast('✅ KML exported: ' + filename + ' (' + allCells.length + ' cells)', 'success');
+}
+
+function kmlSectorCoords(lat, lng, azimuth) {
+  const radius_m = 350;
+  const half_width_m = 100;
+  const near_d = radius_m * 0.04;
+  const far_d = radius_m;
+  const near_w = half_width_m * 0.30;
+  const far_w = half_width_m;
+
+  function pt(fwd_m, right_m) {
+    const distance = Math.sqrt(fwd_m * fwd_m + right_m * right_m);
+    const offsetAngle = Math.atan2(right_m, fwd_m) * 180 / Math.PI;
+    return destinationPoint(lat, lng, azimuth + offsetAngle, distance);
+  }
+
+  return [pt(0, 0), pt(near_d, -near_w), pt(far_d, -far_w), pt(far_d, far_w), pt(near_d, near_w)];
+}
+ 
+/* =========================================================
+   TOOL — PCI CONFLICT CHECKER
+   محوّل من pci_core.py — نفس المنطق بالكامل
+   ========================================================= */
+const EARTH_RADIUS_M = 6371000.0;
+
+/* ---------- Geometry Primitives ---------- */
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  const phi1 = lat1 * Math.PI / 180;
+  const phi2 = lat2 * Math.PI / 180;
+  const dphi = (lat2 - lat1) * Math.PI / 180;
+  const dlam = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dphi / 2) ** 2 + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dlam / 2) ** 2;
+  return EARTH_RADIUS_M * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function calculateBearing(lat1, lon1, lat2, lon2) {
+  const phi1 = lat1 * Math.PI / 180;
+  const phi2 = lat2 * Math.PI / 180;
+  const dlambda = (lon2 - lon1) * Math.PI / 180;
+  const x = Math.sin(dlambda) * Math.cos(phi2);
+  const y = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dlambda);
+  return (Math.atan2(x, y) * 180 / Math.PI + 360) % 360;
+}
+
+function boreDifference(bore1, bore2) {
+  const diff = Math.abs(bore1 - bore2) % 360;
+  return diff <= 180 ? diff : 360 - diff;
+}
+
+function isFaceToFace(cell1, cell2, thresholdDeg) {
+  thresholdDeg = thresholdDeg || 45;
+  const b_1to2 = calculateBearing(cell1.lat, cell1.long, cell2.lat, cell2.long);
+  const b_2to1 = (b_1to2 + 180) % 360;
+  return boreDifference(cell1.bore, b_1to2) <= thresholdDeg &&
+         boreDifference(cell2.bore, b_2to1) <= thresholdDeg;
+}
+
+/* ---------- Spatial Index ---------- */
+function findPairsWithin(cells, maxRadiusM) {
+  if (cells.length < 2) return [];
+  const bucketDeg = Math.max(maxRadiusM / 111000.0, 0.005);
+  const buckets = new Map();
+
+  function key(lat, lon) {
+    return Math.floor(lat / bucketDeg) + ',' + Math.floor(lon / bucketDeg);
+  }
+
+  cells.forEach((c, idx) => {
+    const k = key(c.lat, c.long);
+    if (!buckets.has(k)) buckets.set(k, []);
+    buckets.get(k).push(idx);
+  });
+
+  const pairs = new Set();
+  buckets.forEach((idxs, k) => {
+    const [bx, by] = k.split(',').map(Number);
+    const neighborhood = [];
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        const nk = (bx + dx) + ',' + (by + dy);
+        if (buckets.has(nk)) neighborhood.push(...buckets.get(nk));
+      }
+    }
+    const sorted = Array.from(new Set(neighborhood)).sort((a, b) => a - b);
+    idxs.forEach(i => {
+      sorted.forEach(j => {
+        if (j > i) pairs.add(i + ',' + j);
+      });
+    });
+  });
+
+  return Array.from(pairs).map(s => s.split(',').map(Number)).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+}
+
+/* ---------- Conflict Detection ---------- */
+function analyzeConflicts(cells, settings) {
+  const maxRadius = Math.max(
+    settings.same_pci_radius_m,
+    settings.mod3_radius_m,
+    settings.check_mod6 ? settings.mod6_radius_m : 0,
+    settings.face_to_face_radius_m,
+    settings.same_heading_radius_m
+  );
+
+  const pairs = findPairsWithin(cells, maxRadius);
+  const conflicts = [];
+  const faceToFaceConflicts = [];
+  const samePciSameHeading = [];
+  const neighborMap = new Map();
+
+  const reachRadius = Math.max(
+    settings.same_pci_radius_m,
+    settings.mod3_radius_m,
+    settings.check_mod6 ? settings.mod6_radius_m : 0
+  );
+
+  pairs.forEach(([i, j]) => {
+    const c1 = cells[i], c2 = cells[j];
+    const dist = haversineDistance(c1.lat, c1.long, c2.lat, c2.long);
+
+    let ff = false;
+    if (dist <= settings.face_to_face_radius_m) {
+      ff = isFaceToFace(c1, c2);
+      if (ff) faceToFaceConflicts.push({ cell1: c1, cell2: c2, distance: dist });
+    }
+
+    if (c1.pci === c2.pci && dist <= settings.same_pci_radius_m) {
+      conflicts.push({ cell1: c1, cell2: c2, type: 'Same PCI', distance: dist, face_to_face: ff });
+    } else if ((c1.pci % 3) === (c2.pci % 3) && dist <= settings.mod3_radius_m) {
+      conflicts.push({ cell1: c1, cell2: c2, type: 'MOD3 Conflict', distance: dist, face_to_face: ff });
+    } else if (settings.check_mod6 && (c1.pci % 6) === (c2.pci % 6) && dist <= settings.mod6_radius_m) {
+      conflicts.push({ cell1: c1, cell2: c2, type: 'MOD6 Conflict', distance: dist, face_to_face: ff });
+    }
+
+    if (c1.pci === c2.pci && dist <= settings.same_heading_radius_m) {
+      const azDiff = boreDifference(c1.bore, c2.bore);
+      if (azDiff <= settings.same_heading_deg) {
+        samePciSameHeading.push({
+          cell1: c1, cell2: c2, pci: c1.pci, distance: dist, azimuth_diff: azDiff
+        });
+      }
+    }
+
+    if (dist <= reachRadius) {
+      if (!neighborMap.has(c1.id)) neighborMap.set(c1.id, []);
+      if (!neighborMap.has(c2.id)) neighborMap.set(c2.id, []);
+      neighborMap.get(c1.id).push({ cell: c2, dist: dist, is_ff: ff });
+      neighborMap.get(c2.id).push({ cell: c1, dist: dist, is_ff: ff });
+    }
+  });
+
+  return { conflicts, faceToFaceConflicts, samePciSameHeading, neighborMap };
+}
+
+/* ---------- Optimization ---------- */
+function conflictProfile(neighbors, currentPciOf, settings) {
+  const samePciPenalty = new Map();
+  const mod3Penalty = new Map();
+  const mod6Penalty = new Map();
+
+  const samePciK = Math.max(settings.same_pci_radius_m, 1.0);
+  const mod3K = Math.max(settings.mod3_radius_m, 1.0);
+  const mod6K = Math.max(settings.mod6_radius_m || 1.0, 1.0);
+
+  neighbors.forEach(nb => {
+    const nbPci = currentPciOf(nb.cell.id);
+    if (nbPci == null) return;
+
+    if (nb.dist <= settings.same_pci_radius_m) {
+      let p = 100000.0 * Math.exp(-nb.dist / samePciK);
+      if (nb.is_ff) p += 60000.0;
+      samePciPenalty.set(nbPci, (samePciPenalty.get(nbPci) || 0) + p);
+    }
+
+    if (nb.dist <= settings.mod3_radius_m) {
+      let p = 600.0 * Math.exp(-nb.dist / mod3K);
+      if (nb.is_ff) p += 300.0;
+      const k = nbPci % 3;
+      mod3Penalty.set(k, (mod3Penalty.get(k) || 0) + p);
+    }
+
+    if (settings.check_mod6 && nb.dist <= settings.mod6_radius_m) {
+      const p = 150.0 * Math.exp(-nb.dist / mod6K);
+      const k = nbPci % 6;
+      mod6Penalty.set(k, (mod6Penalty.get(k) || 0) + p);
+    }
+  });
+
+  return { samePciPenalty, mod3Penalty, mod6Penalty };
+}
+
+function scoreCandidate(candidate, profile, checkMod6) {
+  let score = (profile.samePciPenalty.get(candidate) || 0) +
+              (profile.mod3Penalty.get(candidate % 3) || 0);
+  if (checkMod6) score += (profile.mod6Penalty.get(candidate % 6) || 0);
+  return score;
+}
+
+function optimizePCI(cells, analysis, settings, pciPool, passes) {
+  passes = passes || 3;
+  const neighborMap = analysis.neighborMap;
+  const currentPci = new Map();
+  cells.forEach(c => currentPci.set(c.id, c.pci));
+
+  function currentPciOf(id) { return currentPci.get(id); }
+
+  const conflictCounts = new Map();
+  analysis.conflicts.forEach(c => {
+    conflictCounts.set(c.cell1.id, (conflictCounts.get(c.cell1.id) || 0) + 1);
+    conflictCounts.set(c.cell2.id, (conflictCounts.get(c.cell2.id) || 0) + 1);
+  });
+
+  const candidates = Array.from(pciPool).sort((a, b) => a - b);
+
+  for (let pass = 0; pass < passes; pass++) {
+    const ordered = cells.slice().sort((a, b) =>
+      (conflictCounts.get(b.id) || 0) - (conflictCounts.get(a.id) || 0)
+    );
+
+    let changed = false;
+
+    ordered.forEach(cell => {
+      const neighbors = neighborMap.get(cell.id) || [];
+      if (!neighbors.length) return;
+
+      const profile = conflictProfile(neighbors, currentPciOf, settings);
+      const original = currentPci.get(cell.id);
+      const currentScore = scoreCandidate(original, profile, settings.check_mod6);
+      if (currentScore === 0) return;
+
+      let bestPci = original, bestScore = currentScore;
+      for (const cand of candidates) {
+        if (cand === original) continue;
+        const s = scoreCandidate(cand, profile, settings.check_mod6);
+        if (s < bestScore) {
+          bestScore = s;
+          bestPci = cand;
+          if (bestScore === 0) break;
+        }
+      }
+
+      if (bestPci !== original) {
+        currentPci.set(cell.id, bestPci);
+        changed = true;
+      }
+    });
+
+    if (!changed) break;
+  }
+
+  cells.forEach(c => { c.suggested_pci = currentPci.get(c.id); });
+  return cells;
+}
+
+/* ---------- Main Run ---------- */
+let lastPCIResults = null;
+
+function runPCIChecker() {
+  if (!allCells.length) {
+    toast('No cells loaded. Import data first.', 'error');
+    return;
+  }
+
+  const settings = {
+    same_pci_radius_m: parseFloat(document.getElementById('pci_r_same').value) || 5000,
+    mod3_radius_m: parseFloat(document.getElementById('pci_r_mod3').value) || 1000,
+    mod6_radius_m: parseFloat(document.getElementById('pci_r_mod6').value) || 500,
+    face_to_face_radius_m: parseFloat(document.getElementById('pci_r_ff').value) || 2000,
+    same_heading_radius_m: 3000,
+    same_heading_deg: 15,
+    check_mod6: document.getElementById('pci_check_mod6').value === 'yes'
+  };
+
+  const pciMin = parseInt(document.getElementById('pci_min').value) || 0;
+  const pciMax = parseInt(document.getElementById('pci_max').value) || 503;
+
+  const pciPool = new Set();
+  for (let p = pciMin; p <= pciMax; p++) pciPool.add(p);
+
+  toast('Analyzing ' + allCells.length + ' cells...', 'info');
+
+  setTimeout(() => {
+    try {
+      const cellsCopy = allCells.map(c => Object.assign({}, c));
+      const analysis = analyzeConflicts(cellsCopy, settings);
+      const optimized = optimizePCI(cellsCopy, analysis, settings, pciPool, 3);
+
+      // Determine still-conflicted cells after optimization
+      const newPciById = new Map();
+      optimized.forEach(c => newPciById.set(c.id, c.suggested_pci));
+
+      const stillConflicted = new Set();
+      analysis.conflicts.forEach(c => {
+        const p1 = newPciById.get(c.cell1.id);
+        const p2 = newPciById.get(c.cell2.id);
+        if (c.type === 'Same PCI' && p1 === p2) {
+          stillConflicted.add(c.cell1.id);
+          stillConflicted.add(c.cell2.id);
+        } else if (c.type === 'MOD3 Conflict' && (p1 % 3) === (p2 % 3)) {
+          stillConflicted.add(c.cell1.id);
+          stillConflicted.add(c.cell2.id);
+        } else if (c.type === 'MOD6 Conflict' && (p1 % 6) === (p2 % 6)) {
+          stillConflicted.add(c.cell1.id);
+          stillConflicted.add(c.cell2.id);
+        }
+      });
+
+      lastPCIResults = {
+        cells: optimized,
+        conflicts: analysis.conflicts,
+        faceToFace: analysis.faceToFaceConflicts,
+        sameHeading: analysis.samePciSameHeading,
+        stillConflicted: stillConflicted
+      };
+
+      renderPCIResults(lastPCIResults);
+      document.getElementById('pciResults').style.display = 'block';
+      toast('✅ ' + analysis.conflicts.length + ' conflicts found', 'success');
+    } catch (e) {
+      console.error(e);
+      toast('Analysis failed: ' + e.message, 'error');
+    }
+  }, 100);
+}
+
+function renderPCIResults(result) {
+  const sameN = result.conflicts.filter(c => c.type === 'Same PCI').length;
+  const mod3N = result.conflicts.filter(c => c.type === 'MOD3 Conflict').length;
+  const mod6N = result.conflicts.filter(c => c.type === 'MOD6 Conflict').length;
+  const reassignedN = result.cells.filter(c => c.suggested_pci !== c.pci).length;
+  const unresolvedN = result.stillConflicted.size;
+
+  document.getElementById('kpi_total').textContent = result.cells.length;
+  document.getElementById('kpi_conflicts').textContent = result.conflicts.length;
+  document.getElementById('kpi_same').textContent = sameN;
+  document.getElementById('kpi_mod3').textContent = mod3N;
+  document.getElementById('kpi_mod6').textContent = mod6N;
+  document.getElementById('kpi_ff').textContent = result.faceToFace.length;
+  document.getElementById('kpi_reassigned').textContent = reassignedN;
+
+  const unresolvedEl = document.getElementById('kpi_unresolved');
+  unresolvedEl.textContent = unresolvedN;
+  const unresolvedCard = document.getElementById('kpi_unresolved_card');
+  unresolvedCard.className = 'kpi-card ' + (unresolvedN > 0 ? 'danger' : 'success');
+
+  // Conflicts table
+  const conflictBody = document.querySelector('#pciConflictsTable tbody');
+  conflictBody.innerHTML = result.conflicts.slice(0, 200).map(c =>
+    '<tr>' +
+      '<td>' + escapeHtml(c.cell1.cell_name) + '</td>' +
+      '<td>' + c.cell1.pci + '</td>' +
+      '<td><span style="padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:' +
+        (c.type === 'Same PCI' ? '#FCEAEA;color:#B91C1C' :
+         c.type === 'MOD3 Conflict' ? '#FDF1DC;color:#8A5A00' :
+         '#EAF2FB;color:#124191') + ';">' + c.type + '</span></td>' +
+      '<td>' + escapeHtml(c.cell2.cell_name) + '</td>' +
+      '<td>' + c.cell2.pci + '</td>' +
+      '<td>' + c.distance.toFixed(0) + '</td>' +
+    '</tr>'
+  ).join('') || '<tr><td colspan="6" style="text-align:center;padding:20px;color:#5A6B87;">No conflicts 🎉</td></tr>';
+
+  // Optimization table
+  const optBody = document.querySelector('#pciOptTable tbody');
+  const sorted = result.cells.slice().sort((a, b) => {
+    const aChanged = a.suggested_pci !== a.pci ? 1 : 0;
+    const bChanged = b.suggested_pci !== b.pci ? 1 : 0;
+    return bChanged - aChanged;
+  });
+
+  optBody.innerHTML = sorted.slice(0, 200).map(c => {
+    const newPci = c.suggested_pci;
+    const changed = newPci !== c.pci;
+    const unresolved = result.stillConflicted.has(c.id);
+    let statusText, statusColor, statusBg;
+    if (unresolved) { statusText = 'Unresolved'; statusColor = '#B91C1C'; statusBg = '#FCEAEA'; }
+    else if (changed) { statusText = 'Reassigned'; statusColor = '#1F9D55'; statusBg = '#E7F7EE'; }
+    else { statusText = 'Clean'; statusColor = '#5A6B87'; statusBg = '#F4F7FB'; }
+
+    return '<tr>' +
+      '<td>' + escapeHtml(c.cell_name) + '</td>' +
+      '<td>' + c.pci + '</td>' +
+      '<td style="font-weight:700;color:' + (changed ? '#124191' : '#0C1B3D') + ';">' + newPci + '</td>' +
+      '<td>' + (newPci % 3) + '</td>' +
+      '<td><span style="padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:' + statusBg + ';color:' + statusColor + ';">' + statusText + '</span></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function clearPCIResults() {
+  lastPCIResults = null;
+  document.getElementById('pciResults').style.display = 'none';
+  toast('Results cleared', 'info');
+}
+
+function exportPCIResults() {
+  if (!lastPCIResults) { toast('Run analysis first', 'error'); return; }
+
+  const rows = [['Cell Name', 'Original PCI', 'New PCI', 'MOD3 Group', 'Lat', 'Long', 'Azimuth', 'Status']];
+  lastPCIResults.cells.forEach(c => {
+    const newPci = c.suggested_pci;
+    const changed = newPci !== c.pci;
+    const unresolved = lastPCIResults.stillConflicted.has(c.id);
+    const status = unresolved ? 'Unresolved' : (changed ? 'Reassigned' : 'Clean');
+    rows.push([c.cell_name, c.pci, newPci, newPci % 3, c.lat, c.long, c.bore, status]);
+  });
+
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'PCI_Optimization_' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  toast('✅ CSV exported', 'success');
+}
+
+function showPCIOnMap() {
+  if (!lastPCIResults) { toast('Run analysis first', 'error'); return; }
+
+  switchView('map');
+
+  setTimeout(() => {
+    sectorLayer.clearLayers();
+    labelLayer.clearLayers();
+
+    lastPCIResults.cells.forEach(cell => {
+      if (!cell.lat || !cell.long) return;
+
+      let color;
+      if (lastPCIResults.stillConflicted.has(cell.id)) {
+        color = '#D64545'; // Red — unresolved
+      } else if (cell.suggested_pci !== cell.pci) {
+        color = '#1F9D55'; // Green — resolved
+      } else {
+        color = '#94A3B8'; // Gray — clean
+      }
+
+      const coords = makeSectorCoords(cell.lat, cell.long, cell.bore);
+      const polygon = L.polygon(coords, {
+        color: color,
+        weight: 1,
+        fillColor: color,
+        fillOpacity: 0.7,
+        interactive: true
+      });
+
+      polygon.bindPopup(
+        '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:220px;">' +
+          '<div style="font-weight:700;font-size:14px;font-family:monospace;margin-bottom:6px;">' + escapeHtml(cell.cell_name) + '</div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">Original PCI:</span><b>' + cell.pci + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">New PCI:</span><b style="color:' + (cell.suggested_pci !== cell.pci ? '#1F9D55' : '#0C1B3D') + ';">' + cell.suggested_pci + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">Status:</span><b>' + (lastPCIResults.stillConflicted.has(cell.id) ? 'Unresolved' : (cell.suggested_pci !== cell.pci ? 'Reassigned' : 'Clean')) + '</b></div>' +
+        '</div>'
+      );
+
+      sectorLayer.addLayer(polygon);
+    });
+
+    fitAllCells();
+    toast('Showing PCI results on map', 'success');
+  }, 300);
+}
+
+/* =========================================================
+   READY
+   ========================================================= */
+console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
+console.log('%cTools: PCI Checker · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
 </script>
 
 </body>
-</html>
-  
+</html>     
+      
