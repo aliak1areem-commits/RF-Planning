@@ -1283,13 +1283,13 @@ function renderMap() {
       const sectorCoords = makeSectorCoords(cell.lat, cell.long, cell.bore, cell.radius, 120);
 
       const polygon = L.polygon(sectorCoords, {
-        color: cell.color,
-        weight: 1.5,
-        opacity: 0.9,
-        fillColor: cell.color,
-        fillOpacity: 0.35,
-        interactive: true
-      });
+  color: cell.color,
+  weight: 1,
+  opacity: 1,
+  fillColor: cell.color,
+  fillOpacity: 0.65,
+  interactive: true
+});
 
       polygon.bindPopup(makePopupContent(cell), { maxWidth: 340 });
 
@@ -1305,8 +1305,8 @@ function renderMap() {
     }
 
     // ============ 2. LABEL ============
-    if (showLabels) {
-      const label = L.marker(center, {
+   if (showLabels && map.getZoom() >= 14) {
+  const label = L.marker(center, {
         icon: L.divIcon({
           className: 'cell-label',
           html: '<div style="background:' + cell.color + ';color:#fff;padding:2px 7px;border-radius:10px;font-family:\'JetBrains Mono\',monospace;font-size:9.5px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3);border:1.5px solid #fff;">' + cell.cell_name + '</div>',
@@ -1342,18 +1342,23 @@ function renderMap() {
 /* =========================================================
    MAKE SECTOR COORDINATES (120° Triangle)
    ========================================================= */
-function makeSectorCoords(lat, lng, azimuth, radiusM, beamWidth) {
+function makeSectorCoords(lat, lng, azimuth, radiusM, beamWidth){
+  // ⭐ Sector صغير احترافي — ثابت بصرياً
+  const visualRadius = 350; // متر — حجم عرض Sector
   const halfBeam = beamWidth / 2;
-
-  const point1 = destinationPoint(lat, lng, azimuth - halfBeam, radiusM);
-  const point2 = destinationPoint(lat, lng, azimuth + halfBeam, radiusM);
-
-  return [
-    [lat, lng],
-    point1,
-    point2,
-    [lat, lng]
-  ];
+  
+  const point1 = destinationPoint(lat, lng, azimuth - halfBeam, visualRadius);
+  const point2 = destinationPoint(lat, lng, azimuth + halfBeam, visualRadius);
+  
+  // ⭐ شكل منحني (Curved Sector) مثل الأدوات الاحترافية
+  const arcPoints = [];
+  const steps = 8;
+  for(let i = 0; i <= steps; i++){
+    const angle = azimuth - halfBeam + (beamWidth * i / steps);
+    arcPoints.push(destinationPoint(lat, lng, angle, visualRadius));
+  }
+  
+  return [[lat, lng], ...arcPoints, [lat, lng]];
 }
 
 /* =========================================================
