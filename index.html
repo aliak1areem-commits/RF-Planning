@@ -1,371 +1,833 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl"><head>
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RF Planning Pro | MFC</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<meta name="description" content="RF Planning Professional Tool - LTE Cell Management & Visualization">
+
+<!-- ============ EXTERNAL LIBRARIES ============ -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- ============ FONTS ============ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{
-  font-family:'Cairo', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background:#F4F7FB;
-  color:#1B1F2A;
-  display:grid;
-  grid-template-columns:250px 1fr;
-  min-height:100vh;
+/* =========================================================
+   RESET & BASE
+   ========================================================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
-::-webkit-scrollbar{width:10px;height:10px;}
-::-webkit-scrollbar-thumb{background:#C9D4E4;border-radius:6px;}
-::-webkit-scrollbar-thumb:hover{background:#A9B9D4;}
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #0A1628;
+  color: #1B1F2A;
+  -webkit-font-smoothing: antialiased;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #3A4A6A;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #5A6B87;
+}
 
-/* ============ SIDEBAR ============ */
-.sidebar{
-  background:linear-gradient(180deg, #0C1B3D 0%, #142A5C 100%);
-  color:#fff;
-  padding:24px 16px;
-  display:flex;
-  flex-direction:column;
-  gap:24px;
-  height:100vh;
-  position:sticky;
-  top:0;
-  overflow-y:auto;
+/* =========================================================
+   APP LAYOUT
+   ========================================================= */
+.app {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  height: 100vh;
+  overflow: hidden;
 }
-.brand{display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.1);}
-.brand-mark{
-  width:42px;height:42px;border-radius:10px;
-  background:linear-gradient(135deg,#00A1E0,#124191);
-  display:flex;align-items:center;justify-content:center;
-  font-weight:700;font-size:15px;color:#fff;
-}
-.brand-text h1{font-size:15px;margin:0;font-weight:700;}
-.brand-text span{font-size:10.5px;color:#AEB9D4;letter-spacing:.5px;}
-.nav{display:flex;flex-direction:column;gap:4px;}
-.nav-item{
-  display:flex;align-items:center;gap:12px;
-  padding:11px 14px;border-radius:8px;
-  cursor:pointer;color:#AEB9D4;
-  font-size:13.5px;font-weight:500;
-  transition:all .15s;
-  border:none;background:none;text-align:left;width:100%;
-}
-.nav-item:hover{background:rgba(255,255,255,.06);color:#fff;}
-.nav-item.active{background:rgba(0,161,224,.16);color:#fff;font-weight:600;}
-.nav-item.disabled{opacity:.4;cursor:not-allowed;}
-.nav-item.disabled:hover{background:none;color:#AEB9D4;}
-.sidebar-footer{margin-top:auto;font-size:11px;color:#AEB9D4;line-height:1.6;padding-top:16px;border-top:1px solid rgba(255,255,255,.1);}
 
-/* ============ MAIN ============ */
-.main{padding:28px 34px 60px;overflow-x:hidden;}
-.topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;flex-wrap:wrap;gap:14px;}
-.topbar h2{font-size:24px;color:#0C1B3D;margin:0 0 4px;font-weight:700;}
-.topbar p{color:#5A6B87;font-size:13.5px;margin:0;}
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+.sidebar {
+  background: linear-gradient(180deg, #0C1B3D 0%, #142A5C 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 1000;
+}
+.sidebar-brand {
+  padding: 20px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.sidebar-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #00A1E0, #124191);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 14px;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 6px 18px rgba(0,161,224,.35);
+}
+.sidebar-brand-text h1 {
+  font-size: 14px;
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+.sidebar-brand-text span {
+  font-size: 10px;
+  color: #AEB9D4;
+  letter-spacing: 1.2px;
+}
+.sidebar-nav {
+  padding: 14px 10px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #AEB9D4;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all .15s;
+  border: none;
+  background: none;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+}
+.nav-item:hover {
+  background: rgba(255,255,255,.06);
+  color: #fff;
+}
+.nav-item.active {
+  background: rgba(0,161,224,.16);
+  color: #fff;
+  font-weight: 600;
+}
+.nav-item .icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+.nav-item .badge {
+  margin-left: auto;
+  background: rgba(0,161,224,.2);
+  color: #00A1E0;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.sidebar-footer {
+  padding: 14px 18px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  font-size: 10.5px;
+  color: #AEB9D4;
+  line-height: 1.6;
+}
 
-/* ============ CARDS ============ */
-.card{
-  background:#fff;border-radius:12px;
-  box-shadow:0 4px 18px rgba(12,27,61,.06);
-  padding:22px 24px;margin-bottom:20px;
-  border:1px solid #E9EEF6;
+/* =========================================================
+   MAIN CONTENT
+   ========================================================= */
+.main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #F4F7FB;
 }
-.card h3{font-size:17px;color:#0C1B3D;margin:0 0 14px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.card .hint{color:#5A6B87;font-size:12.5px;margin:0 0 16px;line-height:1.6;}
 
-/* ============ BUTTONS ============ */
-button{
-  font-family:inherit;cursor:pointer;border:none;
-  border-radius:8px;font-size:13px;padding:9px 16px;
-  font-weight:600;transition:all .15s;
+/* =========================================================
+   TOPBAR
+   ========================================================= */
+.topbar {
+  height: 56px;
+  background: #fff;
+  border-bottom: 1px solid #E9EEF6;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(12,27,61,.04);
 }
-button:active{transform:scale(0.97);}
-.btn-primary{background:#124191;color:#fff;}
-.btn-primary:hover{background:#0e336f;}
-.btn-secondary{background:#EAF2FB;color:#124191;}
-.btn-secondary:hover{background:#DCEBFB;}
-.btn-ghost{background:transparent;color:#5A6B87;border:1px solid #D7DEEA;}
-.btn-ghost:hover{background:#EEF2F8;}
-.btn-danger{background:#FCEAEA;color:#D64545;}
-.btn-danger:hover{background:#f8d6d6;}
-.btn-gold{background:#F2A900;color:#0C1B3D;}
-.btn-gold:hover{background:#d99500;}
-button:disabled{opacity:.5;cursor:not-allowed;}
+.topbar-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0C1B3D;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.topbar-title .subtitle {
+  font-size: 12px;
+  color: #5A6B87;
+  font-weight: 500;
+}
+.topbar-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
 
-/* ============ DROP ZONE ============ */
-.drop-zone{
-  border:2px dashed #C9D4E4;border-radius:12px;
-  padding:48px 20px;text-align:center;
-  background:#FBFCFE;cursor:pointer;
-  transition:all .2s;
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 15px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all .15s;
+  font-family: inherit;
+  white-space: nowrap;
 }
-.drop-zone:hover, .drop-zone.drag{border-color:#00A1E0;background:#EAF2FB;}
-.drop-zone .icon{font-size:48px;margin-bottom:12px;}
-.drop-zone .txt{font-weight:700;font-size:15px;color:#0C1B3D;margin-bottom:6px;}
-.drop-zone .hint{font-size:12.5px;color:#5A6B87;}
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-primary { background: #124191; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #0e336f; }
+.btn-secondary { background: #EAF2FB; color: #124191; }
+.btn-secondary:hover:not(:disabled) { background: #DCEBFB; }
+.btn-ghost { background: #fff; color: #5A6B87; border-color: #D7DEEA; }
+.btn-ghost:hover:not(:disabled) { background: #F4F7FB; color: #124191; }
+.btn-gold { background: #F2A900; color: #fff; }
+.btn-gold:hover:not(:disabled) { background: #d99500; }
+.btn-danger { background: #FCEAEA; color: #D64545; }
+.btn-danger:hover:not(:disabled) { background: #f8d6d6; }
+.btn-icon { padding: 8px; width: 38px; height: 38px; justify-content: center; }
 
-/* ============ STATS ============ */
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;}
-.stat{background:#EAF2FB;border-radius:10px;padding:16px;}
-.stat .n{font-family:monospace;font-size:22px;font-weight:700;color:#0C1B3D;}
-.stat .l{font-size:11.5px;color:#5A6B87;margin-top:4px;}
+/* =========================================================
+   STATS BAR
+   ========================================================= */
+.stats-bar {
+  display: flex;
+  gap: 16px;
+  padding: 10px 24px;
+  background: #fff;
+  border-bottom: 1px solid #E9EEF6;
+  font-size: 12px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.stats-bar-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #5A6B87;
+}
+.stats-bar-item b {
+  font-family: 'JetBrains Mono', monospace;
+  color: #0C1B3D;
+  font-weight: 700;
+  font-size: 13px;
+}
 
-/* ============ TABLE ============ */
-.table-wrap{
-  background:#fff;border-radius:12px;
-  box-shadow:0 4px 18px rgba(12,27,61,.06);
-  border:1px solid #E9EEF6;
-  overflow:hidden;
+/* =========================================================
+   PAGES
+   ========================================================= */
+.page {
+  display: none;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
 }
-.table-toolbar{
-  display:flex;gap:10px;padding:14px 18px;
-  border-bottom:1px solid #E9EEF6;
-  background:#FBFCFE;
-  flex-wrap:wrap;align-items:center;
+.page.active {
+  display: flex;
+  flex-direction: column;
 }
-.table-toolbar input{
-  padding:9px 14px;border:1.5px solid #D7DEEA;border-radius:8px;
-  font-size:13px;font-family:inherit;min-width:220px;
-}
-.table-toolbar input:focus{outline:none;border-color:#00A1E0;}
-.table-toolbar select{
-  padding:9px 14px;border:1.5px solid #D7DEEA;border-radius:8px;
-  font-size:13px;font-family:inherit;background:#fff;cursor:pointer;
-}
-.table-toolbar .count{margin-left:auto;font-size:12.5px;color:#5A6B87;font-weight:600;}
-.table-scroll{overflow:auto;max-height:65vh;}
-table{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap;}
-thead th{
-  position:sticky;top:0;background:#EAF2FB;color:#124191;
-  text-align:left;font-weight:700;font-size:11px;
-  padding:11px 12px;border-bottom:1px solid #D7DEEA;
-  text-transform:uppercase;letter-spacing:.4px;
-  cursor:pointer;user-select:none;
-}
-thead th:hover{background:#DCEBFB;}
-tbody td{padding:10px 12px;border-bottom:1px solid #F0F3F9;font-family:monospace;}
-tbody tr:hover td{background:#F9FBFE;}
-tbody tr:nth-child(even) td{background:#FBFCFE;}
-tbody tr:nth-child(even):hover td{background:#F0F6FC;}
-.badge{
-  display:inline-block;padding:3px 9px;border-radius:20px;
-  font-size:11px;font-weight:700;font-family:inherit;
-}
-.badge-band{background:#EAF2FB;color:#124191;}
-.badge-site{background:#FDF1DC;color:#8A5A00;}
 
-.pagination{
-  display:flex;align-items:center;justify-content:center;
-  gap:8px;padding:14px;
-  border-top:1px solid #E9EEF6;background:#FBFCFE;
+/* =========================================================
+   MAP CONTAINER
+   ========================================================= */
+.map-container {
+  display: flex;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
 }
-.pagination button{padding:6px 12px;font-size:12.5px;}
-.pagination .info{font-size:12.5px;color:#5A6B87;font-weight:600;}
-
-/* ============ TOAST ============ */
-.toast{
-  position:fixed;bottom:24px;right:24px;z-index:999;
-  padding:14px 20px;border-radius:10px;
-  background:#0C1B3D;color:#fff;font-size:13.5px;font-weight:600;
-  box-shadow:0 8px 24px rgba(0,0,0,.25);
-  transform:translateY(80px);opacity:0;
-  transition:all .3s;
-  max-width:400px;
+.map-sidebar {
+  width: 300px;
+  background: #fff;
+  border-right: 1px solid #E9EEF6;
+  overflow-y: auto;
+  flex-shrink: 0;
+  padding: 18px 16px;
 }
-.toast.show{transform:translateY(0);opacity:1;}
-.toast.success{background:#1F9D55;}
-.toast.error{background:#D64545;}
-.toast.info{background:#124191;}
-
-/* ============ LOADER ============ */
-.loader{
-  display:inline-block;width:14px;height:14px;
-  border:2px solid rgba(255,255,255,.3);
-  border-top-color:#fff;border-radius:50%;
-  animation:spin .6s linear infinite;
-  margin-right:6px;vertical-align:middle;
+.map-sidebar h3 {
+  font-size: 12px;
+  color: #0C1B3D;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-@keyframes spin{to{transform:rotate(360deg);}}
-
-/* ============ EMPTY ============ */
-.empty{
-  padding:80px 20px;text-align:center;color:#5A6B87;
+.map-sidebar h3::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #E9EEF6;
 }
-.empty .icon{font-size:56px;opacity:.4;margin-bottom:14px;}
-.empty h3{font-size:16px;color:#0C1B3D;margin-bottom:8px;}
-.empty p{font-size:13px;}
+.filter-group {
+  margin-bottom: 20px;
+}
+.filter-search {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid #D7DEEA;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: all .15s;
+}
+.filter-search:focus {
+  border-color: #00A1E0;
+  box-shadow: 0 0 0 3px rgba(0,161,224,.1);
+}
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background .15s;
+  user-select: none;
+}
+.filter-checkbox:hover {
+  background: #F4F7FB;
+}
+.filter-checkbox input {
+  width: 16px;
+  height: 16px;
+  accent-color: #124191;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.filter-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(0,0,0,.1);
+}
+.filter-count {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #5A6B87;
+  font-weight: 600;
+}
 
-/* ============ PAGE ============ */
-.page{display:none;}
-.page.active{display:block;animation:fadeIn .3s;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+#map {
+  flex: 1;
+  z-index: 1;
+  background: #0A1628;
+}
+/* =========================================================
+   LEGEND
+   ========================================================= */
+.legend {
+  position: absolute;
+  bottom: 20px;
+  left: 320px;
+  background: rgba(255,255,255,.98);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.15);
+  z-index: 500;
+  font-size: 11.5px;
+  max-width: 220px;
+}
+.legend-title {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #0C1B3D;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  margin-bottom: 8px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,.15);
+}
 
-@media (max-width:900px){
-  body{grid-template-columns:1fr;}
-  .sidebar{height:auto;position:relative;padding:16px;}
-  .nav{flex-direction:row;overflow-x:auto;}
-  .nav-item{white-space:nowrap;}
-  .main{padding:18px;}
+/* =========================================================
+   BASEMAP SWITCHER
+   ========================================================= */
+.basemap-switcher {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 500;
+  background: rgba(255,255,255,.98);
+  border-radius: 10px;
+  padding: 4px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.15);
+  display: flex;
+  gap: 2px;
+}
+.basemap-btn {
+  padding: 7px 12px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #5A6B87;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: inherit;
+}
+.basemap-btn:hover {
+  background: #F4F7FB;
+  color: #124191;
+}
+.basemap-btn.active {
+  background: #124191;
+  color: #fff;
+}
+
+/* =========================================================
+   LEAFLET POPUP
+   ========================================================= */
+.leaflet-popup-content-wrapper {
+  border-radius: 10px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,.2);
+}
+.leaflet-popup-content {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  min-width: 280px;
+}
+.leaflet-popup-tip {
+  background: #fff;
+}
+.cell-popup {
+  padding: 0;
+}
+.cell-popup-header {
+  padding: 12px 16px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cell-popup-header .name {
+  font-weight: 700;
+  font-size: 14px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.cell-popup-header .sector {
+  margin-left: auto;
+  background: rgba(255,255,255,.2);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.cell-popup-body {
+  padding: 12px 16px;
+}
+.cell-popup-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid #F0F3F9;
+  font-size: 12px;
+}
+.cell-popup-row:last-child {
+  border-bottom: none;
+}
+.cell-popup-row .k {
+  color: #5A6B87;
+  font-weight: 500;
+}
+.cell-popup-row .v {
+  color: #0C1B3D;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+.cell-popup-footer {
+  padding: 10px 16px;
+  background: #FBFCFE;
+  border-top: 1px solid #F0F3F9;
+  display: flex;
+  gap: 8px;
+}
+.cell-popup-footer a {
+  flex: 1;
+  text-align: center;
+  padding: 7px;
+  background: #124191;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background .15s;
+}
+.cell-popup-footer a:hover {
+  background: #0e336f;
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  padding: 12px 20px;
+  border-radius: 10px;
+  background: #0C1B3D;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0,0,0,.3);
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all .3s;
+  max-width: 400px;
+}
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+.toast.success { background: #1F9D55; }
+.toast.error { background: #D64545; }
+.toast.info { background: #124191; }
+
+/* =========================================================
+   LOADER
+   ========================================================= */
+.loader {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  vertical-align: middle;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* =========================================================
+   LOADING OVERLAY
+   ========================================================= */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 800;
+  gap: 16px;
+}
+.loading-overlay .spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #E9EEF6;
+  border-top-color: #124191;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+.loading-overlay .text {
+  font-size: 13px;
+  color: #5A6B87;
+  font-weight: 600;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 900px) {
+  .app {
+    grid-template-columns: 60px 1fr;
+  }
+  .sidebar-brand-text,
+  .nav-item span:not(.icon),
+  .sidebar-footer {
+    display: none;
+  }
+  .nav-item {
+    justify-content: center;
+    padding: 12px;
+  }
+  .map-sidebar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 600;
+    transform: translateX(-100%);
+    transition: transform .3s;
+  }
+  .map-sidebar.open {
+    transform: translateX(0);
+  }
+  .legend {
+    left: 16px;
+  }
 }
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <div class="brand">
-    <div class="brand-mark">RF</div>
-    <div class="brand-text">
-      <h1>RF Planning Pro</h1>
-      <span>MFC · LTE OPTIMIZATION</span>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">RF</div>
+      <div class="sidebar-brand-text">
+        <h1>RF Planning Pro</h1>
+        <span>MFC · LTE OPTIMIZATION</span>
+      </div>
     </div>
-  </div>
-  <nav class="nav">
-    <button class="nav-item active" data-page="dashboard">🏠 Dashboard</button>
-    <button class="nav-item" data-page="import">📥 Import</button>
-    <button class="nav-item" data-page="cells">📋 Cells Database</button>
-    <button class="nav-item disabled" title="Coming soon">🗺️ Map</button>
-    <button class="nav-item disabled" title="Coming soon">🧮 PCI Checker</button>
-    <button class="nav-item disabled" title="Coming soon">📐 Tools</button>
-  </nav>
-  <div class="sidebar-footer">
-    v1.0 · Built for Ali Amer<br>
-    © 2026 MFC
-  </div>
-</aside>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-page="map">
+        <span class="icon">🗺️</span><span>Map</span>
+      </button>
+      <button class="nav-item" data-page="dashboard">
+        <span class="icon">📊</span><span>Dashboard</span>
+      </button>
+      <button class="nav-item" data-page="import">
+        <span class="icon">📥</span><span>Import</span>
+      </button>
+      <button class="nav-item" data-page="cells">
+        <span class="icon">📋</span><span>Cells</span>
+        <span class="badge" id="navCellsCount">0</span>
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      v1.0 · Built for Ali Amer<br>
+      © 2026 MFC
+    </div>
+  </aside>
 
-<!-- MAIN -->
-<main class="main">
+  <!-- ============ MAIN ============ -->
+  <main class="main">
 
-  <!-- PAGE: DASHBOARD -->
-  <section class="page active" id="page-dashboard">
+    <!-- ============ TOPBAR ============ -->
     <div class="topbar">
-      <div>
-        <h2>Dashboard</h2>
-        <p>نظرة سريعة على بيانات RF Planning</p>
+      <div class="topbar-title">
+        <span id="pageIcon">🗺️</span>
+        <span id="pageTitle">Cell Map</span>
+        <span class="subtitle" id="pageSubtitle">Visualize LTE cells on the map</span>
       </div>
-      <button class="btn-secondary" onclick="loadStats()">🔄 تحديث</button>
-    </div>
-
-    <div class="stat-grid" id="statsGrid">
-      <div class="stat"><div class="n">—</div><div class="l">Total Cells</div></div>
-      <div class="stat"><div class="n">—</div><div class="l">Total Sites</div></div>
-      <div class="stat"><div class="n">—</div><div class="l">Bands</div></div>
-      <div class="stat"><div class="n">—</div><div class="l">PCI Conflicts</div></div>
-    </div>
-
-    <div class="card">
-      <h3>📊 توزيع الخلايا حسب Band</h3>
-      <div id="bandChart">جاري التحميل...</div>
-    </div>
-  </section>
-
-  <!-- PAGE: IMPORT -->
-  <section class="page" id="page-import">
-    <div class="topbar">
-      <div>
-        <h2>Import Cells</h2>
-        <p>اسحب ملف Excel أو CSV، أو الصق البيانات مباشرة</p>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost" onclick="loadCells()">
+          <span>🔄</span><span>Refresh</span>
+        </button>
       </div>
     </div>
 
-    <div class="card">
-      <h3>📥 استيراد من ملف</h3>
-      <p class="hint">الصق بيانات Excel مباشرة (Ctrl+V) أو اختر ملف. الأعمدة المطلوبة: <b>Cell Name, Cell ID, Physical cell ID, Root sequence index, Cell radius(m), Lat, Long, Bore</b></p>
-      <div class="drop-zone" id="dropZone">
-        <div class="icon">📄</div>
-        <div class="txt">اسحب ملف Excel/CSV هنا أو اضغط للاختيار</div>
-        <div class="hint">يدعم: .xlsx, .xls, .csv</div>
-      </div>
-      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;">
-      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn-ghost" onclick="document.getElementById('fileInput').click()">📁 اختيار ملف</button>
-        <button class="btn-ghost" onclick="pasteFromClipboard()">📋 لصق من الحافظة</button>
-        <button class="btn-ghost" onclick="clearPreview()">🗑️ مسح</button>
-      </div>
+    <!-- ============ STATS BAR ============ -->
+    <div class="stats-bar">
+      <div class="stats-bar-item">📡 <b id="statTotal">0</b> Cells</div>
+      <div class="stats-bar-item">📍 <b id="statSites">0</b> Sites</div>
+      <div class="stats-bar-item">🌐 <b id="statBands">0</b> Bands</div>
+      <div class="stats-bar-item">⚠️ <b id="statPCI">0</b> PCI Conflicts</div>
+      <div class="stats-bar-item" style="margin-left:auto;">🎯 Visible: <b id="statVisible">0</b></div>
     </div>
 
-    <div class="card" id="previewCard" style="display:none;">
-      <h3>👁️ معاينة البيانات</h3>
-      <div class="stat-grid" id="previewStats"></div>
-      <div class="table-scroll" style="max-height:400px;">
-        <table id="previewTable">
-          <thead></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">
-        <button class="btn-danger" onclick="clearPreview()">إلغاء</button>
-        <button class="btn-gold" id="saveBtn" onclick="saveToSupabase()">💾 حفظ في Supabase</button>
-      </div>
-    </div>
-  </section>
+    <!-- ============ PAGE: MAP ============ -->
+    <section class="page active" id="page-map">
+      <div class="map-container">
 
-  <!-- PAGE: CELLS -->
-  <section class="page" id="page-cells">
-    <div class="topbar">
-      <div>
-        <h2>Cells Database</h2>
-        <p>عرض وإدارة كل الخلايا</p>
-      </div>
-      <div style="display:flex;gap:10px;">
-        <button class="btn-ghost" onclick="exportCells()">📤 تصدير Excel</button>
-        <button class="btn-secondary" onclick="loadCells()">🔄 تحديث</button>
-      </div>
-    </div>
+        <!-- Map Sidebar (Filters) -->
+        <div class="map-sidebar" id="mapSidebar">
+          <h3>Search</h3>
+          <div class="filter-group">
+            <input type="text" class="filter-search" id="searchFilter" placeholder="🔍 Cell name, site, PCI..." oninput="applyFilters()">
+          </div>
 
-    <div class="table-wrap">
-      <div class="table-toolbar">
-        <input type="text" id="searchInput" placeholder="🔍 بحث بالاسم، الموقع، PCI..." oninput="renderCells()">
-        <select id="bandFilter" onchange="renderCells()">
-          <option value="">كل الـ Bands</option>
-          <option value="LAN">LAN</option>
-          <option value="LBG">LBG</option>
-          <option value="LCW">LCW</option>
-          <option value="LSA">LSA</option>
-        </select>
-        <select id="vendorFilter" onchange="renderCells()">
-          <option value="">كل الـ Vendors</option>
-          <option value="Huawei">Huawei</option>
-          <option value="Nokia">Nokia</option>
-        </select>
-        <span class="count" id="rowCount">0 cells</span>
+          <h3>Filter by Band</h3>
+          <div class="filter-group" id="bandFilters"></div>
+
+          <h3>Filter by PCI</h3>
+          <div class="filter-group">
+            <input type="text" class="filter-search" id="pciFilter" placeholder="PCI number..." oninput="applyFilters()">
+          </div>
+
+          <h3>Display Options</h3>
+          <div class="filter-group">
+            <label class="filter-checkbox">
+              <input type="checkbox" id="showSectors" checked onchange="toggleLayer('sectors')">
+              <span>Show Sectors</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" id="showLabels" checked onchange="toggleLayer('labels')">
+              <span>Show Labels</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" id="showCoverage" onchange="toggleLayer('coverage')">
+              <span>Show Coverage Radius</span>
+            </label>
+          </div>
+
+          <h3>Actions</h3>
+          <div class="filter-group">
+            <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="fitAllCells()">
+              🎯 Fit to View
+            </button>
+            <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="clearFilters()">
+              🗑️ Clear Filters
+            </button>
+          </div>
+        </div>
+
+        <!-- Map -->
+        <div id="map"></div>
+
+        <!-- Basemap Switcher -->
+        <div class="basemap-switcher">
+          <button class="basemap-btn active" data-basemap="street">Street</button>
+          <button class="basemap-btn" data-basemap="satellite">Satellite</button>
+          <button class="basemap-btn" data-basemap="terrain">Terrain</button>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend" id="legend">
+          <div class="legend-title">Band Legend</div>
+          <div id="legendItems"></div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading-overlay" id="loadingOverlay">
+          <div class="spinner"></div>
+          <div class="text">Loading cells from Supabase...</div>
+        </div>
+
       </div>
-      <div class="table-scroll">
-        <table id="cellsTable">
-          <thead>
-            <tr>
-              <th onclick="sortCells('cell_name')">Cell Name ⇅</th>
-              <th onclick="sortCells('cell_id')">Cell ID ⇅</th>
-              <th onclick="sortCells('pci')">PCI ⇅</th>
-              <th onclick="sortCells('rsi')">RSI ⇅</th>
-              <th onclick="sortCells('cell_radius')">Radius (m) ⇅</th>
-              <th onclick="sortCells('lat')">Lat ⇅</th>
-              <th onclick="sortCells('long')">Long ⇅</th>
-              <th onclick="sortCells('bore')">Bore ⇅</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="cellsBody"></tbody>
-        </table>
+    </section>
+
+    <!-- ============ PAGE: DASHBOARD ============ -->
+    <section class="page" id="page-dashboard">
+      <div style="padding:24px;overflow-y:auto;flex:1;">
+        <div style="background:#fff;border-radius:12px;padding:32px;text-align:center;color:#5A6B87;">
+          <div style="font-size:56px;margin-bottom:16px;">📊</div>
+          <h3 style="color:#0C1B3D;margin-bottom:8px;">Dashboard</h3>
+          <p>Coming soon...</p>
+        </div>
       </div>
-      <div class="pagination" id="pagination"></div>
-    </div>
-  </section>
+    </section>
 
-</main>
+    <!-- ============ PAGE: IMPORT ============ -->
+    <section class="page" id="page-import">
+      <div style="padding:24px;overflow-y:auto;flex:1;">
+        <div style="background:#fff;border-radius:12px;padding:32px;text-align:center;color:#5A6B87;">
+          <div style="font-size:56px;margin-bottom:16px;">📥</div>
+          <h3 style="color:#0C1B3D;margin-bottom:8px;">Import Cells</h3>
+          <p>Coming soon...</p>
+        </div>
+      </div>
+    </section>
 
-<div class="toast" id="toast"></div>
+    <!-- ============ PAGE: CELLS ============ -->
+    <section class="page" id="page-cells">
+      <div style="padding:24px;overflow-y:auto;flex:1;">
+        <div style="background:#fff;border-radius:12px;padding:32px;text-align:center;color:#5A6B87;">
+          <div style="font-size:56px;margin-bottom:16px;">📋</div>
+          <h3 style="color:#0C1B3D;margin-bottom:8px;">Cells Database</h3>
+          <p>Coming soon...</p>
+        </div>
+      </div>
+    </section>
 
-<script>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>  
+  <script>
 /* =========================================================
-   CONFIG — استبدل هذه القيم بمعلوماتك
+   CONFIG — Supabase
    ========================================================= */
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';   // ← استبدل هذا
-const SUPABASE_KEY = 'YOUR_SUPABASE_KEY';   // ← استبدل هذا
+const SUPABASE_URL = 'https://lwmymnxwrvoxnkixjts.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_HAf79ZGumF-BKQhnJoW9ZQ_5V2ubxqT';
 
 /* =========================================================
-   INIT SUPABASE
+   BAND COLORS — Professional LTE Palette
+   ========================================================= */
+const BAND_COLORS = {
+  'LAN':     '#124191',  // Dark Blue
+  'LBG':     '#1F9D55',  // Green
+  'LCW':     '#D64545',  // Red
+  'LSA':     '#F2A900',  // Orange
+  'UCW':     '#8A5A00',  // Brown
+  'LSA26':   '#8B5CF6',  // Purple
+  'LNB':     '#0891B2',  // Cyan
+  'LNC':     '#DB2777',  // Pink
+  'DEFAULT': '#6B7FA0'   // Gray
+};
+
+/* =========================================================
+   SUPABASE INIT
    ========================================================= */
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -373,393 +835,496 @@ const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 /* =========================================================
    STATE
    ========================================================= */
+let map = null;
 let allCells = [];
-let filteredCells = [];
-let previewData = [];
-let currentPage = 1;
-const PAGE_SIZE = 100;
-let sortCol = 'cell_name';
-let sortDir = 1;
+let visibleCells = [];
+let sectorLayer = null;
+let labelLayer = null;
+let coverageLayer = null;
+let basemaps = {};
 
 /* =========================================================
-   TOAST
+   TOAST NOTIFICATION
    ========================================================= */
-function toast(msg, type = 'info', duration = 3000){
+function toast(msg, type, duration) {
+  type = type || 'info';
+  duration = duration || 3000;
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.className = 'toast show ' + type;
-  setTimeout(() => el.className = 'toast ' + type, duration);
+  clearTimeout(el._t);
+  el._t = setTimeout(function() {
+    el.className = 'toast ' + type;
+  }, duration);
 }
 
 /* =========================================================
-   NAVIGATION
+   PAGE NAVIGATION
    ========================================================= */
-document.querySelectorAll('.nav-item:not(.disabled)').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+const PAGE_TITLES = {
+  map:       { icon: '🗺️', title: 'Cell Map',       sub: 'Visualize LTE cells on the map' },
+  dashboard: { icon: '📊', title: 'Dashboard',      sub: 'Overview and statistics' },
+  import:    { icon: '📥', title: 'Import',         sub: 'Import cells from Excel' },
+  cells:     { icon: '📋', title: 'Cells Database', sub: 'Manage all cells' }
+};
+
+document.querySelectorAll('.nav-item').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    const page = btn.dataset.page;
+
+    document.querySelectorAll('.nav-item').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    document.querySelectorAll('.page').forEach(function(p) {
+      p.classList.remove('active');
+    });
+
     btn.classList.add('active');
-    document.getElementById('page-' + btn.dataset.page).classList.add('active');
-    
-    if(btn.dataset.page === 'cells') loadCells();
-    if(btn.dataset.page === 'dashboard') loadStats();
+    document.getElementById('page-' + page).classList.add('active');
+
+    document.getElementById('pageIcon').textContent = PAGE_TITLES[page].icon;
+    document.getElementById('pageTitle').textContent = PAGE_TITLES[page].title;
+    document.getElementById('pageSubtitle').textContent = PAGE_TITLES[page].sub;
+
+    if (page === 'map' && map) {
+      setTimeout(function() {
+        map.invalidateSize();
+      }, 100);
+    }
   });
 });
 
 /* =========================================================
-   STATS
+   MAP INITIALIZATION
    ========================================================= */
-async function loadStats(){
-  try{
-    const { count, error } = await db.from('rf_cells').select('*', { count: 'exact', head: true });
-    if(error) throw error;
-    
-    document.querySelectorAll('#statsGrid .stat')[0].querySelector('.n').textContent = count || 0;
-    
-    // جلب كل البيانات لحساب الإحصائيات
-    const { data, error: e2 } = await db.from('rf_cells').select('cell_name, pci');
-    if(e2) throw e2;
-    
-    const sites = new Set(data.map(r => r.cell_name.replace(/[A-Z]$/, '')));
-    const bands = new Set(data.map(r => r.cell_name.match(/^[A-Z]+/)?.[0]).filter(Boolean));
-    
-    // PCI Conflicts
-    const pciCount = {};
-    data.forEach(r => { pciCount[r.pci] = (pciCount[r.pci] || 0) + 1; });
-    const conflicts = Object.values(pciCount).filter(c => c > 1).length;
-    
-    document.querySelectorAll('#statsGrid .stat')[1].querySelector('.n').textContent = sites.size;
-    document.querySelectorAll('#statsGrid .stat')[2].querySelector('.n').textContent = bands.size;
-    document.querySelectorAll('#statsGrid .stat')[3].querySelector('.n').textContent = conflicts;
-    
-    // Band distribution
-    const bandCount = {};
-    data.forEach(r => {
-      const b = r.cell_name.match(/^[A-Z]+/)?.[0] || 'Unknown';
-      bandCount[b] = (bandCount[b] || 0) + 1;
+function initMap() {
+  map = L.map('map', {
+    center: [33.3, 44.4],
+    zoom: 8,
+    zoomControl: true,
+    preferCanvas: true
+  });
+
+  // Basemaps
+  basemaps.street = L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    { maxZoom: 19, attribution: '© OpenStreetMap' }
+  );
+
+  basemaps.satellite = L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    { maxZoom: 19, attribution: '© Esri' }
+  );
+
+  basemaps.terrain = L.tileLayer(
+    'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    { maxZoom: 17, attribution: '© OpenTopoMap' }
+  );
+
+  // Default basemap
+  basemaps.street.addTo(map);
+
+  // Layer groups
+  sectorLayer = L.layerGroup().addTo(map);
+  labelLayer = L.layerGroup().addTo(map);
+  coverageLayer = L.layerGroup();
+
+  // Basemap switcher
+  document.querySelectorAll('.basemap-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.basemap-btn').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      btn.classList.add('active');
+
+      const name = btn.dataset.basemap;
+
+      Object.keys(basemaps).forEach(function(key) {
+        map.removeLayer(basemaps[key]);
+      });
+
+      basemaps[name].addTo(map);
     });
-    const maxCount = Math.max(...Object.values(bandCount), 1);
-    const chartHtml = Object.entries(bandCount).sort((a,b) => b[1] - a[1]).map(([band, cnt]) => `
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-        <div style="width:60px;font-weight:700;font-size:13px;">${band}</div>
-        <div style="flex:1;height:24px;background:#EAF2FB;border-radius:6px;overflow:hidden;">
-          <div style="width:${(cnt/maxCount*100).toFixed(1)}%;height:100%;background:linear-gradient(90deg,#124191,#00A1E0);display:flex;align-items:center;padding-left:10px;color:#fff;font-size:11px;font-weight:700;">${cnt}</div>
-        </div>
-      </div>
-    `).join('');
-    document.getElementById('bandChart').innerHTML = chartHtml;
-    
-  }catch(e){
-    toast('خطأ في تحميل الإحصائيات: ' + e.message, 'error');
-  }
+  });
 }
 
 /* =========================================================
-   IMPORT — Excel / CSV
+   LOAD CELLS FROM SUPABASE
    ========================================================= */
-const dropZone = document.getElementById('dropZone');
-const fileInput = document.getElementById('fileInput');
+async function loadCells() {
+  document.getElementById('loadingOverlay').style.display = 'flex';
 
-dropZone.addEventListener('click', () => fileInput.click());
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('drag');
-  if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
-});
-fileInput.addEventListener('change', e => {
-  if(e.target.files[0]) handleFile(e.target.files[0]);
-});
+  try {
+    const { data, error } = await db
+      .from('rf_cells')
+      .select('*')
+      .order('cell_name');
 
-function handleFile(file){
-  const reader = new FileReader();
-  reader.onload = e => {
-    try{
-      const data = new Uint8Array(e.target.result);
-      const wb = XLSX.read(data, { type: 'array' });
-      const sheet = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-      parseRows(rows);
-    }catch(err){
-      toast('خطأ في قراءة الملف: ' + err.message, 'error');
-    }
-  };
-  reader.readAsArrayBuffer(file);
-}
+    if (error) throw error;
 
-async function pasteFromClipboard(){
-  try{
-    const text = await navigator.clipboard.readText();
-    const lines = text.trim().split('\n');
-    const headers = lines[0].split('\t').map(h => h.trim());
-    const rows = lines.slice(1).map(line => {
-      const cells = line.split('\t');
-      const obj = {};
-      headers.forEach((h, i) => obj[h] = cells[i]?.trim() || '');
-      return obj;
-    });
-    parseRows(rows);
-  }catch(e){
-    toast('لا يمكن القراءة من الحافظة. الصق البيانات في ملف Excel بدلاً.', 'error');
-  }
-}
+    allCells = (data || []).map(normalizeCell);
 
-function parseRows(rows){
-  if(!rows.length){ toast('لا توجد بيانات', 'error'); return; }
-  
-  // خرائط الأعمدة المحتملة
-  const colMap = {
-    cell_name: ['Cell Name', 'cell_name', 'CELL_NAME'],
-    cell_id: ['Cell ID', 'cell_id', 'CELL_ID'],
-    pci: ['Physical cell ID', 'Physical Cell ID', 'PCI', 'pci', 'Physical cell id'],
-    rsi: ['Root sequence index', 'RSI', 'rsi', 'Root Sequence Index'],
-    cell_radius: ['Cell radius(m)', 'Cell radius (m)', 'Cell Radius', 'cell_radius'],
-    lat: ['Lat', 'LAT', 'lat', 'Latitude', 'latitude'],
-    long: ['Long', 'LONG', 'long', 'Longitude', 'longitude'],
-    bore: ['Bore', 'BORE', 'bore', 'Azimuth', 'azimuth']
-  };
-  
-  function findVal(row, keys){
-    for(const k of keys){
-      if(row[k] !== undefined && row[k] !== '') return row[k];
-    }
-    return '';
-  }
-  
-  previewData = rows.map(row => ({
-    cell_name: String(findVal(row, colMap.cell_name)).trim(),
-    cell_id: parseInt(findVal(row, colMap.cell_id)) || 0,
-    pci: parseInt(findVal(row, colMap.pci)) || 0,
-    rsi: parseInt(findVal(row, colMap.rsi)) || 0,
-    cell_radius: parseInt(findVal(row, colMap.cell_radius)) || 15000,
-    lat: parseFloat(findVal(row, colMap.lat)) || 0,
-    long: parseFloat(findVal(row, colMap.long)) || 0,
-    bore: parseInt(findVal(row, colMap.bore)) || 0
-  })).filter(r => r.cell_name);
-  
-  if(!previewData.length){
-    toast('لم يتم التعرف على أي بيانات. تأكد من أسماء الأعمدة.', 'error');
-    return;
-  }
-  
-  renderPreview();
-}
-
-function renderPreview(){
-  const card = document.getElementById('previewCard');
-  card.style.display = 'block';
-  
-  const bands = new Set(previewData.map(r => r.cell_name.match(/^[A-Z]+/)?.[0]).filter(Boolean));
-  const sites = new Set(previewData.map(r => r.cell_name.replace(/[A-Z]$/, '')));
-  
-  document.getElementById('previewStats').innerHTML = `
-    <div class="stat"><div class="n">${previewData.length}</div><div class="l">Cells</div></div>
-    <div class="stat"><div class="n">${sites.size}</div><div class="l">Sites</div></div>
-    <div class="stat"><div class="n">${bands.size}</div><div class="l">Bands</div></div>
-  `;
-  
-  const thead = document.querySelector('#previewTable thead');
-  const tbody = document.querySelector('#previewTable tbody');
-  thead.innerHTML = '<tr><th>Cell Name</th><th>Cell ID</th><th>PCI</th><th>RSI</th><th>Radius</th><th>Lat</th><th>Long</th><th>Bore</th></tr>';
-  tbody.innerHTML = previewData.slice(0, 50).map(r => `
-    <tr>
-      <td>${r.cell_name}</td>
-      <td>${r.cell_id}</td>
-      <td>${r.pci}</td>
-      <td>${r.rsi}</td>
-      <td>${r.cell_radius}</td>
-      <td>${r.lat}</td>
-      <td>${r.long}</td>
-      <td>${r.bore}</td>
-    </tr>
-  `).join('');
-}
-
-function clearPreview(){
-  previewData = [];
-  document.getElementById('previewCard').style.display = 'none';
-  fileInput.value = '';
-}
-
-async function saveToSupabase(){
-  if(!previewData.length) return;
-  const btn = document.getElementById('saveBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="loader"></span> جاري الحفظ...';
-  
-  try{
-    // تقسيم إلى دفعات (كل دفعة 500 سجل)
-    const BATCH_SIZE = 500;
-    let saved = 0;
-    for(let i = 0; i < previewData.length; i += BATCH_SIZE){
-      const batch = previewData.slice(i, i + BATCH_SIZE);
-      const { error } = await db.from('rf_cells').insert(batch);
-      if(error) throw error;
-      saved += batch.length;
-      btn.innerHTML = `<span class="loader"></span> ${saved}/${previewData.length}`;
-    }
-    
-    toast(`✅ تم حفظ ${saved} خلية بنجاح`, 'success');
-    clearPreview();
-    loadStats();
-  }catch(e){
-    toast('خطأ في الحفظ: ' + e.message, 'error');
-  }finally{
-    btn.disabled = false;
-    btn.textContent = '💾 حفظ في Supabase';
-  }
-}
-
-/* =========================================================
-   CELLS DATABASE
-   ========================================================= */
-async function loadCells(){
-  const tbody = document.getElementById('cellsBody');
-  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;">جاري التحميل...</td></tr>';
-  
-  try{
-    const { data, error } = await db.from('rf_cells').select('*').limit(10000);
-    if(error) throw error;
-    allCells = data || [];
+    updateStats();
+    renderBandFilters();
+    renderLegend();
     applyFilters();
-  }catch(e){
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:#D64545;">خطأ: ' + e.message + '</td></tr>';
+
+    toast('Loaded ' + allCells.length + ' cells', 'success');
+
+  } catch (e) {
+    console.error(e);
+    toast('Error loading cells: ' + e.message, 'error');
+  } finally {
+    document.getElementById('loadingOverlay').style.display = 'none';
   }
-}
-
-function applyFilters(){
-  const search = document.getElementById('searchInput').value.toLowerCase().trim();
-  const bandFilter = document.getElementById('bandFilter').value;
-  const vendorFilter = document.getElementById('vendorFilter').value;
-  
-  filteredCells = allCells.filter(r => {
-    if(search){
-      const hay = (r.cell_name + ' ' + r.pci + ' ' + r.cell_id).toLowerCase();
-      if(!hay.includes(search)) return false;
-    }
-    if(bandFilter && !r.cell_name.startsWith(bandFilter)) return false;
-    return true;
-  });
-  
-  currentPage = 1;
-  renderCells();
-}
-
-function sortCells(col){
-  if(sortCol === col) sortDir *= -1;
-  else { sortCol = col; sortDir = 1; }
-  renderCells();
-}
-
-function renderCells(){
-  applyFilters_();
-  const total = filteredCells.length;
-  document.getElementById('rowCount').textContent = total + ' cells';
-  
-  const tbody = document.getElementById('cellsBody');
-  if(!total){
-    tbody.innerHTML = '<tr><td colspan="9"><div class="empty"><div class="icon">📭</div><h3>لا توجد خلايا</h3><p>استورد بيانات من صفحة Import</p></div></td></tr>';
-    document.getElementById('pagination').innerHTML = '';
-    return;
-  }
-  
-  // Sort
-  const sorted = [...filteredCells].sort((a, b) => {
-    let va = a[sortCol], vb = b[sortCol];
-    if(typeof va === 'number' && typeof vb === 'number') return (va - vb) * sortDir;
-    return String(va).localeCompare(String(vb)) * sortDir;
-  });
-  
-  // Pagination
-  const start = (currentPage - 1) * PAGE_SIZE;
-  const end = start + PAGE_SIZE;
-  const pageData = sorted.slice(start, end);
-  
-  tbody.innerHTML = pageData.map(r => `
-    <tr>
-      <td><b>${r.cell_name}</b></td>
-      <td>${r.cell_id}</td>
-      <td>${r.pci}</td>
-      <td>${r.rsi}</td>
-      <td>${r.cell_radius}</td>
-      <td>${r.lat}</td>
-      <td>${r.long}</td>
-      <td>${r.bore}</td>
-      <td><button class="btn-danger" style="padding:4px 10px;font-size:11px;" onclick="deleteCell(${r.id})">حذف</button></td>
-    </tr>
-  `).join('');
-  
-  // Pagination UI
-  const totalPages = Math.ceil(total / PAGE_SIZE);
-  document.getElementById('pagination').innerHTML = `
-    <button ${currentPage === 1 ? 'disabled' : ''} onclick="goPage(${currentPage - 1})">← Previous</button>
-    <span class="info">صفحة ${currentPage} من ${totalPages}</span>
-    <button ${currentPage === totalPages ? 'disabled' : ''} onclick="goPage(${currentPage + 1})">Next →</button>
-  `;
-}
-
-function applyFilters_(){
-  const search = document.getElementById('searchInput').value.toLowerCase().trim();
-  const bandFilter = document.getElementById('bandFilter').value;
-  const vendorFilter = document.getElementById('vendorFilter').value;
-  
-  filteredCells = allCells.filter(r => {
-    if(search){
-      const hay = (r.cell_name + ' ' + r.pci + ' ' + r.cell_id).toLowerCase();
-      if(!hay.includes(search)) return false;
-    }
-    if(bandFilter && !r.cell_name.startsWith(bandFilter)) return false;
-    return true;
-  });
-}
-
-function goPage(n){
-  currentPage = n;
-  renderCells();
-}
-
-async function deleteCell(id){
-  if(!confirm('حذف هذه الخلية؟')) return;
-  try{
-    const { error } = await db.from('rf_cells').delete().eq('id', id);
-    if(error) throw error;
-    toast('✅ تم الحذف', 'success');
-    loadCells();
-  }catch(e){
-    toast('خطأ: ' + e.message, 'error');
-  }
-}
-
-function exportCells(){
-  if(!filteredCells.length){ toast('لا توجد بيانات', 'error'); return; }
-  const ws = XLSX.utils.json_to_sheet(filteredCells.map(r => ({
-    'Cell Name': r.cell_name,
-    'Cell ID': r.cell_id,
-    'PCI': r.pci,
-    'RSI': r.rsi,
-    'Cell radius(m)': r.cell_radius,
-    'Lat': r.lat,
-    'Long': r.long,
-    'Bore': r.bore
-  })));
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'RF Cells');
-  XLSX.writeFile(wb, 'rf_cells_' + new Date().toISOString().slice(0,10) + '.xlsx');
-  toast('✅ تم التصدير', 'success');
 }
 
 /* =========================================================
-   INIT
+   NORMALIZE CELL DATA
    ========================================================= */
-window.addEventListener('DOMContentLoaded', () => {
-  if(SUPABASE_URL === 'YOUR_SUPABASE_URL'){
-    toast('⚠️ استبدل SUPABASE_URL في الكود أولاً', 'error', 10000);
+function normalizeCell(row) {
+  const name = row.cell_name || '';
+
+  // Extract Band (first letters)
+  const bandMatch = name.match(/^[A-Z]+/);
+  const band = bandMatch ? bandMatch[0] : 'UNKNOWN';
+
+  // Extract Site (all but last letter)
+  const site = name.replace(/[A-Z]$/, '');
+
+  // Extract Sector (last letter)
+  const sector = name.slice(-1);
+
+  return {
+    id:        row.id,
+    cell_name: name,
+    cell_id:   row.cell_id || 0,
+    pci:       row.pci || 0,
+    rsi:       row.rsi || 0,
+    radius:    row.cell_radius || 15000,
+    lat:       parseFloat(row.lat) || 0,
+    long:      parseFloat(row.long) || 0,
+    bore:      row.bore || 0,
+    band:      band,
+    site:      site,
+    sector:    sector,
+    color:     BAND_COLORS[band] || BAND_COLORS.DEFAULT
+  };
+}
+
+/* =========================================================
+   UPDATE STATS
+   ========================================================= */
+function updateStats() {
+  document.getElementById('statTotal').textContent = allCells.length;
+
+  const sites = new Set(allCells.map(function(c) { return c.site; }));
+  document.getElementById('statSites').textContent = sites.size;
+
+  const bands = new Set(allCells.map(function(c) { return c.band; }));
+  document.getElementById('statBands').textContent = bands.size;
+
+  // PCI Conflicts
+  const pciCount = {};
+  allCells.forEach(function(c) {
+    pciCount[c.pci] = (pciCount[c.pci] || 0) + 1;
+  });
+  const conflicts = Object.values(pciCount).filter(function(v) { return v > 1; }).length;
+  document.getElementById('statPCI').textContent = conflicts;
+
+  // Nav badge
+  document.getElementById('navCellsCount').textContent = allCells.length;
+}
+
+/* =========================================================
+   RENDER BAND FILTERS
+   ========================================================= */
+function renderBandFilters() {
+  const bands = {};
+
+  allCells.forEach(function(c) {
+    if (!bands[c.band]) {
+      bands[c.band] = { count: 0, color: c.color };
+    }
+    bands[c.band].count++;
+  });
+
+  const html = Object.keys(bands).sort().map(function(band) {
+    const info = bands[band];
+    return '<label class="filter-checkbox">' +
+      '<input type="checkbox" value="' + band + '" checked onchange="applyFilters()">' +
+      '<span class="filter-color" style="background:' + info.color + ';"></span>' +
+      '<span>' + band + '</span>' +
+      '<span class="filter-count">' + info.count + '</span>' +
+      '</label>';
+  }).join('');
+
+  document.getElementById('bandFilters').innerHTML = html;
+}
+
+/* =========================================================
+   RENDER LEGEND
+   ========================================================= */
+function renderLegend() {
+  const bands = {};
+
+  allCells.forEach(function(c) {
+    if (!bands[c.band]) {
+      bands[c.band] = c.color;
+    }
+  });
+
+  const html = Object.keys(bands).sort().map(function(band) {
+    return '<div class="legend-item">' +
+      '<span class="legend-dot" style="background:' + bands[band] + ';"></span>' +
+      '<span>' + band + '</span>' +
+      '</div>';
+  }).join('');
+
+  document.getElementById('legendItems').innerHTML = html;
+}
+
+/* =========================================================
+   APPLY FILTERS
+   ========================================================= */
+function applyFilters() {
+  const search = (document.getElementById('searchFilter').value || '').toLowerCase().trim();
+  const pciQuery = (document.getElementById('pciFilter').value || '').trim();
+
+  const selectedBands = new Set(
+    Array.from(document.querySelectorAll('#bandFilters input[type="checkbox"]:checked'))
+      .map(function(i) { return i.value; })
+  );
+
+  visibleCells = allCells.filter(function(c) {
+    if (!selectedBands.has(c.band)) return false;
+
+    if (search) {
+      const hay = (c.cell_name + ' ' + c.site + ' ' + c.pci + ' ' + c.cell_id).toLowerCase();
+      if (hay.indexOf(search) === -1) return false;
+    }
+
+    if (pciQuery && String(c.pci) !== pciQuery) return false;
+
+    return true;
+  });
+
+  renderMap();
+  document.getElementById('statVisible').textContent = visibleCells.length;
+}
+
+/* =========================================================
+   RENDER MAP — SECTORS
+   ========================================================= */
+function renderMap() {
+  if (!map) return;
+
+  sectorLayer.clearLayers();
+  labelLayer.clearLayers();
+  coverageLayer.clearLayers();
+
+  const showSectors = document.getElementById('showSectors').checked;
+  const showLabels = document.getElementById('showLabels').checked;
+  const showCoverage = document.getElementById('showCoverage').checked;
+
+  visibleCells.forEach(function(cell) {
+    if (!cell.lat || !cell.long) return;
+
+    const center = [cell.lat, cell.long];
+
+    // ============ 1. SECTOR (Triangle 120°) ============
+    if (showSectors) {
+      const sectorCoords = makeSectorCoords(cell.lat, cell.long, cell.bore, cell.radius, 120);
+
+      const polygon = L.polygon(sectorCoords, {
+        color: cell.color,
+        weight: 1.5,
+        opacity: 0.9,
+        fillColor: cell.color,
+        fillOpacity: 0.35,
+        interactive: true
+      });
+
+      polygon.bindPopup(makePopupContent(cell), { maxWidth: 340 });
+
+      polygon.on('mouseover', function() {
+        this.setStyle({ fillOpacity: 0.6, weight: 2.5 });
+      });
+
+      polygon.on('mouseout', function() {
+        this.setStyle({ fillOpacity: 0.35, weight: 1.5 });
+      });
+
+      sectorLayer.addLayer(polygon);
+    }
+
+    // ============ 2. LABEL ============
+    if (showLabels) {
+      const label = L.marker(center, {
+        icon: L.divIcon({
+          className: 'cell-label',
+          html: '<div style="background:' + cell.color + ';color:#fff;padding:2px 7px;border-radius:10px;font-family:\'JetBrains Mono\',monospace;font-size:9.5px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3);border:1.5px solid #fff;">' + cell.cell_name + '</div>',
+          iconSize: null,
+          iconAnchor: [-6, 12]
+        }),
+        interactive: false
+      });
+      labelLayer.addLayer(label);
+    }
+
+    // ============ 3. COVERAGE CIRCLE ============
+    if (showCoverage) {
+      const circle = L.circle(center, {
+        radius: cell.radius,
+        color: cell.color,
+        weight: 1,
+        opacity: 0.3,
+        fillColor: cell.color,
+        fillOpacity: 0.05,
+        interactive: false
+      });
+      coverageLayer.addLayer(circle);
+    }
+  });
+
+  // Add coverage layer if enabled
+  if (showCoverage && !map.hasLayer(coverageLayer)) {
+    coverageLayer.addTo(map);
+  }
+}
+
+/* =========================================================
+   MAKE SECTOR COORDINATES (120° Triangle)
+   ========================================================= */
+function makeSectorCoords(lat, lng, azimuth, radiusM, beamWidth) {
+  const halfBeam = beamWidth / 2;
+
+  const point1 = destinationPoint(lat, lng, azimuth - halfBeam, radiusM);
+  const point2 = destinationPoint(lat, lng, azimuth + halfBeam, radiusM);
+
+  return [
+    [lat, lng],
+    point1,
+    point2,
+    [lat, lng]
+  ];
+}
+
+/* =========================================================
+   DESTINATION POINT (given start, bearing, distance)
+   ========================================================= */
+function destinationPoint(lat, lng, bearing, distanceM) {
+  const R = 6371000; // Earth radius in meters
+  const d = distanceM / R;
+  const theta = bearing * Math.PI / 180;
+  const phi1 = lat * Math.PI / 180;
+  const lambda1 = lng * Math.PI / 180;
+
+  const phi2 = Math.asin(
+    Math.sin(phi1) * Math.cos(d) +
+    Math.cos(phi1) * Math.sin(d) * Math.cos(theta)
+  );
+
+  const lambda2 = lambda1 + Math.atan2(
+    Math.sin(theta) * Math.sin(d) * Math.cos(phi1),
+    Math.cos(d) - Math.sin(phi1) * Math.sin(phi2)
+  );
+
+  return [
+    phi2 * 180 / Math.PI,
+    lambda2 * 180 / Math.PI
+  ];
+}
+
+/* =========================================================
+   POPUP CONTENT
+   ========================================================= */
+function makePopupContent(cell) {
+  const gmapsLink = 'https://www.google.com/maps/search/?api=1&query=' + cell.lat + ',' + cell.long;
+
+  return '<div class="cell-popup">' +
+    '<div class="cell-popup-header" style="background:' + cell.color + ';">' +
+      '<span class="name">' + cell.cell_name + '</span>' +
+      '<span class="sector">SEC ' + cell.sector + '</span>' +
+    '</div>' +
+    '<div class="cell-popup-body">' +
+      '<div class="cell-popup-row"><span class="k">Cell ID</span><span class="v">' + cell.cell_id + '</span></div>' +
+      '<div class="cell-popup-row"><span class="k">PCI</span><span class="v">' + cell.pci + '</span></div>' +
+      '<div class="cell-popup-row"><span class="k">RSI</span><span class="v">' + cell.rsi + '</span></div>' +
+      '<div class="cell-popup-row"><span class="k">Azimuth</span><span class="v">' + cell.bore + '°</span></div>' +
+      '<div class="cell-popup-row"><span class="k">Radius</span><span class="v">' + (cell.radius / 1000).toFixed(1) + ' km</span></div>' +
+      '<div class="cell-popup-row"><span class="k">Latitude</span><span class="v">' + cell.lat.toFixed(6) + '</span></div>' +
+      '<div class="cell-popup-row"><span class="k">Longitude</span><span class="v">' + cell.long.toFixed(6) + '</span></div>' +
+      '<div class="cell-popup-row"><span class="k">Band</span><span class="v">' + cell.band + '</span></div>' +
+      '<div class="cell-popup-row"><span class="k">Site</span><span class="v">' + cell.site + '</span></div>' +
+    '</div>' +
+    '<div class="cell-popup-footer">' +
+      '<a href="' + gmapsLink + '" target="_blank" rel="noopener">📍 Google Maps</a>' +
+    '</div>' +
+    '</div>';
+}
+
+/* =========================================================
+   TOGGLE LAYERS
+   ========================================================= */
+function toggleLayer(type) {
+  if (type === 'coverage') {
+    if (document.getElementById('showCoverage').checked) {
+      if (!map.hasLayer(coverageLayer)) {
+        coverageLayer.addTo(map);
+      }
+    } else {
+      if (map.hasLayer(coverageLayer)) {
+        map.removeLayer(coverageLayer);
+      }
+    }
+  }
+  renderMap();
+}
+
+/* =========================================================
+   FIT TO ALL CELLS
+   ========================================================= */
+function fitAllCells() {
+  if (!visibleCells.length) {
+    toast('No cells to fit', 'error');
     return;
   }
-  loadStats();
-});
 
+  const bounds = L.latLngBounds(
+    visibleCells.map(function(c) {
+      return [c.lat, c.long];
+    })
+  );
+
+  map.fitBounds(bounds, { padding: [50, 50] });
+  toast('Fitted to ' + visibleCells.length + ' cells', 'success');
+}
+
+/* =========================================================
+   CLEAR FILTERS
+   ========================================================= */
+function clearFilters() {
+  document.getElementById('searchFilter').value = '';
+  document.getElementById('pciFilter').value = '';
+
+  document.querySelectorAll('#bandFilters input[type="checkbox"]').forEach(function(i) {
+    i.checked = true;
+  });
+
+  applyFilters();
+  toast('Filters cleared', 'info');
+}
+
+/* =========================================================
+   INIT APP
+   ========================================================= */
+window.addEventListener('DOMContentLoaded', function() {
+  initMap();
+  loadCells();
+});
 </script>
+
 </body>
 </html>
+  
