@@ -782,7 +782,6 @@ body {
     </section>
 
     <!-- ============ PAGE: IMPORT ============ -->
-    <!-- ============ PAGE: IMPORT ============ -->
 <section class="page" id="page-import">
   <div style="padding:24px;overflow-y:auto;flex:1;max-width:900px;margin:0 auto;width:100%;">
     
@@ -1031,7 +1030,15 @@ function initMap() {
   sectorLayer = L.layerGroup().addTo(map);
   labelLayer = L.layerGroup().addTo(map);
   coverageLayer = L.layerGroup();
+  // ⭐ تحديث Sectors عند تغيير Zoom
+  map.on('zoomend', function() {
+    if (visibleCells.length && document.getElementById('showSectors').checked) {
+      renderMap();
+    }
+  });
 
+  // Basemap switcher
+  document.querySelectorAll('.basemap-btn').forEach(function(btn) {
   // Basemap switcher
   document.querySelectorAll('.basemap-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -1058,23 +1065,38 @@ async function loadCells() {
   document.getElementById('loadingOverlay').style.display = 'flex';
   
   try {
-    // تحميل أول 5000 خلية
-    let query = db
-      .from('rf_cells')
-      .select('*')
-      .order('cell_name')
-      .limit(5000);
+    let allData = [];
+    let from = 0;
+    const PAGE_SIZE = 1000;
+    let hasMore = true;
     
-    if (currentProjectId) {
-      query = query.eq('project_id', currentProjectId);
+    while (hasMore) {
+      let query = db
+        .from('rf_cells')
+        .select('*')
+        .order('cell_name')
+        .range(from, from + PAGE_SIZE - 1);
+      
+      if (currentProjectId) {
+        query = query.eq('project_id', currentProjectId);
+      }
+      
+      const { data, error } = await query;
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        allData = allData.concat(data);
+        console.log(`📥 Page ${Math.floor(from/PAGE_SIZE) + 1}: ${data.length} cells (total: ${allData.length})`);
+        from += PAGE_SIZE;
+        hasMore = data.length === PAGE_SIZE;
+      } else {
+        hasMore = false;
+      }
     }
     
-    const { data, error } = await query;
-    if (error) throw error;
+    console.log(`✅ Total: ${allData.length} cells`);
     
-    console.log(`✅ Loaded ${data.length} cells`);
-    
-    allCells = (data || []).map(normalizeCell);
+    allCells = allData.map(normalizeCell);
     updateStats();
     renderBandFilters();
     renderLegend();
@@ -1320,10 +1342,23 @@ function renderMap() {
    SECTOR SHAPE — Small & Professional (Atoll-like)
    ========================================================= */
 function makeSectorCoords(lat, lng, azimuth, radiusM, beamWidth) {
-  const visualSizeDeg = 0.0008;
+  // ⭐ حجم Sector يتغير حسب الـ Zoom
+  const zoom = map.getZoom();
+  let visualSizeM;
+  
+  if (zoom >= 16) {
+    visualSizeM = 200;   // قريب جداً: 200 متر
+  } else if (zoom >= 14) {
+    visualSizeM = 400;   // قريب: 400 متر
+  } else if (zoom >= 12) {
+    visualSizeM = 800;   // متوسط: 800 متر
+  } else if (zoom >= 10) {
+    visualSizeM = 2000;  // بعيد: 2 كم
+  } else {
+    visualSizeM = 5000;  // بعيد جداً: 5 كم
+  }
+  
   const halfBeam = beamWidth / 2;
-  const visualSizeM = visualSizeDeg * 111000;
-
   const point1 = destinationPoint(lat, lng, azimuth - halfBeam, visualSizeM);
   const point2 = destinationPoint(lat, lng, azimuth + halfBeam, visualSizeM);
 
