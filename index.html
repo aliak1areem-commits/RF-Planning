@@ -1099,24 +1099,52 @@ function initMap() {
    ========================================================= */
 async function loadCells() {
   document.getElementById('loadingOverlay').style.display = 'flex';
-
+  
   try {
-    const { data, error } = await db
-      .from('rf_cells')
-      .select('*')
-      .order('cell_name');
-
-    if (error) throw error;
-
-    allCells = (data || []).map(normalizeCell);
-
+    // ⭐ تحميل كل البيانات — Supabase الحد 1000 لكل طلب
+    const PAGE_SIZE = 1000;
+    let allData = [];
+    let page = 0;
+    let hasMore = true;
+    
+    while (hasMore) {
+      const from = page * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      
+      let query = db
+        .from('rf_cells')
+        .select('*')
+        .order('cell_name')
+        .range(from, to);
+      
+      // إذا فيه Project محدد
+      if (currentProjectId) {
+        query = query.eq('project_id', currentProjectId);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        allData = allData.concat(data);
+        page++;
+        hasMore = data.length === PAGE_SIZE;
+        console.log(`📥 Loaded page ${page}: ${data.length} cells (total: ${allData.length})`);
+      } else {
+        hasMore = false;
+      }
+    }
+    
+    console.log(`✅ Loaded ${allData.length} total cells from Supabase`);
+    
+    allCells = allData.map(normalizeCell);
     updateStats();
     renderBandFilters();
     renderLegend();
     applyFilters();
-
-    toast('Loaded ' + allCells.length + ' cells', 'success');
-
+    
+    toast(`Loaded ${allCells.length} cells`, 'success');
   } catch (e) {
     console.error(e);
     toast('Error loading cells: ' + e.message, 'error');
@@ -1287,8 +1315,10 @@ function renderMap() {
   weight: 1,
   opacity: 1,
   fillColor: cell.color,
-  fillOpacity: 0.65,
-  interactive: true
+  fillOpacity: 0.7,
+  interactive: true,
+  lineJoin: 'round',
+  lineCap: 'round'
 });
 
       polygon.bindPopup(makePopupContent(cell), { maxWidth: 340 });
@@ -1342,23 +1372,26 @@ function renderMap() {
 /* =========================================================
    MAKE SECTOR COORDINATES (120° Triangle)
    ========================================================= */
-function makeSectorCoords(lat, lng, azimuth, radiusM, beamWidth){
-  // ⭐ Sector صغير احترافي — ثابت بصرياً
-  const visualRadius = 350; // متر — حجم عرض Sector
+/* =========================================================
+   SECTOR SHAPE — Atoll-like 3-Sector Visualization
+   شكل Sector صغير وواضح مثل برنامج Atoll
+   ========================================================= */
+function makeSectorCoords(lat, lng, azimuth, radiusM, beamWidth) {
+  // ⭐ حجم Sector بصري (يتغير حسب الـ Zoom)
+  // القيمة بالدرجات — كل 0.001 ≈ 110 متر في العراق
+  const visualSize = 0.005; // ≈ 550 متر
   const halfBeam = beamWidth / 2;
-  
-  const point1 = destinationPoint(lat, lng, azimuth - halfBeam, visualRadius);
-  const point2 = destinationPoint(lat, lng, azimuth + halfBeam, visualRadius);
-  
-  // ⭐ شكل منحني (Curved Sector) مثل الأدوات الاحترافية
-  const arcPoints = [];
-  const steps = 8;
-  for(let i = 0; i <= steps; i++){
-    const angle = azimuth - halfBeam + (beamWidth * i / steps);
-    arcPoints.push(destinationPoint(lat, lng, angle, visualRadius));
-  }
-  
-  return [[lat, lng], ...arcPoints, [lat, lng]];
+
+  // ⭐ نحسب نقطتين على القوس
+  const point1 = destinationPoint(lat, lng, azimuth - halfBeam, visualSize * 111000);
+  const point2 = destinationPoint(lat, lng, azimuth + halfBeam, visualSize * 111000);
+
+  // ⭐ 3 نقاط: مركز، نقطة 1، نقطة 2 = مثلث Sector
+  return [
+    [lat, lng],
+    point1,
+    point2
+  ];
 }
 
 /* =========================================================
@@ -1829,7 +1862,8 @@ loadCells = async function() {
     const { data, error } = await query;
     if (error) throw error;
     
-    allCells = (data || []).map(normalizeCell);
+    allCells = allData.map(normalizeCell);
+console.log(`✅ Loaded ${allCells.length} total cells`);
     updateStats();
     renderBandFilters();
     renderLegend();
