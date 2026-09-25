@@ -656,9 +656,12 @@ body {
       <button class="nav-item" data-page="dashboard">
         <span class="icon">📊</span><span>Dashboard</span>
       </button>
-      <button class="nav-item" data-page="import">
-        <span class="icon">📥</span><span>Import</span>
-      </button>
+     <button class="nav-item" data-page="projects">
+  <span class="icon">📁</span><span>Projects</span>
+</button>
+<button class="nav-item" data-page="import">
+  <span class="icon">📥</span><span>Import</span>
+</button>
       <button class="nav-item" data-page="cells">
         <span class="icon">📋</span><span>Cells</span>
         <span class="badge" id="navCellsCount">0</span>
@@ -788,7 +791,102 @@ body {
         </div>
       </div>
     </section>
+<!-- ============ PAGE: PROJECTS ============ -->
+<section class="page" id="page-projects">
+  <div style="padding:24px;overflow-y:auto;flex:1;">
+    
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <h3 style="font-size:18px;color:#0C1B3D;margin:0 0 4px;">📁 Projects</h3>
+        <p style="color:#5A6B87;font-size:13px;margin:0;">Manage your RF projects</p>
+      </div>
+      <button class="btn btn-primary" onclick="openCreateProjectModal()">+ New Project</button>
+    </div>
+    
+    <div id="projectsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
+      <div style="text-align:center;padding:40px;color:#5A6B87;grid-column:1/-1;">Loading projects...</div>
+    </div>
+    
+  </div>
+</section>
 
+<!-- ============ PAGE: IMPORT ============ -->
+<section class="page" id="page-import">
+  <div style="padding:24px;overflow-y:auto;flex:1;max-width:900px;margin:0 auto;width:100%;">
+    
+    <div style="margin-bottom:20px;">
+      <h3 style="font-size:18px;color:#0C1B3D;margin:0 0 4px;">📥 Import Cells</h3>
+      <p style="color:#5A6B87;font-size:13px;margin:0;">Upload Excel or CSV to add cells</p>
+    </div>
+    
+    <!-- Step 1: Choose Project -->
+    <div class="card" style="background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:16px;border:1px solid #E9EEF6;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#124191;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">1</div>
+        <h4 style="margin:0;font-size:14px;color:#0C1B3D;">Select Project</h4>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <select id="importProjectSelect" style="flex:1;min-width:220px;padding:10px 14px;border:1.5px solid #D7DEEA;border-radius:8px;font-size:13px;background:#fff;">
+          <option value="">— Choose Project —</option>
+        </select>
+        <button class="btn btn-ghost" onclick="openCreateProjectModal()">+ New Project</button>
+      </div>
+    </div>
+    
+    <!-- Step 2: Upload File -->
+    <div class="card" style="background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:16px;border:1px solid #E9EEF6;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#124191;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">2</div>
+        <h4 style="margin:0;font-size:14px;color:#0C1B3D;">Upload Excel / CSV</h4>
+      </div>
+      <div id="importDropZone" style="border:2px dashed #C9D4E4;border-radius:12px;padding:48px 20px;text-align:center;background:#FBFCFE;cursor:pointer;transition:all .2s;">
+        <div style="font-size:48px;margin-bottom:12px;">📄</div>
+        <div style="font-weight:700;font-size:15px;color:#0C1B3D;margin-bottom:6px;">Drag file here or click</div>
+        <div style="font-size:12.5px;color:#5A6B87;">Supports: .xlsx, .xls, .csv</div>
+      </div>
+      <input type="file" id="importFileInput" accept=".xlsx,.xls,.csv" style="display:none;">
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-ghost" onclick="document.getElementById('importFileInput').click()">📁 Choose File</button>
+        <button class="btn btn-ghost" onclick="importPasteFromClipboard()">📋 Paste</button>
+      </div>
+    </div>
+    
+    <!-- Step 3: Preview & Save -->
+    <div class="card" id="importPreviewCard" style="display:none;background:#fff;border-radius:12px;padding:20px 24px;border:1px solid #E9EEF6;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#124191;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">3</div>
+        <h4 style="margin:0;font-size:14px;color:#0C1B3D;">Preview & Save</h4>
+      </div>
+      <div id="importPreviewStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:16px;"></div>
+      <div id="importPreviewTable" style="overflow:auto;max-height:300px;border:1px solid #E9EEF6;border-radius:8px;"></div>
+      <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-danger" onclick="importClearPreview()">Cancel</button>
+        <button class="btn btn-gold" id="importSaveBtn" onclick="importSaveToSupabase()">💾 Save to Supabase</button>
+      </div>
+    </div>
+    
+  </div>
+</section>
+
+<!-- ============ MODAL: CREATE PROJECT ============ -->
+<div class="modal-backdrop" id="createProjectModal" style="position:fixed;inset:0;background:rgba(12,27,61,.65);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:3000;padding:20px;">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="padding:20px 24px;border-bottom:1px solid #E9EEF6;">
+      <h3 style="margin:0;font-size:17px;color:#0C1B3D;">📁 Create New Project</h3>
+      <p style="margin:4px 0 0;font-size:12.5px;color:#5A6B87;">Give your project a name</p>
+    </div>
+    <div style="padding:20px 24px;">
+      <label style="display:block;font-size:12px;font-weight:600;color:#5A6B87;margin-bottom:6px;">Project Name</label>
+      <input type="text" id="newProjectName" placeholder="e.g. Basra LTE 2024" style="width:100%;padding:10px 14px;border:1.5px solid #D7DEEA;border-radius:8px;font-size:13px;font-family:inherit;outline:none;">
+      <label style="display:block;font-size:12px;font-weight:600;color:#5A6B87;margin:14px 0 6px;">Description (Optional)</label>
+      <input type="text" id="newProjectDesc" placeholder="Short description..." style="width:100%;padding:10px 14px;border:1.5px solid #D7DEEA;border-radius:8px;font-size:13px;font-family:inherit;outline:none;">
+    </div>
+    <div style="padding:16px 24px;background:#FBFCFE;border-top:1px solid #E9EEF6;display:flex;gap:10px;justify-content:flex-end;border-radius:0 0 14px 14px;">
+      <button class="btn btn-ghost" onclick="closeCreateProjectModal()">Cancel</button>
+      <button class="btn btn-primary" id="createProjectBtn" onclick="createProject()">Create</button>
+    </div>
+  </div>
+</div>
     <!-- ============ PAGE: CELLS ============ -->
     <section class="page" id="page-cells">
       <div style="padding:24px;overflow-y:auto;flex:1;">
@@ -1319,9 +1417,398 @@ function clearFilters() {
 /* =========================================================
    INIT APP
    ========================================================= */
+/* =========================================================
+   PROJECTS
+   ========================================================= */
+let allProjects = [];
+let currentProjectId = null;
+let importPreviewData = [];
+
+async function loadProjects() {
+  try {
+    const { data, error } = await db
+      .from('rf_projects')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    allProjects = data || [];
+    
+    renderProjectsList();
+    renderProjectSelect();
+  } catch (e) {
+    console.error(e);
+    toast('Error loading projects: ' + e.message, 'error');
+  }
+}
+
+function renderProjectsList() {
+  const container = document.getElementById('projectsList');
+  
+  if (!allProjects.length) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:60px 20px;color:#5A6B87;grid-column:1/-1;">
+        <div style="font-size:56px;opacity:.3;margin-bottom:14px;">📁</div>
+        <h3 style="color:#0C1B3D;margin-bottom:8px;">No Projects Yet</h3>
+        <p style="font-size:13px;">Click "New Project" to create your first one</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = allProjects.map(p => `
+    <div style="background:#fff;border-radius:12px;padding:18px 20px;border:1px solid #E9EEF6;box-shadow:0 2px 8px rgba(12,27,61,.05);transition:all .2s;cursor:pointer;" 
+         onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(12,27,61,.12)';" 
+         onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(12,27,61,.05)';"
+         onclick="openProject(${p.id})">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#124191,#00A1E0);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;">📁</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:14px;color:#0C1B3D;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(p.name)}</div>
+          <div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">${escapeHtml(p.description || 'No description')}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;padding-top:12px;border-top:1px solid #F0F3F9;font-size:11.5px;color:#5A6B87;">
+        <span>📅 ${new Date(p.created_at).toLocaleDateString('en-GB')}</span>
+        <span style="margin-left:auto;color:#124191;font-weight:600;">Open →</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderProjectSelect() {
+  const sel = document.getElementById('importProjectSelect');
+  if (!sel) return;
+  
+  sel.innerHTML = '<option value="">— Choose Project —</option>' + 
+    allProjects.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+}
+
+function openCreateProjectModal() {
+  document.getElementById('createProjectModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('newProjectName').focus(), 200);
+}
+
+function closeCreateProjectModal() {
+  document.getElementById('createProjectModal').style.display = 'none';
+  document.getElementById('newProjectName').value = '';
+  document.getElementById('newProjectDesc').value = '';
+}
+
+async function createProject() {
+  const name = document.getElementById('newProjectName').value.trim();
+  const desc = document.getElementById('newProjectDesc').value.trim();
+  
+  if (!name) {
+    toast('Enter project name', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('createProjectBtn');
+  btn.disabled = true;
+  btn.textContent = 'Creating...';
+  
+  try {
+    const { data, error } = await db
+      .from('rf_projects')
+      .insert([{ name, description: desc }])
+      .select()
+      .single();
+    
+    if (error) {
+      if (error.message.includes('duplicate')) {
+        toast('Project name already exists', 'error');
+      } else {
+        throw error;
+      }
+      return;
+    }
+    
+    toast('✅ Project created', 'success');
+    closeCreateProjectModal();
+    await loadProjects();
+    
+    // Auto-select new project in import
+    if (data && data.id) {
+      document.getElementById('importProjectSelect').value = data.id;
+    }
+  } catch (e) {
+    toast('Error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Create';
+  }
+}
+
+function openProject(projectId) {
+  currentProjectId = projectId;
+  // Go to map
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelector('[data-page="map"]').classList.add('active');
+  document.getElementById('page-map').classList.add('active');
+  document.getElementById('pageIcon').textContent = '🗺️';
+  document.getElementById('pageTitle').textContent = 'Cell Map';
+  document.getElementById('pageSubtitle').textContent = 'Project: ' + (allProjects.find(p => p.id === projectId)?.name || '');
+  
+  loadCells();
+  setTimeout(() => map.invalidateSize(), 100);
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* =========================================================
+   IMPORT
+   ========================================================= */
+const importDropZone = document.getElementById('importDropZone');
+const importFileInput = document.getElementById('importFileInput');
+
+if (importDropZone) {
+  importDropZone.addEventListener('click', () => importFileInput.click());
+  importDropZone.addEventListener('dragover', e => { e.preventDefault(); importDropZone.style.borderColor = '#00A1E0'; importDropZone.style.background = '#EAF2FB'; });
+  importDropZone.addEventListener('dragleave', () => { importDropZone.style.borderColor = '#C9D4E4'; importDropZone.style.background = '#FBFCFE'; });
+  importDropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    importDropZone.style.borderColor = '#C9D4E4';
+    importDropZone.style.background = '#FBFCFE';
+    if (e.dataTransfer.files[0]) importHandleFile(e.dataTransfer.files[0]);
+  });
+  importFileInput.addEventListener('change', e => {
+    if (e.target.files[0]) importHandleFile(e.target.files[0]);
+  });
+}
+
+function importHandleFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, { type: 'array' });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+      importParseRows(rows);
+    } catch (err) {
+      toast('Error reading file: ' + err.message, 'error');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function importPasteFromClipboard() {
+  try {
+    const text = await navigator.clipboard.readText();
+    const lines = text.trim().split('\n');
+    const headers = lines[0].split('\t').map(h => h.trim());
+    const rows = lines.slice(1).map(line => {
+      const cells = line.split('\t');
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = cells[i]?.trim() || '');
+      return obj;
+    });
+    importParseRows(rows);
+  } catch (e) {
+    toast('Cannot read clipboard. Paste into Excel first.', 'error');
+  }
+}
+
+function importParseRows(rows) {
+  if (!rows.length) { toast('No data found', 'error'); return; }
+  
+  const colMap = {
+    cell_name:   ['Cell Name', 'cell_name', 'CELL_NAME'],
+    cell_id:     ['Cell ID', 'cell_id', 'CELL_ID'],
+    pci:         ['Physical cell ID', 'Physical Cell ID', 'PCI', 'pci', 'Physical cell id'],
+    rsi:         ['Root sequence index', 'RSI', 'rsi'],
+    cell_radius: ['Cell radius(m)', 'Cell radius (m)', 'Cell Radius', 'cell_radius'],
+    lat:         ['Lat', 'LAT', 'lat', 'Latitude', 'latitude'],
+    long:        ['Long', 'LONG', 'long', 'Longitude', 'longitude'],
+    bore:        ['Bore', 'BORE', 'bore', 'Azimuth']
+  };
+  
+  function findVal(row, keys) {
+    for (const k of keys) {
+      if (row[k] !== undefined && row[k] !== '') return row[k];
+    }
+    return '';
+  }
+  
+  importPreviewData = rows.map(row => ({
+    cell_name:   String(findVal(row, colMap.cell_name)).trim(),
+    cell_id:     parseInt(findVal(row, colMap.cell_id)) || 0,
+    pci:         parseInt(findVal(row, colMap.pci)) || 0,
+    rsi:         parseInt(findVal(row, colMap.rsi)) || 0,
+    cell_radius: parseInt(findVal(row, colMap.cell_radius)) || 15000,
+    lat:         parseFloat(findVal(row, colMap.lat)) || 0,
+    long:        parseFloat(findVal(row, colMap.long)) || 0,
+    bore:        parseInt(findVal(row, colMap.bore)) || 0
+  })).filter(r => r.cell_name);
+  
+  if (!importPreviewData.length) {
+    toast('No valid cells detected. Check column names.', 'error');
+    return;
+  }
+  
+  importRenderPreview();
+}
+
+function importRenderPreview() {
+  document.getElementById('importPreviewCard').style.display = 'block';
+  
+  const bands = new Set(importPreviewData.map(r => r.cell_name.match(/^[A-Z]+/)?.[0]).filter(Boolean));
+  const sites = new Set(importPreviewData.map(r => r.cell_name.replace(/[A-Z]$/, '')));
+  
+  document.getElementById('importPreviewStats').innerHTML = `
+    <div style="background:#EAF2FB;border-radius:10px;padding:14px;">
+      <div style="font-family:monospace;font-size:20px;font-weight:700;color:#0C1B3D;">${importPreviewData.length}</div>
+      <div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">Cells</div>
+    </div>
+    <div style="background:#EAF2FB;border-radius:10px;padding:14px;">
+      <div style="font-family:monospace;font-size:20px;font-weight:700;color:#0C1B3D;">${sites.size}</div>
+      <div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">Sites</div>
+    </div>
+    <div style="background:#EAF2FB;border-radius:10px;padding:14px;">
+      <div style="font-family:monospace;font-size:20px;font-weight:700;color:#0C1B3D;">${bands.size}</div>
+      <div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">Bands</div>
+    </div>
+  `;
+  
+  const preview = importPreviewData.slice(0, 30);
+  document.getElementById('importPreviewTable').innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:12px;font-family:monospace;">
+      <thead style="background:#EAF2FB;position:sticky;top:0;">
+        <tr>
+          <th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;text-transform:uppercase;">Cell Name</th>
+          <th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Cell ID</th>
+          <th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">PCI</th>
+          <th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">RSI</th>
+          <th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Radius</th>
+          <th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Lat</th>
+          <th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Long</th>
+          <th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Bore</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${preview.map(r => `
+          <tr style="border-bottom:1px solid #F0F3F9;">
+            <td style="padding:7px 10px;">${escapeHtml(r.cell_name)}</td>
+            <td style="padding:7px 10px;">${r.cell_id}</td>
+            <td style="padding:7px 10px;">${r.pci}</td>
+            <td style="padding:7px 10px;">${r.rsi}</td>
+            <td style="padding:7px 10px;">${r.cell_radius}</td>
+            <td style="padding:7px 10px;">${r.lat}</td>
+            <td style="padding:7px 10px;">${r.long}</td>
+            <td style="padding:7px 10px;">${r.bore}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    ${importPreviewData.length > 30 ? `<div style="padding:10px;text-align:center;color:#5A6B87;font-size:11.5px;">... and ${importPreviewData.length - 30} more</div>` : ''}
+  `;
+}
+
+function importClearPreview() {
+  importPreviewData = [];
+  document.getElementById('importPreviewCard').style.display = 'none';
+  document.getElementById('importFileInput').value = '';
+}
+
+async function importSaveToSupabase() {
+  const projectId = document.getElementById('importProjectSelect').value;
+  
+  if (!projectId) {
+    toast('Select a project first', 'error');
+    return;
+  }
+  
+  if (!importPreviewData.length) {
+    toast('No data to save', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('importSaveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  
+  try {
+    // Add project_id to each cell
+    const cellsWithProject = importPreviewData.map(c => ({ ...c, project_id: parseInt(projectId) }));
+    
+    // Batch insert
+    const BATCH = 500;
+    let saved = 0;
+    for (let i = 0; i < cellsWithProject.length; i += BATCH) {
+      const batch = cellsWithProject.slice(i, i + BATCH);
+      const { error } = await db.from('rf_cells').insert(batch);
+      if (error) throw error;
+      saved += batch.length;
+      btn.textContent = `Saving ${saved}/${cellsWithProject.length}...`;
+    }
+    
+    toast(`✅ Saved ${saved} cells to project`, 'success');
+    importClearPreview();
+    await loadProjects();
+    await loadCells();
+  } catch (e) {
+    toast('Error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💾 Save to Supabase';
+  }
+}
+
+/* =========================================================
+   MODIFY loadCells TO FILTER BY PROJECT
+   ========================================================= */
+const _origLoadCells = loadCells;
+loadCells = async function() {
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  
+  try {
+    let query = db.from('rf_cells').select('*').order('cell_name');
+    
+    // Filter by current project if selected
+    if (currentProjectId) {
+      query = query.eq('project_id', currentProjectId);
+    }
+    
+    const { data, error } = await query;
+    if (error) throw error;
+    
+    allCells = (data || []).map(normalizeCell);
+    updateStats();
+    renderBandFilters();
+    renderLegend();
+    applyFilters();
+    
+    toast(`Loaded ${allCells.length} cells`, 'success');
+  } catch (e) {
+    console.error(e);
+    toast('Error loading cells: ' + e.message, 'error');
+  } finally {
+    document.getElementById('loadingOverlay').style.display = 'none';
+  }
+};
+
+/* =========================================================
+   UPDATE NAV TO INCLUDE PROJECTS
+   ========================================================= */
+// Add projects page title
+PAGE_TITLES.projects = { icon: '📁', title: 'Projects', sub: 'Manage RF projects' };
+
+/* =========================================================
+   INIT
+   ========================================================= */
 window.addEventListener('DOMContentLoaded', function() {
   initMap();
+  loadProjects();
   loadCells();
+  
+  // Close modal on backdrop click
+  document.getElementById('createProjectModal').addEventListener('click', function(e) {
+    if (e.target.id === 'createProjectModal') closeCreateProjectModal();
+  });
 });
 </script>
 
