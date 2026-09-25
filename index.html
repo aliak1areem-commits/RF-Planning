@@ -1100,13 +1100,14 @@ function initMap() {
 async function loadCells() {
   document.getElementById('loadingOverlay').style.display = 'flex';
   
+  // ⭐ تعريف المتغيرات خارج try
+  const PAGE_SIZE = 1000;
+  let allData = [];
+  let page = 0;
+  let hasMore = true;
+  
   try {
     // ⭐ تحميل كل البيانات — Supabase الحد 1000 لكل طلب
-    const PAGE_SIZE = 1000;
-    let allData = [];
-    let page = 0;
-    let hasMore = true;
-    
     while (hasMore) {
       const from = page * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
@@ -1130,13 +1131,13 @@ async function loadCells() {
         allData = allData.concat(data);
         page++;
         hasMore = data.length === PAGE_SIZE;
-        console.log(`📥 Loaded page ${page}: ${data.length} cells (total: ${allData.length})`);
+        console.log(`📥 Page ${page}: ${data.length} cells (total: ${allData.length})`);
       } else {
         hasMore = false;
       }
     }
     
-    console.log(`✅ Loaded ${allData.length} total cells from Supabase`);
+    console.log(`✅ Loaded ${allData.length} total cells`);
     
     allCells = allData.map(normalizeCell);
     updateStats();
