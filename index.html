@@ -1677,11 +1677,15 @@ async function loadCells() {
       }
     }
 
-    allCells = allData.map(normalizeCell);
+        allCells = allData.map(normalizeCell);
     updateStats();
     renderBandFilters();
     renderLegend();
     applyFilters();
+
+    // ← أضف هذين السطرين
+    setTimeout(() => fitAllCells(), 300);
+    setTimeout(() => map.invalidateSize(), 100);
 
     toast('Loaded ' + allCells.length + ' cells', 'success');
   } catch (e) {
