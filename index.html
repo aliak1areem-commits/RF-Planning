@@ -138,6 +138,7 @@ body {
   flex-direction: column;
   overflow: hidden;
   background: #F4F7FB;
+  min-height: 0;
 }
 .topbar {
   height: 56px;
@@ -217,13 +218,19 @@ body {
 /* =========================================================
    PAGES
    ========================================================= */
-.page { display: none; flex: 1; overflow: hidden; position: relative; }
+.page { display: none; flex: 1; overflow: hidden; position: relative; min-height: 0; }
 .page.active { display: flex; flex-direction: column; }
 
 /* =========================================================
    MAP
    ========================================================= */
-.map-container { display: flex; flex: 1; position: relative; overflow: hidden; }
+.map-container {
+  display: flex;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;   /* مهم: يسمح للـ flex بالانكماش */
+}
 .map-sidebar {
   width: 320px;
   background: #fff;
@@ -231,6 +238,13 @@ body {
   overflow-y: auto;
   flex-shrink: 0;
   padding: 18px 16px;
+  transition: width .25s, padding .25s;
+}
+.map-sidebar.collapsed {
+  width: 0;
+  padding: 0;
+  border-right: none;
+  overflow: hidden;
 }
 .map-sidebar h3 {
   font-size: 12px;
@@ -281,7 +295,15 @@ body {
   color: #5A6B87;
   font-weight: 600;
 }
-#map { flex: 1; z-index: 1; background: #0A1628; }
+
+#map {
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  z-index: 1;
+  background: #0A1628;
+}
 
 /* =========================================================
    LEGEND
@@ -298,6 +320,7 @@ body {
   z-index: 500;
   font-size: 11.5px;
   max-width: 220px;
+  transition: left .25s;
 }
 .legend-title {
   font-size: 10.5px;
@@ -688,7 +711,8 @@ body {
   .map-sidebar.open { transform: translateX(0); }
   .legend { left: 16px; }
 }
-  /* =========================================================
+
+/* =========================================================
    SITE INFO CARD
    ========================================================= */
 .site-info-card {
@@ -783,7 +807,7 @@ body {
 }
 
 /* =========================================================
-   SITE CIRCLE (low zoom)
+   SITE CIRCLE LABEL
    ========================================================= */
 .site-circle-label {
   background: #124191 !important;
@@ -831,11 +855,11 @@ body {
   cursor: pointer;
   font-family: inherit;
 }
-.multi-select-info button:hover { background: rgba(255,255,255,.25); } 
+.multi-select-info button:hover { background: rgba(255,255,255,.25); }
 </style>
 </head>
 <body>
-   <div class="app">
+<div class="app">
 
   <!-- ============ SIDEBAR ============ -->
   <aside class="sidebar">
@@ -902,6 +926,9 @@ body {
         <span class="subtitle" id="pageSubtitle">Visualize LTE cells on the map</span>
       </div>
       <div class="topbar-actions">
+        <button class="btn btn-ghost" id="toggleSidebarBtn" onclick="toggleMapSidebar()" title="Collapse/Expand panel">
+          <span>◀</span><span>Panel</span>
+        </button>
         <button class="btn btn-ghost" onclick="loadCells()">
           <span>🔄</span><span>Refresh</span>
         </button>
@@ -920,6 +947,8 @@ body {
     <!-- ============ PAGE: MAP ============ -->
     <section class="page active" id="page-map">
       <div class="map-container">
+
+        <!-- ========== MAP SIDEBAR ========== -->
         <div class="map-sidebar" id="mapSidebar">
           <h3>Search</h3>
           <div class="filter-group">
@@ -931,76 +960,83 @@ body {
           <div class="filter-group">
             <input type="text" class="filter-search" id="pciFilter" placeholder="PCI number..." oninput="applyFilters()">
           </div>
-         <h3>Display Options</h3>
-<div class="filter-group">
-  <label class="filter-checkbox">
-    <input type="checkbox" id="showSectors" checked onchange="toggleLayer('sectors')">
-    <span>Show Sectors</span>
-  </label>
-  <label class="filter-checkbox">
-    <input type="checkbox" id="showLabels" checked onchange="toggleLayer('labels')">
-    <span>Show Labels</span>
-  </label>
-  <label class="filter-checkbox">
-    <input type="checkbox" id="showSiteCircle" checked onchange="toggleLayer('siteCircle')">
-    <span>Site Circles (low zoom)</span>
-  </label>
-</div>
+          <h3>Display Options</h3>
+          <div class="filter-group">
+            <label class="filter-checkbox">
+              <input type="checkbox" id="showSectors" checked onchange="toggleLayer('sectors')">
+              <span>Show Sectors</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" id="showLabels" checked onchange="toggleLayer('labels')">
+              <span>Show Labels</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" id="showSiteCircle" checked onchange="toggleLayer('siteCircle')">
+              <span>Site Circles (low zoom)</span>
+            </label>
+          </div>
 
-<h3>Label Mode</h3>
-<div class="filter-group">
-  <select id="labelMode" style="width:100%;padding:9px 12px;border:1.5px solid #D7DEEA;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer;" onchange="renderMap()">
-    <option value="name">Cell Name</option>
-    <option value="pci">PCI</option>
-    <option value="both">Both (Name + PCI)</option>
-    <option value="site">Site Name</option>
-    <option value="none">None</option>
-  </select>
-</div>
-         <h3>Actions</h3>
-  <button class="btn btn-ghost" id="multiSelectBtn" style="width:100%;justify-content:center;" onclick="toggleMultiSelectMode()">🎯 Multi-Select Mode</button>
-</div>
-</div>  <!-- ← هذا الـ </div> الجديد: يغلق .map-sidebar -->
+          <h3>Label Mode</h3>
+          <div class="filter-group">
+            <select id="labelMode" style="width:100%;padding:9px 12px;border:1.5px solid #D7DEEA;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer;" onchange="renderMap()">
+              <option value="name">Cell Name</option>
+              <option value="pci">PCI</option>
+              <option value="both">Both (Name + PCI)</option>
+              <option value="site">Site Name</option>
+              <option value="none">None</option>
+            </select>
+          </div>
 
-<div id="map"></div>
+          <h3>Actions</h3>
+          <div class="filter-group">
+            <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="fitAllCells()">🎯 Fit to View</button>
+            <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="clearFilters()">🗑️ Clear Filters</button>
+            <button class="btn btn-ghost" id="multiSelectBtn" style="width:100%;justify-content:center;" onclick="toggleMultiSelectMode()">🎯 Multi-Select Mode</button>
+          </div>
+        </div>
+        <!-- ========== END MAP SIDEBAR ========== -->
 
-<!-- Multi-Select Info Bar -->
-<div class="multi-select-info" id="multiSelectInfo">
-  <span id="multiSelectCount">0 cells selected</span>
-  <button onclick="exportSelectedCells()">📥 Export CSV</button>
-  <button onclick="clearSelection()">✕ Clear</button>
-</div>
+        <!-- ========== MAP + OVERLAYS ========== -->
+        <div id="map"></div>
 
-<!-- Site Info Card -->
-<div class="site-info-card" id="siteInfoCard">
-  <div class="site-info-head">
-    <div class="site-info-title" id="siteInfoTitle">Site Info</div>
-    <button class="site-info-close" onclick="closeSiteInfo()">✕</button>
-  </div>
-  <div class="site-info-body" id="siteInfoBody">
-    <div style="text-align:center;padding:40px 20px;color:#94A3B8;">
-      <div style="font-size:32px;margin-bottom:8px;">📍</div>
-      <div style="font-size:13px;">Click a sector to view details</div>
-    </div>
-  </div>
-</div>
+        <div class="multi-select-info" id="multiSelectInfo">
+          <span id="multiSelectCount">0 cells selected</span>
+          <button onclick="exportSelectedCells()">📥 Export CSV</button>
+          <button onclick="clearSelection()">✕ Clear</button>
+        </div>
 
-<div class="basemap-switcher">
-  <button class="basemap-btn active" data-basemap="street">Street</button>
-  <button class="basemap-btn" data-basemap="satellite">Satellite</button>
-  <button class="basemap-btn" data-basemap="terrain">Terrain</button>
-</div>
-<div class="legend" id="legend">
-  <div class="legend-title">Band Legend</div>
-  <div id="legendItems"></div>
-</div>
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="spinner"></div>
-  <div class="text">Loading cells from Supabase...</div>
-</div>
+        <div class="site-info-card" id="siteInfoCard">
+          <div class="site-info-head">
+            <div class="site-info-title" id="siteInfoTitle">Site Info</div>
+            <button class="site-info-close" onclick="closeSiteInfo()">✕</button>
+          </div>
+          <div class="site-info-body" id="siteInfoBody">
+            <div style="text-align:center;padding:40px 20px;color:#94A3B8;">
+              <div style="font-size:32px;margin-bottom:8px;">📍</div>
+              <div style="font-size:13px;">Click a sector to view details</div>
+            </div>
+          </div>
+        </div>
 
-</div>  <!-- ← يغلق .map-container -->
-</section>
+        <div class="basemap-switcher">
+          <button class="basemap-btn active" data-basemap="street">Street</button>
+          <button class="basemap-btn" data-basemap="satellite">Satellite</button>
+          <button class="basemap-btn" data-basemap="terrain">Terrain</button>
+        </div>
+
+        <div class="legend" id="legend">
+          <div class="legend-title">Band Legend</div>
+          <div id="legendItems"></div>
+        </div>
+
+        <div class="loading-overlay" id="loadingOverlay">
+          <div class="spinner"></div>
+          <div class="text">Loading cells from Supabase...</div>
+        </div>
+
+      </div>
+    </section>
+
     <!-- ============ PAGE: DASHBOARD ============ -->
     <section class="page" id="page-dashboard">
       <div style="padding:24px;overflow-y:auto;flex:1;">
@@ -1467,7 +1503,8 @@ body {
 </div>
 
 <div class="toast" id="toast"></div>
-   <script>
+
+<script>
 /* =========================================================
    CONFIG — Supabase
    ========================================================= */
@@ -1519,9 +1556,9 @@ let currentProjectId = null;
 let allProjects = [];
 let importPreviewData = [];
 let currentView = 'map';
-      let multiSelectMode = false;
+let multiSelectMode = false;
 let selectedCellIds = new Set();
-let selectedPolygons = new Map(); // id -> polygon layer
+let selectedPolygons = new Map();
 
 /* =========================================================
    TOAST
@@ -1582,9 +1619,8 @@ function switchView(page) {
   document.getElementById('pageTitle').textContent = info.title;
   document.getElementById('pageSubtitle').textContent = info.sub;
 
-  // Map needs invalidateSize when returning
   if (page === 'map' && map) {
-    setTimeout(() => map.invalidateSize(), 100);
+    setTimeout(() => map.invalidateSize(), 150);
   }
 }
 
@@ -1593,6 +1629,20 @@ document.querySelectorAll('.nav-item').forEach(function(btn) {
     switchView(btn.dataset.page);
   });
 });
+
+/* =========================================================
+   TOGGLE MAP SIDEBAR
+   ========================================================= */
+function toggleMapSidebar() {
+  const sb = document.getElementById('mapSidebar');
+  const btn = document.getElementById('toggleSidebarBtn');
+  sb.classList.toggle('collapsed');
+  const collapsed = sb.classList.contains('collapsed');
+  btn.querySelector('span').textContent = collapsed ? '▶' : '◀';
+  const legend = document.getElementById('legend');
+  if (legend) legend.style.left = collapsed ? '20px' : '340px';
+  setTimeout(() => { if (map) map.invalidateSize(); }, 300);
+}
 
 /* =========================================================
    MAP INIT
@@ -1623,6 +1673,8 @@ function initMap() {
   sectorLayer = L.layerGroup().addTo(map);
   labelLayer = L.layerGroup().addTo(map);
   coverageLayer = L.layerGroup();
+
+  L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
 
   map.on('zoomend', function() {
     if (visibleCells.length && document.getElementById('showSectors') && document.getElementById('showSectors').checked) {
@@ -1677,15 +1729,17 @@ async function loadCells() {
       }
     }
 
-        allCells = allData.map(normalizeCell);
+    allCells = allData.map(normalizeCell);
     updateStats();
     renderBandFilters();
     renderLegend();
     applyFilters();
 
-    // ← أضف هذين السطرين
-    setTimeout(() => fitAllCells(), 300);
-    setTimeout(() => map.invalidateSize(), 100);
+    // مهم: تحديث حجم الخريطة قبل fitAllCells
+    setTimeout(() => {
+      if (map) map.invalidateSize();
+      setTimeout(() => fitAllCells(), 200);
+    }, 150);
 
     toast('Loaded ' + allCells.length + ' cells', 'success');
   } catch (e) {
@@ -1793,12 +1847,12 @@ function renderLegend() {
 /* =========================================================
    FILTERS
    ========================================================= */
-      /* Enter key → Search + Fly To */
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && e.target && e.target.id === 'searchFilter') {
     searchAndFly();
   }
 });
+
 function applyFilters() {
   const searchEl = document.getElementById('searchFilter');
   const pciEl = document.getElementById('pciFilter');
@@ -1844,8 +1898,8 @@ function renderMap() {
   const labelMode = document.getElementById('labelMode') ? document.getElementById('labelMode').value : 'name';
   const zoom = map.getZoom();
 
-  // ⭐ Site Circle Mode (Zoom < 12): كل Site = دائرة واحدة
-  if (showSiteCircle && zoom < 12) {
+  // Site Circle Mode (Zoom < 11): كل Site = دائرة واحدة
+  if (showSiteCircle && zoom < 11) {
     const sites = {};
     visibleCells.forEach(cell => {
       if (!cell.lat || !cell.long) return;
@@ -1860,7 +1914,7 @@ function renderMap() {
       const count = info.cells.length;
 
       const circle = L.circleMarker([info.lat, info.long], {
-        radius: 8 + Math.min(count, 5),
+        radius: 7 + Math.min(count, 5),
         color: '#fff',
         weight: 2.5,
         fillColor: color,
@@ -1878,8 +1932,8 @@ function renderMap() {
 
       sectorLayer.addLayer(circle);
 
-      // Site name label
-      if (showLabels) {
+      // Site name label — فقط للـ zoom >= 9
+      if (showLabels && zoom >= 9) {
         const label = L.marker([info.lat, info.long], {
           icon: L.divIcon({
             className: 'site-circle-label',
@@ -1892,10 +1946,10 @@ function renderMap() {
         labelLayer.addLayer(label);
       }
     });
-    return; // Don't render sectors at low zoom
+    return;
   }
 
-  // ⭐ Sectors Mode (Zoom >= 12)
+  // Sectors Mode (Zoom >= 11)
   visibleCells.forEach(function(cell) {
     if (!cell.lat || !cell.long) return;
     const center = [cell.lat, cell.long];
@@ -1924,7 +1978,7 @@ function renderMap() {
 
       polygon.on('mouseover', function() {
         this.setStyle({ fillOpacity: 0.85, weight: 2 });
-        if (!multiSelectMode) this.bindTooltip(cell.cell_name, { sticky: true, className: 'cell-tooltip' }).openTooltip();
+        if (!multiSelectMode) this.bindTooltip(cell.cell_name, { sticky: true }).openTooltip();
       });
       polygon.on('mouseout', function() {
         this.setStyle({ fillOpacity: 0.65, weight: 0.8 });
@@ -1934,7 +1988,7 @@ function renderMap() {
       sectorLayer.addLayer(polygon);
     }
 
-    // ⭐ Label Rendering
+    // Labels — تظهر فقط للـ zoom >= 13
     if (showLabels && zoom >= 13) {
       let labelText = '';
       let labelColor = cell.color;
@@ -1950,7 +2004,7 @@ function renderMap() {
         labelText = cell.site;
         labelColor = '#124191';
       } else {
-        return; // 'none'
+        return;
       }
 
       const label = L.marker(center, {
@@ -1968,7 +2022,7 @@ function renderMap() {
 }
 
 /* =========================================================
-   SECTOR SHAPE — Atoll-like 5-point
+   SECTOR SHAPE — 5-point wedge
    ========================================================= */
 function makeSectorCoords(lat, lng, azimuth) {
   const zoom = map.getZoom();
@@ -1976,8 +2030,8 @@ function makeSectorCoords(lat, lng, azimuth) {
   if (zoom >= 16) { radius_m = 150; half_width_m = 45; }
   else if (zoom >= 14) { radius_m = 350; half_width_m = 100; }
   else if (zoom >= 12) { radius_m = 800; half_width_m = 230; }
-  else if (zoom >= 10) { radius_m = 2000; half_width_m = 570; }
-  else { radius_m = 5000; half_width_m = 1400; }
+  else if (zoom >= 11) { radius_m = 1200; half_width_m = 350; }
+  else { radius_m = 2000; half_width_m = 570; }
 
   const near_d = radius_m * 0.04;
   const far_d = radius_m;
@@ -2010,53 +2064,16 @@ function destinationPoint(lat, lng, bearing, distanceM) {
 }
 
 /* =========================================================
-   POPUP
-   ========================================================= */
-function makePopupContent(cell) {
-  const gmapsLink = 'https://www.google.com/maps/search/?api=1&query=' + cell.lat + ',' + cell.long;
-
-  return '<div class="cell-popup">' +
-    '<div class="cell-popup-header" style="background:' + cell.color + ';">' +
-      '<span class="name">' + escapeHtml(cell.cell_name) + '</span>' +
-      '<span class="sector">SEC ' + escapeHtml(cell.sector) + '</span>' +
-    '</div>' +
-    '<div class="cell-popup-body">' +
-      '<div class="cell-popup-row"><span class="k">Cell ID</span><span class="v">' + cell.cell_id + '</span></div>' +
-      '<div class="cell-popup-row"><span class="k">PCI</span><span class="v">' + cell.pci + '</span></div>' +
-      '<div class="cell-popup-row"><span class="k">RSI</span><span class="v">' + cell.rsi + '</span></div>' +
-      '<div class="cell-popup-row"><span class="k">Azimuth</span><span class="v">' + cell.bore + '°</span></div>' +
-      '<div class="cell-popup-row"><span class="k">Radius</span><span class="v">' + (cell.radius / 1000).toFixed(1) + ' km</span></div>' +
-      '<div class="cell-popup-row"><span class="k">Latitude</span><span class="v">' + cell.lat.toFixed(6) + '</span></div>' +
-      '<div class="cell-popup-row"><span class="k">Longitude</span><span class="v">' + cell.long.toFixed(6) + '</span></div>' +
-      '<div class="cell-popup-row"><span class="k">Band</span><span class="v">' + escapeHtml(cell.band) + '</span></div>' +
-      '<div class="cell-popup-row"><span class="k">Site</span><span class="v">' + escapeHtml(cell.site) + '</span></div>' +
-    '</div>' +
-    '<div class="cell-popup-footer">' +
-      '<a href="' + gmapsLink + '" target="_blank" rel="noopener">📍 Google Maps</a>' +
-    '</div>' +
-    '</div>';
-}
-
-/* =========================================================
    ACTIONS
    ========================================================= */
-      function toggleLayer(type) {
-  if (type === 'coverage') {
-    if (document.getElementById('showCoverage') && document.getElementById('showCoverage').checked) {
-      if (!map.hasLayer(coverageLayer)) coverageLayer.addTo(map);
-    } else {
-      if (map.hasLayer(coverageLayer)) map.removeLayer(coverageLayer);
-    }
-  }
+function toggleLayer(type) {
   renderMap();
 }
-
 
 function fitAllCells() {
   if (!visibleCells.length) { toast('No cells to fit', 'error'); return; }
   const bounds = L.latLngBounds(visibleCells.map(c => [c.lat, c.long]));
   map.fitBounds(bounds, { padding: [50, 50] });
-  toast('Fitted to ' + visibleCells.length + ' cells', 'success');
 }
 
 function clearFilters() {
@@ -2395,7 +2412,7 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
-     
+
 /* =========================================================
    TOOL — DISTANCE & BEARING
    ========================================================= */
@@ -2569,11 +2586,10 @@ function exportKML() {
   const filename = (document.getElementById('kml_filename').value.trim() || 'RF_Planning_Export') + '.kml';
 
   function hexToKML(hex) {
-    // KML uses aabbggrr format
     const r = hex.substring(1, 3);
     const g = hex.substring(3, 5);
     const b = hex.substring(5, 7);
-    return 'ff' + b + g + r; // alpha = ff (opaque)
+    return 'ff' + b + g + r;
   }
 
   function getColor(cell) {
@@ -2588,7 +2604,6 @@ function exportKML() {
   kml += '  <name>' + filename + '</name>\n';
   kml += '  <description>RF Planning Export — ' + allCells.length + ' cells</description>\n';
 
-  // Styles per band/sector
   const stylesUsed = new Set();
   allCells.forEach(c => stylesUsed.add(getColor(c)));
 
@@ -2627,7 +2642,6 @@ function exportKML() {
     kml += '      <styleUrl>#' + styleId + '</styleUrl>\n';
 
     if (includeSectors) {
-      // Sector polygon (5 points like Atoll)
       const coords = kmlSectorCoords(cell.lat, cell.long, cell.bore);
       kml += '      <Polygon>\n';
       kml += '        <outerBoundaryIs><LinearRing><coordinates>\n          ';
@@ -2647,7 +2661,6 @@ function exportKML() {
   kml += '</Document>\n';
   kml += '</kml>\n';
 
-  // Download
   const blob = new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -2677,14 +2690,12 @@ function kmlSectorCoords(lat, lng, azimuth) {
 
   return [pt(0, 0), pt(near_d, -near_w), pt(far_d, -far_w), pt(far_d, far_w), pt(near_d, near_w)];
 }
- 
+
 /* =========================================================
    TOOL — PCI CONFLICT CHECKER
-   محوّل من pci_core.py — نفس المنطق بالكامل
    ========================================================= */
 const EARTH_RADIUS_M = 6371000.0;
 
-/* ---------- Geometry Primitives ---------- */
 function haversineDistance(lat1, lon1, lat2, lon2) {
   const phi1 = lat1 * Math.PI / 180;
   const phi2 = lat2 * Math.PI / 180;
@@ -2716,7 +2727,6 @@ function isFaceToFace(cell1, cell2, thresholdDeg) {
          boreDifference(cell2.bore, b_2to1) <= thresholdDeg;
 }
 
-/* ---------- Spatial Index ---------- */
 function findPairsWithin(cells, maxRadiusM) {
   if (cells.length < 2) return [];
   const bucketDeg = Math.max(maxRadiusM / 111000.0, 0.005);
@@ -2753,7 +2763,6 @@ function findPairsWithin(cells, maxRadiusM) {
   return Array.from(pairs).map(s => s.split(',').map(Number)).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
 }
 
-/* ---------- Conflict Detection ---------- */
 function analyzeConflicts(cells, settings) {
   const maxRadius = Math.max(
     settings.same_pci_radius_m,
@@ -2813,7 +2822,6 @@ function analyzeConflicts(cells, settings) {
   return { conflicts, faceToFaceConflicts, samePciSameHeading, neighborMap };
 }
 
-/* ---------- Optimization ---------- */
 function conflictProfile(neighbors, currentPciOf, settings) {
   const samePciPenalty = new Map();
   const mod3Penalty = new Map();
@@ -2913,7 +2921,6 @@ function optimizePCI(cells, analysis, settings, pciPool, passes) {
   return cells;
 }
 
-/* ---------- Main Run ---------- */
 let lastPCIResults = null;
 
 function runPCIChecker() {
@@ -2946,7 +2953,6 @@ function runPCIChecker() {
       const analysis = analyzeConflicts(cellsCopy, settings);
       const optimized = optimizePCI(cellsCopy, analysis, settings, pciPool, 3);
 
-      // Determine still-conflicted cells after optimization
       const newPciById = new Map();
       optimized.forEach(c => newPciById.set(c.id, c.suggested_pci));
 
@@ -3004,7 +3010,6 @@ function renderPCIResults(result) {
   const unresolvedCard = document.getElementById('kpi_unresolved_card');
   unresolvedCard.className = 'kpi-card ' + (unresolvedN > 0 ? 'danger' : 'success');
 
-  // Conflicts table
   const conflictBody = document.querySelector('#pciConflictsTable tbody');
   conflictBody.innerHTML = result.conflicts.slice(0, 200).map(c =>
     '<tr>' +
@@ -3020,7 +3025,6 @@ function renderPCIResults(result) {
     '</tr>'
   ).join('') || '<tr><td colspan="6" style="text-align:center;padding:20px;color:#5A6B87;">No conflicts 🎉</td></tr>';
 
-  // Optimization table
   const optBody = document.querySelector('#pciOptTable tbody');
   const sorted = result.cells.slice().sort((a, b) => {
     const aChanged = a.suggested_pci !== a.pci ? 1 : 0;
@@ -3093,11 +3097,11 @@ function showPCIOnMap() {
 
       let color;
       if (lastPCIResults.stillConflicted.has(cell.id)) {
-        color = '#D64545'; // Red — unresolved
+        color = '#D64545';
       } else if (cell.suggested_pci !== cell.pci) {
-        color = '#1F9D55'; // Green — resolved
+        color = '#1F9D55';
       } else {
-        color = '#94A3B8'; // Gray — clean
+        color = '#94A3B8';
       }
 
       const coords = makeSectorCoords(cell.lat, cell.long, cell.bore);
@@ -3127,11 +3131,6 @@ function showPCIOnMap() {
 }
 
 /* =========================================================
-   READY
-   ========================================================= */
-console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
-console.log('%cTools: PCI Checker · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
-      /* =========================================================
    MULTI-SELECT
    ========================================================= */
 function toggleMultiSelectMode() {
@@ -3289,12 +3288,9 @@ function searchAndFly() {
     return;
   }
 
-  // Fly to cell
   map.flyTo([match.lat, match.long], 16, { duration: 1.5 });
 
-  // Highlight after fly
   setTimeout(() => {
-    // Find polygon for this cell
     sectorLayer.eachLayer(layer => {
       if (layer.cellData && layer.cellData.id === match.id) {
         layer.setStyle({
@@ -3319,8 +3315,13 @@ function searchAndFly() {
 
   toast('📍 Flying to ' + match.cell_name, 'success');
 }
+
+/* =========================================================
+   READY
+   ========================================================= */
+console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
+console.log('%cTools: PCI Checker · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
 </script>
 
 </body>
-</html>     
-      
+</html>
