@@ -1112,46 +1112,24 @@ function initMap() {
 async function loadCells() {
   document.getElementById('loadingOverlay').style.display = 'flex';
   
-  // ⭐ تعريف المتغيرات خارج try
-  const PAGE_SIZE = 1000;
-  let allData = [];
-  let page = 0;
-  let hasMore = true;
-  
   try {
-    // ⭐ تحميل كل البيانات — Supabase الحد 1000 لكل طلب
-    while (hasMore) {
-      const from = page * PAGE_SIZE;
-      const to = from + PAGE_SIZE - 1;
-      
-      let query = db
-        .from('rf_cells')
-        .select('*')
-        .order('cell_name')
-        .range(from, to);
-      
-      // إذا فيه Project محدد
-      if (currentProjectId) {
-        query = query.eq('project_id', currentProjectId);
-      }
-      
-      const { data, error } = await query;
-      
-      if (error) throw error;
-      
-      if (data && data.length > 0) {
-        allData = allData.concat(data);
-        page++;
-        hasMore = data.length === PAGE_SIZE;
-        console.log(`📥 Page ${page}: ${data.length} cells (total: ${allData.length})`);
-      } else {
-        hasMore = false;
-      }
+    // تحميل أول 5000 خلية
+    let query = db
+      .from('rf_cells')
+      .select('*')
+      .order('cell_name')
+      .limit(5000);
+    
+    if (currentProjectId) {
+      query = query.eq('project_id', currentProjectId);
     }
     
-    console.log(`✅ Loaded ${allData.length} total cells`);
+    const { data, error } = await query;
+    if (error) throw error;
     
-    allCells = allData.map(normalizeCell);
+    console.log(`✅ Loaded ${data.length} cells`);
+    
+    allCells = (data || []).map(normalizeCell);
     updateStats();
     renderBandFilters();
     renderLegend();
@@ -1165,7 +1143,6 @@ async function loadCells() {
     document.getElementById('loadingOverlay').style.display = 'none';
   }
 }
-
 /* =========================================================
    NORMALIZE CELL DATA
    ========================================================= */
