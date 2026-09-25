@@ -960,6 +960,18 @@ const SUPABASE_KEY = 'sb_publishable_HAf79ZGumF-BKQhnJoW9ZQ_5V2ubxqT';;
 /* =========================================================
    BAND COLORS — Professional LTE Palette
    ========================================================= */
+     /* =========================================================
+   SECTOR COLORS — A/B/C لكل Site
+   ========================================================= */
+const SECTOR_COLORS = {
+  'A': '#D64545',  // أحمر — Sector 1
+  'B': '#1F9D55',  // أخضر — Sector 2
+  'C': '#124191',  // أزرق — Sector 3
+  'D': '#F2A900',  // برتقالي
+  'E': '#8B5CF6',  // بنفسجي
+  'F': '#EC4899',  // وردي
+  'G': '#06B6D4',  // سماوي
+};
 const BAND_COLORS = {
   'LAN':     '#124191',  // Dark Blue
   'LBG':     '#1F9D55',  // Green
@@ -1183,7 +1195,7 @@ function normalizeCell(row) {
     band:      band,
     site:      site,
     sector:    sector,
-    color:     BAND_COLORS[band] || BAND_COLORS.DEFAULT
+   color: SECTOR_COLORS[sector] || BAND_COLORS[band] || BAND_COLORS.DEFAULT
   };
 }
 
@@ -1311,15 +1323,14 @@ function renderMap() {
     if (showSectors) {
       const sectorCoords = makeSectorCoords(cell.lat, cell.long, cell.bore, cell.radius, 120);
 
-      const polygon = L.polygon(sectorCoords, {
+     const polygon = L.polygon(sectorCoords, {
   color: cell.color,
-  weight: 1,
+  weight: 0.8,
   opacity: 1,
   fillColor: cell.color,
-  fillOpacity: 0.7,
+  fillOpacity: 0.65,
   interactive: true,
-  lineJoin: 'round',
-  lineCap: 'round'
+  lineJoin: 'round'
 });
 
       polygon.bindPopup(makePopupContent(cell), { maxWidth: 340 });
@@ -1377,8 +1388,30 @@ function renderMap() {
    SECTOR SHAPE — Atoll-like 3-Sector Visualization
    شكل Sector صغير وواضح مثل برنامج Atoll
    ========================================================= */
+/* =========================================================
+   SECTOR SHAPE — Small & Professional (Atoll-like)
+   ========================================================= */
 function makeSectorCoords(lat, lng, azimuth, radiusM, beamWidth) {
-  // ⭐ حجم Sector بصري (يتغير حسب الـ Zoom)
+  // ⭐ حجم Sector بالدرجات (صغير جداً — متناسب مع Zoom)
+  // كل 0.0005 درجة ≈ 55 متر في العراق
+  const visualSizeDeg = 0.0008;  // صغير — يشبه Atoll
+  const halfBeam = beamWidth / 2;
+
+  // تحويل الحجم إلى متر (لحساب النقاط)
+  const visualSizeM = visualSizeDeg * 111000;
+
+  // نقطتين على القوس
+  const point1 = destinationPoint(lat, lng, azimuth - halfBeam, visualSizeM);
+  const point2 = destinationPoint(lat, lng, azimuth + halfBeam, visualSizeM);
+
+  // Sector: مركز + نقطتين
+  return [
+    [lat, lng],
+    point1,
+    point2
+  ];
+}
+     // ⭐ حجم Sector بصري (يتغير حسب الـ Zoom)
   // القيمة بالدرجات — كل 0.001 ≈ 110 متر في العراق
   const visualSize = 0.005; // ≈ 550 متر
   const halfBeam = beamWidth / 2;
