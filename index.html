@@ -688,6 +688,150 @@ body {
   .map-sidebar.open { transform: translateX(0); }
   .legend { left: 16px; }
 }
+  /* =========================================================
+   SITE INFO CARD
+   ========================================================= */
+.site-info-card {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 340px;
+  max-height: calc(100% - 32px);
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(12,27,61,.2);
+  border: 1px solid #E9EEF6;
+  z-index: 550;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+.site-info-card.show { display: flex; }
+.site-info-head {
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #0C1B3D, #142A5C);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.site-info-title {
+  font-size: 14px;
+  font-weight: 700;
+  flex: 1;
+  font-family: 'JetBrains Mono', monospace;
+}
+.site-info-close {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.1);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.15);
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.site-info-close:hover { background: rgba(255,255,255,.2); }
+.site-info-body {
+  padding: 18px;
+  overflow-y: auto;
+  flex: 1;
+}
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #F0F3F9;
+  font-size: 12.5px;
+}
+.info-row:last-child { border-bottom: none; }
+.info-row .k { color: #5A6B87; font-weight: 500; }
+.info-row .v {
+  color: #0C1B3D;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  text-align: right;
+  word-break: break-word;
+  max-width: 60%;
+}
+.info-section-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #5A6B87;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  margin: 16px 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #F0F3F9;
+}
+.info-section-title:first-child { margin-top: 0; }
+
+/* =========================================================
+   SECTOR HIGHLIGHT
+   ========================================================= */
+.sector-highlight {
+  animation: sectorPulse 1s ease-in-out 3;
+}
+@keyframes sectorPulse {
+  0%, 100% { fill-opacity: 0.65; stroke-width: 0.8; }
+  50% { fill-opacity: 1; stroke-width: 3; }
+}
+
+/* =========================================================
+   SITE CIRCLE (low zoom)
+   ========================================================= */
+.site-circle-label {
+  background: #124191 !important;
+  color: #fff !important;
+  padding: 4px 10px !important;
+  border-radius: 20px !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+  box-shadow: 0 3px 10px rgba(18,65,145,.4) !important;
+  border: 2px solid #fff !important;
+  text-align: center !important;
+}
+
+/* =========================================================
+   MULTI-SELECT BOX
+   ========================================================= */
+.multi-select-info {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #124191;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 700;
+  z-index: 550;
+  display: none;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 8px 24px rgba(18,65,145,.4);
+}
+.multi-select-info.show { display: flex; }
+.multi-select-info button {
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.3);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.multi-select-info button:hover { background: rgba(255,255,255,.25); } 
 </style>
 </head>
 <body>
@@ -787,25 +931,60 @@ body {
           <div class="filter-group">
             <input type="text" class="filter-search" id="pciFilter" placeholder="PCI number..." oninput="applyFilters()">
           </div>
-          <h3>Display Options</h3>
-          <div class="filter-group">
-            <label class="filter-checkbox">
-              <input type="checkbox" id="showSectors" checked onchange="toggleLayer('sectors')">
-              <span>Show Sectors</span>
-            </label>
-            <label class="filter-checkbox">
-              <input type="checkbox" id="showLabels" checked onchange="toggleLayer('labels')">
-              <span>Show Labels</span>
-            </label>
-          </div>
-          <h3>Actions</h3>
-          <div class="filter-group">
-            <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="fitAllCells()">🎯 Fit to View</button>
-            <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="clearFilters()">🗑️ Clear Filters</button>
-          </div>
-        </div>
-        <div id="map"></div>
-        <div class="basemap-switcher">
+         <h3>Display Options</h3>
+<div class="filter-group">
+  <label class="filter-checkbox">
+    <input type="checkbox" id="showSectors" checked onchange="toggleLayer('sectors')">
+    <span>Show Sectors</span>
+  </label>
+  <label class="filter-checkbox">
+    <input type="checkbox" id="showLabels" checked onchange="toggleLayer('labels')">
+    <span>Show Labels</span>
+  </label>
+  <label class="filter-checkbox">
+    <input type="checkbox" id="showSiteCircle" checked onchange="toggleLayer('siteCircle')">
+    <span>Site Circles (low zoom)</span>
+  </label>
+</div>
+
+<h3>Label Mode</h3>
+<div class="filter-group">
+  <select id="labelMode" style="width:100%;padding:9px 12px;border:1.5px solid #D7DEEA;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer;" onchange="renderMap()">
+    <option value="name">Cell Name</option>
+    <option value="pci">PCI</option>
+    <option value="both">Both (Name + PCI)</option>
+    <option value="site">Site Name</option>
+    <option value="none">None</option>
+  </select>
+</div>
+         <h3>Actions</h3>
+<div class="filter-group">
+  <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="fitAllCells()">🎯 Fit to View</button>
+  <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="clearFilters()">🗑️ Clear Filters</button>
+  <button class="btn btn-ghost" id="multiSelectBtn" style="width:100%;justify-content:center;" onclick="toggleMultiSelectMode()">🎯 Multi-Select Mode</button>
+</div>
+<div id="map"></div>
+
+<!-- Multi-Select Info Bar -->
+<div class="multi-select-info" id="multiSelectInfo">
+  <span id="multiSelectCount">0 cells selected</span>
+  <button onclick="exportSelectedCells()">📥 Export CSV</button>
+  <button onclick="clearSelection()">✕ Clear</button>
+</div>
+
+<!-- Site Info Card -->
+<div class="site-info-card" id="siteInfoCard">
+  <div class="site-info-head">
+    <div class="site-info-title" id="siteInfoTitle">Site Info</div>
+    <button class="site-info-close" onclick="closeSiteInfo()">✕</button>
+  </div>
+  <div class="site-info-body" id="siteInfoBody">
+    <div style="text-align:center;padding:40px 20px;color:#94A3B8;">
+      <div style="font-size:32px;margin-bottom:8px;">📍</div>
+      <div style="font-size:13px;">Click a sector to view details</div>
+    </div>
+  </div>
+</div>        <div class="basemap-switcher">
           <button class="basemap-btn active" data-basemap="street">Street</button>
           <button class="basemap-btn" data-basemap="satellite">Satellite</button>
           <button class="basemap-btn" data-basemap="terrain">Terrain</button>
@@ -1339,6 +1518,9 @@ let currentProjectId = null;
 let allProjects = [];
 let importPreviewData = [];
 let currentView = 'map';
+      let multiSelectMode = false;
+let selectedCellIds = new Set();
+let selectedPolygons = new Map(); // id -> polygon layer
 
 /* =========================================================
    TOAST
@@ -1606,6 +1788,12 @@ function renderLegend() {
 /* =========================================================
    FILTERS
    ========================================================= */
+      /* Enter key → Search + Fly To */
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && e.target && e.target.id === 'searchFilter') {
+    searchAndFly();
+  }
+});
 function applyFilters() {
   const searchEl = document.getElementById('searchFilter');
   const pciEl = document.getElementById('pciFilter');
@@ -1647,7 +1835,62 @@ function renderMap() {
 
   const showSectors = document.getElementById('showSectors') && document.getElementById('showSectors').checked;
   const showLabels = document.getElementById('showLabels') && document.getElementById('showLabels').checked;
+  const showSiteCircle = document.getElementById('showSiteCircle') && document.getElementById('showSiteCircle').checked;
+  const labelMode = document.getElementById('labelMode') ? document.getElementById('labelMode').value : 'name';
+  const zoom = map.getZoom();
 
+  // ⭐ Site Circle Mode (Zoom < 12): كل Site = دائرة واحدة
+  if (showSiteCircle && zoom < 12) {
+    const sites = {};
+    visibleCells.forEach(cell => {
+      if (!cell.lat || !cell.long) return;
+      if (!sites[cell.site]) {
+        sites[cell.site] = { lat: cell.lat, long: cell.long, cells: [], band: cell.band };
+      }
+      sites[cell.site].cells.push(cell);
+    });
+
+    Object.entries(sites).forEach(([siteName, info]) => {
+      const color = BAND_COLORS[info.band] || BAND_COLORS.DEFAULT;
+      const count = info.cells.length;
+
+      const circle = L.circleMarker([info.lat, info.long], {
+        radius: 8 + Math.min(count, 5),
+        color: '#fff',
+        weight: 2.5,
+        fillColor: color,
+        fillOpacity: 0.9,
+        interactive: true
+      });
+
+      circle.bindPopup(
+        '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:200px;">' +
+          '<div style="font-weight:800;font-size:14px;font-family:monospace;margin-bottom:8px;color:#0C1B3D;">' + escapeHtml(siteName) + '</div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;"><span style="color:#5A6B87;">Cells:</span><b>' + count + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:#5A6B87;">Band:</span><b>' + escapeHtml(info.band) + '</b></div>' +
+        '</div>'
+      );
+
+      sectorLayer.addLayer(circle);
+
+      // Site name label
+      if (showLabels) {
+        const label = L.marker([info.lat, info.long], {
+          icon: L.divIcon({
+            className: 'site-circle-label',
+            html: '<div style="background:#124191;color:#fff;padding:3px 10px;border-radius:20px;font-family:\'JetBrains Mono\',monospace;font-size:10.5px;font-weight:800;white-space:nowrap;box-shadow:0 3px 10px rgba(18,65,145,.4);border:2px solid #fff;">' + escapeHtml(siteName) + '</div>',
+            iconSize: null,
+            iconAnchor: [-20, -18]
+          }),
+          interactive: false
+        });
+        labelLayer.addLayer(label);
+      }
+    });
+    return; // Don't render sectors at low zoom
+  }
+
+  // ⭐ Sectors Mode (Zoom >= 12)
   visibleCells.forEach(function(cell) {
     if (!cell.lat || !cell.long) return;
     const center = [cell.lat, cell.long];
@@ -1664,17 +1907,51 @@ function renderMap() {
         lineJoin: 'round'
       });
 
-      polygon.bindPopup(makePopupContent(cell), { maxWidth: 340 });
-      polygon.on('mouseover', function() { this.setStyle({ fillOpacity: 0.85, weight: 2 }); });
-      polygon.on('mouseout', function() { this.setStyle({ fillOpacity: 0.65, weight: 0.8 }); });
+      polygon.cellData = cell;
+
+      polygon.on('click', function(e) {
+        if (multiSelectMode) {
+          toggleCellSelection(cell, this);
+        } else {
+          showSiteInfo(cell);
+        }
+      });
+
+      polygon.on('mouseover', function() {
+        this.setStyle({ fillOpacity: 0.85, weight: 2 });
+        if (!multiSelectMode) this.bindTooltip(cell.cell_name, { sticky: true, className: 'cell-tooltip' }).openTooltip();
+      });
+      polygon.on('mouseout', function() {
+        this.setStyle({ fillOpacity: 0.65, weight: 0.8 });
+        this.closeTooltip();
+      });
+
       sectorLayer.addLayer(polygon);
     }
 
-    if (showLabels && map.getZoom() >= 14) {
+    // ⭐ Label Rendering
+    if (showLabels && zoom >= 13) {
+      let labelText = '';
+      let labelColor = cell.color;
+
+      if (labelMode === 'name') {
+        labelText = cell.cell_name;
+      } else if (labelMode === 'pci') {
+        labelText = 'PCI ' + cell.pci;
+        labelColor = '#0C1B3D';
+      } else if (labelMode === 'both') {
+        labelText = cell.cell_name + ' · ' + cell.pci;
+      } else if (labelMode === 'site') {
+        labelText = cell.site;
+        labelColor = '#124191';
+      } else {
+        return; // 'none'
+      }
+
       const label = L.marker(center, {
         icon: L.divIcon({
           className: 'cell-label',
-          html: '<div style="background:' + cell.color + ';color:#fff;padding:2px 7px;border-radius:10px;font-family:\'JetBrains Mono\',monospace;font-size:9.5px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3);border:1.5px solid #fff;">' + escapeHtml(cell.cell_name) + '</div>',
+          html: '<div style="background:' + labelColor + ';color:#fff;padding:2px 7px;border-radius:10px;font-family:\'JetBrains Mono\',monospace;font-size:9.5px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3);border:1.5px solid #fff;">' + escapeHtml(labelText) + '</div>',
           iconSize: null,
           iconAnchor: [-6, 12]
         }),
@@ -2837,6 +3114,194 @@ function showPCIOnMap() {
    ========================================================= */
 console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
 console.log('%cTools: PCI Checker · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
+      /* =========================================================
+   MULTI-SELECT
+   ========================================================= */
+function toggleMultiSelectMode() {
+  multiSelectMode = !multiSelectMode;
+
+  const btn = document.getElementById('multiSelectBtn');
+  if (multiSelectMode) {
+    btn.classList.add('active');
+    btn.style.background = '#D64545';
+    btn.style.color = '#fff';
+    btn.style.borderColor = '#D64545';
+    toast('Multi-Select ON — Click sectors to select', 'info');
+  } else {
+    btn.classList.remove('active');
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+    clearSelection();
+    toast('Multi-Select OFF', 'info');
+  }
+}
+
+function toggleCellSelection(cell, polygon) {
+  if (selectedCellIds.has(cell.id)) {
+    selectedCellIds.delete(cell.id);
+    selectedPolygons.delete(cell.id);
+    polygon.setStyle({
+      color: cell.color,
+      fillColor: cell.color,
+      fillOpacity: 0.65,
+      weight: 0.8
+    });
+  } else {
+    selectedCellIds.add(cell.id);
+    selectedPolygons.set(cell.id, polygon);
+    polygon.setStyle({
+      color: '#FFD700',
+      fillColor: '#FFD700',
+      fillOpacity: 0.9,
+      weight: 3
+    });
+  }
+  updateMultiSelectInfo();
+}
+
+function updateMultiSelectInfo() {
+  const el = document.getElementById('multiSelectInfo');
+  const countEl = document.getElementById('multiSelectCount');
+  if (!el) return;
+
+  if (selectedCellIds.size > 0) {
+    el.classList.add('show');
+    countEl.textContent = selectedCellIds.size + ' cells selected';
+  } else {
+    el.classList.remove('show');
+  }
+}
+
+function clearSelection() {
+  selectedPolygons.forEach((polygon, id) => {
+    const cell = allCells.find(c => c.id === id);
+    if (cell) {
+      polygon.setStyle({
+        color: cell.color,
+        fillColor: cell.color,
+        fillOpacity: 0.65,
+        weight: 0.8
+      });
+    }
+  });
+  selectedCellIds.clear();
+  selectedPolygons.clear();
+  updateMultiSelectInfo();
+}
+
+function exportSelectedCells() {
+  if (!selectedCellIds.size) { toast('No cells selected', 'error'); return; }
+
+  const selected = allCells.filter(c => selectedCellIds.has(c.id));
+  const rows = [['Cell Name', 'PCI', 'RSI', 'Lat', 'Long', 'Azimuth', 'Site', 'Band', 'Sector']];
+  selected.forEach(c => {
+    rows.push([c.cell_name, c.pci, c.rsi, c.lat, c.long, c.bore, c.site, c.band, c.sector]);
+  });
+
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Selected_Cells_' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('✅ Exported ' + selected.length + ' cells', 'success');
+}
+
+/* =========================================================
+   SITE INFO CARD
+   ========================================================= */
+function showSiteInfo(cell) {
+  const card = document.getElementById('siteInfoCard');
+  const title = document.getElementById('siteInfoTitle');
+  const body = document.getElementById('siteInfoBody');
+
+  title.textContent = cell.cell_name;
+  card.classList.add('show');
+
+  const gmapsLink = 'https://www.google.com/maps/search/?api=1&query=' + cell.lat + ',' + cell.long;
+  const streetLink = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + cell.lat + ',' + cell.long;
+
+  body.innerHTML =
+    '<div class="info-section-title">📡 Cell Info</div>' +
+    '<div class="info-row"><span class="k">Cell Name</span><span class="v">' + escapeHtml(cell.cell_name) + '</span></div>' +
+    '<div class="info-row"><span class="k">Site</span><span class="v">' + escapeHtml(cell.site) + '</span></div>' +
+    '<div class="info-row"><span class="k">Sector</span><span class="v">' + escapeHtml(cell.sector) + '</span></div>' +
+    '<div class="info-row"><span class="k">Band</span><span class="v">' + escapeHtml(cell.band) + '</span></div>' +
+    '<div class="info-row"><span class="k">Cell ID</span><span class="v">' + cell.cell_id + '</span></div>' +
+
+    '<div class="info-section-title">🔢 RF Parameters</div>' +
+    '<div class="info-row"><span class="k">PCI</span><span class="v" style="color:#124191;">' + cell.pci + '</span></div>' +
+    '<div class="info-row"><span class="k">RSI</span><span class="v">' + cell.rsi + '</span></div>' +
+    '<div class="info-row"><span class="k">Azimuth</span><span class="v">' + cell.bore + '°</span></div>' +
+    '<div class="info-row"><span class="k">Radius</span><span class="v">' + (cell.radius / 1000).toFixed(2) + ' km</span></div>' +
+
+    '<div class="info-section-title">📍 Location</div>' +
+    '<div class="info-row"><span class="k">Latitude</span><span class="v">' + cell.lat.toFixed(6) + '</span></div>' +
+    '<div class="info-row"><span class="k">Longitude</span><span class="v">' + cell.long.toFixed(6) + '</span></div>' +
+
+    '<div style="display:flex;gap:8px;margin-top:18px;">' +
+      '<a href="' + gmapsLink + '" target="_blank" rel="noopener" style="flex:1;text-align:center;padding:9px;background:#124191;color:#fff;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;">📍 Maps</a>' +
+      '<a href="' + streetLink + '" target="_blank" rel="noopener" style="flex:1;text-align:center;padding:9px;background:#1F9D55;color:#fff;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;">🌐 Street View</a>' +
+    '</div>';
+}
+
+function closeSiteInfo() {
+  document.getElementById('siteInfoCard').classList.remove('show');
+}
+
+/* =========================================================
+   SEARCH + FLY TO
+   ========================================================= */
+function searchAndFly() {
+  const query = (document.getElementById('searchFilter').value || '').trim().toLowerCase();
+  if (!query) { toast('Enter search text', 'error'); return; }
+
+  const match = allCells.find(c =>
+    c.cell_name.toLowerCase() === query ||
+    c.cell_name.toLowerCase().includes(query) ||
+    String(c.pci) === query
+  );
+
+  if (!match) {
+    toast('No match found for "' + query + '"', 'error');
+    return;
+  }
+
+  // Fly to cell
+  map.flyTo([match.lat, match.long], 16, { duration: 1.5 });
+
+  // Highlight after fly
+  setTimeout(() => {
+    // Find polygon for this cell
+    sectorLayer.eachLayer(layer => {
+      if (layer.cellData && layer.cellData.id === match.id) {
+        layer.setStyle({
+          color: '#FFD700',
+          fillColor: '#FFD700',
+          fillOpacity: 1,
+          weight: 4
+        });
+        layer.openPopup();
+        setTimeout(() => {
+          layer.setStyle({
+            color: match.color,
+            fillColor: match.color,
+            fillOpacity: 0.65,
+            weight: 0.8
+          });
+        }, 4000);
+      }
+    });
+    showSiteInfo(match);
+  }, 1600);
+
+  toast('📍 Flying to ' + match.cell_name, 'success');
+}
 </script>
 
 </body>
