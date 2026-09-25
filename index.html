@@ -1845,39 +1845,7 @@ async function importSaveToSupabase() {
   }
 }
 
-/* =========================================================
-   MODIFY loadCells TO FILTER BY PROJECT
-   ========================================================= */
-const _origLoadCells = loadCells;
-loadCells = async function() {
-  document.getElementById('loadingOverlay').style.display = 'flex';
-  
-  try {
-    let query = db.from('rf_cells').select('*').order('cell_name');
-    
-    // Filter by current project if selected
-    if (currentProjectId) {
-      query = query.eq('project_id', currentProjectId);
-    }
-    
-    const { data, error } = await query;
-    if (error) throw error;
-    
-    allCells = allData.map(normalizeCell);
-console.log(`✅ Loaded ${allCells.length} total cells`);
-    updateStats();
-    renderBandFilters();
-    renderLegend();
-    applyFilters();
-    
-    toast(`Loaded ${allCells.length} cells`, 'success');
-  } catch (e) {
-    console.error(e);
-    toast('Error loading cells: ' + e.message, 'error');
-  } finally {
-    document.getElementById('loadingOverlay').style.display = 'none';
-  }
-};
+
 
 /* =========================================================
    UPDATE NAV TO INCLUDE PROJECTS
