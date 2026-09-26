@@ -2409,6 +2409,9 @@ function applyFilters() {
   const showLTE = !lteEl || lteEl.checked;
 
   visibleCells = allCells.filter(function(c) {
+    // 🛑 استثنِ الخلايا بدون sector
+    if (!/[A-Z]$/.test(c.cell_name)) return false;
+
     // فلتر التكنولوجيا
     if (c.tech === 'GSM' && !showGSM) return false;
     if (c.tech === 'LTE' && !showLTE) return false;
@@ -3332,15 +3335,18 @@ async function importSaveToSupabase() {
     let saved = 0;
     for (let i = 0; i < cellsWithProject.length; i += BATCH) {
       const batch = cellsWithProject.slice(i, i + BATCH);
-      const { error } = await db.from('rf_cells').insert(batch);
+      // upsert بدل insert — يحدّث الموجود ويضيف الجديد
+      const { error } = await db.from('rf_cells').upsert(batch, {
+        onConflict: 'cell_name,project_id',
+        ignoreDuplicates: false
+      });
       if (error) {
-        console.error('❌ Insert error:', error);
+        console.error('❌ Upsert error:', error);
         throw error;
       }
       saved += batch.length;
       btn.textContent = 'Saving ' + saved + '/' + cellsWithProject.length + '...';
     }
-
     toast('✅ Saved ' + saved + ' cells', 'success');
     importClearPreview();
     await loadProjects();
@@ -4403,6 +4409,21 @@ function nbAnalyzeCell(sourceCell, radius, threshold) {
     const nbName = item.value;
     const feat = nbFindCell(nbName);
 
+    // 🛑 إذا كان الـ NB موقعاً وليس خلية (بدون sector)، اعتبره Not Found
+    if (feat && !/[A-Z]$/.test(feat.cell_name)) {
+      neighbors.push({
+        name: nbName,
+        cell: null,
+        distance: null,
+        isFront: false,
+        status: 'Added (Not Found)',
+        nbField: item.slot,
+        nbSlotNum: item.slotNum
+      });
+      seen.add(nbName.toUpperCase());
+      return;
+    }
+
     if (!feat) {
       neighbors.push({
         name: nbName,
@@ -4438,8 +4459,16 @@ function nbAnalyzeCell(sourceCell, radius, threshold) {
     if (fname === sourceName.toUpperCase()) return;
     if (seen.has(fname)) return;
 
-    // GSM فقط
+    // 🛑 GSM فقط
     if (feat.tech !== 'GSM') return;
+
+    // 🛑 استثنِ الخلايا بدون sector (لا تنتهي بحرف A-Z)
+    if (!/[A-Z]$/.test(feat.cell_name)) return;
+
+    // 🛑 استثنِ co-site cells
+    const sourceSite = sourceName.replace(/[A-Z]$/, '');
+    const featSite = feat.cell_name.replace(/[A-Z]$/, '');
+    if (sourceSite === featSite) return;
 
     const dist = haversineDistance(sLat, sLon, feat.lat, feat.long);
     if (dist > radius) return;
