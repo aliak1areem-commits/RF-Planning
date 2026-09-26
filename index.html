@@ -957,6 +957,19 @@ body {
           <div class="filter-group">
             <input type="text" class="filter-search" id="searchFilter" placeholder="🔍 Cell name, site, PCI..." oninput="applyFilters()">
           </div>
+                     <h3>Filter by Technology</h3>
+          <div class="filter-group">
+            <label class="filter-checkbox">
+              <input type="checkbox" id="filterGSM" checked onchange="applyFilters()">
+              <span style="color:#D97706;font-weight:700;">📡 GSM (2G)</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" id="filterLTE" checked onchange="applyFilters()">
+              <span style="color:#124191;font-weight:700;">📶 LTE (4G)</span>
+            </label>
+          </div>
+
+          <h3>Filter by PCI</h3>
                     <h3>Filter by PCI</h3>
           <div class="filter-group">
             <input type="text" class="filter-search" id="pciFilter" placeholder="PCI number..." oninput="applyFilters()">
@@ -1969,10 +1982,16 @@ async function loadCells() {
    ========================================================= */
 function normalizeCell(row) {
   const name = row.cell_name || '';
-  const prefixMatch = name.match(/^[A-Z]+/);
+    const prefixMatch = name.match(/^[A-Z]+/);
   const region = prefixMatch ? prefixMatch[0] : 'UNKNOWN';
-  const site = row.site || name.replace(/[A-Z]$/, '');
   const sector = name.slice(-1);
+
+  // استخرج الـ Site الموحّد
+  let site = row.site;
+  if (!site) {
+    site = name.replace(/[A-Z]$/, '');     // شيل آخر حرف
+    site = site.replace(/^L/, '');         // شيل L من البداية (LTE prefix)
+  }
 
   // كشف النوع
   const isGSM = row.bcch != null && row.bcch > 0;
@@ -2018,7 +2037,12 @@ function updateStats() {
   const el = (id) => document.getElementById(id);
   if (el('statTotal')) el('statTotal').textContent = allCells.length;
 
-  const sites = new Set(allCells.map(c => c.site));
+  // وحّد اسم الموقع: BG3990A و LBG3990A → نفس الـ Site
+  const sites = new Set(allCells.map(c => {
+    let s = c.cell_name.replace(/[A-Z]$/, '');   // شيل آخر حرف (A/B/C)
+    s = s.replace(/^L/, '');                      // شيل L من البداية (LTE prefix)
+    return s;
+  }));
   if (el('statSites')) el('statSites').textContent = sites.size;
 
     const regions = new Set(allCells.map(c => c.region));
@@ -2064,12 +2088,26 @@ function applyFilters() {
   const search = (searchEl.value || '').toLowerCase().trim();
   const pciQuery = (pciEl.value || '').trim();
 
+  // فلتر التكنولوجيا
+  const gsmEl = document.getElementById('filterGSM');
+  const lteEl = document.getElementById('filterLTE');
+  const showGSM = !gsmEl || gsmEl.checked;
+  const showLTE = !lteEl || lteEl.checked;
+
   visibleCells = allCells.filter(function(c) {
+    // فلتر التكنولوجيا
+    if (c.tech === 'GSM' && !showGSM) return false;
+    if (c.tech === 'LTE' && !showLTE) return false;
+
+    // البحث
     if (search) {
       const hay = (c.cell_name + ' ' + c.site + ' ' + c.pci + ' ' + c.cell_id).toLowerCase();
       if (hay.indexOf(search) === -1) return false;
     }
+
+    // فلتر PCI
     if (pciQuery && String(c.pci) !== pciQuery) return false;
+
     return true;
   });
 
@@ -2147,19 +2185,41 @@ function renderMap() {
     return;
   }
 
-  // Sectors Mode (Zoom >= 11)
+    // Sectors Mode (Zoom >= 11)
   visibleCells.forEach(function(cell) {
     if (!cell.lat || !cell.long) return;
     const center = [cell.lat, cell.long];
 
     if (showSectors) {
-      const coords = makeSectorCoords(cell.lat, cell.long, cell.bore);
+      const isGSM = cell.tech === 'GSM';
+      const isLTE = cell.tech === 'LTE';
+
+      // 🎨 ألوان حسب التكنولوجيا
+      let cellColor, fillOpacity, weight, scale;
+      if (isGSM) {
+        cellColor = '#D97706';      // برتقالي = GSM
+        fillOpacity = 0.55;
+        weight = 1.5;
+        scale = 1.0;                 // الحجم الكامل
+      } else if (isLTE) {
+        cellColor = '#124191';      // أزرق = LTE
+        fillOpacity = 0.75;
+        weight = 1.0;
+        scale = 0.45;                // 45% من حجم GSM (داخل بطن المثلث)
+      } else {
+        cellColor = cell.color;
+        fillOpacity = 0.65;
+        weight = 0.8;
+        scale = 1.0;
+      }
+
+      const coords = makeSectorCoordsScaled(cell.lat, cell.long, cell.bore, scale);
       const polygon = L.polygon(coords, {
-        color: cell.color,
-        weight: 0.8,
+        color: cellColor,
+        weight: weight,
         opacity: 1,
-        fillColor: cell.color,
-        fillOpacity: 0.65,
+        fillColor: cellColor,
+        fillOpacity: fillOpacity,
         interactive: true,
         lineJoin: 'round'
       });
@@ -2244,7 +2304,33 @@ function makeSectorCoords(lat, lng, azimuth) {
 
   return [pt(0, 0), pt(near_d, -near_w), pt(far_d, -far_w), pt(far_d, far_w), pt(near_d, near_w)];
 }
+/* Sector coords with scale factor (1.0 = normal, 0.45 = LTE small) */
+function makeSectorCoordsScaled(lat, lng, azimuth, scale) {
+  const zoom = map.getZoom();
+  let radius_m, half_width_m;
+  if (zoom >= 16) { radius_m = 150; half_width_m = 45; }
+  else if (zoom >= 14) { radius_m = 350; half_width_m = 100; }
+  else if (zoom >= 12) { radius_m = 800; half_width_m = 230; }
+  else if (zoom >= 11) { radius_m = 1200; half_width_m = 350; }
+  else { radius_m = 2000; half_width_m = 570; }
 
+  // طبّق المقياس
+  radius_m *= scale;
+  half_width_m *= scale;
+
+  const near_d = radius_m * 0.04;
+  const far_d = radius_m;
+  const near_w = half_width_m * 0.30;
+  const far_w = half_width_m;
+
+  function pt(fwd_m, right_m) {
+    const distance = Math.sqrt(fwd_m * fwd_m + right_m * right_m);
+    const offsetAngle = Math.atan2(right_m, fwd_m) * 180 / Math.PI;
+    return destinationPoint(lat, lng, azimuth + offsetAngle, distance);
+  }
+
+  return [pt(0, 0), pt(near_d, -near_w), pt(far_d, -far_w), pt(far_d, far_w), pt(near_d, near_w)];
+}
 /* =========================================================
    DESTINATION POINT
    ========================================================= */
