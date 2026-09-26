@@ -569,6 +569,9 @@ body {
             <button class="nav-item" data-page="tool-hsn">
         <span class="icon">🎵</span><span>HSN Analysis</span>
       </button>
+            <button class="nav-item" data-page="tool-bsic">
+        <span class="icon">🎨</span><span>BSIC Analyzer</span>
+      </button>
       <button class="nav-item" data-page="tool-distance">
         <span class="icon">📐</span><span>Distance & Bearing</span>
       </button>
@@ -993,6 +996,12 @@ body {
           <div class="tool-desc">Suggest conflict-free BCCH (ARFCN) and BSIC values for GSM cells with boresight analysis and co-site hard-blocking.</div>
           <div class="tool-tag" style="background:#FDF1DC;color:#8A5A00;">GSM</div>
         </div>
+                <div class="tool-card" onclick="switchView('tool-bsic')">
+          <div class="tool-icon" style="background:linear-gradient(135deg,#DB2777,#EC4899);color:#fff;">🎨</div>
+          <div class="tool-title">BSIC Analyzer</div>
+          <div class="tool-desc">Find BSIC clashes (same BCCH+BSIC within X km) and auto-assign new BSICs with strict geographic separation.</div>
+          <div class="tool-tag" style="background:#FCE7F3;color:#DB2777;">GSM</div>
+        </div>
                 <div class="tool-card" onclick="switchView('tool-hsn')">
           <div class="tool-icon" style="background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;">🎵</div>
           <div class="tool-title">HSN Conflict Analyzer</div>
@@ -1220,6 +1229,110 @@ body {
               <button class="btn btn-secondary" onclick="gsmShowOnMap()">🗺️ Show on Map</button>
               <button class="btn btn-gold" onclick="gsmSaveToDatabase()">💾 Save to Layer</button>
               <button class="btn btn-success" onclick="gsmExportCSV()">📥 Export CSV</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+        <!-- ============ PAGE: BSIC ANALYZER ============ -->
+    <section class="page" id="page-tool-bsic">
+      <div class="tool-page" style="max-width:1500px;">
+        <div class="tool-page-header">
+          <button class="back-btn" onclick="switchView('tools')">←</button>
+          <div>
+            <div class="tool-page-title">🎨 BSIC Analyzer</div>
+            <div class="tool-page-sub">Clash detection + Strict-separation auto-assignment · BCCH × BSIC × Distance</div>
+          </div>
+        </div>
+
+        <!-- Mode Selection -->
+        <div class="tool-section">
+          <h3>🎯 Analysis Mode</h3>
+          <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+            <button id="bsicModeBtn1" class="btn btn-primary" onclick="bsicSetMode('clash')">🔴 Clash Finder</button>
+            <button id="bsicModeBtn2" class="btn btn-ghost" onclick="bsicSetMode('optimize')">🟢 Full Optimizer</button>
+          </div>
+          <div style="font-size:12.5px;color:#5A6B87;line-height:1.6;" id="bsicModeDesc">
+            <b>Clash Finder:</b> ابحث عن خلايا لها نفس BCCH + BSIC ضمن مسافة محددة (تحليل مركّز).
+          </div>
+        </div>
+
+        <!-- Parameters -->
+        <div class="tool-section">
+          <h3>⚙️ Parameters</h3>
+          <div class="form-row">
+            <div class="form-field">
+              <label>BCCH Filter (optional)</label>
+              <input type="number" id="bsic_bcch" placeholder="اتركه فارغاً لكل الخلايا" min="0" max="1023">
+              <div class="hint">فارغ = كل خلايا GSM</div>
+            </div>
+            <div class="form-field">
+              <label>Clash Radius (km)</label>
+              <input type="number" id="bsic_clash_radius" value="10" min="0.5" max="200" step="0.5">
+              <div class="hint">مسافة اعتبار نفس BSIC تعارضاً</div>
+            </div>
+            <div class="form-field">
+              <label>Analysis Radius (km)</label>
+              <input type="number" id="bsic_analysis_radius" value="200" min="10" max="500" step="10">
+              <div class="hint">نطاق عد الجيران</div>
+            </div>
+          </div>
+          <div class="action-row">
+            <button class="btn btn-primary" onclick="runBSICAnalyzer()">🚀 Analyze</button>
+            <button class="btn btn-ghost" onclick="clearBSICResults()">🗑️ Clear</button>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div id="bsicResults" style="display:none;">
+
+          <div class="tool-section">
+            <h3>📊 Summary</h3>
+            <div class="kpi-grid">
+              <div class="kpi-card"><div class="kpi-label">Total Cells</div><div class="kpi-value" id="bsic_kpi_total">0</div></div>
+              <div class="kpi-card warn"><div class="kpi-label">Neighbors ≥1</div><div class="kpi-value" id="bsic_kpi_neighbors">0</div></div>
+              <div class="kpi-card danger"><div class="kpi-label">Clashes</div><div class="kpi-value" id="bsic_kpi_clashes">0</div></div>
+              <div class="kpi-card danger"><div class="kpi-label">HIGH Priority</div><div class="kpi-value" id="bsic_kpi_high">0</div></div>
+              <div class="kpi-card warn"><div class="kpi-label">MEDIUM</div><div class="kpi-value" id="bsic_kpi_medium">0</div></div>
+              <div class="kpi-card success"><div class="kpi-label">Suggested Changes</div><div class="kpi-value" id="bsic_kpi_changes">0</div></div>
+            </div>
+            <div id="bsicWarnings" style="margin-top:12px;"></div>
+          </div>
+
+          <div class="tool-section">
+            <h3>📋 Cells Analysis</h3>
+            <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <label style="font-size:12.5px;color:#5A6B87;">Filter:</label>
+              <select id="bsic_filter" class="filter-search" style="width:auto;padding:6px 10px;" onchange="renderBSICTable()">
+                <option value="all">All Cells</option>
+                <option value="conflict">Clash Only</option>
+                <option value="changed">With New Suggestion</option>
+                <option value="clean">Clean Only</option>
+              </select>
+              <input type="text" id="bsic_search" class="filter-search" placeholder="🔍 Cell name..." style="width:200px;padding:6px 10px;" oninput="renderBSICTable()">
+            </div>
+            <div style="overflow:auto;max-height:600px;border:1px solid #E9EEF6;border-radius:10px;">
+              <table class="data-table" id="bsicTable">
+                <thead style="position:sticky;top:0;z-index:2;">
+                  <tr>
+                    <th>Cell</th>
+                    <th>BCCH</th>
+                    <th>BSIC</th>
+                    <th>Lat</th>
+                    <th>Lon</th>
+                    <th>Neighbors</th>
+                    <th>Same BSIC Nearby</th>
+                    <th>Level</th>
+                    <th>Suggested</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="action-row">
+              <button class="btn btn-success" onclick="bsicExportCSV()">📥 Export CSV</button>
+              <button class="btn btn-gold" onclick="bsicApplyAll()">💾 Apply All Suggestions</button>
+              <button class="btn btn-secondary" onclick="bsicShowOnMap()">🗺️ Show Clashes on Map</button>
             </div>
           </div>
         </div>
@@ -1856,6 +1969,7 @@ const PAGE_TITLES = {
   'tool-gsm-planner': { icon: '📡', title: 'GSM BCCH/BSIC Planner',   sub: 'Suggest conflict-free BCCH and BSIC' },
   'tool-neighbor':    { icon: '🔗', title: 'Neighbor Analysis',       sub: 'Audit missing neighbor relations' },
     'tool-hsn':         { icon: '🎵', title: 'HSN Conflict Analyzer',   sub: 'Detect & fix HSN conflicts in GSM' },
+    'tool-bsic':        { icon: '🎨', title: 'BSIC Analyzer',            sub: 'Detect & fix BSIC conflicts with strict separation' },
   'tool-distance':    { icon: '📐', title: 'Distance & Bearing',      sub: 'Calculate distance between sites' },
   'tool-azimuth':     { icon: '🎯', title: 'Azimuth & Tilt',          sub: 'Calculate antenna angles' },
   'tool-unit':        { icon: '🔢', title: 'Unit Converter',          sub: 'Convert RF units' },
@@ -5821,6 +5935,496 @@ function showHSNLegend(count) {
    ========================================================= */
 // في normalizeCell، أضف بعد lac: row.lac || 0, :
 //   hsn: row.hsn != null ? parseInt(row.hsn) : null,
+
+  /* =========================================================
+   TOOL — BSIC ANALYZER
+   Merged from BSIC CLASH.py + BSIC new assighnment.py
+   ========================================================= */
+let bsicMode = 'clash';  // 'clash' | 'optimize'
+let bsicLastResults = null;
+
+function bsicSetMode(mode) {
+  bsicMode = mode;
+  document.getElementById('bsicModeBtn1').className = mode === 'clash' ? 'btn btn-primary' : 'btn btn-ghost';
+  document.getElementById('bsicModeBtn2').className = mode === 'optimize' ? 'btn btn-primary' : 'btn btn-ghost';
+  document.getElementById('bsicModeDesc').innerHTML = mode === 'clash'
+    ? '<b>Clash Finder:</b> ابحث عن خلايا لها نفس BCCH + BSIC ضمن مسافة محددة (تحليل مركّز على BCCH محدد).'
+    : '<b>Full Optimizer:</b> تحليل كل خلايا GSM — كشف كل تعارضات BSIC وإعادة توزيع كامل.';
+}
+
+// BSIC format: 2-digit string (NCC 0-7, BCC 0-7) → "00" to "77"
+function bsicFormat(bsic) {
+  if (bsic == null || bsic === '') return '00';
+  if (typeof bsic === 'number') return String(bsic).padStart(2, '0').slice(-2);
+  const s = String(bsic).trim();
+  if (/^\d+$/.test(s)) {
+    return s.length === 1 ? '0' + s : s.slice(0, 2).padStart(2, '0');
+  }
+  return s.padStart(2, '0').slice(-2);
+}
+
+// All 64 possible BSICs: 00..77
+function bsicAllPossible() {
+  const list = [];
+  for (let ncc = 0; ncc < 8; ncc++) {
+    for (let bcc = 0; bcc < 8; bcc++) {
+      list.push(String(ncc) + String(bcc));
+    }
+  }
+  return list;
+}
+
+// Distance in km (Haversine)
+function bsicDistanceKm(lat1, lon1, lat2, lon2) {
+  return haversineDistance(lat1, lon1, lat2, lon2) / 1000;
+}
+
+// =========================================================
+// MAIN — Run Analyzer
+// =========================================================
+function runBSICAnalyzer() {
+  // GSM cells only
+  const gsmCells = allCells.filter(c =>
+    c.tech === 'GSM' && /[A-Z]$/.test(c.cell_name) && c.bsic !== '' && c.bsic != null
+  );
+
+  if (!gsmCells.length) {
+    toast('No GSM cells with BSIC found', 'error', 6000);
+    return;
+  }
+
+  const bcchText = (document.getElementById('bsic_bcch').value || '').trim();
+  const targetBCCH = bcchText ? parseInt(bcchText) : null;
+  const clashRadiusKm = parseFloat(document.getElementById('bsic_clash_radius').value) || 10;
+  const analysisRadiusKm = parseFloat(document.getElementById('bsic_analysis_radius').value) || 200;
+
+  // Filter by BCCH (if provided)
+  let features = gsmCells;
+  if (targetBCCH !== null && !isNaN(targetBCCH)) {
+    features = gsmCells.filter(c => parseInt(c.bcch) === targetBCCH);
+  }
+
+  if (!features.length) {
+    toast(targetBCCH !== null
+      ? 'No GSM cells with BCCH = ' + targetBCCH
+      : 'No GSM cells', 'error', 5000);
+    return;
+  }
+
+  console.log('🎨 BSIC Analyzer [' + bsicMode + ']: ' + features.length + ' cells · clash=' + clashRadiusKm + 'km · analysis=' + analysisRadiusKm + 'km');
+
+  const analysisRadiusM = analysisRadiusKm * 1000;
+  const clashRadiusM = clashRadiusKm * 1000;
+
+  // Build analysis results per cell
+  const results = features.map(cell => ({
+    id: cell.id,
+    cell_name: cell.cell_name,
+    bcch: parseInt(cell.bcch) || 0,
+    bsic: bsicFormat(cell.bsic),
+    lat: cell.lat,
+    lon: cell.long,
+    bore: cell.bore,
+    neighbors_count: 0,
+    same_bsic_nearby: 0,
+    conflict_peers: []
+  }));
+
+  // Build spatial index (grid bucket)
+  const bucketDeg = Math.max(analysisRadiusM / 111000, 0.001);
+  const buckets = new Map();
+  const key = (lat, lon) => Math.floor(lat / bucketDeg) + ',' + Math.floor(lon / bucketDeg);
+  results.forEach((r, idx) => {
+    const k = key(r.lat, r.lon);
+    if (!buckets.has(k)) buckets.set(k, []);
+    buckets.get(k).push(idx);
+  });
+
+  // Count neighbors + same BSIC
+  results.forEach((r, i) => {
+    const [bx, by] = key(r.lat, r.lon).split(',').map(Number);
+    const nearby = [];
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        const nk = (bx + dx) + ',' + (by + dy);
+        if (buckets.has(nk)) nearby.push(...buckets.get(nk));
+      }
+    }
+    const uniqueNearby = [...new Set(nearby)].filter(j => j !== i);
+
+    uniqueNearby.forEach(j => {
+      const o = results[j];
+      const dM = haversineDistance(r.lat, r.lon, o.lat, o.lon);
+      if (dM <= analysisRadiusM) {
+        r.neighbors_count++;
+        if (r.bsic === o.bsic && dM <= clashRadiusM) {
+          r.same_bsic_nearby++;
+          r.conflict_peers.push({ cell: o.cell_name, distance_m: dM, bsic: o.bsic });
+        }
+      }
+    });
+  });
+
+  // If 'clash' mode, only keep cells with clashes (or with BCCH target)
+  let analysisResults = results;
+  if (bsicMode === 'clash') {
+    // In clash mode, keep only cells that have at least one clash OR have BCCH = targetBCCH (if given)
+    analysisResults = results.filter(r => r.same_bsic_nearby > 0 || (targetBCCH !== null));
+  }
+
+  // Sort by same_bsic_nearby desc, then name
+  analysisResults.sort((a, b) => b.same_bsic_nearby - a.same_bsic_nearby || a.cell_name.localeCompare(b.cell_name));
+
+  // === Strict-separation BSIC suggestions ===
+  const suggestions = bsicSuggestStrict(analysisResults, clashRadiusKm);
+
+  // Determine changes
+  let changeCount = 0;
+  let highCount = 0;
+  let mediumCount = 0;
+  analysisResults.forEach(r => {
+    const s = suggestions.get(r.id);
+    if (s && s !== r.bsic) {
+      r.suggested = s;
+      changeCount++;
+    } else {
+      r.suggested = r.bsic;
+    }
+    if (r.same_bsic_nearby >= 3) highCount++;
+    else if (r.same_bsic_nearby >= 1) mediumCount++;
+  });
+
+  bsicLastResults = {
+    cells: analysisResults,
+    suggestions: suggestions,
+    mode: bsicMode,
+    targetBCCH: targetBCCH,
+    clashRadiusKm: clashRadiusKm,
+    analysisRadiusKm: analysisRadiusKm,
+    changes: changeCount,
+    highCount: highCount,
+    mediumCount: mediumCount
+  };
+
+  renderBSICResults(bsicLastResults);
+  document.getElementById('bsicResults').style.display = 'block';
+  toast('✅ ' + analysisResults.length + ' cells · ' + changeCount + ' suggestions', 'success', 5000);
+}
+
+// =========================================================
+// Strict-separation BSIC assignment
+// =========================================================
+function bsicSuggestStrict(cells, minDistanceKm) {
+  const suggestions = new Map();
+  const allBsics = bsicAllPossible();
+  const assignments = {}; // bsic -> [{lat, lon, cell_id}]
+
+  // Sort by latitude desc (North to South) for consistency
+  const sorted = cells.slice().sort((a, b) => b.lat - a.lat);
+
+  sorted.forEach(cell => {
+    const cellId = cell.id;
+    const currentBsic = cell.bsic;
+    const lat = cell.lat, lon = cell.lon;
+
+    // Collect BSICs used within minDistance
+    const forbidden = new Set();
+
+    // Existing assignments
+    Object.keys(assignments).forEach(bs => {
+      assignments[bs].forEach(entry => {
+        if (entry.cell_id === cellId) return;
+        const d = bsicDistanceKm(lat, lon, entry.lat, entry.lon);
+        if (d < minDistanceKm) forbidden.add(bs);
+      });
+    });
+
+    // Other analyzed cells (not yet assigned)
+    cells.forEach(other => {
+      if (other.id === cellId) return;
+      const d = bsicDistanceKm(lat, lon, other.lat, other.lon);
+      if (d < minDistanceKm) forbidden.add(other.bsic);
+    });
+
+    // Available BSICs
+    const available = allBsics.filter(bs => !forbidden.has(bs));
+
+    let chosen;
+    if (available.length) {
+      // Least globally used
+      const usage = {};
+      available.forEach(bs => { usage[bs] = (assignments[bs] || []).length; });
+      available.sort((a, b) => usage[a] - usage[b] || a.localeCompare(b));
+      chosen = available[0];
+    } else {
+      // Fallback: BSIC with max min-distance
+      let best = currentBsic, bestMin = -1;
+      allBsics.forEach(bs => {
+        let minDist = Infinity;
+        if (assignments[bs]) {
+          assignments[bs].forEach(e => {
+            if (e.cell_id === cellId) return;
+            minDist = Math.min(minDist, bsicDistanceKm(lat, lon, e.lat, e.lon));
+          });
+        }
+        cells.forEach(o => {
+          if (o.id === cellId || o.bsic !== bs) return;
+          minDist = Math.min(minDist, bsicDistanceKm(lat, lon, o.lat, o.lon));
+        });
+        if (minDist > bestMin) { bestMin = minDist; best = bs; }
+      });
+      chosen = best;
+    }
+
+    suggestions.set(cellId, chosen);
+    if (!assignments[chosen]) assignments[chosen] = [];
+    assignments[chosen].push({ lat, lon, cell_id: cellId });
+  });
+
+  return suggestions;
+}
+
+// =========================================================
+// Render
+// =========================================================
+function renderBSICResults(r) {
+  document.getElementById('bsic_kpi_total').textContent = r.cells.length;
+  document.getElementById('bsic_kpi_clashes').textContent = r.cells.filter(c => c.same_bsic_nearby > 0).length;
+  document.getElementById('bsic_kpi_neighbors').textContent = r.cells.filter(c => c.neighbors_count > 0).length;
+  document.getElementById('bsic_kpi_high').textContent = r.highCount;
+  document.getElementById('bsic_kpi_medium').textContent = r.mediumCount;
+  document.getElementById('bsic_kpi_changes').textContent = r.changes;
+
+  const warnEl = document.getElementById('bsicWarnings');
+  let warnHtml = '';
+  if (r.targetBCCH !== null) {
+    warnHtml += '<div style="background:#EAF2FB;color:#124191;padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:8px;">' +
+      '<b>📡 BCCH Filter:</b> ' + r.targetBCCH + ' — ' + r.cells.length + ' cells</div>';
+  }
+  if (r.changes > 0) {
+    warnHtml += '<div style="background:#FFF9C4;color:#8A5A00;padding:10px 14px;border-radius:8px;font-size:12.5px;">' +
+      '<b>💡 ' + r.changes + '</b> خلية تحتاج تغيير BSIC</div>';
+  } else {
+    warnHtml += '<div style="background:#E7F7EE;color:#1F9D55;padding:10px 14px;border-radius:8px;font-size:12.5px;">' +
+      '<b>✅ لا توجد تعارضات — كل BSICs سليمة</b></div>';
+  }
+  warnEl.innerHTML = warnHtml;
+
+  renderBSICTable();
+}
+
+function renderBSICTable() {
+  if (!bsicLastResults) return;
+  const tbody = document.querySelector('#bsicTable tbody');
+  const filter = document.getElementById('bsic_filter').value;
+  const search = (document.getElementById('bsic_search').value || '').toLowerCase().trim();
+
+  let rows = bsicLastResults.cells;
+
+  if (filter === 'conflict') rows = rows.filter(c => c.same_bsic_nearby > 0);
+  else if (filter === 'changed') rows = rows.filter(c => c.suggested && c.suggested !== c.bsic);
+  else if (filter === 'clean') rows = rows.filter(c => c.same_bsic_nearby === 0);
+
+  if (search) rows = rows.filter(c => c.cell_name.toLowerCase().includes(search));
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:#5A6B87;">No cells match</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = rows.map(c => {
+    let level, levelColor, levelBg;
+    if (c.same_bsic_nearby >= 3) { level = 'HIGH'; levelColor = '#B91C1C'; levelBg = '#FCEAEA'; }
+    else if (c.same_bsic_nearby >= 1) { level = 'MEDIUM'; levelColor = '#8A5A00'; levelBg = '#FDF1DC'; }
+    else { level = 'Low'; levelColor = '#1F9D55'; levelBg = '#E7F7EE'; }
+
+    const changed = c.suggested && c.suggested !== c.bsic;
+    const peers = (c.conflict_peers || []).slice(0, 3).map(p =>
+      p.cell + ' (' + p.distance_m.toFixed(0) + 'm)'
+    ).join(', ');
+
+    return '<tr>' +
+      '<td><b>' + escapeHtml(c.cell_name) + '</b></td>' +
+      '<td>' + c.bcch + '</td>' +
+      '<td style="font-family:monospace;font-weight:700;">' + c.bsic + '</td>' +
+      '<td style="font-size:11px;">' + c.lat.toFixed(5) + '</td>' +
+      '<td style="font-size:11px;">' + c.lon.toFixed(5) + '</td>' +
+      '<td style="text-align:center;">' + c.neighbors_count + '</td>' +
+      '<td style="text-align:center;color:' + (c.same_bsic_nearby > 0 ? '#B91C1C' : '#1F9D55') + ';font-weight:700;">' + c.same_bsic_nearby + '</td>' +
+      '<td><span style="padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;background:' + levelBg + ';color:' + levelColor + ';">' + level + '</span></td>' +
+      '<td style="font-family:monospace;font-weight:800;color:' + (changed ? '#1F9D55' : '#0C1B3D') + ';">' + c.suggested + (changed ? ' ✨' : '') + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+function clearBSICResults() {
+  bsicLastResults = null;
+  document.getElementById('bsicResults').style.display = 'none';
+  toast('Cleared', 'info');
+}
+
+// =========================================================
+// Apply All
+// =========================================================
+async function bsicApplyAll() {
+  if (!bsicLastResults) { toast('Run analysis first', 'error'); return; }
+
+  const changes = bsicLastResults.cells.filter(c => c.suggested && c.suggested !== c.bsic);
+  if (!changes.length) { toast('No changes to apply', 'info'); return; }
+
+  if (!confirm('Apply BSIC changes to ' + changes.length + ' cells?\n\nهذا سيحدّث قاعدة البيانات.')) return;
+
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = 'Applying...';
+
+  let applied = 0, failed = 0;
+
+  try {
+    for (let i = 0; i < changes.length; i++) {
+      const c = changes[i];
+      // Store as 2-digit string (e.g. "47")
+      const { error } = await db.from('rf_cells').update({ bsic: c.suggested }).eq('id', c.id);
+      if (error) { failed++; console.error(error); }
+      else {
+        applied++;
+        const local = allCells.find(x => x.id === c.id);
+        if (local) local.bsic = c.suggested;
+      }
+      if (applied % 20 === 0) btn.textContent = 'Applying ' + applied + '/' + changes.length + '...';
+    }
+
+    toast('✅ Applied ' + applied + ' BSIC changes' + (failed ? ' (' + failed + ' failed)' : ''), 'success', 5000);
+
+    setTimeout(() => runBSICAnalyzer(), 800);
+  } catch (e) {
+    console.error(e);
+    toast('Error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💾 Apply All Suggestions';
+  }
+}
+
+// =========================================================
+// Export CSV
+// =========================================================
+function bsicExportCSV() {
+  if (!bsicLastResults) { toast('Run analysis first', 'error'); return; }
+
+  const rows = [['Cell', 'BCCH', 'BSIC', 'Lat', 'Lon', 'Neighbors', 'Same_BSIC_Nearby', 'Level', 'Suggested_BSIC', 'Changed']];
+
+  bsicLastResults.cells.forEach(c => {
+    let level = c.same_bsic_nearby >= 3 ? 'HIGH' : c.same_bsic_nearby >= 1 ? 'MEDIUM' : 'Low';
+    const changed = c.suggested && c.suggested !== c.bsic ? 'YES' : 'NO';
+    rows.push([c.cell_name, c.bcch, c.bsic, c.lat, c.lon, c.neighbors_count, c.same_bsic_nearby, level, c.suggested, changed]);
+  });
+
+  const csv = rows.map(r => r.map(v => {
+    const s = String(v);
+    return s.indexOf(',') !== -1 ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }).join(',')).join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'BSIC_Analysis_' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('✅ CSV exported', 'success');
+}
+
+// =========================================================
+// Show Clashes on Map
+// =========================================================
+function bsicShowOnMap() {
+  if (!bsicLastResults) { toast('Run analysis first', 'error'); return; }
+
+  window.__gsmMode = true;
+  switchView('map');
+
+  setTimeout(() => {
+    sectorLayer.clearLayers();
+    labelLayer.clearLayers();
+
+    const conflictCells = bsicLastResults.cells.filter(c => c.same_bsic_nearby > 0);
+
+    if (!conflictCells.length) {
+      toast('✅ No clashes to show — all cells clean', 'success', 5000);
+      return;
+    }
+
+    // Fixed 80m size
+    const FIXED_RADIUS_M = 80;
+    function makeFixedSector(lat, lng, azimuth) {
+      const radius_m = FIXED_RADIUS_M;
+      const half_width_m = FIXED_RADIUS_M * 0.35;
+      const near_d = radius_m * 0.04;
+      const far_d = radius_m;
+      const near_w = half_width_m * 0.30;
+      const far_w = half_width_m;
+      function pt(fwd_m, right_m) {
+        const distance = Math.sqrt(fwd_m * fwd_m + right_m * right_m);
+        const offsetAngle = Math.atan2(right_m, fwd_m) * 180 / Math.PI;
+        return destinationPoint(lat, lng, azimuth + offsetAngle, distance);
+      }
+      return [pt(0, 0), pt(near_d, -near_w), pt(far_d, -far_w), pt(far_d, far_w), pt(near_d, near_w)];
+    }
+
+    // Sort: low first
+    conflictCells.sort((a, b) => a.same_bsic_nearby - b.same_bsic_nearby);
+
+    conflictCells.forEach(cell => {
+      let color, weight;
+      if (cell.same_bsic_nearby >= 3) { color = '#B91C1C'; weight = 2.5; }
+      else if (cell.same_bsic_nearby >= 2) { color = '#F97316'; weight = 2; }
+      else { color = '#FBBF24'; weight = 1.5; }
+
+      const coords = makeFixedSector(cell.lat, cell.lon, cell.bore);
+      const poly = L.polygon(coords, {
+        color: color, weight: weight,
+        fillColor: color, fillOpacity: 0.85,
+        lineJoin: 'round'
+      });
+
+      poly.bindPopup(
+        '<div style="font-family:Inter,sans-serif;font-size:13px;min-width:220px;">' +
+          '<div style="font-weight:800;font-family:monospace;margin-bottom:8px;color:#0C1B3D;">' + escapeHtml(cell.cell_name) + '</div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #F0F3F9;"><span>BCCH:</span><b>' + cell.bcch + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #F0F3F9;"><span>Current BSIC:</span><b style="color:#B91C1C;">' + cell.bsic + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #F0F3F9;"><span>Suggested:</span><b style="color:#1F9D55;">' + cell.suggested + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Clashes:</span><b style="color:#B91C1C;">' + cell.same_bsic_nearby + '</b></div>' +
+        '</div>'
+      );
+
+      sectorLayer.addLayer(poly);
+    });
+
+    const bounds = L.latLngBounds(conflictCells.map(c => [c.lat, c.lon]));
+    if (bounds.isValid()) map.fitBounds(bounds, { padding: [80, 80] });
+
+    // Legend
+    let legend = document.getElementById('bsicLegend');
+    if (!legend) {
+      legend = document.createElement('div');
+      legend.id = 'bsicLegend';
+      legend.className = 'legend';
+      legend.style.cssText = 'left:20px;bottom:20px;display:block;';
+      document.querySelector('.map-container').appendChild(legend);
+    }
+    legend.style.display = 'block';
+    legend.innerHTML =
+      '<div class="legend-title">🎨 BSIC Clashes (' + conflictCells.length + ')</div>' +
+      '<div class="legend-item"><span class="legend-dot" style="background:#B91C1C;"></span><span>HIGH (3+)</span></div>' +
+      '<div class="legend-item"><span class="legend-dot" style="background:#F97316;"></span><span>MEDIUM (2)</span></div>' +
+      '<div class="legend-item"><span class="legend-dot" style="background:#FBBF24;"></span><span>LOW (1)</span></div>';
+
+    toast('⚠️ ' + conflictCells.length + ' clash cells on map', 'success', 4000);
+  }, 400);
+}
 console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
 console.log('%cTools: PCI · GSM · NB · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
 </script>
