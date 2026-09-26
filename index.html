@@ -893,8 +893,11 @@ body {
       <button class="nav-item" data-page="tools">
         <span class="icon">🔧</span><span>Tools</span>
       </button>
-      <button class="nav-item" data-page="tool-pci-checker">
+            <button class="nav-item" data-page="tool-pci-checker">
         <span class="icon">🧮</span><span>PCI Checker</span>
+      </button>
+      <button class="nav-item" data-page="tool-gsm-planner">
+        <span class="icon">📡</span><span>GSM Planner</span>
       </button>
       <button class="nav-item" data-page="tool-distance">
         <span class="icon">📐</span><span>Distance & Bearing</span>
@@ -1132,6 +1135,12 @@ body {
           <div class="tool-desc">Detect Same PCI, MOD3, MOD6 conflicts, Face-to-Face antennas, and auto-optimize PCI assignments.</div>
           <div class="tool-tag" style="background:#EAF2FB;color:#124191;">Optimization</div>
         </div>
+                 <div class="tool-card" onclick="switchView('tool-gsm-planner')">
+          <div class="tool-icon" style="background:linear-gradient(135deg,#D97706,#F2A900);color:#fff;">📡</div>
+          <div class="tool-title">GSM BCCH/BSIC Planner</div>
+          <div class="tool-desc">Suggest conflict-free BCCH (ARFCN) and BSIC values for GSM cells with boresight analysis, co-site hard-blocking, and distance/angle-weighted scoring.</div>
+          <div class="tool-tag" style="background:#FDF1DC;color:#8A5A00;">GSM</div>
+        </div>
         <div class="tool-card" onclick="switchView('tool-distance')">
           <div class="tool-icon" style="background:linear-gradient(135deg,#1F9D55,#10B981);color:#fff;">📐</div>
           <div class="tool-title">Distance & Bearing</div>
@@ -1271,7 +1280,127 @@ body {
         </div>
       </div>
     </section>
+    <!-- ============ PAGE: GSM BCCH/BSIC PLANNER ============ -->
+    <section class="page" id="page-tool-gsm-planner">
+      <div class="tool-page">
+        <div class="tool-page-header">
+          <button class="back-btn" onclick="switchView('tools')">←</button>
+          <div>
+            <div class="tool-page-title">📡 GSM BCCH/BSIC Planner</div>
+            <div class="tool-page-sub">Conflict-free BCCH & BSIC · Boresight + Co-site analysis</div>
+          </div>
+        </div>
 
+        <!-- ===== INPUT DIALOG ===== -->
+        <div class="tool-section">
+          <h3>🎯 Target Cell</h3>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Cell Name</label>
+              <input type="text" id="gsm_cell" placeholder="e.g. BG3413A" style="text-transform:uppercase;">
+              <div class="hint">A/B/C → 900 MHz · D/E/F → 1800 MHz</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tool-section">
+          <h3>⚙️ Options</h3>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Search Radius (m)</label>
+              <input type="number" id="gsm_radius" value="1200" min="200" max="5000" step="100">
+            </div>
+            <div class="form-field">
+              <label>Front Sector Threshold (°)</label>
+              <input type="number" id="gsm_front_threshold" value="45" min="10" max="180">
+            </div>
+          </div>
+          <div class="filter-group" style="margin-top:14px;">
+            <label class="filter-checkbox">
+              <input type="checkbox" id="gsm_opt_highlight" checked>
+              <span>Highlight cell on map</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" id="gsm_opt_nearby" checked>
+              <span>Show nearby cells on map</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" id="gsm_opt_save">
+              <span>Save result to database (BCCH + BSIC)</span>
+            </label>
+          </div>
+          <div class="action-row">
+            <button class="btn btn-primary" onclick="runGSMPlanner()">
+              🚀 Analyze & Suggest
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== RESULTS ===== -->
+        <div id="gsmResults" style="display:none;">
+
+          <!-- Summary -->
+          <div class="tool-section">
+            <h3>💡 Suggested Plan</h3>
+            <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));">
+              <div class="kpi-card">
+                <div class="kpi-label">Cell</div>
+                <div class="kpi-value" id="gsm_kpi_cell" style="font-size:15px;">—</div>
+              </div>
+              <div class="kpi-card success">
+                <div class="kpi-label">BCCH</div>
+                <div class="kpi-value" id="gsm_kpi_bcch">—</div>
+              </div>
+              <div class="kpi-card success">
+                <div class="kpi-label">BSIC</div>
+                <div class="kpi-value" id="gsm_kpi_bsic">—</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label">Band</div>
+                <div class="kpi-value" id="gsm_kpi_band" style="font-size:15px;">—</div>
+              </div>
+              <div class="kpi-card warn">
+                <div class="kpi-label">Conflicts</div>
+                <div class="kpi-value" id="gsm_kpi_conflicts">0</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label">Neighbors</div>
+                <div class="kpi-value" id="gsm_kpi_neighbors">0</div>
+              </div>
+            </div>
+            <div id="gsmWarnings" style="margin-top:12px;"></div>
+          </div>
+
+          <!-- Nearby Cells Table -->
+          <div class="tool-section">
+            <h3>📊 Nearby Cells Analysis</h3>
+            <div style="overflow:auto;max-height:450px;border:1px solid #E9EEF6;border-radius:10px;">
+              <table class="data-table" id="gsmNearbyTable">
+                <thead>
+                  <tr>
+                    <th>Cell</th>
+                    <th>Distance (m)</th>
+                    <th>Bore</th>
+                    <th>Band</th>
+                    <th>BCCH</th>
+                    <th>Front Sector?</th>
+                    <th>Conflict</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="action-row">
+              <button class="btn btn-secondary" onclick="gsmShowOnMap()">🗺️ Show on Map</button>
+              <button class="btn btn-gold" onclick="gsmSaveToDatabase()">💾 Save to Layer</button>
+              <button class="btn btn-success" onclick="gsmExportCSV()">📥 Export CSV</button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
     <!-- ============ PAGE: DISTANCE & BEARING ============ -->
     <section class="page" id="page-tool-distance">
       <div class="tool-page">
@@ -1671,7 +1800,8 @@ const PAGE_TITLES = {
   'import':              { icon: '📥', title: 'Import',                  sub: 'Import cells from Excel' },
   'cells':               { icon: '📋', title: 'Cells Database',          sub: 'Manage all cells' },
   'tools':               { icon: '🔧', title: 'Tools',                   sub: 'RF optimization & planning tools' },
-  'tool-pci-checker':    { icon: '🧮', title: 'PCI Conflict Checker',    sub: 'Detect & fix PCI conflicts' },
+   'tool-pci-checker':    { icon: '🧮', title: 'PCI Conflict Checker',    sub: 'Detect & fix PCI conflicts' },
+  'tool-gsm-planner':    { icon: '📡', title: 'GSM BCCH/BSIC Planner',   sub: 'Suggest conflict-free BCCH and BSIC for GSM cells' },
   'tool-distance':       { icon: '📐', title: 'Distance & Bearing',      sub: 'Calculate distance between sites' },
   'tool-azimuth':        { icon: '🎯', title: 'Azimuth & Tilt',          sub: 'Calculate antenna angles' },
   'tool-unit':           { icon: '🔢', title: 'Unit Converter',          sub: 'Convert RF units' },
