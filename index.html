@@ -3877,13 +3877,26 @@ function gsmGetNearbyCells(targetCell, targetBand, radius) {
   const tLon = targetCell.long;
   const tName = targetCell.cell_name;
   const tBore = targetCell.bore;
+  const tSite = tName.replace(/[A-Z]$/, '');   // ← اسم السايت
 
   allCells.forEach(feat => {
     if (feat.cell_name === tName) return;
+
+    // 🛑 1. استثنِ خلايا نفس السايت (Co-site)
+    const featSite = feat.cell_name.replace(/[A-Z]$/, '');
+    if (featSite === tSite) return;
+
+    // 🛑 2. استثنِ خلايا LTE (اقبل GSM فقط)
+    if (feat.tech !== 'GSM') return;
+
+    // 3. تحقق من الباند
     const cellBand = gsmGetBand(feat.cell_name);
     if (cellBand !== targetBand) return;
+
+    // 4. تحقق من المسافة
     const dist = haversineDistance(tLat, tLon, feat.lat, feat.long);
     if (dist > radius) return;
+
     const bearingFromTarget = gsmCalculateBearing(tLat, tLon, feat.lat, feat.long);
     results.push({
       cell: feat.cell_name,
