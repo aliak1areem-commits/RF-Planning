@@ -2307,9 +2307,34 @@ function normalizeCell(row) {
     site = site.replace(/^L/, '');         // شيل L من البداية (LTE prefix)
   }
 
-  // كشف النوع
-  const isGSM = row.bcch != null && row.bcch > 0;
-  const isLTE = row.pci != null && row.pci > 0;
+  // ===== كشف النوع (ذكي) =====
+  const nameUpper = name.toUpperCase();
+  
+  // LTE: يبدأ بـ LBG/LCW/LSA26 أو عندها PCI
+  const looksLTE = /^(LBG|LCW|LSA26|LNB|LNC|LLN)/.test(nameUpper);
+  
+  // GSM: يبدأ بـ BG/CW/UCW/LSA (بدون 26) أو عندها BCCH
+  const looksGSM = /^(BG|CW|UCW|LSA(?!26))/.test(nameUpper);
+  
+  const hasBcch = row.bcch != null && row.bcch > 0;
+  const hasPci = row.pci != null && row.pci > 0;
+  const hasNb = row.nb1 != null || row.nb2 != null || row.nb3 != null;
+  
+  let isGSM, isLTE;
+  
+  if (looksLTE) {
+    isLTE = true;
+    isGSM = false;
+  } else if (looksGSM || hasBcch || hasNb) {
+    isGSM = true;
+    isLTE = false;
+  } else if (hasPci) {
+    isLTE = true;
+    isGSM = false;
+  } else {
+    isGSM = false;
+    isLTE = false;
+  }
 
     const result = {
     id: row.id,
