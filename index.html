@@ -2521,7 +2521,10 @@ async function importSaveToSupabase() {
     let saved = 0;
     for (let i = 0; i < cellsWithProject.length; i += BATCH) {
       const batch = cellsWithProject.slice(i, i + BATCH);
-      const { error } = await db.from('rf_cells').insert(batch);
+     const { error } = await db.from('rf_cells').upsert(batch, {
+  onConflict: 'cell_name,project_id',
+  ignoreDuplicates: false
+});
       if (error) {
         console.error('❌ Insert error:', error);
         throw error;
