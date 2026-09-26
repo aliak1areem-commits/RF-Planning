@@ -15,6 +15,29 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
+   /* NB Labels on map */
+.nb-label {
+  background: rgba(255,255,255,.95) !important;
+  border: 1.5px solid #124191 !important;
+  border-radius: 6px !important;
+  padding: 2px 6px !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #0C1B3D !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,.15) !important;
+}
+.nb-label-source {
+  background: #DC2626 !important;
+  border: 2px solid #fff !important;
+  border-radius: 8px !important;
+  padding: 3px 8px !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  box-shadow: 0 3px 8px rgba(220,38,38,.4) !important;
+}
 /* =========================================================
    RESET & BASE
    ========================================================= */
@@ -2107,9 +2130,11 @@ const PAGE_TITLES = {
 function switchView(page) {
   currentView = page;
 
-  // إذا خرجنا من الماب → أوقف وضع GSM
+  // إذا خرجنا من الماب → أوقف الأوضاع الخاصة
   if (page !== 'map') {
     window.__gsmMode = false;
+    window.__nbMode = false;
+    nbHideLegend();
   }
 
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -2411,8 +2436,9 @@ function applyFilters() {
 function renderMap() {
   if (!map) return;
 
-  // 🛑 إذا كنا في وضع GSM، لا ترسم خلايا LTE
+  // 🛑 منع الرسم العادي في وضع GSM أو NB
   if (window.__gsmMode) return;
+  if (window.__nbMode) return;
 
   sectorLayer.clearLayers();
   labelLayer.clearLayers();
@@ -3043,6 +3069,11 @@ const HEADER_ALIASES = {
   ]
 };
 
+// أضف NB1..NB35 بعد الـ object
+for (let i = 1; i <= 35; i++) {
+  HEADER_ALIASES['nb' + i] = ['nb' + i, 'neighbor' + i, 'nbr' + i, 'nb_' + i];
+}
+
 function findValueByAlias(row, aliases) {
   const keys = Object.keys(row);
 
@@ -3097,7 +3128,7 @@ function importParseRows(rows) {
     const hgtVal = findValueByAlias(row, HEADER_ALIASES.height);
     const siteVal = findValueByAlias(row, HEADER_ALIASES.site);
 
-    return {
+       const result = {
       // بيانات أساسية
       cell_name:   cellName,
       site:        String(siteVal || cellName.replace(/[A-Z]$/, '')).trim(),
@@ -3120,6 +3151,14 @@ function importParseRows(rows) {
       bw:          bwVal ? parseFloat(bwVal) : null,
       height:      hgtVal ? parseFloat(hgtVal) : null
     };
+
+    // أضف NB1..NB35
+    for (let i = 1; i <= 35; i++) {
+      const nbVal = findValueByAlias(row, HEADER_ALIASES['nb' + i]);
+      if (nbVal) result['nb' + i] = String(nbVal).trim();
+    }
+
+    return result;
   }).filter(Boolean);
 
   console.log(`✅ Parsed ${importPreviewData.length} valid cells from ${rows.length} rows`);
@@ -3130,20 +3169,32 @@ function importParseRows(rows) {
     return;
   }
 
-  // إحصائية سريعة
-  const type = importPreviewData[0].bcch !== null ? 'GSM' : 'LTE';
-  console.log(`📡 Detected technology: ${type}`);
+    // إحصائية سريعة — كشف نوع الملف
+  const sample = importPreviewData[0];
+  const hasNb = sample && (sample['nb1'] !== undefined || rows[0]['NB1'] !== undefined || rows[0]['nb1'] !== undefined);
+  const hasBCCH = sample.bcch !== null && sample.bcch !== undefined;
+  const hasPCI = sample.pci !== null && sample.pci !== undefined && sample.pci > 0;
 
+  let type;
+  if (hasNb) type = 'Neighbor (NB)';
+  else if (hasBCCH) type = 'GSM';
+  else if (hasPCI) type = 'LTE';
+  else type = 'Unknown';
+
+  console.log(`📡 Detected technology: ${type}`);
   importRenderPreview();
 }
 
 function importRenderPreview() {
   document.getElementById('importPreviewCard').style.display = 'block';
 
-  // اكتشف نوع التكنولوجيا
+  /  // اكتشف نوع التكنولوجيا
   const sample = importPreviewData[0];
-  const isGSM = sample.bcch !== null && sample.bcch !== undefined;
-  const isLTE = sample.pci !== null && sample.pci !== undefined && sample.pci > 0;
+  const hasNb = sample.nb1 !== undefined || sample.nb2 !== undefined ||
+                Object.keys(sample).some(k => k.startsWith('nb'));
+  const isGSM = (sample.bcch !== null && sample.bcch !== undefined) || hasNb;
+  const isLTE = (sample.pci !== null && sample.pci !== undefined && sample.pci > 0) && !hasNb;
+  const isNBFile = hasNb;
 
   // احسب الإحصائيات
   const sites = new Set(importPreviewData.map(r => r.site));
@@ -3153,8 +3204,11 @@ function importRenderPreview() {
   }).filter(Boolean));
 
   // نوع الملف
-  const techLabel = isGSM ? 'GSM (2G)' : (isLTE ? 'LTE (4G)' : 'Unknown');
-  const techColor = isGSM ? '#D97706' : (isLTE ? '#124191' : '#5A6B87');
+    let techLabel, techColor;
+  if (isNBFile) { techLabel = 'Neighbor (NB)'; techColor = '#7C3AED'; }
+  else if (isGSM) { techLabel = 'GSM (2G)'; techColor = '#D97706'; }
+  else if (isLTE) { techLabel = 'LTE (4G)'; techColor = '#124191'; }
+  else { techLabel = 'Unknown'; techColor = '#5A6B87'; }
 
   document.getElementById('importPreviewStats').innerHTML =
     '<div style="background:#EAF2FB;border-radius:10px;padding:14px;">' +
@@ -3176,7 +3230,20 @@ function importRenderPreview() {
 
   // ====== جدول ديناميكي حسب النوع ======
   let columns;
-  if (isGSM) {
+  if (isNBFile) {
+    columns = [
+      { key: 'cell_name', label: 'Cell' },
+      { key: 'site',      label: 'Site' },
+      { key: 'lat',       label: 'Lat' },
+      { key: 'long',      label: 'Long' },
+      { key: 'bore',      label: 'Bore' },
+      { key: 'nb1',       label: 'NB1' },
+      { key: 'nb2',       label: 'NB2' },
+      { key: 'nb3',       label: 'NB3' },
+      { key: 'nb4',       label: 'NB4' },
+      { key: 'nb5',       label: 'NB5' }
+    ];
+  } else if (isGSM) {
     columns = [
       { key: 'cell_name', label: 'Cell' },
       { key: 'site',      label: 'Site' },
@@ -4817,77 +4884,121 @@ function nbShowOnMap() {
     return;
   }
 
-  // احفظ الطبقة الحالية وأضف طبقات NB
+  // 🛑 IMPORTANT: ادخل "وضع NB" — يمنع renderMap من رسم كل الخلايا
+  window.__nbMode = true;
+
   switchView('map');
 
   setTimeout(() => {
-    // نظّف الطبقات السابقة
+    // 🧹 احذف كل الطبقات السابقة (الخلايا العادية، GSM، إلخ)
+    if (sectorLayer) sectorLayer.clearLayers();
+    if (labelLayer) labelLayer.clearLayers();
+    if (coverageLayer) coverageLayer.clearLayers();
+
+    // احذف طبقات NB السابقة إذا موجودة
     nbMapLayers.forEach(l => map.removeLayer(l));
     nbMapLayers = [];
 
-    // 1. Radius circle
     const sLat = nbCurrentSource.lat;
     const sLon = nbCurrentSource.long;
+    const sBore = nbCurrentSource.bore;
+
+    // ⭐ حدد zoom منخفض معقول قبل أي رسم
+    map.setView([sLat, sLon], 14);
+
+    // 1. Radius circle (خط أزرق متقطع، بدون fill قوي)
     const radiusCircle = L.circle([sLat, sLon], {
       radius: nbCurrentRadius,
-      color: '#1E90FF',
-      weight: 1.2,
-      fillColor: '#1E90FF',
-      fillOpacity: 0.08,
+      color: '#2563EB',
+      weight: 2,
+      dashArray: '6,6',
+      fillColor: '#2563EB',
+      fillOpacity: 0.04,
       interactive: false
     }).addTo(map);
     nbMapLayers.push(radiusCircle);
 
-    // 2. Source cell sector (أحمر)
-    const srcCoords = makeSectorCoords(sLat, sLon, nbCurrentSource.bore);
+    // 2. Source cell sector — أحمر واضح
+    const srcCoords = makeSectorCoords(sLat, sLon, sBore);
     const srcPoly = L.polygon(srcCoords, {
-      color: '#C20000',
-      weight: 2,
-      fillColor: '#FF3232',
-      fillOpacity: 0.75
+      color: '#991B1B',
+      weight: 2.5,
+      fillColor: '#DC2626',
+      fillOpacity: 0.85
     }).addTo(map);
-    srcPoly.bindPopup('<b>' + escapeHtml(nbCurrentSource.cell_name) + '</b><br>Source Cell');
+
+    srcPoly.bindTooltip('🎯 ' + nbCurrentSource.cell_name, {
+      permanent: true,
+      direction: 'top',
+      offset: [0, -10],
+      className: 'nb-label-source'
+    });
+
+    srcPoly.bindPopup(
+      '<div style="font-family:Inter,sans-serif;font-size:13px;">' +
+        '<b style="font-size:15px;">🎯 ' + escapeHtml(nbCurrentSource.cell_name) + '</b><br>' +
+        '<span style="color:#5A6B87;">Source Cell</span><br>' +
+        '<b>Bore:</b> ' + sBore + '°<br>' +
+        '<b>Radius:</b> ' + nbCurrentRadius + ' m<br>' +
+        '<b>Neighbors:</b> ' + nbCurrentNeighbors.length
+      + '</div>'
+    );
     nbMapLayers.push(srcPoly);
 
-    // 3. Neighbor lines + sectors
+    // 3. Neighbor sectors + lines
     nbCurrentNeighbors.forEach(nb => {
       if (!nb.cell) return;
 
       const nLat = nb.cell.lat;
       const nLon = nb.cell.long;
 
-      // خط من الهدف إلى الجار
-      const lineColor = nb.status === 'Added' ? '#1F9D55' : '#D64545';
-      const lineDash = nb.status === 'Added' ? null : '5,8';
+      // 🎨 اللون حسب الحالة
+      let fill, stroke;
+      if (nb.status === 'Missing') {
+        fill = '#F97316';    // برتقالي = Missing
+        stroke = '#C2410C';
+      } else if (nb.status === 'Added (Not Found)') {
+        fill = '#EAB308';    // أصفر = Added but not found in layer
+        stroke = '#A16207';
+      } else {
+        fill = '#16A34A';    // أخضر = Added (موجود)
+        stroke = '#15803D';
+      }
+
+      // الخط
       const line = L.polyline([[sLat, sLon], [nLat, nLon]], {
-        color: lineColor,
-        weight: nb.isFront ? 2.5 : 1.5,
-        opacity: 0.7,
-        dashArray: lineDash
+        color: nb.status === 'Missing' ? '#DC2626' : '#16A34A',
+        weight: nb.isFront ? 3 : 1.5,
+        opacity: 0.85,
+        dashArray: nb.status === 'Missing' ? '8,6' : null
       }).addTo(map);
       nbMapLayers.push(line);
 
-      // sector الجار
+      // الـ sector
       const nCoords = makeSectorCoords(nLat, nLon, nb.cell.bore);
-      let fillColor;
-      if (nb.status === 'Missing') fillColor = '#F59E0B';
-      else if (nb.isFront) fillColor = '#16A34A';
-      else fillColor = '#84CC16';
-
       const nPoly = L.polygon(nCoords, {
-        color: '#fff',
-        weight: 0.8,
-        fillColor: fillColor,
+        color: stroke,
+        weight: 1.5,
+        fillColor: fill,
         fillOpacity: 0.7
       }).addTo(map);
 
+      // Label دائم — يظهر اسم الخلية
+      nPoly.bindTooltip(nb.name, {
+        permanent: true,
+        direction: 'center',
+        className: 'nb-label'
+      });
+
       nPoly.bindPopup(
-        '<div style="font-family:Inter,sans-serif;font-size:12px;min-width:180px;">' +
-          '<div style="font-weight:800;font-family:monospace;margin-bottom:6px;">' + escapeHtml(nb.name) + '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span style="color:#5A6B87;">Distance:</span><b>' + (nb.distance != null ? nb.distance.toFixed(0) + ' m' : '—') + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span style="color:#5A6B87;">Bore:</span><b>' + nb.cell.bore + '°</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span style="color:#5A6B87;">Direction:</span><b>' + (nb.isFront ? 'Front' : 'Non-Front') + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span style="color:#5A6B87;">Status:</span><b style="color:' + (nb.status === 'Added' ? '#1F9D55' : '#D64545') + ';">' + nb.status + '</b></div>' +
+        '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:200px;">' +
+          '<div style="font-weight:800;font-family:monospace;margin-bottom:6px;color:#0C1B3D;">' + escapeHtml(nb.name) + '</div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #F0F3F9;"><span style="color:#5A6B87;">Status:</span><b style="color:' + (nb.status === 'Missing' ? '#DC2626' : '#16A34A') + ';">' + nb.status + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">Distance:</span><b>' + (nb.distance != null ? nb.distance.toFixed(0) + ' m' : '—') + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">Bore:</span><b>' + nb.cell.bore + '°</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">Direction:</span><b>' + (nb.isFront ? '🟧 Front' : '⬜ Non-Front') + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">NB Slot:</span><b>' + (nb.nbField ? nb.nbField.toUpperCase() : '—') + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">Site:</span><b>' + (nb.cell.site || '—') + '</b></div>' +
         '</div>'
       );
 
@@ -4899,20 +5010,66 @@ function nbShowOnMap() {
     nbCurrentNeighbors.forEach(nb => {
       if (nb.cell) points.push([nb.cell.lat, nb.cell.long]);
     });
+
     if (points.length > 1) {
-      map.fitBounds(L.latLngBounds(points), { padding: [60, 60], maxZoom: 15 });
-    } else {
-      map.setView([sLat, sLon], 14);
+      const bounds = L.latLngBounds(points);
+      const ne = bounds.getNorthEast();
+      const sw = bounds.getSouthWest();
+      ne.lat += 0.005;
+      ne.lng += 0.005;
+      sw.lat -= 0.005;
+      sw.lng -= 0.005;
+      map.fitBounds(L.latLngBounds(sw, ne), { padding: [40, 40], maxZoom: 15 });
     }
 
-    toast('📍 Showing ' + nbCurrentNeighbors.length + ' neighbors on map', 'success');
-  }, 400);
+    // 5. اعرض Legend خاصة بـ NB
+    nbShowLegend();
+
+    toast('📍 ' + nbCurrentNeighbors.length + ' neighbors shown on map', 'success');
+  }, 500);
 }
 
 function nbHideMapLayers() {
+  window.__nbMode = false;
   nbMapLayers.forEach(l => map.removeLayer(l));
   nbMapLayers = [];
+  nbHideLegend();
   toast('Map layers hidden', 'info');
+}
+
+/* ---------- Legend خاصة بـ NB ---------- */
+function nbShowLegend() {
+  let legend = document.getElementById('nbLegend');
+  if (!legend) {
+    legend = document.createElement('div');
+    legend.id = 'nbLegend';
+    legend.className = 'legend';
+    legend.style.cssText = 'left:20px;bottom:20px;display:block;';
+    document.querySelector('.map-container').appendChild(legend);
+  }
+  legend.style.display = 'block';
+  legend.innerHTML =
+    '<div class="legend-title">🔗 Neighbor Analysis</div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#DC2626;"></span><span>Source Cell</span></div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#16A34A;"></span><span>Added Neighbor</span></div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#F97316;"></span><span>Missing Neighbor</span></div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#EAB308;"></span><span>Not Found in DB</span></div>' +
+    '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #E9EEF6;font-size:10.5px;">' +
+      '<div style="display:flex;align-items:center;gap:6px;padding:2px 0;">' +
+        '<span style="width:24px;height:0;border-top:3px solid #16A34A;"></span><span>Line = Added NB</span>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:6px;padding:2px 0;">' +
+        '<span style="width:24px;height:0;border-top:3px dashed #DC2626;"></span><span>Dashed = Missing NB</span>' +
+      '</div>' +
+    '</div>' +
+    '<div style="margin-top:6px;font-size:10px;color:#5A6B87;">' +
+      '🔵 Circle = ' + nbCurrentRadius + 'm radius' +
+    '</div>';
+}
+
+function nbHideLegend() {
+  const legend = document.getElementById('nbLegend');
+  if (legend) legend.style.display = 'none';
 }
 
 /* =========================================================
