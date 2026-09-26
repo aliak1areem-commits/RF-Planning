@@ -1698,7 +1698,11 @@ let selectedPolygons = new Map();
 let importPreviewData = [];
 
 const GSM_BAND_ARFCN = { '900': { from: 34, to: 46 }, '1800': { from: 663, to: 680 } };
-const GSM_BAND_SUFFIX = { 'A':'900','B':'900','C':'900', 'D':'1800','E':'1800','F':'1800' };
+const GSM_BAND_SUFFIX = {
+  'A':'900', 'B':'900', 'C':'900',
+  'D':'1800', 'E':'1800', 'F':'1800',
+  'G':'900', 'H':'1800', 'I':'1800', 'J':'1800'
+};
 const GSM_RADIUS_M = 1200;
 const GSM_FRONT_THRESHOLD = 45;
 let gsmLastResults = null;
@@ -1974,13 +1978,14 @@ function normalizeCell(row) {
   else if (looksGSM || hasBcch || hasNb) { isGSM = true; }
   else if (hasPci) { isLTE = true; }
 
-  const result = {
+   const result = {
     id: row.id,
     cell_name: name,
     cell_id: row.cell_id || 0,
     site: site,
     region: region,
     sector: sector,
+    gsmBand: isGSM ? (GSM_BAND_SUFFIX[sector.toUpperCase()] || 'unknown') : null,
     lat: parseFloat(row.lat) || 0,
     long: parseFloat(row.long) || 0,
     bore: row.bore || 0,
@@ -2162,15 +2167,42 @@ function renderMap() {
     if (!cell.lat || !cell.long) return;
     const center = [cell.lat, cell.long];
 
-    if (showSectors) {
+      if (showSectors) {
       const isGSM = cell.tech === 'GSM';
       const isLTE = cell.tech === 'LTE';
       if (isLTE && zoom < 16) return;
 
       let cellColor, fillOpacity, weight, scale;
-      if (isGSM) { cellColor = '#D97706'; fillOpacity = 0.55; weight = 1.5; scale = 1.0; }
-      else if (isLTE) { cellColor = '#124191'; fillOpacity = 0.75; weight = 1.0; scale = 0.45; }
-      else { cellColor = cell.color; fillOpacity = 0.65; weight = 0.8; scale = 1.0; }
+
+      if (isGSM) {
+        // 🎨 لون وحجم حسب الباند
+        if (cell.gsmBand === '1800') {
+          cellColor = '#7C3AED';   // بنفسجي = GSM 1800
+          fillOpacity = 0.65;
+          weight = 1.2;
+          scale = 0.55;            // أصغر → يظهر داخل 900
+        } else if (cell.gsmBand === '900') {
+          cellColor = '#D97706';   // برتقالي = GSM 900
+          fillOpacity = 0.45;
+          weight = 1.5;
+          scale = 1.0;             // الحجم الكامل
+        } else {
+          cellColor = '#9CA3AF';   // رمادي = Unknown
+          fillOpacity = 0.55;
+          weight = 1.2;
+          scale = 0.75;
+        }
+      } else if (isLTE) {
+        cellColor = '#124191';
+        fillOpacity = 0.75;
+        weight = 1.0;
+        scale = 0.45;
+      } else {
+        cellColor = cell.color;
+        fillOpacity = 0.65;
+        weight = 0.8;
+        scale = 1.0;
+      }
 
       const coords = makeSectorCoordsScaled(cell.lat, cell.long, cell.bore, scale);
       const polygon = L.polygon(coords, {
@@ -3394,10 +3426,16 @@ function showSiteInfo(cell) {
 
   let rfSection = '';
   if (isGSM) {
+      const bandBadge = cell.gsmBand === '1800'
+      ? '<span style="background:#F3E8FF;color:#7C3AED;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;">1800 MHz</span>'
+      : cell.gsmBand === '900'
+      ? '<span style="background:#FDF1DC;color:#8A5A00;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;">900 MHz</span>'
+      : '<span style="background:#F4F7FB;color:#5A6B87;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;">Unknown</span>';
+
     rfSection =
       '<div class="info-section-title">📡 GSM Parameters</div>' +
+      '<div class="info-row"><span class="k">Band</span><span class="v">' + bandBadge + '</span></div>' +
       '<div class="info-row"><span class="k">BCCH</span><span class="v" style="color:#D97706;font-weight:800;">' + (cell.bcch || '—') + '</span></div>' +
-      '<div class="info-row"><span class="k">BSIC</span><span class="v" style="color:#D97706;font-weight:800;">' + (cell.bsic || '—') + '</span></div>' +
       '<div class="info-row"><span class="k">TCH</span><span class="v">' + (cell.tch || '—') + '</span></div>' +
       '<div class="info-row"><span class="k">LAC</span><span class="v">' + (cell.lac || '—') + '</span></div>';
   } else {
