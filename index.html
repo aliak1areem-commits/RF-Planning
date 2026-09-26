@@ -1965,18 +1965,10 @@ function normalizeCell(row) {
     site = site.replace(/^L/, '');
   }
 
-  // كشف النوع
+   // 🎯 قاعدة بسيطة: يبدأ بـ L = LTE، غير ذلك = GSM
   const nameUpper = name.toUpperCase();
-  const looksLTE = /^(LBG|LCW|LSA26|LNB|LNC|LLN)/.test(nameUpper);
-  const looksGSM = /^(BG|CW|UCW|LSA(?!26))/.test(nameUpper);
-  const hasBcch = row.bcch != null && row.bcch > 0;
-  const hasPci = row.pci != null && row.pci > 0;
-  const hasNb = row.nb1 != null || row.nb2 != null || row.nb3 != null;
-
-  let isGSM = false, isLTE = false;
-  if (looksLTE) { isLTE = true; }
-  else if (looksGSM || hasBcch || hasNb) { isGSM = true; }
-  else if (hasPci) { isLTE = true; }
+  const isLTE = nameUpper.startsWith('L');
+  const isGSM = !isLTE;
 
    const result = {
     id: row.id,
@@ -2064,8 +2056,9 @@ function applyFilters() {
 
   visibleCells = allCells.filter(function(c) {
     if (!/[A-Z]$/.test(c.cell_name)) return false;
-    if (c.tech === 'GSM' && !showGSM) return false;
+        if (c.tech === 'GSM' && !showGSM) return false;
     if (c.tech === 'LTE' && !showLTE) return false;
+    if (c.tech !== 'GSM' && c.tech !== 'LTE') return false;  // 🆕 تجاهل Unknown
 
     if (search) {
       const hay = (c.cell_name + ' ' + c.site + ' ' + c.pci + ' ' + c.cell_id).toLowerCase();
@@ -3455,9 +3448,19 @@ function showSiteInfo(cell) {
     '<div class="info-row"><span class="k">Latitude</span><span class="v">' + cell.lat.toFixed(6) + '</span></div>' +
     '<div class="info-row"><span class="k">Longitude</span><span class="v">' + cell.long.toFixed(6) + '</span></div>';
 
-  const techBadge = cell.tech === 'GSM'
-    ? '<span style="background:#FDF1DC;color:#8A5A00;padding:3px 10px;border-radius:12px;font-size:10.5px;font-weight:800;">GSM 2G</span>'
-    : '<span style="background:#EAF2FB;color:#124191;padding:3px 10px;border-radius:12px;font-size:10.5px;font-weight:800;">LTE 4G</span>';
+  let techBadge;
+  if (cell.tech === 'GSM') {
+    const bandLabel = cell.gsmBand === '1800' ? 'GSM 2G · 1800 MHz' :
+                      cell.gsmBand === '900'  ? 'GSM 2G · 900 MHz'  :
+                      'GSM 2G';
+    const badgeBg = cell.gsmBand === '1800' ? '#F3E8FF' : '#FDF1DC';
+    const badgeColor = cell.gsmBand === '1800' ? '#7C3AED' : '#8A5A00';
+    techBadge = '<span style="background:' + badgeBg + ';color:' + badgeColor + ';padding:3px 10px;border-radius:12px;font-size:10.5px;font-weight:800;">' + bandLabel + '</span>';
+  } else if (cell.tech === 'LTE') {
+    techBadge = '<span style="background:#EAF2FB;color:#124191;padding:3px 10px;border-radius:12px;font-size:10.5px;font-weight:800;">LTE 4G</span>';
+  } else {
+    techBadge = '<span style="background:#F4F7FB;color:#5A6B87;padding:3px 10px;border-radius:12px;font-size:10.5px;font-weight:800;">❓ Unknown</span>';
+  }
 
   body.innerHTML =
     '<div style="margin-bottom:12px;">' + techBadge + '</div>' +
