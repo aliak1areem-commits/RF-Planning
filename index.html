@@ -9,7 +9,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -699,14 +699,99 @@ body {
       </div>
     </section>
 
-    <!-- PAGE: DASHBOARD -->
+       <!-- ============ PAGE: DASHBOARD ============ -->
     <section class="page" id="page-dashboard">
       <div style="padding:24px;overflow-y:auto;flex:1;">
-        <div style="background:#fff;border-radius:12px;padding:32px;text-align:center;color:#5A6B87;">
-          <div style="font-size:56px;margin-bottom:16px;">📊</div>
-          <h3 style="color:#0C1B3D;margin-bottom:8px;">Dashboard</h3>
-          <p>Coming soon...</p>
+
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h3 style="font-size:20px;color:#0C1B3D;margin:0 0 4px;">📊 Network Dashboard</h3>
+            <p style="color:#5A6B87;font-size:13px;margin:0;">Live overview of your RF network</p>
+          </div>
+          <button class="btn btn-ghost" onclick="renderDashboard()">🔄 Refresh</button>
         </div>
+
+        <!-- Filters -->
+        <div style="background:#fff;border-radius:12px;padding:18px 22px;margin-bottom:20px;border:1px solid #E9EEF6;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;">
+          <div>
+            <label style="display:block;font-size:11.5px;font-weight:700;color:#5A6B87;text-transform:uppercase;margin-bottom:6px;">Technology</label>
+            <select id="dashFilterTech" class="filter-search" onchange="renderDashboard()">
+              <option value="all">All Technologies</option>
+              <option value="GSM">📡 GSM (2G)</option>
+              <option value="LTE">📶 LTE (4G)</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:11.5px;font-weight:700;color:#5A6B87;text-transform:uppercase;margin-bottom:6px;">Region</label>
+            <select id="dashFilterRegion" class="filter-search" onchange="renderDashboard()">
+              <option value="all">All Regions</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:11.5px;font-weight:700;color:#5A6B87;text-transform:uppercase;margin-bottom:6px;">Project</label>
+            <select id="dashFilterProject" class="filter-search" onchange="renderDashboard()">
+              <option value="all">All Projects</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:flex-end;">
+            <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="resetDashboardFilters()">🗑️ Reset</button>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div id="dashKPI" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px;"></div>
+
+        <!-- Smart Insights -->
+        <div id="dashInsights" style="background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:20px;border:1px solid #E9EEF6;border-left:4px solid #F2A900;"></div>
+
+        <!-- Charts Grid -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:20px;margin-bottom:20px;">
+
+          <div style="background:#fff;border-radius:12px;padding:20px;border:1px solid #E9EEF6;">
+            <h4 style="font-size:14px;color:#0C1B3D;margin:0 0 14px;">📶 Cells by Technology</h4>
+            <div style="position:relative;height:260px;">
+              <canvas id="chartTech"></canvas>
+            </div>
+          </div>
+
+          <div style="background:#fff;border-radius:12px;padding:20px;border:1px solid #E9EEF6;">
+            <h4 style="font-size:14px;color:#0C1B3D;margin:0 0 14px;">🗺️ Cells by Region</h4>
+            <div style="position:relative;height:260px;">
+              <canvas id="chartRegion"></canvas>
+            </div>
+          </div>
+
+          <div style="background:#fff;border-radius:12px;padding:20px;border:1px solid #E9EEF6;">
+            <h4 style="font-size:14px;color:#0C1B3D;margin:0 0 14px;">🏢 Top 10 Sites by Cells</h4>
+            <div style="position:relative;height:260px;">
+              <canvas id="chartSites"></canvas>
+            </div>
+          </div>
+
+          <div style="background:#fff;border-radius:12px;padding:20px;border:1px solid #E9EEF6;">
+            <h4 style="font-size:14px;color:#0C1B3D;margin:0 0 14px;">🔢 PCI Distribution (LTE)</h4>
+            <div style="position:relative;height:260px;">
+              <canvas id="chartPCI"></canvas>
+            </div>
+          </div>
+
+          <div style="background:#fff;border-radius:12px;padding:20px;border:1px solid #E9EEF6;">
+            <h4 style="font-size:14px;color:#0C1B3D;margin:0 0 14px;">📻 BCCH Distribution (GSM)</h4>
+            <div style="position:relative;height:260px;">
+              <canvas id="chartBCCH"></canvas>
+            </div>
+          </div>
+
+          <div style="background:#fff;border-radius:12px;padding:20px;border:1px solid #E9EEF6;">
+            <h4 style="font-size:14px;color:#0C1B3D;margin:0 0 14px;">🎯 Cells by Sector</h4>
+            <div style="position:relative;height:260px;">
+              <canvas id="chartSector"></canvas>
+            </div>
+          </div>
+
+        </div>
+
       </div>
     </section>
 
@@ -776,14 +861,96 @@ body {
       </div>
     </section>
 
-    <!-- PAGE: CELLS -->
+        <!-- ============ PAGE: CELLS ============ -->
     <section class="page" id="page-cells">
       <div style="padding:24px;overflow-y:auto;flex:1;">
-        <div style="background:#fff;border-radius:12px;padding:32px;text-align:center;color:#5A6B87;">
-          <div style="font-size:56px;margin-bottom:16px;">📋</div>
-          <h3 style="color:#0C1B3D;margin-bottom:8px;">Cells Database</h3>
-          <p>Coming soon...</p>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h3 style="font-size:20px;color:#0C1B3D;margin:0 0 4px;">📋 Cells Database</h3>
+            <p style="color:#5A6B87;font-size:13px;margin:0;" id="cellsSubtitle">Browse, filter, and export all cells</p>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-success" onclick="cellsExportFiltered()">📥 Export Filtered</button>
+            <button class="btn btn-ghost" onclick="cellsResetFilters()">🗑️ Reset</button>
+          </div>
         </div>
+
+        <!-- Filters -->
+        <div style="background:#fff;border-radius:12px;padding:18px 22px;margin-bottom:16px;border:1px solid #E9EEF6;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;">
+            <div>
+              <label style="display:block;font-size:11px;font-weight:700;color:#5A6B87;text-transform:uppercase;margin-bottom:5px;">🔍 Search</label>
+              <input type="text" id="cellsSearch" class="filter-search" placeholder="Cell / Site name..." oninput="renderCellsPage(1)">
+            </div>
+            <div>
+              <label style="display:block;font-size:11px;font-weight:700;color:#5A6B87;text-transform:uppercase;margin-bottom:5px;">Technology</label>
+              <select id="cellsFilterTech" class="filter-search" onchange="renderCellsPage(1)">
+                <option value="all">All</option>
+                <option value="GSM">GSM</option>
+                <option value="LTE">LTE</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;font-size:11px;font-weight:700;color:#5A6B87;text-transform:uppercase;margin-bottom:5px;">Region</label>
+              <select id="cellsFilterRegion" class="filter-search" onchange="renderCellsPage(1)">
+                <option value="all">All Regions</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;font-size:11px;font-weight:700;color:#5A6B87;text-transform:uppercase;margin-bottom:5px;">Site</label>
+              <input type="text" id="cellsFilterSite" class="filter-search" placeholder="Site prefix..." oninput="renderCellsPage(1)">
+            </div>
+            <div>
+              <label style="display:block;font-size:11px;font-weight:700;color:#5A6B87;text-transform:uppercase;margin-bottom:5px;">PCI</label>
+              <input type="number" id="cellsFilterPCI" class="filter-search" placeholder="e.g. 123" oninput="renderCellsPage(1)">
+            </div>
+            <div>
+              <label style="display:block;font-size:11px;font-weight:700;color:#5A6B87;text-transform:uppercase;margin-bottom:5px;">BCCH</label>
+              <input type="number" id="cellsFilterBCCH" class="filter-search" placeholder="e.g. 45" oninput="renderCellsPage(1)">
+            </div>
+          </div>
+
+          <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div id="cellsFilterStats" style="font-size:12.5px;color:#5A6B87;font-family:'JetBrains Mono',monospace;"></div>
+            <div style="display:flex;gap:6px;align-items:center;font-size:12px;color:#5A6B87;">
+              <span>Rows per page:</span>
+              <select id="cellsPerPage" class="filter-search" style="width:80px;padding:5px 10px;" onchange="renderCellsPage(1)">
+                <option value="25">25</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="250">250</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div style="background:#fff;border-radius:12px;border:1px solid #E9EEF6;overflow:hidden;margin-bottom:16px;">
+          <div style="overflow-x:auto;max-height:calc(100vh - 480px);min-height:400px;">
+            <table class="data-table" id="cellsTable" style="width:100%;">
+              <thead style="position:sticky;top:0;z-index:2;">
+                <tr>
+                  <th style="cursor:pointer;" onclick="cellsSortBy('cell_name')">Cell Name</th>
+                  <th style="cursor:pointer;" onclick="cellsSortBy('site')">Site</th>
+                  <th>Tech</th>
+                  <th style="cursor:pointer;" onclick="cellsSortBy('pci')">PCI</th>
+                  <th style="cursor:pointer;" onclick="cellsSortBy('bcch')">BCCH</th>
+                  <th>BSIC</th>
+                  <th style="cursor:pointer;" onclick="cellsSortBy('bore')">Bore</th>
+                  <th>Lat</th>
+                  <th>Long</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="cellsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div id="cellsPagination" style="display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap;padding:10px;"></div>
+
       </div>
     </section>
 
@@ -1649,11 +1816,16 @@ function switchView(page) {
   document.getElementById('pageTitle').textContent = info.title;
   document.getElementById('pageSubtitle').textContent = info.sub;
 
-  if (page === 'map' && map) {
+    if (page === 'map' && map) {
     setTimeout(() => map.invalidateSize(), 150);
   }
+  if (page === 'dashboard') {
+    setTimeout(() => renderDashboard(), 100);
+  }
+  if (page === 'cells') {
+    setTimeout(() => renderCellsPage(1), 100);
+  }
 }
-
 document.querySelectorAll('.nav-item').forEach(function(btn) {
   btn.addEventListener('click', function() {
     switchView(btn.dataset.page);
@@ -4194,7 +4366,503 @@ function gsmExportCSV() {
   URL.revokeObjectURL(url);
   toast('✅ CSV exported', 'success');
 }
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+let dashCharts = {};
 
+function renderDashboard() {
+  if (!allCells.length) {
+    document.getElementById('dashKPI').innerHTML =
+      '<div style="grid-column:1/-1;background:#fff;border-radius:12px;padding:40px;text-align:center;color:#5A6B87;">' +
+        '<div style="font-size:48px;margin-bottom:12px;">📊</div>' +
+        '<p>Loading cells...</p></div>';
+    return;
+  }
+
+  // Populate filters
+  populateDashFilters();
+
+  // Apply filters
+  const tech = document.getElementById('dashFilterTech').value;
+  const region = document.getElementById('dashFilterRegion').value;
+  const project = document.getElementById('dashFilterProject').value;
+
+  let cells = allCells.filter(c => /[A-Z]$/.test(c.cell_name));
+  if (tech !== 'all') cells = cells.filter(c => c.tech === tech);
+  if (region !== 'all') cells = cells.filter(c => c.region === region);
+
+  // KPI
+  const totalCells = cells.length;
+  const sites = new Set(cells.map(c => c.site)).size;
+  const gsmCount = cells.filter(c => c.tech === 'GSM').length;
+  const lteCount = cells.filter(c => c.tech === 'LTE').length;
+  const regions = new Set(cells.map(c => c.region)).size;
+
+  // Conflicts
+  const lteCells = cells.filter(c => c.tech === 'LTE' && c.pci > 0);
+  const pciCount = {};
+  lteCells.forEach(c => { pciCount[c.pci] = (pciCount[c.pci] || 0) + 1; });
+  const pciConflicts = Object.values(pciCount).filter(v => v > 1).length;
+
+  // GSM cells without BCCH
+  const gsmNoBcch = cells.filter(c => c.tech === 'GSM' && (!c.bcch || c.bcch === 0)).length;
+
+  document.getElementById('dashKPI').innerHTML =
+    kpiCard('📡', 'Total Cells', totalCells, '#124191') +
+    kpiCard('📍', 'Sites', sites, '#00A1E0') +
+    kpiCard('📶', 'GSM (2G)', gsmCount, '#D97706') +
+    kpiCard('📡', 'LTE (4G)', lteCount, '#124191') +
+    kpiCard('🌐', 'Regions', regions, '#1F9D55') +
+    kpiCard('⚠️', 'PCI Conflicts', pciConflicts, pciConflicts > 0 ? '#D64545' : '#1F9D55') +
+    kpiCard('🔕', 'GSM w/o BCCH', gsmNoBcch, gsmNoBcch > 0 ? '#F2A900' : '#1F9D55');
+
+  // Smart Insights
+  renderDashInsights(cells, pciConflicts, gsmNoBcch, gsmCount, lteCount);
+
+  // Charts
+  drawChartTech(cells);
+  drawChartRegion(cells);
+  drawChartSites(cells);
+  drawChartPCI(lteCells);
+  drawChartBCCH(cells.filter(c => c.tech === 'GSM' && c.bcch > 0));
+  drawChartSector(cells);
+}
+
+function kpiCard(icon, label, value, color) {
+  return '<div style="background:#fff;border-radius:12px;padding:16px 18px;border:1px solid #E9EEF6;box-shadow:0 2px 8px rgba(12,27,61,.04);">' +
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">' +
+      '<div style="font-size:20px;">' + icon + '</div>' +
+      '<div style="font-size:10.5px;font-weight:700;color:#5A6B87;text-transform:uppercase;letter-spacing:.4px;">' + label + '</div>' +
+    '</div>' +
+    '<div style="font-family:\'JetBrains Mono\',monospace;font-size:26px;font-weight:800;color:' + color + ';line-height:1;">' + value + '</div>' +
+  '</div>';
+}
+
+function populateDashFilters() {
+  // Regions
+  const regionSel = document.getElementById('dashFilterRegion');
+  if (regionSel.options.length <= 1) {
+    const regions = [...new Set(allCells.map(c => c.region))].sort();
+    regionSel.innerHTML = '<option value="all">All Regions</option>' +
+      regions.map(r => '<option value="' + r + '">' + r + '</option>').join('');
+  }
+  // Projects
+  const projSel = document.getElementById('dashFilterProject');
+  if (projSel.options.length <= 1 && allProjects.length) {
+    projSel.innerHTML = '<option value="all">All Projects</option>' +
+      allProjects.map(p => '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>').join('');
+  }
+}
+
+function resetDashboardFilters() {
+  document.getElementById('dashFilterTech').value = 'all';
+  document.getElementById('dashFilterRegion').value = 'all';
+  document.getElementById('dashFilterProject').value = 'all';
+  renderDashboard();
+}
+
+function renderDashInsights(cells, pciConflicts, gsmNoBcch, gsmCount, lteCount) {
+  const insights = [];
+  const el = document.getElementById('dashInsights');
+
+  // Analysis
+  const total = cells.length;
+  const gsmPct = total ? Math.round(gsmCount / total * 100) : 0;
+  const ltePct = total ? Math.round(lteCount / total * 100) : 0;
+
+  insights.push({
+    icon: '📊',
+    color: '#124191',
+    title: 'Network Composition',
+    text: 'Your network has <b>' + total + '</b> cells — ' +
+          '<b>' + gsmPct + '%</b> GSM (' + gsmCount + ') and <b>' + ltePct + '%</b> LTE (' + lteCount + ').'
+  });
+
+  if (pciConflicts > 0) {
+    const ratio = lteCount > 0 ? (pciConflicts / lteCount * 100).toFixed(1) : 0;
+    insights.push({
+      icon: '⚠️',
+      color: pciConflicts > 20 ? '#D64545' : '#F2A900',
+      title: 'PCI Conflicts Detected',
+      text: 'Found <b>' + pciConflicts + '</b> PCI reuse groups (' + ratio + '% of LTE cells). ' +
+            'Run <b>PCI Checker</b> to detect and fix.'
+    });
+  } else if (lteCount > 0) {
+    insights.push({
+      icon: '✅',
+      color: '#1F9D55',
+      title: 'No PCI Conflicts',
+      text: 'LTE network is clean — no PCI reuse conflicts detected.'
+    });
+  }
+
+  if (gsmNoBcch > 0) {
+    insights.push({
+      icon: '🔕',
+      color: '#F2A900',
+      title: 'GSM Cells Missing BCCH',
+      text: '<b>' + gsmNoBcch + '</b> GSM cells have no BCCH assigned. ' +
+            'Use <b>GSM Planner</b> to assign BCCH/BSIC automatically.'
+    });
+  }
+
+  // Top sites
+  const siteCount = {};
+  cells.forEach(c => { siteCount[c.site] = (siteCount[c.site] || 0) + 1; });
+  const topSite = Object.entries(siteCount).sort((a, b) => b[1] - a[1])[0];
+  if (topSite && topSite[1] > 5) {
+    insights.push({
+      icon: '🏢',
+      color: '#7C3AED',
+      title: 'Busiest Site',
+      text: 'Site <b>' + topSite[0] + '</b> has <b>' + topSite[1] + '</b> cells. ' +
+            'Review for co-site interference.'
+    });
+  }
+
+  // Recommendations
+  insights.push({
+    icon: '💡',
+    color: '#00A1E0',
+    title: 'Recommended Actions',
+    text: (pciConflicts > 0 ? '1️⃣ Fix PCI conflicts. ' : '') +
+          (gsmNoBcch > 0 ? '2️⃣ Assign BCCH to GSM cells. ' : '') +
+          '3️⃣ Run <b>Neighbor Analysis</b> to audit neighbor relations.'
+  });
+
+  el.innerHTML =
+    '<div style="font-size:13px;font-weight:800;color:#0C1B3D;text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;">💡 Smart Insights</div>' +
+    insights.map(i =>
+      '<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #F0F3F9;">' +
+        '<div style="font-size:20px;flex-shrink:0;">' + i.icon + '</div>' +
+        '<div style="flex:1;font-size:13px;line-height:1.55;color:#1B1F2A;">' +
+          '<b style="color:' + i.color + ';">' + i.title + ':</b> ' + i.text +
+        '</div>' +
+      '</div>'
+    ).join('');
+}
+
+/* --- Chart helpers --- */
+function destroyChart(id) {
+  if (dashCharts[id]) { dashCharts[id].destroy(); delete dashCharts[id]; }
+}
+
+function drawChartTech(cells) {
+  const gsm = cells.filter(c => c.tech === 'GSM').length;
+  const lte = cells.filter(c => c.tech === 'LTE').length;
+  destroyChart('tech');
+  const ctx = document.getElementById('chartTech');
+  if (!ctx) return;
+  dashCharts.tech = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['GSM (2G)', 'LTE (4G)'],
+      datasets: [{ data: [gsm, lte], backgroundColor: ['#D97706', '#124191'], borderWidth: 2, borderColor: '#fff' }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 } } } }
+    }
+  });
+}
+
+function drawChartRegion(cells) {
+  const counts = {};
+  cells.forEach(c => { counts[c.region] = (counts[c.region] || 0) + 1; });
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 12);
+  destroyChart('region');
+  const ctx = document.getElementById('chartRegion');
+  if (!ctx) return;
+  dashCharts.region = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: sorted.map(e => e[0]),
+      datasets: [{ label: 'Cells', data: sorted.map(e => e[1]), backgroundColor: '#00A1E0', borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+}
+
+function drawChartSites(cells) {
+  const counts = {};
+  cells.forEach(c => { counts[c.site] = (counts[c.site] || 0) + 1; });
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  destroyChart('sites');
+  const ctx = document.getElementById('chartSites');
+  if (!ctx) return;
+  dashCharts.sites = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: sorted.map(e => e[0]),
+      datasets: [{ label: 'Cells', data: sorted.map(e => e[1]), backgroundColor: '#7C3AED', borderRadius: 4 }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true } }
+    }
+  });
+}
+
+function drawChartPCI(cells) {
+  // Histogram of PCI mod 3 groups
+  const buckets = { 0: 0, 1: 0, 2: 0 };
+  cells.forEach(c => { const m = c.pci % 3; buckets[m] = (buckets[m] || 0) + 1; });
+  destroyChart('pci');
+  const ctx = document.getElementById('chartPCI');
+  if (!ctx) return;
+  dashCharts.pci = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['MOD 0', 'MOD 1', 'MOD 2'],
+      datasets: [{ label: 'Cells', data: [buckets[0], buckets[1], buckets[2]], backgroundColor: ['#124191', '#1F9D55', '#F2A900'], borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+}
+
+function drawChartBCCH(cells) {
+  const counts = {};
+  cells.forEach(c => {
+    const b = Math.floor((c.bcch - 34) / 3) * 3 + 34;
+    counts[b] = (counts[b] || 0) + 1;
+  });
+  const sorted = Object.entries(counts).sort((a, b) => parseInt(a[0]) - parseInt(b[0])).slice(0, 12);
+  destroyChart('bcch');
+  const ctx = document.getElementById('chartBCCH');
+  if (!ctx) return;
+  dashCharts.bcch = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: sorted.map(e => 'ARFCN ' + e[0]),
+      datasets: [{ label: 'Cells', data: sorted.map(e => e[1]), backgroundColor: '#D97706', borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+}
+
+function drawChartSector(cells) {
+  const counts = {};
+  cells.forEach(c => { counts[c.sector] = (counts[c.sector] || 0) + 1; });
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  destroyChart('sector');
+  const ctx = document.getElementById('chartSector');
+  if (!ctx) return;
+  dashCharts.sector = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: sorted.map(e => 'Sector ' + e[0]),
+      datasets: [{ data: sorted.map(e => e[1]), backgroundColor: ['#124191', '#1F9D55', '#D64545', '#F2A900', '#8B5CF6', '#EC4899', '#06B6D4'], borderWidth: 2, borderColor: '#fff' }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11 } } } }
+    }
+  });
+}
+
+/* =========================================================
+   CELLS PAGE
+   ========================================================= */
+let cellsPageState = { page: 1, sortBy: 'cell_name', sortAsc: true };
+
+function renderCellsPage(page) {
+  cellsPageState.page = page || cellsPageState.page;
+  populateCellsFilters();
+
+  const search = (document.getElementById('cellsSearch').value || '').toLowerCase().trim();
+  const tech = document.getElementById('cellsFilterTech').value;
+  const region = document.getElementById('cellsFilterRegion').value;
+  const siteF = (document.getElementById('cellsFilterSite').value || '').toLowerCase().trim();
+  const pciF = document.getElementById('cellsFilterPCI').value.trim();
+  const bcchF = document.getElementById('cellsFilterBCCH').value.trim();
+
+  let filtered = allCells.filter(c => /[A-Z]$/.test(c.cell_name));
+
+  if (tech !== 'all') filtered = filtered.filter(c => c.tech === tech);
+  if (region !== 'all') filtered = filtered.filter(c => c.region === region);
+  if (search) filtered = filtered.filter(c =>
+    c.cell_name.toLowerCase().includes(search) || c.site.toLowerCase().includes(search));
+  if (siteF) filtered = filtered.filter(c => c.site.toLowerCase().includes(siteF));
+  if (pciF) filtered = filtered.filter(c => String(c.pci) === pciF);
+  if (bcchF) filtered = filtered.filter(c => String(c.bcch) === bcchF);
+
+  // Sort
+  filtered.sort((a, b) => {
+    const k = cellsPageState.sortBy;
+    let va = a[k], vb = b[k];
+    if (typeof va === 'string') { va = va.toLowerCase(); vb = String(vb || '').toLowerCase(); }
+    if (va < vb) return cellsPageState.sortAsc ? -1 : 1;
+    if (va > vb) return cellsPageState.sortAsc ? 1 : -1;
+    return 0;
+  });
+
+  // Pagination
+  const perPage = parseInt(document.getElementById('cellsPerPage').value) || 50;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+  if (cellsPageState.page > totalPages) cellsPageState.page = totalPages;
+
+  const start = (cellsPageState.page - 1) * perPage;
+  const pageItems = filtered.slice(start, start + perPage);
+
+  // Stats
+  document.getElementById('cellsFilterStats').innerHTML =
+    'Showing <b style="color:#124191;">' + (start + 1) + '–' + Math.min(start + perPage, filtered.length) + '</b> ' +
+    'of <b>' + filtered.length + '</b> filtered cells · Total: <b>' + allCells.length + '</b>';
+
+  // Render rows
+  const tbody = document.getElementById('cellsTableBody');
+  if (!pageItems.length) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#5A6B87;">No cells match your filters</td></tr>';
+  } else {
+    tbody.innerHTML = pageItems.map(c =>
+      '<tr style="cursor:pointer;" onclick="flyToCell(' + c.id + ')">' +
+        '<td><b>' + escapeHtml(c.cell_name) + '</b></td>' +
+        '<td>' + escapeHtml(c.site || '—') + '</td>' +
+        '<td><span style="padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;background:' +
+          (c.tech === 'GSM' ? '#FDF1DC;color:#8A5A00' : c.tech === 'LTE' ? '#EAF2FB;color:#124191' : '#F4F7FB;color:#5A6B87') + ';">' +
+          c.tech + '</span></td>' +
+        '<td>' + (c.pci || '—') + '</td>' +
+        '<td>' + (c.bcch || '—') + '</td>' +
+        '<td>' + (c.bsic || '—') + '</td>' +
+        '<td>' + (c.bore || 0) + '°</td>' +
+        '<td style="font-size:11px;">' + c.lat.toFixed(4) + '</td>' +
+        '<td style="font-size:11px;">' + c.long.toFixed(4) + '</td>' +
+        '<td>' +
+          '<button onclick="event.stopPropagation();flyToCell(' + c.id + ')" style="padding:4px 8px;background:#EAF2FB;color:#124191;border:1px solid #D7DEEA;border-radius:6px;font-size:10.5px;font-weight:600;cursor:pointer;font-family:inherit;">🗺️ View</button>' +
+        '</td>' +
+      '</tr>'
+    ).join('');
+  }
+
+  // Pagination
+  renderCellsPagination(totalPages);
+}
+
+function populateCellsFilters() {
+  const regionSel = document.getElementById('cellsFilterRegion');
+  if (regionSel.options.length <= 1) {
+    const regions = [...new Set(allCells.map(c => c.region))].sort();
+    regionSel.innerHTML = '<option value="all">All Regions</option>' +
+      regions.map(r => '<option value="' + r + '">' + r + '</option>').join('');
+  }
+}
+
+function renderCellsPagination(totalPages) {
+  const el = document.getElementById('cellsPagination');
+  if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+  const cur = cellsPageState.page;
+  let html = '';
+
+  const btnStyle = (active) => 'padding:6px 12px;border-radius:6px;border:1px solid #D7DEEA;background:' +
+    (active ? '#124191;color:#fff;font-weight:700;' : '#fff;color:#5A6B87;font-weight:600;') +
+    'font-size:12px;cursor:pointer;font-family:inherit;';
+
+  html += '<button style="' + btnStyle(false) + '" onclick="renderCellsPage(' + (cur - 1) + ')" ' + (cur <= 1 ? 'disabled' : '') + '>← Prev</button>';
+
+  let startPage = Math.max(1, cur - 2);
+  let endPage = Math.min(totalPages, cur + 2);
+
+  if (startPage > 1) {
+    html += '<button style="' + btnStyle(false) + '" onclick="renderCellsPage(1)">1</button>';
+    if (startPage > 2) html += '<span style="color:#5A6B87;padding:0 6px;">…</span>';
+  }
+  for (let i = startPage; i <= endPage; i++) {
+    html += '<button style="' + btnStyle(i === cur) + '" onclick="renderCellsPage(' + i + ')">' + i + '</button>';
+  }
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) html += '<span style="color:#5A6B87;padding:0 6px;">…</span>';
+    html += '<button style="' + btnStyle(false) + '" onclick="renderCellsPage(' + totalPages + ')">' + totalPages + '</button>';
+  }
+
+  html += '<button style="' + btnStyle(false) + '" onclick="renderCellsPage(' + (cur + 1) + ')" ' + (cur >= totalPages ? 'disabled' : '') + '>Next →</button>';
+
+  el.innerHTML = html;
+}
+
+function cellsSortBy(key) {
+  if (cellsPageState.sortBy === key) {
+    cellsPageState.sortAsc = !cellsPageState.sortAsc;
+  } else {
+    cellsPageState.sortBy = key;
+    cellsPageState.sortAsc = true;
+  }
+  renderCellsPage(1);
+}
+
+function cellsResetFilters() {
+  document.getElementById('cellsSearch').value = '';
+  document.getElementById('cellsFilterTech').value = 'all';
+  document.getElementById('cellsFilterRegion').value = 'all';
+  document.getElementById('cellsFilterSite').value = '';
+  document.getElementById('cellsFilterPCI').value = '';
+  document.getElementById('cellsFilterBCCH').value = '';
+  renderCellsPage(1);
+  toast('Filters reset', 'info');
+}
+
+function flyToCell(id) {
+  const cell = allCells.find(c => c.id === id);
+  if (!cell) return;
+  window.__gsmMode = false;
+  window.__nbMode = false;
+  switchView('map');
+  setTimeout(() => {
+    renderMap();
+    map.flyTo([cell.lat, cell.long], 16, { duration: 1 });
+    setTimeout(() => showSiteInfo(cell), 1200);
+  }, 200);
+}
+
+function cellsExportFiltered() {
+  const search = (document.getElementById('cellsSearch').value || '').toLowerCase().trim();
+  const tech = document.getElementById('cellsFilterTech').value;
+  const region = document.getElementById('cellsFilterRegion').value;
+  const siteF = (document.getElementById('cellsFilterSite').value || '').toLowerCase().trim();
+  const pciF = document.getElementById('cellsFilterPCI').value.trim();
+  const bcchF = document.getElementById('cellsFilterBCCH').value.trim();
+
+  let filtered = allCells.filter(c => /[A-Z]$/.test(c.cell_name));
+  if (tech !== 'all') filtered = filtered.filter(c => c.tech === tech);
+  if (region !== 'all') filtered = filtered.filter(c => c.region === region);
+  if (search) filtered = filtered.filter(c =>
+    c.cell_name.toLowerCase().includes(search) || c.site.toLowerCase().includes(search));
+  if (siteF) filtered = filtered.filter(c => c.site.toLowerCase().includes(siteF));
+  if (pciF) filtered = filtered.filter(c => String(c.pci) === pciF);
+  if (bcchF) filtered = filtered.filter(c => String(c.bcch) === bcchF);
+
+  if (!filtered.length) { toast('No cells to export', 'error'); return; }
+
+  const rows = [['Cell Name', 'Site', 'Tech', 'PCI', 'BCCH', 'BSIC', 'Bore', 'Lat', 'Long', 'Region']];
+  filtered.forEach(c => {
+    rows.push([c.cell_name, c.site, c.tech, c.pci, c.bcch, c.bsic, c.bore, c.lat, c.long, c.region]);
+  });
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Cells_Export_' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('✅ Exported ' + filtered.length + ' cells', 'success');
+}
 console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
 console.log('%cTools: PCI · GSM · NB · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
 </script>
