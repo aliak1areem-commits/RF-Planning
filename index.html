@@ -6069,23 +6069,25 @@ function runBSICAnalyzer() {
   // If 'clash' mode, only keep cells with clashes (or with BCCH target)
   let analysisResults = results;
   if (bsicMode === 'clash') {
-    // In clash mode, keep only cells that have at least one clash OR have BCCH = targetBCCH (if given)
-    analysisResults = results.filter(r => r.same_bsic_nearby > 0 || (targetBCCH !== null));
+    // 🎯 اعرض فقط الخلايا المتعارضة
+    analysisResults = results.filter(r => r.same_bsic_nearby > 0);
   }
-
   // Sort by same_bsic_nearby desc, then name
   analysisResults.sort((a, b) => b.same_bsic_nearby - a.same_bsic_nearby || a.cell_name.localeCompare(b.cell_name));
 
   // === Strict-separation BSIC suggestions ===
   const suggestions = bsicSuggestStrict(analysisResults, clashRadiusKm);
 
-  // Determine changes
+   // Determine changes
   let changeCount = 0;
   let highCount = 0;
   let mediumCount = 0;
   analysisResults.forEach(r => {
     const s = suggestions.get(r.id);
-    if (s && s !== r.bsic) {
+    // 🎯 في clash mode، اقترح فقط للخلايا المتعارضة
+    if (bsicMode === 'clash' && r.same_bsic_nearby === 0) {
+      r.suggested = r.bsic; // لا تغيير
+    } else if (s && s !== r.bsic) {
       r.suggested = s;
       changeCount++;
     } else {
@@ -6118,78 +6120,95 @@ function runBSICAnalyzer() {
 function bsicSuggestStrict(cells, minDistanceKm) {
   const suggestions = new Map();
   const allBsics = bsicAllPossible();
-  const assignments = {}; // bsic -> [{lat, lon, cell_id}]
+  const assignments = {}; // bsic -> [{lat, lon, cell_id, bcch}]
 
-  // Sort by latitude desc (North to South) for consistency
-  const sorted = cells.slice().sort((a, b) => b.lat - a.lat);
+  // 🎯 رتّب: الخلايا المتعارضة أولاً (الأكثر تعارضاً)، ثم الباقي
+  const sorted = cells.slice().sort((a, b) => {
+    if ((b.same_bsic_nearby || 0) !== (a.same_bsic_nearby || 0)) {
+      return (b.same_bsic_nearby || 0) - (a.same_bsic_nearby || 0);
+    }
+    return b.lat - a.lat;
+  });
 
   sorted.forEach(cell => {
     const cellId = cell.id;
     const currentBsic = cell.bsic;
     const lat = cell.lat, lon = cell.lon;
+    const hasConflict = (cell.same_bsic_nearby || 0) > 0;
 
-    // Collect BSICs used within minDistance
+    // 🎯 إذا كانت Clean → لا تغيير، لكن سجّلها للجيران
+    if (!hasConflict) {
+      suggestions.set(cellId, currentBsic);
+      if (!assignments[currentBsic]) assignments[currentBsic] = [];
+      assignments[currentBsic].push({ lat, lon, cell_id: cellId, bcch: cell.bcch });
+      return;
+    }
+
+    // 🎯 خلية متعارضة → يجب تغيير BSIC
     const forbidden = new Set();
 
-      // Existing assignments
+    // الاقتراحات السابقة (من خلايا معالجة)
     Object.keys(assignments).forEach(bs => {
       assignments[bs].forEach(entry => {
         if (entry.cell_id === cellId) return;
         const d = bsicDistanceKm(lat, lon, entry.lat, entry.lon);
-        // 🎯 فقط إذا كان نفس BCCH
+        // منع نفس BSIC فقط لنفس BCCH
         if (d < minDistanceKm && entry.bcch === cell.bcch) {
           forbidden.add(bs);
         }
       });
     });
 
-      // Other analyzed cells (not yet assigned)
+    // الخلايا الأخرى (بقيمها الأصلية)
     cells.forEach(other => {
       if (other.id === cellId) return;
       const d = bsicDistanceKm(lat, lon, other.lat, other.lon);
-      // 🎯 منع نفس BSIC فقط إذا كان نفس BCCH
+      // منع نفس BSIC فقط لنفس BCCH
       if (d < minDistanceKm && other.bcch === cell.bcch) {
         forbidden.add(other.bsic);
       }
     });
-    // Available BSICs
+
+    // 🎯 إجباري: أضف القيمة الحالية إلى forbidden → لا يمكن اختيارها
+    forbidden.add(currentBsic);
+
     const available = allBsics.filter(bs => !forbidden.has(bs));
 
     let chosen;
     if (available.length) {
-      // Least globally used
+      // الأقل استخداماً
       const usage = {};
       available.forEach(bs => { usage[bs] = (assignments[bs] || []).length; });
       available.sort((a, b) => usage[a] - usage[b] || a.localeCompare(b));
       chosen = available[0];
     } else {
-      // Fallback: BSIC with max min-distance
-      let best = currentBsic, bestMin = -1;
+      // Fallback: الأبعد عن الجيران
+      let best = null, bestMin = -1;
       allBsics.forEach(bs => {
+        if (bs === currentBsic) return; // تجاهل الحالية
         let minDist = Infinity;
         if (assignments[bs]) {
           assignments[bs].forEach(e => {
-            if (e.cell_id === cellId) return;
+            if (e.cell_id === cellId || e.bcch !== cell.bcch) return;
             minDist = Math.min(minDist, bsicDistanceKm(lat, lon, e.lat, e.lon));
           });
         }
         cells.forEach(o => {
-          if (o.id === cellId || o.bsic !== bs) return;
+          if (o.id === cellId || o.bsic !== bs || o.bcch !== cell.bcch) return;
           minDist = Math.min(minDist, bsicDistanceKm(lat, lon, o.lat, o.lon));
         });
         if (minDist > bestMin) { bestMin = minDist; best = bs; }
       });
-      chosen = best;
+      chosen = (best !== null) ? best : currentBsic;
     }
 
     suggestions.set(cellId, chosen);
-       if (!assignments[chosen]) assignments[chosen] = [];
+    if (!assignments[chosen]) assignments[chosen] = [];
     assignments[chosen].push({ lat, lon, cell_id: cellId, bcch: cell.bcch });
   });
 
   return suggestions;
 }
-
 // =========================================================
 // Render
 // =========================================================
