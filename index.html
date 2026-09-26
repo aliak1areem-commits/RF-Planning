@@ -1895,11 +1895,11 @@ function initMap() {
     { maxZoom: 17, attribution: '© OpenTopoMap' }
   );
 
-  basemaps.street.addTo(map);
+   basemaps.street.addTo(map);
+  sectorLayer = L.layerGroup().addTo(map);
   labelLayer = L.layerGroup().addTo(map);
   coverageLayer = L.layerGroup();
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
-
   let zoomTimer = null;
   map.on('zoomend', function() {
     if (zoomTimer) clearTimeout(zoomTimer);
