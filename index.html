@@ -1500,7 +1500,98 @@ body {
 </div>
 
 <div class="toast" id="toast"></div>
+   
+/* =========================================================
+   EDIT PROJECT
+   ========================================================= */
+async function editProject(projectId) {
+  const proj = allProjects.find(p => p.id === projectId);
+  if (!proj) return;
 
+  const newName = prompt('New project name:', proj.name);
+  if (newName === null) return; // cancelled
+  const trimmed = newName.trim();
+  if (!trimmed) { toast('Name cannot be empty', 'error'); return; }
+
+  const newDesc = prompt('New description (optional):', proj.description || '');
+  if (newDesc === null) return;
+
+  try {
+    const { error } = await db
+      .from('rf_projects')
+      .update({ name: trimmed, description: newDesc.trim() })
+      .eq('id', projectId);
+
+    if (error) {
+      if (error.message.includes('duplicate')) {
+        toast('Project name already exists', 'error');
+      } else {
+        throw error;
+      }
+      return;
+    }
+
+    toast('✅ Project updated', 'success');
+    await loadProjects();
+  } catch (e) {
+    toast('Error: ' + e.message, 'error');
+  }
+}
+
+/* =========================================================
+   DELETE PROJECT
+   ========================================================= */
+async function deleteProject(projectId) {
+  const proj = allProjects.find(p => p.id === projectId);
+  if (!proj) return;
+
+  // احسب عدد الخلايا
+  let cellCount = 0;
+  try {
+    const { count } = await db
+      .from('rf_cells')
+      .select('id', { count: 'exact', head: true })
+      .eq('project_id', projectId);
+    cellCount = count || 0;
+  } catch (e) {
+    console.warn('Could not count cells:', e);
+  }
+
+  const msg = 'Delete project "' + proj.name + '"?\n\n' +
+    '⚠️ This will also delete ' + cellCount + ' cells inside it.\n\n' +
+    'This action cannot be undone.';
+
+  if (!confirm(msg)) return;
+
+  try {
+    // 1. احذف الخلايا
+    const { error: cellErr } = await db
+      .from('rf_cells')
+      .delete()
+      .eq('project_id', projectId);
+
+    if (cellErr) throw cellErr;
+
+    // 2. احذف المشروع
+    const { error: projErr } = await db
+      .from('rf_projects')
+      .delete()
+      .eq('id', projectId);
+
+    if (projErr) throw projErr;
+
+    toast('✅ Project deleted', 'success');
+    await loadProjects();
+
+    // إذا كان المشروع محذوف هو النشط، صفّر
+    if (currentProjectId === projectId) {
+      currentProjectId = null;
+      await loadCells();
+    }
+  } catch (e) {
+    toast('Error: ' + e.message, 'error');
+  }
+}
 <script>
 /* =========================================================
    CONFIG — Supabase
@@ -2066,25 +2157,34 @@ function renderProjectsList() {
   }
 
   container.innerHTML = allProjects.map(p =>
-    '<div style="background:#fff;border-radius:12px;padding:18px 20px;border:1px solid #E9EEF6;box-shadow:0 2px 8px rgba(12,27,61,.05);transition:all .2s;cursor:pointer;" ' +
-    'onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 8px 24px rgba(12,27,61,.12)\';" ' +
-    'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 2px 8px rgba(12,27,61,.05)\';" ' +
-    'onclick="openProject(' + p.id + ')">' +
-      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">' +
+    '<div style="background:#fff;border-radius:12px;padding:18px 20px;border:1px solid #E9EEF6;box-shadow:0 2px 8px rgba(12,27,61,.05);transition:all .2s;">' +
+
+      // Header: icon + name + description
+      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;cursor:pointer;" onclick="openProject(' + p.id + ')">' +
         '<div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#124191,#00A1E0);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;">📁</div>' +
         '<div style="flex:1;min-width:0;">' +
           '<div style="font-weight:700;font-size:14px;color:#0C1B3D;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(p.name) + '</div>' +
           '<div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">' + escapeHtml(p.description || 'No description') + '</div>' +
         '</div>' +
       '</div>' +
-      '<div style="display:flex;gap:12px;padding-top:12px;border-top:1px solid #F0F3F9;font-size:11.5px;color:#5A6B87;">' +
+
+      // Footer: date + action buttons
+      '<div style="display:flex;gap:8px;padding-top:12px;border-top:1px solid #F0F3F9;font-size:11.5px;color:#5A6B87;align-items:center;">' +
         '<span>📅 ' + new Date(p.created_at).toLocaleDateString('en-GB') + '</span>' +
-        '<span style="margin-left:auto;color:#124191;font-weight:600;">Open →</span>' +
+
+        // Edit button
+        '<button onclick="event.stopPropagation();editProject(' + p.id + ')" ' +
+          'style="margin-left:auto;padding:5px 10px;background:#EAF2FB;color:#124191;border:1px solid #D7DEEA;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;" ' +
+          'title="Rename">✏️ Edit</button>' +
+
+        // Delete button
+        '<button onclick="event.stopPropagation();deleteProject(' + p.id + ')" ' +
+          'style="padding:5px 10px;background:#FCEAEA;color:#D64545;border:1px solid #F5D5D5;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;" ' +
+          'title="Delete">🗑️ Delete</button>' +
       '</div>' +
     '</div>'
   ).join('');
 }
-
 function renderProjectSelect() {
   const sel = document.getElementById('importProjectSelect');
   if (!sel) return;
@@ -2224,40 +2324,66 @@ function normalizeHeader(h) {
 }
 
 const HEADER_ALIASES = {
+  // اسم الخلية الحقيقي: BG3413A
   cell_name: [
-    'cellname', 'cell', 'name', 'sitename', 'site',
-    'cgi', 'eci', 'ecgi', 'cellidentity', 'sector'
+    'cell', 'cellname', 'name', 'cell_name'
   ],
+  // اسم الموقع: BG3413
+  site: [
+    'site', 'sitename', 'site_name', 'sitename', 'node', 'nodename', 'enodeb', 'gnodeb'
+  ],
+  // معرف الخلية
   cell_id: [
-    'cellid', 'cid', 'id', 'localcellid'
+    'ci', 'cellid', 'cell_id', 'cid', 'localcellid', 'cellidentity'
   ],
+  // PCI (LTE)
   pci: [
     'pci', 'physicalcellid', 'physicalcellidentity', 'phycellid'
   ],
+  // RSI (LTE)
   rsi: [
     'rsi', 'rootsequenceindex', 'rootseqindex'
   ],
+  // BCCH (GSM)
   bcch: [
-    'bcch', 'arfcn', 'frequency', 'freq', 'bcchfreq', 'bccharfcn',
-    'bcchno', 'bcchnumber', 'gsmfrequency'
+    'bcch', 'bccharfcn', 'arfcn', 'bcchno', 'bcchnumber'
   ],
+  // BSIC (GSM)
   bsic: [
-    'bsic', 'colorcode', 'nccbcc', 'bsiccode', 'bsicvalue'
+    'bsic', 'bsiccode', 'nccbcc', 'colorcode'
+  ],
+  // TCH (GSM traffic channel)
+  tch: [
+    'tch', 'tchfreq', 'tch_arfcn'
+  ],
+  // LAC (GSM Location Area Code)
+  lac: [
+    'lac', 'locationarea', 'locationareacode', 'lac_code'
+  ],
+  // BSC
+  bsc: [
+    'bsc', 'bscname', 'controller', 'rnc'
   ],
   band: [
     'band', 'gsmband', 'frequencyband', 'freqband'
   ],
   cell_radius: [
-    'cellradiusm', 'cellradius', 'radius', 'cellradiusmeter', 'radiusm'
+    'cellradiusm', 'cellradius', 'radius', 'radiusm', 'cell_radius'
   ],
   lat: [
-    'lat', 'latitude', 'lattitude', 'y', 'ycoord', 'ylat'
+    'lat', 'latitude', 'lattitude', 'y', 'ycoord'
   ],
   long: [
-    'long', 'lng', 'lon', 'longitude', 'x', 'xcoord', 'xlong'
+    'long', 'lng', 'lon', 'longitude', 'x', 'xcoord'
   ],
   bore: [
     'bore', 'azimuth', 'azm', 'az', 'bearing', 'direction', 'heading'
+  ],
+  bw: [
+    'bw', 'bandwidth', 'band_width'
+  ],
+  height: [
+    'height', 'antennaheight', 'antheight', 'hgt'
   ]
 };
 
@@ -2296,7 +2422,7 @@ function importParseRows(rows) {
   console.log('🎯 Auto-detected:', detected);
 
   importPreviewData = rows.map(row => {
-    const cellName = String(findValueByAlias(row, HEADER_ALIASES.cell_name)).trim();
+    const cellName = String(findValueByAlias(row, HEADER_ALIASES.cell_name) || '').trim();
     const lat = parseFloat(findValueByAlias(row, HEADER_ALIASES.lat)) || 0;
     const lng = parseFloat(findValueByAlias(row, HEADER_ALIASES.long)) || 0;
 
@@ -2304,18 +2430,39 @@ function importParseRows(rows) {
     if (!lat || !lng) return null;
     if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
 
+    const bcchVal = findValueByAlias(row, HEADER_ALIASES.bcch);
+    const bsicVal = findValueByAlias(row, HEADER_ALIASES.bsic);
+    const pciVal = findValueByAlias(row, HEADER_ALIASES.pci);
+    const rsiVal = findValueByAlias(row, HEADER_ALIASES.rsi);
+    const tchVal = findValueByAlias(row, HEADER_ALIASES.tch);
+    const lacVal = findValueByAlias(row, HEADER_ALIASES.lac);
+    const bscVal = findValueByAlias(row, HEADER_ALIASES.bsc);
+    const bwVal = findValueByAlias(row, HEADER_ALIASES.bw);
+    const hgtVal = findValueByAlias(row, HEADER_ALIASES.height);
+    const siteVal = findValueByAlias(row, HEADER_ALIASES.site);
+
     return {
+      // بيانات أساسية
       cell_name:   cellName,
+      site:        String(siteVal || cellName.replace(/[A-Z]$/, '')).trim(),
       cell_id:     parseInt(findValueByAlias(row, HEADER_ALIASES.cell_id)) || 0,
-      pci:         parseInt(findValueByAlias(row, HEADER_ALIASES.pci)) || 0,
-      rsi:         parseInt(findValueByAlias(row, HEADER_ALIASES.rsi)) || 0,
-      bcch:        parseInt(findValueByAlias(row, HEADER_ALIASES.bcch)) || 0,
-      bsic:        String(findValueByAlias(row, HEADER_ALIASES.bsic) || '').trim(),
-      band:        String(findValueByAlias(row, HEADER_ALIASES.band) || '').trim(),
-      cell_radius: parseInt(findValueByAlias(row, HEADER_ALIASES.cell_radius)) || 15000,
       lat:         lat,
       long:        lng,
-      bore:        parseInt(findValueByAlias(row, HEADER_ALIASES.bore)) || 0
+      bore:        parseInt(findValueByAlias(row, HEADER_ALIASES.bore)) || 0,
+      cell_radius: parseInt(findValueByAlias(row, HEADER_ALIASES.cell_radius)) || 5000,
+
+      // LTE
+      pci:         pciVal ? parseInt(pciVal) : null,
+      rsi:         rsiVal ? parseInt(rsiVal) : null,
+
+      // GSM
+      bcch:        bcchVal ? parseInt(bcchVal) : null,
+      bsic:        bsicVal ? String(bsicVal).trim() : null,
+      tch:         tchVal ? parseInt(tchVal) : null,
+      lac:         lacVal ? parseInt(lacVal) : null,
+      bsc:         bscVal ? String(bscVal).trim() : null,
+      bw:          bwVal ? parseFloat(bwVal) : null,
+      height:      hgtVal ? parseFloat(hgtVal) : null
     };
   }).filter(Boolean);
 
@@ -2323,10 +2470,13 @@ function importParseRows(rows) {
 
   if (!importPreviewData.length) {
     console.error('❌ No valid cells. Headers:', Object.keys(rows[0]));
-    console.error('❌ Sample rows:', rows.slice(0, 3));
     toast('No valid cells. Open Console (F12) to see headers', 'error', 6000);
     return;
   }
+
+  // إحصائية سريعة
+  const type = importPreviewData[0].bcch !== null ? 'GSM' : 'LTE';
+  console.log(`📡 Detected technology: ${type}`);
 
   importRenderPreview();
 }
@@ -2399,24 +2549,41 @@ async function importSaveToSupabase() {
   btn.textContent = 'Saving...';
 
   try {
-    const cellsWithProject = importPreviewData.map(c => Object.assign({}, c, { project_id: parseInt(projectId) }));
+    const cellsWithProject = importPreviewData.map(c => {
+      const obj = { project_id: parseInt(projectId) };
+
+      // أرسل فقط القيم الموجودة (تجنب null)
+      Object.keys(c).forEach(k => {
+        if (c[k] !== null && c[k] !== undefined && c[k] !== '') {
+          obj[k] = c[k];
+        }
+      });
+
+      return obj;
+    });
+
+    console.log('📤 Sending', cellsWithProject.length, 'cells with fields:', Object.keys(cellsWithProject[0]));
 
     const BATCH = 500;
     let saved = 0;
     for (let i = 0; i < cellsWithProject.length; i += BATCH) {
       const batch = cellsWithProject.slice(i, i + BATCH);
       const { error } = await db.from('rf_cells').insert(batch);
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Insert error:', error);
+        throw error;
+      }
       saved += batch.length;
       btn.textContent = 'Saving ' + saved + '/' + cellsWithProject.length + '...';
     }
 
-    toast('✅ Saved ' + saved + ' cells to project', 'success');
+    toast('✅ Saved ' + saved + ' cells', 'success');
     importClearPreview();
     await loadProjects();
     await loadCells();
   } catch (e) {
-    toast('Error: ' + e.message, 'error');
+    console.error('❌ Save error:', e);
+    toast('Error: ' + e.message, 'error', 6000);
   } finally {
     btn.disabled = false;
     btn.textContent = '💾 Save to Supabase';
