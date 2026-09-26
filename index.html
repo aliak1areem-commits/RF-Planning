@@ -561,10 +561,13 @@ body {
         <span class="icon">🧮</span><span>PCI Checker</span>
       </button>
       <button class="nav-item" data-page="tool-gsm-planner">
-        <span class="icon">📡</span><span>GSM Planner</span>
+        <span class="icon">📡</span><span>2G-Freq. Planner</span>
       </button>
       <button class="nav-item" data-page="tool-neighbor">
-        <span class="icon">🔗</span><span>Neighbor Analysis</span>
+        <span class="icon">🔗</span><span>2G-Neighbor Analysis</span>
+      </button>
+            <button class="nav-item" data-page="tool-hsn">
+        <span class="icon">🎵</span><span>HSN Analysis</span>
       </button>
       <button class="nav-item" data-page="tool-distance">
         <span class="icon">📐</span><span>Distance & Bearing</span>
@@ -990,6 +993,12 @@ body {
           <div class="tool-desc">Suggest conflict-free BCCH (ARFCN) and BSIC values for GSM cells with boresight analysis and co-site hard-blocking.</div>
           <div class="tool-tag" style="background:#FDF1DC;color:#8A5A00;">GSM</div>
         </div>
+                <div class="tool-card" onclick="switchView('tool-hsn')">
+          <div class="tool-icon" style="background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;">🎵</div>
+          <div class="tool-title">HSN Conflict Analyzer</div>
+          <div class="tool-desc">Detect HSN conflicts between GSM cells (same-site & neighbors) with bearing analysis. Auto-suggest conflict-free HSN values.</div>
+          <div class="tool-tag" style="background:#F3E8FF;color:#7C3AED;">GSM</div>
+        </div>
         <div class="tool-card" onclick="switchView('tool-neighbor')">
           <div class="tool-icon" style="background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;">🔗</div>
           <div class="tool-title">Neighbor Analysis</div>
@@ -1214,6 +1223,100 @@ body {
             </div>
           </div>
         </div>
+      </div>
+    </section>
+        <!-- ============ PAGE: HSN ANALYSIS ============ -->
+    <section class="page" id="page-tool-hsn">
+      <div class="tool-page" style="max-width:1400px;">
+        <div class="tool-page-header">
+          <button class="back-btn" onclick="switchView('tools')">←</button>
+          <div>
+            <div class="tool-page-title">🎵 HSN Conflict Analyzer</div>
+            <div class="tool-page-sub">Detect & fix HSN conflicts · Same-site · Neighbor · Bearing analysis</div>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="tool-section">
+          <h3>⚙️ Analysis Parameters</h3>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Search Distance (m)</label>
+              <input type="number" id="hsn_distance" value="2000" min="100" max="10000" step="100">
+            </div>
+            <div class="form-field">
+              <label>HSN Range — From</label>
+              <input type="number" id="hsn_min" value="0" min="0" max="63">
+            </div>
+            <div class="form-field">
+              <label>HSN Range — To</label>
+              <input type="number" id="hsn_max" value="63" min="0" max="63">
+            </div>
+            <div class="form-field">
+              <label>Coverage Sector Width (°)</label>
+              <input type="number" id="hsn_sector_width" value="120" min="30" max="360">
+            </div>
+          </div>
+          <div class="filter-group" style="margin-top:14px;">
+            <label class="filter-checkbox">
+              <input type="checkbox" id="hsn_consider_bearing" checked>
+              <span>Consider Antenna Bearing (coverage sector)</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" id="hsn_force_unique_site" checked>
+              <span>Force Unique HSN per Site</span>
+            </label>
+          </div>
+          <div class="action-row">
+            <button class="btn btn-primary" onclick="runHSNChecker()">🚀 Analyze HSN Conflicts</button>
+            <button class="btn btn-ghost" onclick="clearHSNResults()">🗑️ Clear</button>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div id="hsnResults" style="display:none;">
+
+          <!-- KPI -->
+          <div class="tool-section">
+            <h3>📊 Summary</h3>
+            <div class="kpi-grid">
+              <div class="kpi-card"><div class="kpi-label">Cells Analyzed</div><div class="kpi-value" id="hsn_kpi_total">0</div></div>
+              <div class="kpi-card warn"><div class="kpi-label">Conflicts</div><div class="kpi-value" id="hsn_kpi_conflicts">0</div></div>
+              <div class="kpi-card danger"><div class="kpi-label">Same-Site</div><div class="kpi-value" id="hsn_kpi_samesite">0</div></div>
+              <div class="kpi-card warn"><div class="kpi-label">Neighbor</div><div class="kpi-value" id="hsn_kpi_neighbor">0</div></div>
+              <div class="kpi-card danger"><div class="kpi-label">HIGH Priority</div><div class="kpi-value" id="hsn_kpi_high">0</div></div>
+              <div class="kpi-card success"><div class="kpi-label">Reassigned</div><div class="kpi-value" id="hsn_kpi_reassigned">0</div></div>
+            </div>
+            <div id="hsnWarnings" style="margin-top:12px;"></div>
+          </div>
+
+          <!-- Conflicts Table -->
+          <div class="tool-section">
+            <h3>⚠️ HSN Conflicts List</h3>
+            <div style="overflow:auto;max-height:500px;border:1px solid #E9EEF6;border-radius:10px;">
+              <table class="data-table" id="hsnConflictsTable">
+                <thead>
+                  <tr>
+                    <th>Cell</th>
+                    <th>HSN</th>
+                    <th>Conflicts</th>
+                    <th>Type</th>
+                    <th>Neighbors (HSN, Dist, Bearing Δ)</th>
+                    <th>Suggested HSN</th>
+                    <th>Priority</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="action-row">
+              <button class="btn btn-success" onclick="hsnExportCSV()">📥 Export CSV</button>
+              <button class="btn btn-gold" onclick="hsnApplyAll()">💾 Apply All Suggestions</button>
+              <button class="btn btn-secondary" onclick="hsnShowOnMap()">🗺️ Show on Map</button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -1750,6 +1853,7 @@ const PAGE_TITLES = {
   'tool-pci-checker': { icon: '🧮', title: 'PCI Conflict Checker',    sub: 'Detect & fix PCI conflicts' },
   'tool-gsm-planner': { icon: '📡', title: 'GSM BCCH/BSIC Planner',   sub: 'Suggest conflict-free BCCH and BSIC' },
   'tool-neighbor':    { icon: '🔗', title: 'Neighbor Analysis',       sub: 'Audit missing neighbor relations' },
+    'tool-hsn':         { icon: '🎵', title: 'HSN Conflict Analyzer',   sub: 'Detect & fix HSN conflicts in GSM' },
   'tool-distance':    { icon: '📐', title: 'Distance & Bearing',      sub: 'Calculate distance between sites' },
   'tool-azimuth':     { icon: '🎯', title: 'Azimuth & Tilt',          sub: 'Calculate antenna angles' },
   'tool-unit':        { icon: '🔢', title: 'Unit Converter',          sub: 'Convert RF units' },
@@ -2005,7 +2109,8 @@ function normalizeCell(row) {
     bcch: row.bcch || 0,
     bsic: row.bsic || '',
     tch: row.tch || 0,
-    lac: row.lac || 0,
+       lac: row.lac || 0,
+    hsn: row.hsn != null ? parseInt(row.hsn) : null,
     bsc: row.bsc || '',
     bw: row.bw || 0,
     height: row.height || 0,
@@ -2541,6 +2646,7 @@ const HEADER_ALIASES = {
   bsic:        ['bsic', 'bsiccode', 'nccbcc', 'colorcode'],
   tch:         ['tch', 'tchfreq', 'tch_arfcn'],
   lac:         ['lac', 'locationarea', 'locationareacode', 'lac_code'],
+    hsn:         ['hsn', 'hoppingsequencenumber', 'hopsequence', 'hopseq'],
   bsc:         ['bsc', 'bscname', 'controller', 'rnc'],
   band:        ['band', 'gsmband', 'frequencyband', 'freqband'],
   cell_radius: ['cellradiusm', 'cellradius', 'radius', 'radiusm', 'cell_radius'],
@@ -5079,6 +5185,563 @@ function selectFromPicker(id) {
   if (modal) modal.remove();
   flyToCellById(id);
 }
+  /* =========================================================
+   TOOL — HSN CONFLICT ANALYZER
+   Ported from HSN COnflicted_2.py
+   ========================================================= */
+let hsnLastResults = null;
+
+function hsnCalculateBearing(lat1, lon1, lat2, lon2) {
+  const phi1 = lat1 * Math.PI / 180;
+  const phi2 = lat2 * Math.PI / 180;
+  const dlambda = (lon2 - lon1) * Math.PI / 180;
+  const x = Math.sin(dlambda) * Math.cos(phi2);
+  const y = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dlambda);
+  return (Math.atan2(x, y) * 180 / Math.PI + 360) % 360;
+}
+
+function hsnBoreDifference(b1, b2) {
+  const d = Math.abs(b1 - b2) % 360;
+  return d <= 180 ? d : 360 - d;
+}
+
+function hsnExtractSiteId(cellName) {
+  // نفس منطق بايثون: استخرج أول 6 أحرف
+  return cellName.substring(0, Math.min(6, cellName.length));
+}
+
+function hsnIsInCoverage(bore, bearingToNeighbor, sectorWidth) {
+  sectorWidth = sectorWidth || 120;
+  if (bore == null) return true;
+  const diff = hsnBoreDifference(bore, bearingToNeighbor);
+  return diff <= (sectorWidth / 2);
+}
+
+function hsnCalculateConflictLevel(distance, maxDistance, bearingDiff, considerBearing) {
+  let baseLevel = 1.0 - (distance / maxDistance);
+
+  if (considerBearing) {
+    if (bearingDiff < 30) baseLevel *= 1.5;
+    else if (bearingDiff < 60) baseLevel *= 1.2;
+    else if (bearingDiff > 150) baseLevel *= 0.5;
+  }
+
+  return Math.min(1.0, Math.max(0.1, baseLevel));
+}
+
+/* =========================================================
+   MAIN — Run HSN Analyzer
+   ========================================================= */
+function runHSNChecker() {
+  // 🛑 GSM cells only
+  const gsmCells = allCells.filter(c =>
+    c.tech === 'GSM' && /[A-Z]$/.test(c.cell_name) && c.hsn != null && c.hsn >= 0
+  );
+
+  if (!gsmCells.length) {
+    toast('No GSM cells with HSN found. Import GSM data first.', 'error', 6000);
+    return;
+  }
+
+  const distanceThreshold = parseInt(document.getElementById('hsn_distance').value) || 2000;
+  const hsnMin = parseInt(document.getElementById('hsn_min').value) || 0;
+  const hsnMax = parseInt(document.getElementById('hsn_max').value) || 63;
+  const sectorWidth = parseInt(document.getElementById('hsn_sector_width').value) || 120;
+  const considerBearing = document.getElementById('hsn_consider_bearing').checked;
+  const forceUnique = document.getElementById('hsn_force_unique_site').checked;
+
+  // Filter by HSN range
+  let features = gsmCells.filter(c => c.hsn >= hsnMin && c.hsn <= hsnMax);
+
+  if (!features.length) {
+    toast('No cells with HSN in range ' + hsnMin + '–' + hsnMax, 'error', 5000);
+    return;
+  }
+
+  console.log('🎵 HSN Analyzer: ' + features.length + ' GSM cells');
+
+  // Group by site
+  const siteGroups = {};
+  features.forEach(f => {
+    const siteId = f.site || hsnExtractSiteId(f.cell_name);
+    if (!siteGroups[siteId]) siteGroups[siteId] = [];
+    siteGroups[siteId].push(f);
+  });
+
+  const conflicts = [];
+  const conflictMap = new Map();
+  const featureDict = new Map();
+  features.forEach(f => featureDict.set(f.id, f));
+
+  // ⭐ Pass 1 — Same-site conflicts
+  Object.entries(siteGroups).forEach(([siteId, cells]) => {
+    if (cells.length <= 1) return;
+    for (let i = 0; i < cells.length; i++) {
+      for (let j = 0; j < cells.length; j++) {
+        if (i === j) continue;
+        const src = cells[i], tgt = cells[j];
+        if (src.hsn === tgt.hsn) {
+          conflicts.push({
+            sourceId: src.id, sourceCell: src.cell_name,
+            targetId: tgt.id, targetCell: tgt.cell_name,
+            hsn: src.hsn, distance: 1, bearingDiff: 0,
+            conflictLevel: 1.0, sameSite: true
+          });
+          if (!conflictMap.has(src.id)) conflictMap.set(src.id, []);
+          conflictMap.get(src.id).push({
+            cell: tgt.cell_name, distance: 1, hsn: tgt.hsn,
+            bearingDiff: 0, conflictLevel: 1.0, sameSite: true
+          });
+        }
+      }
+    }
+  });
+
+  // ⭐ Pass 2 — Neighbor conflicts (different sites)
+  for (let i = 0; i < features.length; i++) {
+    const src = features[i];
+    for (let j = 0; j < features.length; j++) {
+      if (i === j) continue;
+      const tgt = features[j];
+
+      const srcSite = src.site || hsnExtractSiteId(src.cell_name);
+      const tgtSite = tgt.site || hsnExtractSiteId(tgt.cell_name);
+      if (srcSite === tgtSite) continue;
+
+      const dist = haversineDistance(src.lat, src.long, tgt.lat, tgt.long);
+      if (dist > distanceThreshold) continue;
+
+      if (src.hsn !== tgt.hsn) continue;
+
+      const bearingToTarget = hsnCalculateBearing(src.lat, src.long, tgt.lat, tgt.long);
+
+      let inCov = true;
+      let bDiff = 0;
+      if (considerBearing) {
+        inCov = hsnIsInCoverage(src.bore, bearingToTarget, sectorWidth);
+        bDiff = hsnBoreDifference(src.bore, bearingToTarget);
+      }
+
+      if (inCov) {
+        const cLevel = hsnCalculateConflictLevel(dist, distanceThreshold, bDiff, considerBearing);
+        conflicts.push({
+          sourceId: src.id, sourceCell: src.cell_name,
+          targetId: tgt.id, targetCell: tgt.cell_name,
+          hsn: src.hsn, distance: dist, bearingDiff: bDiff,
+          conflictLevel: cLevel, sameSite: false
+        });
+        if (!conflictMap.has(src.id)) conflictMap.set(src.id, []);
+        conflictMap.get(src.id).push({
+          cell: tgt.cell_name, distance: dist, hsn: tgt.hsn,
+          bearingDiff: bDiff, conflictLevel: cLevel, sameSite: false
+        });
+      }
+    }
+  }
+
+  // ⭐ Pass 3 — Force unique HSN per site
+  if (forceUnique) {
+    Object.entries(siteGroups).forEach(([siteId, cells]) => {
+      if (cells.length <= 1) return;
+      const hsnGroups = {};
+      cells.forEach(c => {
+        if (!hsnGroups[c.hsn]) hsnGroups[c.hsn] = [];
+        hsnGroups[c.hsn].push(c);
+      });
+      Object.entries(hsnGroups).forEach(([hsn, group]) => {
+        if (group.length <= 1) return;
+        for (let i = 0; i < group.length; i++) {
+          for (let j = 0; j < group.length; j++) {
+            if (i === j) continue;
+            const src = group[i], tgt = group[j];
+            if (!conflictMap.has(src.id)) conflictMap.set(src.id, []);
+            const exists = conflictMap.get(src.id).some(c => c.cell === tgt.cell_name);
+            if (!exists) {
+              conflictMap.get(src.id).push({
+                cell: tgt.cell_name, distance: 1, hsn: tgt.hsn,
+                bearingDiff: 0, conflictLevel: 1.0, sameSite: true
+              });
+            }
+          }
+        }
+      });
+    });
+  }
+
+  if (!conflictMap.size) {
+    toast('✅ No HSN conflicts found!', 'success');
+    document.getElementById('hsnResults').style.display = 'none';
+    return;
+  }
+
+  // ⭐ Suggest new HSNs
+  const allPossibleHSNs = [];
+  for (let h = 0; h <= 63; h++) allPossibleHSNs.push(h);
+
+  const hsnDistribution = {};
+  features.forEach(f => { hsnDistribution[f.hsn] = (hsnDistribution[f.hsn] || 0) + 1; });
+
+  const suggestedHSNs = new Map();
+  const usedSuggestions = new Set();
+
+  // Sort by conflict count
+  const conflictedCells = Array.from(conflictMap.entries())
+    .sort((a, b) => b[1].length - a[1].length);
+
+  conflictedCells.forEach(([featureId, cellConflicts]) => {
+    const feat = featureDict.get(featureId);
+    if (!feat) return;
+
+    const neighborHSNs = new Set(cellConflicts.map(c => c.hsn));
+
+    // Same-site HSNs
+    const siteHSNs = new Set();
+    const siteId = feat.site || hsnExtractSiteId(feat.cell_name);
+    (siteGroups[siteId] || []).forEach(cell => {
+      if (cell.id === featureId) return;
+      if (suggestedHSNs.has(cell.id)) siteHSNs.add(suggestedHSNs.get(cell.id));
+      else siteHSNs.add(cell.hsn);
+    });
+
+    const forbidden = new Set([...neighborHSNs, ...siteHSNs, ...usedSuggestions]);
+
+    const available = allPossibleHSNs.filter(h => !forbidden.has(h));
+
+    let suggestedHSN;
+    if (available.length) {
+      suggestedHSN = available.reduce((a, b) =>
+        (hsnDistribution[a] || 0) <= (hsnDistribution[b] || 0) ? a : b
+      );
+    } else {
+      suggestedHSN = allPossibleHSNs.reduce((a, b) =>
+        (hsnDistribution[a] || 0) <= (hsnDistribution[b] || 0) ? a : b
+      );
+    }
+
+    suggestedHSNs.set(featureId, suggestedHSN);
+    usedSuggestions.add(suggestedHSN);
+    hsnDistribution[suggestedHSN] = (hsnDistribution[suggestedHSN] || 0) + 1;
+  });
+
+  // Second pass — remaining cells
+  features.forEach(f => {
+    if (suggestedHSNs.has(f.id)) return;
+    const siteId = f.site || hsnExtractSiteId(f.cell_name);
+    const siteHSNs = new Set();
+    (siteGroups[siteId] || []).forEach(cell => {
+      if (cell.id === f.id) return;
+      siteHSNs.add(suggestedHSNs.has(cell.id) ? suggestedHSNs.get(cell.id) : cell.hsn);
+    });
+
+    const forbidden = new Set([...siteHSNs, ...usedSuggestions]);
+    const available = allPossibleHSNs.filter(h => !forbidden.has(h));
+
+    let suggestedHSN;
+    if (available.length) {
+      suggestedHSN = available.reduce((a, b) =>
+        (hsnDistribution[a] || 0) <= (hsnDistribution[b] || 0) ? a : b
+      );
+    } else {
+      suggestedHSN = allPossibleHSNs.reduce((a, b) =>
+        (hsnDistribution[a] || 0) <= (hsnDistribution[b] || 0) ? a : b
+      );
+    }
+
+    suggestedHSNs.set(f.id, suggestedHSN);
+    usedSuggestions.add(suggestedHSN);
+  });
+
+  hsnLastResults = {
+    cells: features,
+    conflicts: conflicts,
+    conflictMap: conflictMap,
+    featureDict: featureDict,
+    suggestedHSNs: suggestedHSNs,
+    distanceThreshold: distanceThreshold,
+    considerBearing: considerBearing,
+    forceUnique: forceUnique
+  };
+
+  renderHSNResults(hsnLastResults);
+  document.getElementById('hsnResults').style.display = 'block';
+  toast('⚠️ ' + conflicts.length + ' conflicts in ' + conflictMap.size + ' cells', 'success', 5000);
+}
+
+/* =========================================================
+   RENDER HSN RESULTS
+   ========================================================= */
+function renderHSNResults(r) {
+  const totalCells = r.cells.length;
+  const totalConflicts = r.conflicts.length;
+  const sameSiteCount = r.conflicts.filter(c => c.sameSite).length;
+  const neighborCount = r.conflicts.filter(c => !c.sameSite).length;
+
+  document.getElementById('hsn_kpi_total').textContent = totalCells;
+  document.getElementById('hsn_kpi_conflicts').textContent = totalConflicts;
+  document.getElementById('hsn_kpi_samesite').textContent = sameSiteCount;
+  document.getElementById('hsn_kpi_neighbor').textContent = neighborCount;
+
+  // Count HIGH priority
+  let highCount = 0;
+  r.conflictMap.forEach((conflicts, id) => {
+    const cnt = conflicts.length;
+    const avgLevel = conflicts.reduce((a, c) => a + (c.conflictLevel || 0.5), 0) / cnt;
+    if (cnt >= 3 && avgLevel > 0.7) highCount++;
+  });
+  document.getElementById('hsn_kpi_high').textContent = highCount;
+  document.getElementById('hsn_kpi_reassigned').textContent = r.suggestedHSNs.size;
+
+  // Warnings
+  const warnEl = document.getElementById('hsnWarnings');
+  let warnHtml = '';
+  if (sameSiteCount > 0) {
+    warnHtml += '<div style="background:#FCEAEA;color:#B91C1C;padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:8px;">' +
+      '<b>🔴 Same-Site Conflicts:</b> ' + sameSiteCount + ' — خلايا نفس الموقع لها نفس HSN</div>';
+  }
+  if (neighborCount > 0) {
+    warnHtml += '<div style="background:#FDF1DC;color:#8A5A00;padding:10px 14px;border-radius:8px;font-size:12.5px;">' +
+      '<b>🟠 Neighbor Conflicts:</b> ' + neighborCount + ' — خلايا متجاورة لها نفس HSN</div>';
+  }
+  warnEl.innerHTML = warnHtml;
+
+  // Table
+  const tbody = document.querySelector('#hsnConflictsTable tbody');
+  const rows = [];
+
+  r.conflictMap.forEach((conflicts, id) => {
+    const feat = r.featureDict.get(id);
+    if (!feat) return;
+
+    const cnt = conflicts.length;
+    const sameSite = conflicts.filter(c => c.sameSite).length;
+    const neighbor = conflicts.filter(c => !c.sameSite).length;
+
+    const avgLevel = conflicts.reduce((a, c) => a + (c.conflictLevel || 0.5), 0) / cnt;
+
+    let priority, priorityColor, priorityBg;
+    if (cnt >= 3 && avgLevel > 0.7) { priority = 'HIGH'; priorityColor = '#B91C1C'; priorityBg = '#FCEAEA'; }
+    else if (cnt >= 2 || sameSite > 0) { priority = 'MEDIUM'; priorityColor = '#8A5A00'; priorityBg = '#FDF1DC'; }
+    else { priority = 'LOW'; priorityColor = '#1F9D55'; priorityBg = '#E7F7EE'; }
+
+    const typeText = sameSite > 0 && neighbor > 0 ? 'Same + Neighbor' :
+                     sameSite > 0 ? '🏠 Same-Site' : '📡 Neighbor';
+
+    const neighborList = conflicts.slice(0, 3).map(c => {
+      if (c.sameSite) return c.cell + ' (SAME, HSN:' + c.hsn + ')';
+      return c.cell + ' (HSN:' + c.hsn + ', ' + c.distance.toFixed(0) + 'm, ' + c.bearingDiff.toFixed(0) + '°)';
+    }).join('<br>') + (conflicts.length > 3 ? '<br>... +' + (conflicts.length - 3) + ' more' : '');
+
+    const suggestedHSN = r.suggestedHSNs.get(id);
+
+    rows.push('<tr>' +
+      '<td><b>' + escapeHtml(feat.cell_name) + '</b></td>' +
+      '<td style="font-family:monospace;">' + feat.hsn + '</td>' +
+      '<td style="text-align:center;"><b>' + cnt + '</b></td>' +
+      '<td>' + typeText + '</td>' +
+      '<td style="font-size:11px;font-family:monospace;">' + neighborList + '</td>' +
+      '<td style="font-family:monospace;font-weight:800;color:#124191;font-size:14px;">' + suggestedHSN + '</td>' +
+      '<td><span style="padding:3px 9px;border-radius:10px;font-size:11px;font-weight:700;background:' + priorityBg + ';color:' + priorityColor + ';">' + priority + '</span></td>' +
+    '</tr>');
+  });
+
+  tbody.innerHTML = rows.join('') || '<tr><td colspan="7" style="text-align:center;padding:20px;color:#5A6B87;">No conflicts 🎉</td></tr>';
+}
+
+/* =========================================================
+   CLEAR
+   ========================================================= */
+function clearHSNResults() {
+  hsnLastResults = null;
+  document.getElementById('hsnResults').style.display = 'none';
+  toast('Cleared', 'info');
+}
+
+/* =========================================================
+   APPLY ALL SUGGESTIONS
+   ========================================================= */
+async function hsnApplyAll() {
+  if (!hsnLastResults) { toast('Run analysis first', 'error'); return; }
+
+  const count = hsnLastResults.suggestedHSNs.size;
+  if (!count) { toast('No suggestions to apply', 'info'); return; }
+
+  if (!confirm('Apply ' + count + ' suggested HSN values to Supabase?\n\nهذا سيحدّث ' + count + ' خلية.')) return;
+
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = 'Applying...';
+
+  let applied = 0;
+  let failed = 0;
+
+  try {
+    // Batch updates
+    for (const [id, newHSN] of hsnLastResults.suggestedHSNs) {
+      const feat = hsnLastResults.featureDict.get(id);
+      if (!feat) continue;
+
+      const { error } = await db.from('rf_cells').update({ hsn: newHSN }).eq('id', feat.id);
+      if (error) { failed++; console.error(error); }
+      else {
+        applied++;
+        // Update local cache
+        const local = allCells.find(c => c.id === feat.id);
+        if (local) local.hsn = newHSN;
+      }
+
+      if (applied % 20 === 0) btn.textContent = 'Applying ' + applied + '/' + count + '...';
+    }
+
+    toast('✅ Applied ' + applied + ' HSN updates' + (failed ? ' (' + failed + ' failed)' : ''), 'success', 5000);
+
+    // Re-run analysis to confirm
+    setTimeout(() => runHSNChecker(), 500);
+  } catch (e) {
+    console.error(e);
+    toast('Error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💾 Apply All Suggestions';
+  }
+}
+
+/* =========================================================
+   EXPORT CSV
+   ========================================================= */
+function hsnExportCSV() {
+  if (!hsnLastResults) { toast('Run analysis first', 'error'); return; }
+
+  const rows = [['Cell', 'Site', 'Current HSN', 'Conflicts', 'Same-Site', 'Neighbor', 'Neighbors List', 'Suggested HSN', 'Priority']];
+
+  hsnLastResults.conflictMap.forEach((conflicts, id) => {
+    const feat = hsnLastResults.featureDict.get(id);
+    if (!feat) return;
+
+    const sameSite = conflicts.filter(c => c.sameSite).length;
+    const neighbor = conflicts.filter(c => !c.sameSite).length;
+    const cnt = conflicts.length;
+    const avgLevel = conflicts.reduce((a, c) => a + (c.conflictLevel || 0.5), 0) / cnt;
+
+    let priority;
+    if (cnt >= 3 && avgLevel > 0.7) priority = 'HIGH';
+    else if (cnt >= 2 || sameSite > 0) priority = 'MEDIUM';
+    else priority = 'LOW';
+
+    const neighborText = conflicts.map(c =>
+      c.sameSite ? c.cell + '(SAME)' : c.cell + '(' + c.distance.toFixed(0) + 'm)'
+    ).join('; ');
+
+    rows.push([
+      feat.cell_name,
+      feat.site || '',
+      feat.hsn,
+      cnt,
+      sameSite,
+      neighbor,
+      neighborText,
+      hsnLastResults.suggestedHSNs.get(id),
+      priority
+    ]);
+  });
+
+  const csv = rows.map(r => r.map(v => {
+    const s = String(v);
+    return s.indexOf(',') !== -1 ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }).join(',')).join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'HSN_Analysis_' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('✅ CSV exported', 'success');
+}
+
+/* =========================================================
+   SHOW ON MAP
+   ========================================================= */
+function hsnShowOnMap() {
+  if (!hsnLastResults) { toast('Run analysis first', 'error'); return; }
+
+  window.__gsmMode = true;
+  switchView('map');
+
+  setTimeout(() => {
+    sectorLayer.clearLayers();
+    labelLayer.clearLayers();
+
+    hsnLastResults.cells.forEach(cell => {
+      if (!cell.lat || !cell.long) return;
+
+      const hasConflict = hsnLastResults.conflictMap.has(cell.id);
+      const isHigh = hasConflict && (() => {
+        const c = hsnLastResults.conflictMap.get(cell.id);
+        const avg = c.reduce((a, x) => a + (x.conflictLevel || 0.5), 0) / c.length;
+        return c.length >= 3 && avg > 0.7;
+      })();
+
+      let color;
+      if (isHigh) color = '#B91C1C';         // أحمر داكن = HIGH
+      else if (hasConflict) color = '#F2A900'; // أصفر = MEDIUM/LOW
+      else color = '#1F9D55';                  // أخضر = Clean
+
+      const coords = makeSectorCoords(cell.lat, cell.long, cell.bore);
+      const poly = L.polygon(coords, {
+        color: color, weight: 1.5,
+        fillColor: color, fillOpacity: 0.7
+      });
+
+      const conflictCount = hasConflict ? hsnLastResults.conflictMap.get(cell.id).length : 0;
+      const suggested = hsnLastResults.suggestedHSNs.get(cell.id);
+
+      poly.bindPopup(
+        '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:200px;">' +
+          '<div style="font-weight:800;font-family:monospace;margin-bottom:6px;">' + escapeHtml(cell.cell_name) + '</div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Current HSN:</span><b>' + cell.hsn + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Suggested:</span><b style="color:#124191;">' + suggested + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Conflicts:</span><b style="color:#B91C1C;">' + conflictCount + '</b></div>' +
+        '</div>'
+      );
+
+      sectorLayer.addLayer(poly);
+    });
+
+    // Fit bounds
+    const bounds = L.latLngBounds(hsnLastResults.cells.map(c => [c.lat, c.long]));
+    if (bounds.isValid()) map.fitBounds(bounds, { padding: [50, 50] });
+
+    // Legend
+    showHSNLegend();
+    toast('📍 Showing HSN results on map', 'success');
+  }, 400);
+}
+
+function showHSNLegend() {
+  let legend = document.getElementById('hsnLegend');
+  if (!legend) {
+    legend = document.createElement('div');
+    legend.id = 'hsnLegend';
+    legend.className = 'legend';
+    legend.style.cssText = 'left:20px;bottom:20px;display:block;';
+    document.querySelector('.map-container').appendChild(legend);
+  }
+  legend.style.display = 'block';
+  legend.innerHTML =
+    '<div class="legend-title">🎵 HSN Conflicts</div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#B91C1C;"></span><span>HIGH Priority</span></div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#F2A900;"></span><span>MEDIUM/LOW</span></div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#1F9D55;"></span><span>Clean</span></div>';
+}
+
+/* =========================================================
+   INIT — أضف hsn في normalizeCell
+   ========================================================= */
+// في normalizeCell، أضف بعد lac: row.lac || 0, :
+//   hsn: row.hsn != null ? parseInt(row.hsn) : null,
 console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
 console.log('%cTools: PCI · GSM · NB · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
 </script>
