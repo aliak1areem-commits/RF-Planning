@@ -1814,6 +1814,11 @@ const PAGE_TITLES = {
 function switchView(page) {
   currentView = page;
 
+  // إذا خرجنا من الماب → أوقف وضع GSM
+  if (page !== 'map') {
+    window.__gsmMode = false;
+  }
+
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
 
@@ -2079,10 +2084,12 @@ function applyFilters() {
 function renderMap() {
   if (!map) return;
 
+  // 🛑 إذا كنا في وضع GSM، لا ترسم خلايا LTE
+  if (window.__gsmMode) return;
+
   sectorLayer.clearLayers();
   labelLayer.clearLayers();
   coverageLayer.clearLayers();
-
   const showSectors = document.getElementById('showSectors') && document.getElementById('showSectors').checked;
   const showLabels = document.getElementById('showLabels') && document.getElementById('showLabels').checked;
   const showSiteCircle = document.getElementById('showSiteCircle') && document.getElementById('showSiteCircle').checked;
@@ -2262,6 +2269,7 @@ function toggleLayer(type) {
 }
 
 function fitAllCells() {
+  window.__gsmMode = false;   // ← اخرج من وضع GSM
   if (!visibleCells.length) { toast('No cells to fit', 'error'); return; }
   const bounds = L.latLngBounds(visibleCells.map(c => [c.lat, c.long]));
   map.fitBounds(bounds, { padding: [50, 50] });
@@ -4074,20 +4082,7 @@ function runGSMPlanner() {
   renderGSMResults(gsmLastResults);
   document.getElementById('gsmResults').style.display = 'block';
 
-  toast('✅ BCCH=' + suggestedBCCH + ' · BSIC=' + suggestedBSIC, 'success', 4000);
-
-  // Auto Show on Map إذا الخيار مفعّل
-  const hl = document.getElementById('gsm_opt_highlight');
-  const nb = document.getElementById('gsm_opt_nearby');
-  if (hl && (hl.checked || (nb && nb.checked))) {
-    setTimeout(() => gsmShowOnMap(), 400);
-  }
-
-  // Auto Save إذا الخيار مفعّل
-  const sv = document.getElementById('gsm_opt_save');
-  if (sv && sv.checked) {
-    setTimeout(() => gsmSaveToDatabase(), 800);
-  }
+   toast('✅ BCCH=' + suggestedBCCH + ' · BSIC=' + suggestedBSIC, 'success', 4000);
 }
 
 function renderGSMResults(r) {
@@ -4152,14 +4147,19 @@ function clearGSMResults() {
 function gsmShowOnMap() {
   if (!gsmLastResults) { toast('Run analysis first', 'error'); return; }
 
-  switchView('map');
+   switchView('map');
 
   setTimeout(() => {
+    // 🛑 علّم الماب إنه في وضع "GSM" — يمنع renderMap من رسم 3502 خلية
+    window.__gsmMode = true;
+
     if (sectorLayer) sectorLayer.clearLayers();
     if (labelLayer) labelLayer.clearLayers();
 
     const target = gsmLastResults.cell;
 
+    // ⭐ Zoom أولاً حتى makeSectorCoords يحسب الحجم الصحيح
+    map.setView([target.lat, target.long], 14);
     // Target cell — أحمر
     const targetCoords = makeSectorCoords(target.lat, target.long, target.bore);
     const targetPoly = L.polygon(targetCoords, {
