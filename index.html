@@ -3188,7 +3188,7 @@ function importParseRows(rows) {
 function importRenderPreview() {
   document.getElementById('importPreviewCard').style.display = 'block';
 
-  /  // اكتشف نوع التكنولوجيا
+   // اكتشف نوع التكنولوجيا
   const sample = importPreviewData[0];
   const hasNb = sample.nb1 !== undefined || sample.nb2 !== undefined ||
                 Object.keys(sample).some(k => k.startsWith('nb'));
