@@ -2311,7 +2311,7 @@ function normalizeCell(row) {
   const isGSM = row.bcch != null && row.bcch > 0;
   const isLTE = row.pci != null && row.pci > 0;
 
-  return {
+    const result = {
     id: row.id,
     cell_name: name,
     cell_id: row.cell_id || 0,
@@ -2343,6 +2343,16 @@ function normalizeCell(row) {
 
     color: CELL_COLOR
   };
+
+  // ⭐ انسخ NB1..NB35 من الصف
+  for (let i = 1; i <= 35; i++) {
+    const val = row['nb' + i];
+    if (val !== null && val !== undefined && String(val).trim() !== '') {
+      result['nb' + i] = String(val).trim();
+    }
+  }
+
+  return result;
 }
 /* =========================================================
    STATS
