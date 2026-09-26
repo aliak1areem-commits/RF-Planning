@@ -15,7 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-   /* NB Labels on map */
+/* NB Labels on map */
 .nb-label {
   background: rgba(255,255,255,.95) !important;
   border: 1.5px solid #124191 !important;
@@ -38,9 +38,8 @@
   color: #fff !important;
   box-shadow: 0 3px 8px rgba(220,38,38,.4) !important;
 }
-/* =========================================================
-   RESET & BASE
-   ========================================================= */
+
+/* RESET & BASE */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; overflow: hidden; }
 body {
@@ -54,9 +53,7 @@ body {
 ::-webkit-scrollbar-thumb { background: #3A4A6A; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #5A6B87; }
 
-/* =========================================================
-   APP LAYOUT
-   ========================================================= */
+/* APP LAYOUT */
 .app {
   display: grid;
   grid-template-columns: 240px 1fr;
@@ -64,9 +61,7 @@ body {
   overflow: hidden;
 }
 
-/* =========================================================
-   SIDEBAR
-   ========================================================= */
+/* SIDEBAR */
 .sidebar {
   background: linear-gradient(180deg, #0C1B3D 0%, #142A5C 100%);
   color: #fff;
@@ -83,124 +78,65 @@ body {
   border-bottom: 1px solid rgba(255,255,255,.08);
 }
 .sidebar-logo {
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
+  width: 42px; height: 42px; border-radius: 10px;
   background: linear-gradient(135deg, #00A1E0, #124191);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   font-family: 'JetBrains Mono', monospace;
-  font-weight: 800;
-  font-size: 14px;
-  flex-shrink: 0;
+  font-weight: 800; font-size: 14px; flex-shrink: 0;
   box-shadow: 0 6px 18px rgba(0,161,224,.35);
 }
 .sidebar-brand-text h1 { font-size: 14px; font-weight: 700; letter-spacing: .3px; }
 .sidebar-brand-text span { font-size: 10px; color: #AEB9D4; letter-spacing: 1.2px; }
-
-.sidebar-nav {
-  padding: 14px 10px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
+.sidebar-nav { padding: 14px 10px; flex: 1; display: flex; flex-direction: column; gap: 3px; }
 .nav-section {
-  font-size: 9.5px;
-  font-weight: 800;
-  color: #5A6B87;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 12px 14px 4px;
+  font-size: 9.5px; font-weight: 800; color: #5A6B87;
+  text-transform: uppercase; letter-spacing: 1px; padding: 12px 14px 4px;
 }
 .nav-item {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  color: #AEB9D4;
-  font-size: 13px;
-  font-weight: 500;
-  transition: all .15s;
-  border: none;
-  background: none;
-  text-align: left;
-  width: 100%;
-  font-family: inherit;
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 14px; border-radius: 8px;
+  cursor: pointer; color: #AEB9D4;
+  font-size: 13px; font-weight: 500;
+  transition: all .15s; border: none; background: none;
+  text-align: left; width: 100%; font-family: inherit;
 }
 .nav-item:hover { background: rgba(255,255,255,.06); color: #fff; }
 .nav-item.active { background: rgba(0,161,224,.16); color: #fff; font-weight: 600; }
 .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
 .nav-item .badge {
-  margin-left: auto;
-  background: rgba(0,161,224,.2);
-  color: #00A1E0;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 10px;
-  font-family: 'JetBrains Mono', monospace;
+  margin-left: auto; background: rgba(0,161,224,.2); color: #00A1E0;
+  font-size: 10px; font-weight: 700; padding: 2px 7px;
+  border-radius: 10px; font-family: 'JetBrains Mono', monospace;
 }
 .sidebar-footer {
-  padding: 14px 18px;
-  border-top: 1px solid rgba(255,255,255,.08);
-  font-size: 10.5px;
-  color: #AEB9D4;
-  line-height: 1.6;
+  padding: 14px 18px; border-top: 1px solid rgba(255,255,255,.08);
+  font-size: 10.5px; color: #AEB9D4; line-height: 1.6;
 }
 
-/* =========================================================
-   MAIN
-   ========================================================= */
+/* MAIN */
 .main {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: #F4F7FB;
-  min-height: 0;
+  position: relative; display: flex; flex-direction: column;
+  overflow: hidden; background: #F4F7FB; min-height: 0;
 }
 .topbar {
-  height: 56px;
-  background: #fff;
-  border-bottom: 1px solid #E9EEF6;
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
-  gap: 16px;
-  flex-shrink: 0;
-  box-shadow: 0 1px 3px rgba(12,27,61,.04);
+  height: 56px; background: #fff; border-bottom: 1px solid #E9EEF6;
+  display: flex; align-items: center; padding: 0 24px; gap: 16px;
+  flex-shrink: 0; box-shadow: 0 1px 3px rgba(12,27,61,.04);
 }
 .topbar-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #0C1B3D;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  font-size: 16px; font-weight: 700; color: #0C1B3D;
+  display: flex; align-items: center; gap: 10px;
 }
 .topbar-title .subtitle { font-size: 12px; color: #5A6B87; font-weight: 500; }
 .topbar-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
 
-/* =========================================================
-   BUTTONS
-   ========================================================= */
+/* BUTTONS */
 .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 15px;
-  border-radius: 8px;
-  font-size: 12.5px;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1.5px solid transparent;
-  transition: all .15s;
-  font-family: inherit;
-  white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 15px; border-radius: 8px;
+  font-size: 12.5px; font-weight: 600; cursor: pointer;
+  border: 1.5px solid transparent; transition: all .15s;
+  font-family: inherit; white-space: nowrap;
 }
 .btn:active { transform: scale(.97); }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
@@ -217,205 +153,102 @@ body {
 .btn-success { background: #1F9D55; color: #fff; }
 .btn-success:hover:not(:disabled) { background: #18803f; }
 
-/* =========================================================
-   STATS BAR
-   ========================================================= */
+/* STATS BAR */
 .stats-bar {
-  display: flex;
-  gap: 16px;
-  padding: 10px 24px;
-  background: #fff;
-  border-bottom: 1px solid #E9EEF6;
-  font-size: 12px;
-  flex-shrink: 0;
-  flex-wrap: wrap;
+  display: flex; gap: 16px; padding: 10px 24px; background: #fff;
+  border-bottom: 1px solid #E9EEF6; font-size: 12px;
+  flex-shrink: 0; flex-wrap: wrap;
 }
 .stats-bar-item { display: flex; align-items: center; gap: 7px; color: #5A6B87; }
 .stats-bar-item b {
-  font-family: 'JetBrains Mono', monospace;
-  color: #0C1B3D;
-  font-weight: 700;
-  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace; color: #0C1B3D;
+  font-weight: 700; font-size: 13px;
 }
 
-/* =========================================================
-   PAGES
-   ========================================================= */
+/* PAGES */
 .page { display: none; flex: 1; overflow: hidden; position: relative; min-height: 0; }
 .page.active { display: flex; flex-direction: column; }
 
-/* =========================================================
-   MAP
-   ========================================================= */
-.map-container {
-  display: flex;
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-  min-height: 0;   /* مهم: يسمح للـ flex بالانكماش */
-}
+/* MAP */
+.map-container { display: flex; flex: 1; position: relative; overflow: hidden; min-height: 0; }
 .map-sidebar {
-  width: 320px;
-  background: #fff;
-  border-right: 1px solid #E9EEF6;
-  overflow-y: auto;
-  flex-shrink: 0;
-  padding: 18px 16px;
+  width: 320px; background: #fff; border-right: 1px solid #E9EEF6;
+  overflow-y: auto; flex-shrink: 0; padding: 18px 16px;
   transition: width .25s, padding .25s;
 }
-.map-sidebar.collapsed {
-  width: 0;
-  padding: 0;
-  border-right: none;
-  overflow: hidden;
-}
+.map-sidebar.collapsed { width: 0; padding: 0; border-right: none; overflow: hidden; }
 .map-sidebar h3 {
-  font-size: 12px;
-  color: #0C1B3D;
-  text-transform: uppercase;
-  letter-spacing: .8px;
-  font-weight: 800;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  font-size: 12px; color: #0C1B3D; text-transform: uppercase;
+  letter-spacing: .8px; font-weight: 800; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 6px;
 }
 .map-sidebar h3::after { content: ""; flex: 1; height: 1px; background: #E9EEF6; }
 .filter-group { margin-bottom: 20px; }
 .filter-search {
-  width: 100%;
-  padding: 9px 12px;
-  border: 1.5px solid #D7DEEA;
-  border-radius: 8px;
-  font-size: 13px;
-  font-family: inherit;
-  outline: none;
+  width: 100%; padding: 9px 12px; border: 1.5px solid #D7DEEA;
+  border-radius: 8px; font-size: 13px; font-family: inherit; outline: none;
 }
 .filter-search:focus { border-color: #00A1E0; box-shadow: 0 0 0 3px rgba(0,161,224,.1); }
 .filter-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  user-select: none;
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: 6px; cursor: pointer;
+  font-size: 13px; user-select: none;
 }
 .filter-checkbox:hover { background: #F4F7FB; }
 .filter-checkbox input {
-  width: 16px;
-  height: 16px;
-  accent-color: #124191;
-  cursor: pointer;
-  flex-shrink: 0;
+  width: 16px; height: 16px; accent-color: #124191; cursor: pointer; flex-shrink: 0;
 }
 .filter-color { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
 .filter-count {
-  margin-left: auto;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: #5A6B87;
-  font-weight: 600;
+  margin-left: auto; font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: #5A6B87; font-weight: 600;
 }
+#map { flex: 1; height: 100%; min-height: 0; min-width: 0; z-index: 1; background: #0A1628; }
 
-#map {
-  flex: 1;
-  height: 100%;
-  min-height: 0;
-  min-width: 0;
-  z-index: 1;
-  background: #0A1628;
-}
-
-/* =========================================================
-   LEGEND
-   ========================================================= */
+/* LEGEND */
 .legend {
-  position: absolute;
-  bottom: 20px;
-  left: 340px;
-  background: rgba(255,255,255,.98);
-  backdrop-filter: blur(10px);
-  border-radius: 10px;
-  padding: 12px 14px;
-  box-shadow: 0 4px 20px rgba(0,0,0,.15);
-  z-index: 500;
-  font-size: 11.5px;
-  max-width: 220px;
-  transition: left .25s;
+  position: absolute; bottom: 20px; left: 340px;
+  background: rgba(255,255,255,.98); backdrop-filter: blur(10px);
+  border-radius: 10px; padding: 12px 14px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.15); z-index: 500;
+  font-size: 11.5px; max-width: 220px; transition: left .25s;
 }
 .legend-title {
-  font-size: 10.5px;
-  font-weight: 800;
-  color: #0C1B3D;
-  text-transform: uppercase;
-  letter-spacing: .6px;
-  margin-bottom: 8px;
+  font-size: 10.5px; font-weight: 800; color: #0C1B3D;
+  text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px;
 }
 .legend-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 3px 0;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  display: flex; align-items: center; gap: 8px; padding: 3px 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
 }
 .legend-dot { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.15); }
 
-/* =========================================================
-   BASEMAP SWITCHER
-   ========================================================= */
+/* BASEMAP SWITCHER */
 .basemap-switcher {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 500;
-  background: rgba(255,255,255,.98);
-  border-radius: 10px;
-  padding: 4px;
-  box-shadow: 0 4px 20px rgba(0,0,0,.15);
-  display: flex;
-  gap: 2px;
+  position: absolute; top: 16px; right: 16px; z-index: 500;
+  background: rgba(255,255,255,.98); border-radius: 10px;
+  padding: 4px; box-shadow: 0 4px 20px rgba(0,0,0,.15);
+  display: flex; gap: 2px;
 }
 .basemap-btn {
-  padding: 7px 12px;
-  border-radius: 6px;
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #5A6B87;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
+  padding: 7px 12px; border-radius: 6px; font-size: 11.5px;
+  font-weight: 600; color: #5A6B87; background: transparent;
+  border: none; cursor: pointer; font-family: inherit;
 }
 .basemap-btn:hover { background: #F4F7FB; color: #124191; }
 .basemap-btn.active { background: #124191; color: #fff; }
 
-/* =========================================================
-   TOOLS GRID
-   ========================================================= */
+/* TOOLS GRID */
 .tools-grid {
-  padding: 24px;
-  overflow-y: auto;
-  flex: 1;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-  align-content: start;
+  padding: 24px; overflow-y: auto; flex: 1;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px; align-content: start;
 }
 .tool-card {
-  background: #fff;
-  border-radius: 14px;
-  padding: 24px;
-  border: 1px solid #E9EEF6;
-  box-shadow: 0 4px 12px rgba(12,27,61,.06);
-  cursor: pointer;
-  transition: all .25s;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 180px;
+  background: #fff; border-radius: 14px; padding: 24px;
+  border: 1px solid #E9EEF6; box-shadow: 0 4px 12px rgba(12,27,61,.06);
+  cursor: pointer; transition: all .25s;
+  display: flex; flex-direction: column; gap: 12px; min-height: 180px;
 }
 .tool-card:hover {
   transform: translateY(-4px);
@@ -423,490 +256,260 @@ body {
   border-color: #124191;
 }
 .tool-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  flex-shrink: 0;
+  width: 56px; height: 56px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; flex-shrink: 0;
 }
-.tool-title {
-  font-size: 16px;
-  font-weight: 800;
-  color: #0C1B3D;
-}
-.tool-desc {
-  font-size: 12.5px;
-  color: #5A6B87;
-  line-height: 1.5;
-}
+.tool-title { font-size: 16px; font-weight: 800; color: #0C1B3D; }
+.tool-desc { font-size: 12.5px; color: #5A6B87; line-height: 1.5; }
 .tool-tag {
-  display: inline-block;
-  padding: 3px 9px;
-  border-radius: 20px;
-  font-size: 10.5px;
-  font-weight: 700;
-  margin-top: auto;
+  display: inline-block; padding: 3px 9px; border-radius: 20px;
+  font-size: 10.5px; font-weight: 700; margin-top: auto;
 }
 
-/* =========================================================
-   TOOL PAGE
-   ========================================================= */
+/* TOOL PAGE */
 .tool-page {
-  padding: 24px;
-  overflow-y: auto;
-  flex: 1;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
+  padding: 24px; overflow-y: auto; flex: 1;
+  max-width: 1200px; margin: 0 auto; width: 100%;
 }
-.tool-page-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-}
+.tool-page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
 .tool-page-header .back-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: #fff;
-  border: 1.5px solid #D7DEEA;
-  color: #5A6B87;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 40px; height: 40px; border-radius: 10px; background: #fff;
+  border: 1.5px solid #D7DEEA; color: #5A6B87; font-size: 18px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
   font-family: inherit;
 }
 .tool-page-header .back-btn:hover { background: #F4F7FB; color: #124191; }
 .tool-page-title { font-size: 22px; font-weight: 800; color: #0C1B3D; }
 .tool-page-sub { font-size: 13px; color: #5A6B87; margin-top: 2px; }
-
 .tool-section {
-  background: #fff;
-  border-radius: 14px;
-  padding: 24px;
-  border: 1px solid #E9EEF6;
-  box-shadow: 0 4px 12px rgba(12,27,61,.06);
+  background: #fff; border-radius: 14px; padding: 24px;
+  border: 1px solid #E9EEF6; box-shadow: 0 4px 12px rgba(12,27,61,.06);
   margin-bottom: 20px;
 }
 .tool-section h3 {
-  font-size: 15px;
-  font-weight: 800;
-  color: #0C1B3D;
-  margin-bottom: 16px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #F0F3F9;
+  font-size: 15px; font-weight: 800; color: #0C1B3D;
+  margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #F0F3F9;
 }
 .form-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
-  margin-bottom: 16px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px; margin-bottom: 16px;
 }
 .form-field label {
-  display: block;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: #5A6B87;
-  text-transform: uppercase;
-  letter-spacing: .4px;
-  margin-bottom: 6px;
+  display: block; font-size: 11.5px; font-weight: 700; color: #5A6B87;
+  text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px;
 }
-.form-field input,
-.form-field select {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1.5px solid #D7DEEA;
-  border-radius: 8px;
-  font-size: 13.5px;
+.form-field input, .form-field select {
+  width: 100%; padding: 10px 14px; border: 1.5px solid #D7DEEA;
+  border-radius: 8px; font-size: 13.5px;
   font-family: 'JetBrains Mono', monospace;
-  color: #0C1B3D;
-  outline: none;
-  background: #FBFCFE;
+  color: #0C1B3D; outline: none; background: #FBFCFE;
 }
-.form-field input:focus,
-.form-field select:focus {
-  border-color: #00A1E0;
-  box-shadow: 0 0 0 3px rgba(0,161,224,.1);
-  background: #fff;
+.form-field input:focus, .form-field select:focus {
+  border-color: #00A1E0; box-shadow: 0 0 0 3px rgba(0,161,224,.1); background: #fff;
 }
-.form-field .hint {
-  font-size: 11px;
-  color: #94A3B8;
-  margin-top: 4px;
-  font-weight: 500;
-}
+.form-field .hint { font-size: 11px; color: #94A3B8; margin-top: 4px; font-weight: 500; }
 .result-box {
   background: linear-gradient(135deg, #EAF2FB, #DCEBFB);
-  border-radius: 12px;
-  padding: 20px;
-  margin-top: 16px;
+  border-radius: 12px; padding: 20px; margin-top: 16px;
   border-left: 4px solid #124191;
 }
 .result-box .label {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: #5A6B87;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-  margin-bottom: 6px;
+  font-size: 11.5px; font-weight: 700; color: #5A6B87;
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px;
 }
 .result-box .value {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 28px;
-  font-weight: 800;
-  color: #0C1B3D;
-  line-height: 1;
+  font-family: 'JetBrains Mono', monospace; font-size: 28px;
+  font-weight: 800; color: #0C1B3D; line-height: 1;
 }
 .result-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-  margin-top: 16px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px; margin-top: 16px;
 }
 .result-item {
-  background: #fff;
-  border-radius: 10px;
-  padding: 14px;
-  border: 1px solid #E9EEF6;
+  background: #fff; border-radius: 10px; padding: 14px; border: 1px solid #E9EEF6;
 }
 .result-item .label {
-  font-size: 11px;
-  font-weight: 700;
-  color: #5A6B87;
-  text-transform: uppercase;
-  letter-spacing: .4px;
-  margin-bottom: 4px;
+  font-size: 11px; font-weight: 700; color: #5A6B87;
+  text-transform: uppercase; letter-spacing: .4px; margin-bottom: 4px;
 }
 .result-item .value {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 18px;
-  font-weight: 800;
-  color: #0C1B3D;
+  font-family: 'JetBrains Mono', monospace; font-size: 18px;
+  font-weight: 800; color: #0C1B3D;
 }
-.action-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 16px;
-}
+.action-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
 
-/* =========================================================
-   PCI CHECKER SPECIFIC
-   ========================================================= */
+/* PCI CHECKER SPECIFIC */
 .kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-  margin-bottom: 20px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px; margin-bottom: 20px;
 }
 .kpi-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px;
-  border: 1px solid #E9EEF6;
-  text-align: center;
+  background: #fff; border-radius: 12px; padding: 16px;
+  border: 1px solid #E9EEF6; text-align: center;
 }
 .kpi-card .kpi-label {
-  font-size: 10.5px;
-  font-weight: 700;
-  color: #5A6B87;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-  margin-bottom: 6px;
+  font-size: 10.5px; font-weight: 700; color: #5A6B87;
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px;
 }
 .kpi-card .kpi-value {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 26px;
-  font-weight: 800;
-  color: #124191;
-  line-height: 1;
+  font-family: 'JetBrains Mono', monospace; font-size: 26px;
+  font-weight: 800; color: #124191; line-height: 1;
 }
 .kpi-card.warn .kpi-value { color: #F2A900; }
 .kpi-card.danger .kpi-value { color: #D64545; }
 .kpi-card.success .kpi-value { color: #1F9D55; }
 
 .data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12.5px;
+  width: 100%; border-collapse: collapse; font-size: 12.5px;
   font-family: 'JetBrains Mono', monospace;
 }
 .data-table thead th {
-  background: #EAF2FB;
-  color: #124191;
-  text-align: left;
-  padding: 10px 12px;
-  font-weight: 700;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: .4px;
-  border-bottom: 1px solid #D7DEEA;
-  white-space: nowrap;
+  background: #EAF2FB; color: #124191; text-align: left;
+  padding: 10px 12px; font-weight: 700; font-size: 11px;
+  text-transform: uppercase; letter-spacing: .4px;
+  border-bottom: 1px solid #D7DEEA; white-space: nowrap;
 }
-.data-table tbody td {
-  padding: 9px 12px;
-  border-bottom: 1px solid #F0F3F9;
-}
+.data-table tbody td { padding: 9px 12px; border-bottom: 1px solid #F0F3F9; }
 .data-table tbody tr:hover td { background: #F9FBFE; }
 .data-table tbody tr:last-child td { border-bottom: none; }
 
-/* =========================================================
-   TOAST
-   ========================================================= */
+/* TOAST */
 .toast {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 9999;
-  padding: 12px 20px;
-  border-radius: 10px;
-  background: #0C1B3D;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  padding: 12px 20px; border-radius: 10px; background: #0C1B3D;
+  color: #fff; font-size: 13px; font-weight: 600;
   box-shadow: 0 10px 30px rgba(0,0,0,.3);
-  transform: translateY(80px);
-  opacity: 0;
-  transition: all .3s;
-  max-width: 400px;
+  transform: translateY(80px); opacity: 0; transition: all .3s; max-width: 400px;
 }
 .toast.show { transform: translateY(0); opacity: 1; }
 .toast.success { background: #1F9D55; }
 .toast.error { background: #D64545; }
 .toast.info { background: #124191; }
 
-/* =========================================================
-   LOADING
-   ========================================================= */
+/* LOADING */
 .loader {
-  display: inline-block;
-  width: 14px; height: 14px;
-  border: 2px solid rgba(255,255,255,.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin .6s linear infinite;
-  vertical-align: middle;
+  display: inline-block; width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,.3); border-top-color: #fff;
+  border-radius: 50%; animation: spin .6s linear infinite; vertical-align: middle;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,.9);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 800;
-  gap: 16px;
+  position: absolute; inset: 0; background: rgba(255,255,255,.9);
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; z-index: 800; gap: 16px;
 }
 .loading-overlay .spinner {
-  width: 48px; height: 48px;
-  border: 4px solid #E9EEF6;
-  border-top-color: #124191;
-  border-radius: 50%;
+  width: 48px; height: 48px; border: 4px solid #E9EEF6;
+  border-top-color: #124191; border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 .loading-overlay .text { font-size: 13px; color: #5A6B87; font-weight: 600; }
 
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
+/* RESPONSIVE */
 @media (max-width: 600px) {
   .app { grid-template-columns: 60px 1fr; }
-  .sidebar-brand-text,
-  .nav-item span:not(.icon),
-  .nav-section,
-  .sidebar-footer { display: none; }
+  .sidebar-brand-text, .nav-item span:not(.icon), .nav-section, .sidebar-footer { display: none; }
   .nav-item { justify-content: center; padding: 12px; }
-  .map-sidebar {
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    z-index: 600;
-    transform: translateX(-100%);
-    transition: transform .3s;
-  }
+  .map-sidebar { position: absolute; left: 0; top: 0; bottom: 0; z-index: 600; transform: translateX(-100%); transition: transform .3s; }
   .map-sidebar.open { transform: translateX(0); }
   .legend { left: 16px; }
 }
 
-/* =========================================================
-   SITE INFO CARD
-   ========================================================= */
+/* SITE INFO CARD */
 .site-info-card {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 340px;
-  max-height: calc(100% - 32px);
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 12px 40px rgba(12,27,61,.2);
-  border: 1px solid #E9EEF6;
-  z-index: 550;
-  display: none;
-  flex-direction: column;
-  overflow: hidden;
+  position: absolute; top: 16px; right: 16px; width: 340px;
+  max-height: calc(100% - 32px); background: #fff; border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(12,27,61,.2); border: 1px solid #E9EEF6;
+  z-index: 550; display: none; flex-direction: column; overflow: hidden;
 }
 .site-info-card.show { display: flex; }
 .site-info-head {
-  padding: 14px 18px;
-  background: linear-gradient(135deg, #0C1B3D, #142A5C);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
+  padding: 14px 18px; background: linear-gradient(135deg, #0C1B3D, #142A5C);
+  color: #fff; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
 }
 .site-info-title {
-  font-size: 14px;
-  font-weight: 700;
-  flex: 1;
+  font-size: 14px; font-weight: 700; flex: 1;
   font-family: 'JetBrains Mono', monospace;
 }
 .site-info-close {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  background: rgba(255,255,255,.1);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,.15);
-  cursor: pointer;
-  font-size: 14px;
-  font-family: inherit;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 30px; height: 30px; border-radius: 8px;
+  background: rgba(255,255,255,.1); color: #fff;
+  border: 1px solid rgba(255,255,255,.15); cursor: pointer;
+  font-size: 14px; font-family: inherit;
+  display: flex; align-items: center; justify-content: center;
 }
 .site-info-close:hover { background: rgba(255,255,255,.2); }
-.site-info-body {
-  padding: 18px;
-  overflow-y: auto;
-  flex: 1;
-}
+.site-info-body { padding: 18px; overflow-y: auto; flex: 1; }
 .info-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #F0F3F9;
-  font-size: 12.5px;
+  display: flex; justify-content: space-between; padding: 8px 0;
+  border-bottom: 1px solid #F0F3F9; font-size: 12.5px;
 }
 .info-row:last-child { border-bottom: none; }
 .info-row .k { color: #5A6B87; font-weight: 500; }
 .info-row .v {
-  color: #0C1B3D;
-  font-weight: 700;
+  color: #0C1B3D; font-weight: 700;
   font-family: 'JetBrains Mono', monospace;
-  text-align: right;
-  word-break: break-word;
-  max-width: 60%;
+  text-align: right; word-break: break-word; max-width: 60%;
 }
 .info-section-title {
-  font-size: 11px;
-  font-weight: 800;
-  color: #5A6B87;
-  text-transform: uppercase;
-  letter-spacing: .6px;
-  margin: 16px 0 8px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid #F0F3F9;
+  font-size: 11px; font-weight: 800; color: #5A6B87;
+  text-transform: uppercase; letter-spacing: .6px;
+  margin: 16px 0 8px; padding-bottom: 6px; border-bottom: 1px solid #F0F3F9;
 }
 .info-section-title:first-child { margin-top: 0; }
 
-/* =========================================================
-   SECTOR HIGHLIGHT
-   ========================================================= */
-.sector-highlight {
-  animation: sectorPulse 1s ease-in-out 3;
-}
+/* SECTOR HIGHLIGHT */
+.sector-highlight { animation: sectorPulse 1s ease-in-out 3; }
 @keyframes sectorPulse {
   0%, 100% { fill-opacity: 0.65; stroke-width: 0.8; }
   50% { fill-opacity: 1; stroke-width: 3; }
 }
 
-/* =========================================================
-   SITE CIRCLE LABEL
-   ========================================================= */
+/* SITE CIRCLE LABEL */
 .site-circle-label {
-  background: #124191 !important;
-  color: #fff !important;
-  padding: 4px 10px !important;
-  border-radius: 20px !important;
+  background: #124191 !important; color: #fff !important;
+  padding: 4px 10px !important; border-radius: 20px !important;
   font-family: 'JetBrains Mono', monospace !important;
-  font-size: 11px !important;
-  font-weight: 800 !important;
+  font-size: 11px !important; font-weight: 800 !important;
   white-space: nowrap !important;
   box-shadow: 0 3px 10px rgba(18,65,145,.4) !important;
-  border: 2px solid #fff !important;
-  text-align: center !important;
+  border: 2px solid #fff !important; text-align: center !important;
 }
-/* =========================================================
-   NB TABS
-   ========================================================= */
+
+/* NB TABS */
 .nb-tabs {
-  display: flex;
-  gap: 4px;
-  background: #fff;
-  border-radius: 10px;
-  padding: 4px;
-  margin-bottom: 16px;
+  display: flex; gap: 4px; background: #fff; border-radius: 10px;
+  padding: 4px; margin-bottom: 16px;
   box-shadow: 0 2px 8px rgba(12,27,61,.06);
-  border: 1px solid #E9EEF6;
-  overflow-x: auto;
+  border: 1px solid #E9EEF6; overflow-x: auto;
 }
 .nb-tab {
-  padding: 9px 16px;
-  border-radius: 7px;
-  border: none;
-  background: transparent;
-  color: #5A6B87;
-  font-size: 12.5px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  white-space: nowrap;
-  transition: all .15s;
+  padding: 9px 16px; border-radius: 7px; border: none;
+  background: transparent; color: #5A6B87;
+  font-size: 12.5px; font-weight: 600; cursor: pointer;
+  font-family: inherit; white-space: nowrap; transition: all .15s;
 }
 .nb-tab:hover { background: #F4F7FB; color: #124191; }
 .nb-tab.active { background: #124191; color: #fff; }
 .nb-tab-content { display: none; }
 .nb-tab-content.active { display: block; }
-/* =========================================================
-   MULTI-SELECT BOX
-   ========================================================= */
+
+/* MULTI-SELECT BOX */
 .multi-select-info {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #124191;
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 30px;
-  font-size: 13px;
-  font-weight: 700;
-  z-index: 550;
-  display: none;
-  align-items: center;
-  gap: 14px;
+  position: absolute; bottom: 20px; left: 50%;
+  transform: translateX(-50%); background: #124191;
+  color: #fff; padding: 10px 20px; border-radius: 30px;
+  font-size: 13px; font-weight: 700; z-index: 550;
+  display: none; align-items: center; gap: 14px;
   box-shadow: 0 8px 24px rgba(18,65,145,.4);
 }
 .multi-select-info.show { display: flex; }
 .multi-select-info button {
   background: rgba(255,255,255,.15);
   border: 1px solid rgba(255,255,255,.3);
-  color: #fff;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 11.5px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
+  color: #fff; padding: 5px 12px; border-radius: 20px;
+  font-size: 11.5px; font-weight: 600; cursor: pointer; font-family: inherit;
 }
 .multi-select-info button:hover { background: rgba(255,255,255,.25); }
 </style>
@@ -946,13 +549,13 @@ body {
       <button class="nav-item" data-page="tools">
         <span class="icon">🔧</span><span>Tools</span>
       </button>
-            <button class="nav-item" data-page="tool-pci-checker">
+      <button class="nav-item" data-page="tool-pci-checker">
         <span class="icon">🧮</span><span>PCI Checker</span>
       </button>
       <button class="nav-item" data-page="tool-gsm-planner">
         <span class="icon">📡</span><span>GSM Planner</span>
       </button>
-             <button class="nav-item" data-page="tool-neighbor">
+      <button class="nav-item" data-page="tool-neighbor">
         <span class="icon">🔗</span><span>Neighbor Analysis</span>
       </button>
       <button class="nav-item" data-page="tool-distance">
@@ -977,15 +580,14 @@ body {
   <!-- ============ MAIN ============ -->
   <main class="main">
 
-    <!-- ============ TOPBAR ============ -->
     <div class="topbar">
       <div class="topbar-title">
         <span id="pageIcon">🗺️</span>
         <span id="pageTitle">Cell Map</span>
-        <span class="subtitle" id="pageSubtitle">Visualize LTE cells on the map</span>
+        <span class="subtitle" id="pageSubtitle">Visualize cells on the map</span>
       </div>
       <div class="topbar-actions">
-        <button class="btn btn-ghost" id="toggleSidebarBtn" onclick="toggleMapSidebar()" title="Collapse/Expand panel">
+        <button class="btn btn-ghost" id="toggleSidebarBtn" onclick="toggleMapSidebar()">
           <span>◀</span><span>Panel</span>
         </button>
         <button class="btn btn-ghost" onclick="loadCells()">
@@ -994,26 +596,23 @@ body {
       </div>
     </div>
 
-    <!-- ============ STATS BAR ============ -->
     <div class="stats-bar">
       <div class="stats-bar-item">📡 <b id="statTotal">0</b> Cells</div>
       <div class="stats-bar-item">📍 <b id="statSites">0</b> Sites</div>
-            <div class="stats-bar-item">🌐 <b id="statBands">0</b> Regions</div>
+      <div class="stats-bar-item">🌐 <b id="statBands">0</b> Regions</div>
       <div class="stats-bar-item">⚠️ <b id="statPCI">0</b> PCI Conflicts</div>
       <div class="stats-bar-item" style="margin-left:auto;">🎯 Visible: <b id="statVisible">0</b></div>
     </div>
 
-    <!-- ============ PAGE: MAP ============ -->
+    <!-- PAGE: MAP -->
     <section class="page active" id="page-map">
       <div class="map-container">
-
-        <!-- ========== MAP SIDEBAR ========== -->
         <div class="map-sidebar" id="mapSidebar">
           <h3>Search</h3>
           <div class="filter-group">
             <input type="text" class="filter-search" id="searchFilter" placeholder="🔍 Cell name, site, PCI..." oninput="applyFilters()">
           </div>
-                     <h3>Filter by Technology</h3>
+          <h3>Filter by Technology</h3>
           <div class="filter-group">
             <label class="filter-checkbox">
               <input type="checkbox" id="filterGSM" checked onchange="applyFilters()">
@@ -1024,9 +623,7 @@ body {
               <span style="color:#124191;font-weight:700;">📶 LTE (4G)</span>
             </label>
           </div>
-
           <h3>Filter by PCI</h3>
-                    <h3>Filter by PCI</h3>
           <div class="filter-group">
             <input type="text" class="filter-search" id="pciFilter" placeholder="PCI number..." oninput="applyFilters()">
           </div>
@@ -1045,7 +642,6 @@ body {
               <span>Site Circles (low zoom)</span>
             </label>
           </div>
-
           <h3>Label Mode</h3>
           <div class="filter-group">
             <select id="labelMode" style="width:100%;padding:9px 12px;border:1.5px solid #D7DEEA;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer;" onchange="renderMap()">
@@ -1056,7 +652,6 @@ body {
               <option value="none">None</option>
             </select>
           </div>
-
           <h3>Actions</h3>
           <div class="filter-group">
             <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="fitAllCells()">🎯 Fit to View</button>
@@ -1064,9 +659,7 @@ body {
             <button class="btn btn-ghost" id="multiSelectBtn" style="width:100%;justify-content:center;" onclick="toggleMultiSelectMode()">🎯 Multi-Select Mode</button>
           </div>
         </div>
-        <!-- ========== END MAP SIDEBAR ========== -->
 
-        <!-- ========== MAP + OVERLAYS ========== -->
         <div id="map"></div>
 
         <div class="multi-select-info" id="multiSelectInfo">
@@ -1094,7 +687,7 @@ body {
           <button class="basemap-btn" data-basemap="terrain">Terrain</button>
         </div>
 
-                <div class="legend" id="legend" style="display:none;">
+        <div class="legend" id="legend" style="display:none;">
           <div class="legend-title">Legend</div>
           <div id="legendItems"></div>
         </div>
@@ -1103,11 +696,10 @@ body {
           <div class="spinner"></div>
           <div class="text">Loading cells from Supabase...</div>
         </div>
-
       </div>
     </section>
 
-    <!-- ============ PAGE: DASHBOARD ============ -->
+    <!-- PAGE: DASHBOARD -->
     <section class="page" id="page-dashboard">
       <div style="padding:24px;overflow-y:auto;flex:1;">
         <div style="background:#fff;border-radius:12px;padding:32px;text-align:center;color:#5A6B87;">
@@ -1118,7 +710,7 @@ body {
       </div>
     </section>
 
-    <!-- ============ PAGE: PROJECTS ============ -->
+    <!-- PAGE: PROJECTS -->
     <section class="page" id="page-projects">
       <div style="padding:24px;overflow-y:auto;flex:1;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
@@ -1134,7 +726,7 @@ body {
       </div>
     </section>
 
-    <!-- ============ PAGE: IMPORT ============ -->
+    <!-- PAGE: IMPORT -->
     <section class="page" id="page-import">
       <div style="padding:24px;overflow-y:auto;flex:1;max-width:900px;margin:0 auto;width:100%;">
         <div style="margin-bottom:20px;">
@@ -1184,7 +776,7 @@ body {
       </div>
     </section>
 
-    <!-- ============ PAGE: CELLS ============ -->
+    <!-- PAGE: CELLS -->
     <section class="page" id="page-cells">
       <div style="padding:24px;overflow-y:auto;flex:1;">
         <div style="background:#fff;border-radius:12px;padding:32px;text-align:center;color:#5A6B87;">
@@ -1195,7 +787,7 @@ body {
       </div>
     </section>
 
-    <!-- ============ PAGE: TOOLS GRID ============ -->
+    <!-- PAGE: TOOLS GRID -->
     <section class="page" id="page-tools">
       <div class="tools-grid">
         <div class="tool-card" onclick="switchView('tool-pci-checker')">
@@ -1204,13 +796,13 @@ body {
           <div class="tool-desc">Detect Same PCI, MOD3, MOD6 conflicts, Face-to-Face antennas, and auto-optimize PCI assignments.</div>
           <div class="tool-tag" style="background:#EAF2FB;color:#124191;">Optimization</div>
         </div>
-                 <div class="tool-card" onclick="switchView('tool-gsm-planner')">
+        <div class="tool-card" onclick="switchView('tool-gsm-planner')">
           <div class="tool-icon" style="background:linear-gradient(135deg,#D97706,#F2A900);color:#fff;">📡</div>
           <div class="tool-title">GSM BCCH/BSIC Planner</div>
-          <div class="tool-desc">Suggest conflict-free BCCH (ARFCN) and BSIC values for GSM cells with boresight analysis, co-site hard-blocking, and distance/angle-weighted scoring.</div>
+          <div class="tool-desc">Suggest conflict-free BCCH (ARFCN) and BSIC values for GSM cells with boresight analysis and co-site hard-blocking.</div>
           <div class="tool-tag" style="background:#FDF1DC;color:#8A5A00;">GSM</div>
         </div>
-                 <div class="tool-card" onclick="switchView('tool-neighbor')">
+        <div class="tool-card" onclick="switchView('tool-neighbor')">
           <div class="tool-icon" style="background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;">🔗</div>
           <div class="tool-title">Neighbor Analysis</div>
           <div class="tool-desc">Audit GSM neighbor relations — detect missing NBs, auto add/remove, before/after compare, batch analysis.</div>
@@ -1243,7 +835,7 @@ body {
       </div>
     </section>
 
-    <!-- ============ PAGE: PCI CHECKER ============ -->
+    <!-- PAGE: PCI CHECKER -->
     <section class="page" id="page-tool-pci-checker">
       <div class="tool-page">
         <div class="tool-page-header">
@@ -1355,7 +947,8 @@ body {
         </div>
       </div>
     </section>
-    <!-- ============ PAGE: GSM BCCH/BSIC PLANNER ============ -->
+
+    <!-- PAGE: GSM BCCH/BSIC PLANNER -->
     <section class="page" id="page-tool-gsm-planner">
       <div class="tool-page">
         <div class="tool-page-header">
@@ -1366,7 +959,6 @@ body {
           </div>
         </div>
 
-        <!-- ===== INPUT DIALOG ===== -->
         <div class="tool-section">
           <h3>🎯 Target Cell</h3>
           <div class="form-row">
@@ -1390,63 +982,25 @@ body {
               <input type="number" id="gsm_front_threshold" value="45" min="10" max="180">
             </div>
           </div>
-          <div class="filter-group" style="margin-top:14px;">
-            <label class="filter-checkbox">
-              <input type="checkbox" id="gsm_opt_highlight" checked>
-              <span>Highlight cell on map</span>
-            </label>
-            <label class="filter-checkbox">
-              <input type="checkbox" id="gsm_opt_nearby" checked>
-              <span>Show nearby cells on map</span>
-            </label>
-            <label class="filter-checkbox">
-              <input type="checkbox" id="gsm_opt_save">
-              <span>Save result to database (BCCH + BSIC)</span>
-            </label>
-          </div>
           <div class="action-row">
-            <button class="btn btn-primary" onclick="runGSMPlanner()">
-              🚀 Analyze & Suggest
-            </button>
+            <button class="btn btn-primary" onclick="runGSMPlanner()">🚀 Analyze & Suggest</button>
           </div>
         </div>
 
-        <!-- ===== RESULTS ===== -->
         <div id="gsmResults" style="display:none;">
-
-          <!-- Summary -->
           <div class="tool-section">
             <h3>💡 Suggested Plan</h3>
             <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));">
-              <div class="kpi-card">
-                <div class="kpi-label">Cell</div>
-                <div class="kpi-value" id="gsm_kpi_cell" style="font-size:15px;">—</div>
-              </div>
-              <div class="kpi-card success">
-                <div class="kpi-label">BCCH</div>
-                <div class="kpi-value" id="gsm_kpi_bcch">—</div>
-              </div>
-              <div class="kpi-card success">
-                <div class="kpi-label">BSIC</div>
-                <div class="kpi-value" id="gsm_kpi_bsic">—</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Band</div>
-                <div class="kpi-value" id="gsm_kpi_band" style="font-size:15px;">—</div>
-              </div>
-              <div class="kpi-card warn">
-                <div class="kpi-label">Conflicts</div>
-                <div class="kpi-value" id="gsm_kpi_conflicts">0</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Neighbors</div>
-                <div class="kpi-value" id="gsm_kpi_neighbors">0</div>
-              </div>
+              <div class="kpi-card"><div class="kpi-label">Cell</div><div class="kpi-value" id="gsm_kpi_cell" style="font-size:15px;">—</div></div>
+              <div class="kpi-card success"><div class="kpi-label">BCCH</div><div class="kpi-value" id="gsm_kpi_bcch">—</div></div>
+              <div class="kpi-card success"><div class="kpi-label">BSIC</div><div class="kpi-value" id="gsm_kpi_bsic">—</div></div>
+              <div class="kpi-card"><div class="kpi-label">Band</div><div class="kpi-value" id="gsm_kpi_band" style="font-size:15px;">—</div></div>
+              <div class="kpi-card warn"><div class="kpi-label">Conflicts</div><div class="kpi-value" id="gsm_kpi_conflicts">0</div></div>
+              <div class="kpi-card"><div class="kpi-label">Neighbors</div><div class="kpi-value" id="gsm_kpi_neighbors">0</div></div>
             </div>
             <div id="gsmWarnings" style="margin-top:12px;"></div>
           </div>
 
-          <!-- Nearby Cells Table -->
           <div class="tool-section">
             <h3>📊 Nearby Cells Analysis</h3>
             <div style="overflow:auto;max-height:450px;border:1px solid #E9EEF6;border-radius:10px;">
@@ -1471,16 +1025,13 @@ body {
               <button class="btn btn-success" onclick="gsmExportCSV()">📥 Export CSV</button>
             </div>
           </div>
-
         </div>
-
       </div>
     </section>
-         <!-- ============ PAGE: NEIGHBOR ANALYSIS ============ -->
+
+    <!-- PAGE: NEIGHBOR ANALYSIS -->
     <section class="page" id="page-tool-neighbor">
       <div class="tool-page" style="max-width:1400px;">
-
-        <!-- Header -->
         <div class="tool-page-header">
           <button class="back-btn" onclick="switchView('tools')">←</button>
           <div>
@@ -1489,7 +1040,6 @@ body {
           </div>
         </div>
 
-        <!-- Controls -->
         <div class="tool-section">
           <h3>🎯 Source Cell</h3>
           <div class="form-row">
@@ -1512,10 +1062,8 @@ body {
           </div>
         </div>
 
-        <!-- Stats Bar -->
         <div id="nb_stats" style="display:none;background:#EAF2FB;border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:12.5px;color:#0C1B3D;font-family:'JetBrains Mono',monospace;line-height:1.8;"></div>
 
-        <!-- Tabs -->
         <div id="nb_main" style="display:none;">
           <div class="nb-tabs">
             <button class="nb-tab active" data-tab="results" onclick="switchNbTab('results')">📊 Results</button>
@@ -1525,7 +1073,6 @@ body {
             <button class="nb-tab" data-tab="map" onclick="switchNbTab('map')">🗺️ Map</button>
           </div>
 
-          <!-- TAB 1: Results -->
           <div class="nb-tab-content active" id="nb_tab_results">
             <div class="tool-section">
               <h3>🔍 Filters</h3>
@@ -1583,7 +1130,6 @@ body {
             </div>
           </div>
 
-          <!-- TAB 2: Actions -->
           <div class="nb-tab-content" id="nb_tab_actions">
             <div class="tool-section">
               <h3>➕ Auto Add Missing NBs</h3>
@@ -1626,7 +1172,6 @@ body {
             </div>
           </div>
 
-          <!-- TAB 3: Batch -->
           <div class="nb-tab-content" id="nb_tab_batch">
             <div class="tool-section">
               <h3>⚡ Batch Analysis</h3>
@@ -1667,7 +1212,6 @@ body {
             </div>
           </div>
 
-          <!-- TAB 4: Compare -->
           <div class="nb-tab-content" id="nb_tab_compare">
             <div class="tool-section">
               <h3>🔍 Before / After Comparison</h3>
@@ -1699,7 +1243,6 @@ body {
             </div>
           </div>
 
-          <!-- TAB 5: Map -->
           <div class="nb-tab-content" id="nb_tab_map">
             <div class="tool-section">
               <h3>🗺️ Show on Map</h3>
@@ -1713,10 +1256,10 @@ body {
             </div>
           </div>
         </div>
-
       </div>
     </section>
-    <!-- ============ PAGE: DISTANCE & BEARING ============ -->
+
+    <!-- PAGE: DISTANCE & BEARING -->
     <section class="page" id="page-tool-distance">
       <div class="tool-page">
         <div class="tool-page-header">
@@ -1755,7 +1298,7 @@ body {
       </div>
     </section>
 
-    <!-- ============ PAGE: AZIMUTH & TILT ============ -->
+    <!-- PAGE: AZIMUTH & TILT -->
     <section class="page" id="page-tool-azimuth">
       <div class="tool-page">
         <div class="tool-page-header">
@@ -1796,7 +1339,7 @@ body {
       </div>
     </section>
 
-    <!-- ============ PAGE: UNIT CONVERTER ============ -->
+    <!-- PAGE: UNIT CONVERTER -->
     <section class="page" id="page-tool-unit">
       <div class="tool-page">
         <div class="tool-page-header">
@@ -1875,7 +1418,7 @@ body {
       </div>
     </section>
 
-    <!-- ============ PAGE: EXPORT KML ============ -->
+    <!-- PAGE: EXPORT KML -->
     <section class="page" id="page-tool-kml">
       <div class="tool-page">
         <div class="tool-page-header">
@@ -1895,7 +1438,7 @@ body {
                 <option value="no">No (Points only)</option>
               </select>
             </div>
-                       <div class="form-field">
+            <div class="form-field">
               <label>Color Mode</label>
               <select id="kml_color">
                 <option value="sector">By Sector (A/B/C)</option>
@@ -1923,7 +1466,7 @@ body {
   </main>
 </div>
 
-<!-- ============ MODAL: CREATE PROJECT ============ -->
+<!-- MODAL: CREATE PROJECT -->
 <div class="modal-backdrop" id="createProjectModal" style="position:fixed;inset:0;background:rgba(12,27,61,.65);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:3000;padding:20px;">
   <div style="background:#fff;border-radius:14px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
     <div style="padding:20px 24px;border-bottom:1px solid #E9EEF6;">
@@ -1944,144 +1487,82 @@ body {
 </div>
 
 <div class="toast" id="toast"></div>
-   
-/* =========================================================
-   EDIT PROJECT
-   ========================================================= */
-async function editProject(projectId) {
-  const proj = allProjects.find(p => p.id === projectId);
-  if (!proj) return;
 
-  const newName = prompt('New project name:', proj.name);
-  if (newName === null) return; // cancelled
-  const trimmed = newName.trim();
-  if (!trimmed) { toast('Name cannot be empty', 'error'); return; }
-
-  const newDesc = prompt('New description (optional):', proj.description || '');
-  if (newDesc === null) return;
-
-  try {
-    const { error } = await db
-      .from('rf_projects')
-      .update({ name: trimmed, description: newDesc.trim() })
-      .eq('id', projectId);
-
-    if (error) {
-      if (error.message.includes('duplicate')) {
-        toast('Project name already exists', 'error');
-      } else {
-        throw error;
-      }
-      return;
-    }
-
-    toast('✅ Project updated', 'success');
-    await loadProjects();
-  } catch (e) {
-    toast('Error: ' + e.message, 'error');
-  }
-}
-
-/* =========================================================
-   DELETE PROJECT
-   ========================================================= */
-async function deleteProject(projectId) {
-  const proj = allProjects.find(p => p.id === projectId);
-  if (!proj) return;
-
-  // احسب عدد الخلايا
-  let cellCount = 0;
-  try {
-    const { count } = await db
-      .from('rf_cells')
-      .select('id', { count: 'exact', head: true })
-      .eq('project_id', projectId);
-    cellCount = count || 0;
-  } catch (e) {
-    console.warn('Could not count cells:', e);
-  }
-
-  const msg = 'Delete project "' + proj.name + '"?\n\n' +
-    '⚠️ This will also delete ' + cellCount + ' cells inside it.\n\n' +
-    'This action cannot be undone.';
-
-  if (!confirm(msg)) return;
-
-  try {
-    // 1. احذف الخلايا
-    const { error: cellErr } = await db
-      .from('rf_cells')
-      .delete()
-      .eq('project_id', projectId);
-
-    if (cellErr) throw cellErr;
-
-    // 2. احذف المشروع
-    const { error: projErr } = await db
-      .from('rf_projects')
-      .delete()
-      .eq('id', projectId);
-
-    if (projErr) throw projErr;
-
-    toast('✅ Project deleted', 'success');
-    await loadProjects();
-
-    // إذا كان المشروع محذوف هو النشط، صفّر
-    if (currentProjectId === projectId) {
-      currentProjectId = null;
-      await loadCells();
-    }
-  } catch (e) {
-    toast('Error: ' + e.message, 'error');
-  }
-}
 <script>
 /* =========================================================
-   CONFIG — Supabase
+   CONFIG
    ========================================================= */
 const SUPABASE_URL = 'https://lwmymnxwrvroxnkixjts.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_HAf79ZGumF-BKQhnJoW9ZQ_5V2ubxqT';
 
-/* =========================================================
-   COLORS
-   ========================================================= */
-// كل الخلايا = أحمر
-const CELL_COLOR = '#D64545';
-
-const SECTOR_COLORS = {
-  'A': '#D64545',
-  'B': '#1F9D55',
-  'C': '#124191',
-  'D': '#F2A900',
-  'E': '#8B5CF6',
-  'F': '#EC4899',
-  'G': '#06B6D4'
-};
-
-/* =========================================================
-   SUPABASE INIT
-   ========================================================= */
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* =========================================================
+   CONSTANTS
+   ========================================================= */
+const CELL_COLOR = '#D64545';
+const SECTOR_COLORS = {
+  'A': '#D64545', 'B': '#1F9D55', 'C': '#124191',
+  'D': '#F2A900', 'E': '#8B5CF6', 'F': '#EC4899', 'G': '#06B6D4'
+};
+const NB_FIELD_COUNT = 35;
+const NB_FRONT_THRESHOLD = 45;
+const NB_DEFAULT_RADIUS = 1200;
+const EARTH_RADIUS_M = 6371000.0;
 
 /* =========================================================
    STATE
    ========================================================= */
 let map = null;
+let canvasRenderer = null;
+let basemaps = {};
 let allCells = [];
 let visibleCells = [];
 let sectorLayer = null;
 let labelLayer = null;
 let coverageLayer = null;
-let basemaps = {};
 let currentProjectId = null;
 let allProjects = [];
-let importPreviewData = [];
 let currentView = 'map';
 let multiSelectMode = false;
 let selectedCellIds = new Set();
 let selectedPolygons = new Map();
+let importPreviewData = [];
+
+const GSM_BAND_ARFCN = { '900': { from: 34, to: 46 }, '1800': { from: 663, to: 680 } };
+const GSM_BAND_SUFFIX = { 'A':'900','B':'900','C':'900', 'D':'1800','E':'1800','F':'1800' };
+const GSM_RADIUS_M = 1200;
+const GSM_FRONT_THRESHOLD = 45;
+let gsmLastResults = null;
+
+let nbCurrentNeighbors = [];
+let nbCurrentSource = null;
+let nbBeforeSnapshot = {};
+let nbCurrentRadius = 1200;
+let nbBatchResults = {};
+let nbMapLayers = [];
+
+let lastPCIResults = null;
+
+/* =========================================================
+   PAGE TITLES
+   ========================================================= */
+const PAGE_TITLES = {
+  'map':              { icon: '🗺️', title: 'Cell Map',                sub: 'Visualize cells on the map' },
+  'dashboard':        { icon: '📊', title: 'Dashboard',               sub: 'Overview and statistics' },
+  'projects':         { icon: '📁', title: 'Projects',                sub: 'Manage RF projects' },
+  'import':           { icon: '📥', title: 'Import',                  sub: 'Import cells from Excel' },
+  'cells':            { icon: '📋', title: 'Cells Database',          sub: 'Manage all cells' },
+  'tools':            { icon: '🔧', title: 'Tools',                   sub: 'RF optimization & planning tools' },
+  'tool-pci-checker': { icon: '🧮', title: 'PCI Conflict Checker',    sub: 'Detect & fix PCI conflicts' },
+  'tool-gsm-planner': { icon: '📡', title: 'GSM BCCH/BSIC Planner',   sub: 'Suggest conflict-free BCCH and BSIC' },
+  'tool-neighbor':    { icon: '🔗', title: 'Neighbor Analysis',       sub: 'Audit missing neighbor relations' },
+  'tool-distance':    { icon: '📐', title: 'Distance & Bearing',      sub: 'Calculate distance between sites' },
+  'tool-azimuth':     { icon: '🎯', title: 'Azimuth & Tilt',          sub: 'Calculate antenna angles' },
+  'tool-unit':        { icon: '🔢', title: 'Unit Converter',          sub: 'Convert RF units' },
+  'tool-kml':         { icon: '🗺️', title: 'Export KML',              sub: 'Export to Google Earth' }
+};
 
 /* =========================================================
    TOAST
@@ -2090,6 +1571,7 @@ function toast(msg, type, duration) {
   type = type || 'info';
   duration = duration || 3000;
   const el = document.getElementById('toast');
+  if (!el) return;
   el.textContent = msg;
   el.className = 'toast show ' + type;
   clearTimeout(el._t);
@@ -2106,35 +1588,51 @@ function escapeHtml(s) {
 }
 
 /* =========================================================
-   PAGE TITLES
+   MATH
    ========================================================= */
-const PAGE_TITLES = {
-  'map':                 { icon: '🗺️', title: 'Cell Map',                sub: 'Visualize LTE cells on the map' },
-  'dashboard':           { icon: '📊', title: 'Dashboard',               sub: 'Overview and statistics' },
-  'projects':            { icon: '📁', title: 'Projects',                sub: 'Manage RF projects' },
-  'import':              { icon: '📥', title: 'Import',                  sub: 'Import cells from Excel' },
-  'cells':               { icon: '📋', title: 'Cells Database',          sub: 'Manage all cells' },
-  'tools':               { icon: '🔧', title: 'Tools',                   sub: 'RF optimization & planning tools' },
-   'tool-pci-checker':    { icon: '🧮', title: 'PCI Conflict Checker',    sub: 'Detect & fix PCI conflicts' },
-  'tool-gsm-planner':    { icon: '📡', title: 'GSM BCCH/BSIC Planner',   sub: 'Suggest conflict-free BCCH and BSIC for GSM cells' },
-     'tool-neighbor':       { icon: '🔗', title: 'Neighbor Analysis',       sub: 'Audit missing neighbor relations' },
-  'tool-distance':       { icon: '📐', title: 'Distance & Bearing',      sub: 'Calculate distance between sites' },
-  'tool-azimuth':        { icon: '🎯', title: 'Azimuth & Tilt',          sub: 'Calculate antenna angles' },
-  'tool-unit':           { icon: '🔢', title: 'Unit Converter',          sub: 'Convert RF units' },
-  'tool-kml':            { icon: '🗺️', title: 'Export KML',              sub: 'Export to Google Earth' }
-};
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  const phi1 = lat1 * Math.PI / 180;
+  const phi2 = lat2 * Math.PI / 180;
+  const dphi = (lat2 - lat1) * Math.PI / 180;
+  const dlam = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dphi / 2) ** 2 + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dlam / 2) ** 2;
+  return EARTH_RADIUS_M * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function calculateBearing(lat1, lon1, lat2, lon2) {
+  const phi1 = lat1 * Math.PI / 180;
+  const phi2 = lat2 * Math.PI / 180;
+  const dlambda = (lon2 - lon1) * Math.PI / 180;
+  const x = Math.sin(dlambda) * Math.cos(phi2);
+  const y = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dlambda);
+  return (Math.atan2(x, y) * 180 / Math.PI + 360) % 360;
+}
+
+function boreDifference(b1, b2) {
+  const diff = Math.abs(b1 - b2) % 360;
+  return diff <= 180 ? diff : 360 - diff;
+}
+
+function destinationPoint(lat, lng, bearing, distanceM) {
+  const R = 6371000;
+  const d = distanceM / R;
+  const theta = bearing * Math.PI / 180;
+  const phi1 = lat * Math.PI / 180;
+  const lambda1 = lng * Math.PI / 180;
+  const phi2 = Math.asin(Math.sin(phi1) * Math.cos(d) + Math.cos(phi1) * Math.sin(d) * Math.cos(theta));
+  const lambda2 = lambda1 + Math.atan2(Math.sin(theta) * Math.sin(d) * Math.cos(phi1), Math.cos(d) - Math.sin(phi1) * Math.sin(phi2));
+  return [phi2 * 180 / Math.PI, lambda2 * 180 / Math.PI];
+}
 
 /* =========================================================
    VIEW SWITCHER
    ========================================================= */
 function switchView(page) {
   currentView = page;
-
-  // إذا خرجنا من الماب → أوقف الأوضاع الخاصة
   if (page !== 'map') {
     window.__gsmMode = false;
     window.__nbMode = false;
-    nbHideLegend();
+    if (typeof nbHideLegend === 'function') nbHideLegend();
   }
 
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -2162,9 +1660,6 @@ document.querySelectorAll('.nav-item').forEach(function(btn) {
   });
 });
 
-/* =========================================================
-   TOGGLE MAP SIDEBAR
-   ========================================================= */
 function toggleMapSidebar() {
   const sb = document.getElementById('mapSidebar');
   const btn = document.getElementById('toggleSidebarBtn');
@@ -2179,15 +1674,13 @@ function toggleMapSidebar() {
 /* =========================================================
    MAP INIT
    ========================================================= */
-let canvasRenderer = null;
-
 function initMap() {
   map = L.map('map', {
     center: [33.3, 44.4],
     zoom: 8,
     zoomControl: true,
     preferCanvas: true,
-    renderer: L.canvas({ padding: 0.5 })   // ← Canvas renderer مع padding
+    renderer: L.canvas({ padding: 0.5 })
   });
 
   canvasRenderer = map.options.renderer;
@@ -2213,14 +1706,16 @@ function initMap() {
 
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
 
-    let zoomTimer = null;
+  let zoomTimer = null;
   map.on('zoomend', function() {
     if (zoomTimer) clearTimeout(zoomTimer);
     zoomTimer = setTimeout(function() {
-      if (visibleCells.length && document.getElementById('showSectors') && document.getElementById('showSectors').checked) {
+      if (visibleCells.length &&
+          document.getElementById('showSectors') &&
+          document.getElementById('showSectors').checked) {
         renderMap();
       }
-    }, 250);   // ← انتظر 250ms بعد توقف الـ zoom
+    }, 250);
   });
 
   document.querySelectorAll('.basemap-btn').forEach(function(btn) {
@@ -2248,15 +1743,8 @@ async function loadCells() {
     let hasMore = true;
 
     while (hasMore) {
-      let query = db
-        .from('rf_cells')
-        .select('*')
-        .order('cell_name')
-        .range(from, from + PAGE_SIZE - 1);
-
-      if (currentProjectId) {
-        query = query.eq('project_id', currentProjectId);
-      }
+      let query = db.from('rf_cells').select('*').order('cell_name').range(from, from + PAGE_SIZE - 1);
+      if (currentProjectId) query = query.eq('project_id', currentProjectId);
 
       const { data, error } = await query;
       if (error) throw error;
@@ -2265,18 +1753,13 @@ async function loadCells() {
         allData = allData.concat(data);
         from += PAGE_SIZE;
         hasMore = data.length === PAGE_SIZE;
-      } else {
-        hasMore = false;
-      }
+      } else hasMore = false;
     }
 
     allCells = allData.map(normalizeCell);
     updateStats();
-    renderBandFilters();
-    renderLegend();
     applyFilters();
 
-    // مهم: تحديث حجم الخريطة قبل fitAllCells
     setTimeout(() => {
       if (map) map.invalidateSize();
       setTimeout(() => fitAllCells(), 200);
@@ -2296,52 +1779,33 @@ async function loadCells() {
    ========================================================= */
 function normalizeCell(row) {
   const name = row.cell_name || '';
-    const prefixMatch = name.match(/^[A-Z]+/);
+  const prefixMatch = name.match(/^[A-Z]+/);
   const region = prefixMatch ? prefixMatch[0] : 'UNKNOWN';
   const sector = name.slice(-1);
 
-  // استخرج الـ Site الموحّد
   let site = row.site;
   if (!site) {
-    site = name.replace(/[A-Z]$/, '');     // شيل آخر حرف
-    site = site.replace(/^L/, '');         // شيل L من البداية (LTE prefix)
+    site = name.replace(/[A-Z]$/, '');
+    site = site.replace(/^L/, '');
   }
 
-  // ===== كشف النوع (ذكي) =====
+  // كشف النوع
   const nameUpper = name.toUpperCase();
-  
-  // LTE: يبدأ بـ LBG/LCW/LSA26 أو عندها PCI
   const looksLTE = /^(LBG|LCW|LSA26|LNB|LNC|LLN)/.test(nameUpper);
-  
-  // GSM: يبدأ بـ BG/CW/UCW/LSA (بدون 26) أو عندها BCCH
   const looksGSM = /^(BG|CW|UCW|LSA(?!26))/.test(nameUpper);
-  
   const hasBcch = row.bcch != null && row.bcch > 0;
   const hasPci = row.pci != null && row.pci > 0;
   const hasNb = row.nb1 != null || row.nb2 != null || row.nb3 != null;
-  
-  let isGSM, isLTE;
-  
-  if (looksLTE) {
-    isLTE = true;
-    isGSM = false;
-  } else if (looksGSM || hasBcch || hasNb) {
-    isGSM = true;
-    isLTE = false;
-  } else if (hasPci) {
-    isLTE = true;
-    isGSM = false;
-  } else {
-    isGSM = false;
-    isLTE = false;
-  }
 
-    const result = {
+  let isGSM = false, isLTE = false;
+  if (looksLTE) { isLTE = true; }
+  else if (looksGSM || hasBcch || hasNb) { isGSM = true; }
+  else if (hasPci) { isLTE = true; }
+
+  const result = {
     id: row.id,
     cell_name: name,
     cell_id: row.cell_id || 0,
-
-    // موقع
     site: site,
     region: region,
     sector: sector,
@@ -2349,12 +1813,8 @@ function normalizeCell(row) {
     long: parseFloat(row.long) || 0,
     bore: row.bore || 0,
     radius: row.cell_radius || 5000,
-
-    // LTE
     pci: row.pci || 0,
     rsi: row.rsi || 0,
-
-    // GSM
     bcch: row.bcch || 0,
     bsic: row.bsic || '',
     tch: row.tch || 0,
@@ -2362,14 +1822,10 @@ function normalizeCell(row) {
     bsc: row.bsc || '',
     bw: row.bw || 0,
     height: row.height || 0,
-
-    // نوع
     tech: isGSM ? 'GSM' : (isLTE ? 'LTE' : 'Unknown'),
-
     color: CELL_COLOR
   };
 
-  // ⭐ انسخ NB1..NB35 من الصف
   for (let i = 1; i <= 35; i++) {
     const val = row['nb' + i];
     if (val !== null && val !== undefined && String(val).trim() !== '') {
@@ -2379,6 +1835,7 @@ function normalizeCell(row) {
 
   return result;
 }
+
 /* =========================================================
    STATS
    ========================================================= */
@@ -2386,38 +1843,24 @@ function updateStats() {
   const el = (id) => document.getElementById(id);
   if (el('statTotal')) el('statTotal').textContent = allCells.length;
 
-  // وحّد اسم الموقع: BG3990A و LBG3990A → نفس الـ Site
   const sites = new Set(allCells.map(c => {
-    let s = c.cell_name.replace(/[A-Z]$/, '');   // شيل آخر حرف (A/B/C)
-    s = s.replace(/^L/, '');                      // شيل L من البداية (LTE prefix)
-    return s;
+    let s = c.site || c.cell_name.replace(/[A-Z]$/, '');
+    s = s.replace(/^L(?=BG|CW|UCW|LSA)/, '');
+    return s.toUpperCase();
   }));
   if (el('statSites')) el('statSites').textContent = sites.size;
 
-    const regions = new Set(allCells.map(c => c.region));
+  const regions = new Set(allCells.map(c => c.region));
   if (el('statBands')) el('statBands').textContent = regions.size;
+
   const pciCount = {};
-  allCells.forEach(c => { pciCount[c.pci] = (pciCount[c.pci] || 0) + 1; });
+  allCells.filter(c => c.tech === 'LTE' && c.pci > 0).forEach(c => {
+    pciCount[c.pci] = (pciCount[c.pci] || 0) + 1;
+  });
   const conflicts = Object.values(pciCount).filter(v => v > 1).length;
   if (el('statPCI')) el('statPCI').textContent = conflicts;
 
   if (el('navCellsCount')) el('navCellsCount').textContent = allCells.length;
-}
-
-/* =========================================================
-   BAND FILTERS
-   ========================================================= */
-function renderBandFilters() {
-  // لا يوجد فلتر band بعد الآن — الدالة فاضية
-  return;
-}
-
-/* =========================================================
-   LEGEND
-   ========================================================= */
-function renderLegend() {
-  // لا يوجد legend بعد الآن
-  return;
 }
 
 /* =========================================================
@@ -2437,29 +1880,21 @@ function applyFilters() {
   const search = (searchEl.value || '').toLowerCase().trim();
   const pciQuery = (pciEl.value || '').trim();
 
-  // فلتر التكنولوجيا
   const gsmEl = document.getElementById('filterGSM');
   const lteEl = document.getElementById('filterLTE');
   const showGSM = !gsmEl || gsmEl.checked;
   const showLTE = !lteEl || lteEl.checked;
 
   visibleCells = allCells.filter(function(c) {
-    // 🛑 استثنِ الخلايا بدون sector
     if (!/[A-Z]$/.test(c.cell_name)) return false;
-
-    // فلتر التكنولوجيا
     if (c.tech === 'GSM' && !showGSM) return false;
     if (c.tech === 'LTE' && !showLTE) return false;
 
-    // البحث
     if (search) {
       const hay = (c.cell_name + ' ' + c.site + ' ' + c.pci + ' ' + c.cell_id).toLowerCase();
       if (hay.indexOf(search) === -1) return false;
     }
-
-    // فلتر PCI
     if (pciQuery && String(c.pci) !== pciQuery) return false;
-
     return true;
   });
 
@@ -2468,26 +1903,25 @@ function applyFilters() {
     document.getElementById('statVisible').textContent = visibleCells.length;
   }
 }
+
 /* =========================================================
    RENDER MAP
    ========================================================= */
 function renderMap() {
   if (!map) return;
-
-  // 🛑 منع الرسم العادي في وضع GSM أو NB
   if (window.__gsmMode) return;
   if (window.__nbMode) return;
 
   sectorLayer.clearLayers();
   labelLayer.clearLayers();
   coverageLayer.clearLayers();
+
   const showSectors = document.getElementById('showSectors') && document.getElementById('showSectors').checked;
   const showLabels = document.getElementById('showLabels') && document.getElementById('showLabels').checked;
   const showSiteCircle = document.getElementById('showSiteCircle') && document.getElementById('showSiteCircle').checked;
   const labelMode = document.getElementById('labelMode') ? document.getElementById('labelMode').value : 'name';
   const zoom = map.getZoom();
 
-  // Site Circle Mode (Zoom < 11): كل Site = دائرة واحدة
   if (showSiteCircle && zoom < 11) {
     const sites = {};
     visibleCells.forEach(cell => {
@@ -2499,184 +1933,112 @@ function renderMap() {
     });
 
     Object.entries(sites).forEach(([siteName, info]) => {
-      const color = CELL_COLOR;
       const count = info.cells.length;
-
       const circle = L.circleMarker([info.lat, info.long], {
+        renderer: canvasRenderer,
         radius: 7 + Math.min(count, 5),
-        color: '#fff',
-        weight: 2.5,
-        fillColor: color,
-        fillOpacity: 0.9,
-        interactive: true
+        color: '#fff', weight: 2.5,
+        fillColor: CELL_COLOR, fillOpacity: 0.9, interactive: true
       });
-
       circle.bindPopup(
         '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:200px;">' +
           '<div style="font-weight:800;font-size:14px;font-family:monospace;margin-bottom:8px;color:#0C1B3D;">' + escapeHtml(siteName) + '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;"><span style="color:#5A6B87;">Cells:</span><b>' + count + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:#5A6B87;">Region:</span><b>' + escapeHtml(info.region) + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:#5A6B87;">Cells:</span><b>' + count + '</b></div>' +
         '</div>'
       );
-
       sectorLayer.addLayer(circle);
-
-      // Site name label — فقط للـ zoom >= 9
-      if (showLabels && zoom >= 9) {
-        const label = L.marker([info.lat, info.long], {
-          icon: L.divIcon({
-            className: 'site-circle-label',
-            html: '<div style="background:#124191;color:#fff;padding:3px 10px;border-radius:20px;font-family:\'JetBrains Mono\',monospace;font-size:10.5px;font-weight:800;white-space:nowrap;box-shadow:0 3px 10px rgba(18,65,145,.4);border:2px solid #fff;">' + escapeHtml(siteName) + '</div>',
-            iconSize: null,
-            iconAnchor: [-20, -18]
-          }),
-          interactive: false
-        });
-        labelLayer.addLayer(label);
-      }
     });
     return;
   }
 
-   // 🚀 في Zoom منخفض → اعرض دوائر Sites فقط (سريع)
-  // في Zoom مرتفع → اعرض المثلثات
-  const SHOW_SECTORS_MIN_ZOOM = 14;   // ← لا ترسم مثلثات قبل zoom 14
-
+  const SHOW_SECTORS_MIN_ZOOM = 14;
   if (zoom < SHOW_SECTORS_MIN_ZOOM) {
-    // اعرض دوائر للـ Sites فقط
     const sites = {};
     visibleCells.forEach(cell => {
       if (!cell.lat || !cell.long) return;
       const key = cell.site;
-      if (!sites[key]) {
-        sites[key] = { lat: cell.lat, long: cell.long, gsm: 0, lte: 0 };
-      }
+      if (!sites[key]) sites[key] = { lat: cell.lat, long: cell.long, gsm: 0, lte: 0 };
       if (cell.tech === 'GSM') sites[key].gsm++;
       else if (cell.tech === 'LTE') sites[key].lte++;
     });
 
     Object.entries(sites).forEach(([siteName, info]) => {
-      const hasGSM = info.gsm > 0;
-      const hasLTE = info.lte > 0;
-      const color = hasGSM && hasLTE ? '#7C3AED' :
-                    hasGSM ? '#D97706' :
-                    hasLTE ? '#124191' : '#94A3B8';
+      const color = info.gsm && info.lte ? '#7C3AED' :
+                    info.gsm ? '#D97706' :
+                    info.lte ? '#124191' : '#94A3B8';
       const total = info.gsm + info.lte;
 
       const circle = L.circleMarker([info.lat, info.long], {
         renderer: canvasRenderer,
         radius: 6 + Math.min(total / 3, 6),
-        color: '#fff',
-        weight: 2,
-        fillColor: color,
-        fillOpacity: 0.85,
-        interactive: true
+        color: '#fff', weight: 2,
+        fillColor: color, fillOpacity: 0.85, interactive: true
       });
-
       circle.bindPopup(
         '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:180px;">' +
           '<div style="font-weight:800;font-size:14px;font-family:monospace;margin-bottom:8px;color:#0C1B3D;">' + escapeHtml(siteName) + '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;"><span style="color:#D97706;">📡 GSM:</span><b>' + info.gsm + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:#D97706;">📡 GSM:</span><b>' + info.gsm + '</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:#124191;">📶 LTE:</span><b>' + info.lte + '</b></div>' +
         '</div>'
       );
-
       sectorLayer.addLayer(circle);
     });
-
-    return;  // ← خروج — لا ترسم مثلثات
+    return;
   }
 
-  // Sectors Mode (Zoom >= 14)
   visibleCells.forEach(function(cell) {
     if (!cell.lat || !cell.long) return;
     const center = [cell.lat, cell.long];
 
-        if (showSectors) {
+    if (showSectors) {
       const isGSM = cell.tech === 'GSM';
       const isLTE = cell.tech === 'LTE';
-
-      // 🛑 لا ترسم LTE قبل zoom 16
       if (isLTE && zoom < 16) return;
 
-      // 🎨 ألوان حسب التكنولوجيا
       let cellColor, fillOpacity, weight, scale;
-      if (isGSM) {
-        cellColor = '#D97706';      // برتقالي = GSM
-        fillOpacity = 0.55;
-        weight = 1.5;
-        scale = 1.0;                 // الحجم الكامل
-      } else if (isLTE) {
-        cellColor = '#124191';      // أزرق = LTE
-        fillOpacity = 0.75;
-        weight = 1.0;
-        scale = 0.45;                // 45% من حجم GSM (داخل بطن المثلث)
-      } else {
-        cellColor = cell.color;
-        fillOpacity = 0.65;
-        weight = 0.8;
-        scale = 1.0;
-      }
+      if (isGSM) { cellColor = '#D97706'; fillOpacity = 0.55; weight = 1.5; scale = 1.0; }
+      else if (isLTE) { cellColor = '#124191'; fillOpacity = 0.75; weight = 1.0; scale = 0.45; }
+      else { cellColor = cell.color; fillOpacity = 0.65; weight = 0.8; scale = 1.0; }
 
-           const coords = makeSectorCoordsScaled(cell.lat, cell.long, cell.bore, scale);
+      const coords = makeSectorCoordsScaled(cell.lat, cell.long, cell.bore, scale);
       const polygon = L.polygon(coords, {
-        renderer: canvasRenderer,        // ← مهم للسرعة
-        color: cellColor,
-        weight: weight,
-        opacity: 1,
-        fillColor: cellColor,
-        fillOpacity: fillOpacity,
-        interactive: true,
-        lineJoin: 'round'
+        renderer: canvasRenderer,
+        color: cellColor, weight: weight, opacity: 1,
+        fillColor: cellColor, fillOpacity: fillOpacity,
+        interactive: true, lineJoin: 'round'
       });
 
       polygon.cellData = cell;
-
       polygon.on('click', function(e) {
-        if (multiSelectMode) {
-          toggleCellSelection(cell, this);
-        } else {
-          showSiteInfo(cell);
-        }
+        if (multiSelectMode) toggleCellSelection(cell, this);
+        else showSiteInfo(cell);
       });
-
       polygon.on('mouseover', function() {
         this.setStyle({ fillOpacity: 0.85, weight: 2 });
         if (!multiSelectMode) this.bindTooltip(cell.cell_name, { sticky: true }).openTooltip();
       });
       polygon.on('mouseout', function() {
-        this.setStyle({ fillOpacity: 0.65, weight: 0.8 });
+        this.setStyle({ fillOpacity: fillOpacity, weight: weight });
         this.closeTooltip();
       });
 
       sectorLayer.addLayer(polygon);
     }
 
-    // Labels — تظهر فقط للـ zoom >= 13
     if (showLabels && zoom >= 13) {
       let labelText = '';
       let labelColor = cell.color;
-
-      if (labelMode === 'name') {
-        labelText = cell.cell_name;
-      } else if (labelMode === 'pci') {
-        labelText = 'PCI ' + cell.pci;
-        labelColor = '#0C1B3D';
-      } else if (labelMode === 'both') {
-        labelText = cell.cell_name + ' · ' + cell.pci;
-      } else if (labelMode === 'site') {
-        labelText = cell.site;
-        labelColor = '#124191';
-      } else {
-        return;
-      }
+      if (labelMode === 'name') labelText = cell.cell_name;
+      else if (labelMode === 'pci') { labelText = 'PCI ' + cell.pci; labelColor = '#0C1B3D'; }
+      else if (labelMode === 'both') labelText = cell.cell_name + ' · ' + cell.pci;
+      else if (labelMode === 'site') { labelText = cell.site; labelColor = '#124191'; }
+      else return;
 
       const label = L.marker(center, {
         icon: L.divIcon({
           className: 'cell-label',
           html: '<div style="background:' + labelColor + ';color:#fff;padding:2px 7px;border-radius:10px;font-family:\'JetBrains Mono\',monospace;font-size:9.5px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3);border:1.5px solid #fff;">' + escapeHtml(labelText) + '</div>',
-          iconSize: null,
-          iconAnchor: [-6, 12]
+          iconSize: null, iconAnchor: [-6, 12]
         }),
         interactive: false
       });
@@ -2685,32 +2047,8 @@ function renderMap() {
   });
 }
 
-/* =========================================================
-   SECTOR SHAPE — 5-point wedge
-   ========================================================= */
-function makeSectorCoords(lat, lng, azimuth) {
-  const zoom = map.getZoom();
-  let radius_m, half_width_m;
-  if (zoom >= 16) { radius_m = 150; half_width_m = 45; }
-  else if (zoom >= 14) { radius_m = 350; half_width_m = 100; }
-  else if (zoom >= 12) { radius_m = 800; half_width_m = 230; }
-  else if (zoom >= 11) { radius_m = 1200; half_width_m = 350; }
-  else { radius_m = 2000; half_width_m = 570; }
+function makeSectorCoords(lat, lng, azimuth) { return makeSectorCoordsScaled(lat, lng, azimuth, 1.0); }
 
-  const near_d = radius_m * 0.04;
-  const far_d = radius_m;
-  const near_w = half_width_m * 0.30;
-  const far_w = half_width_m;
-
-  function pt(fwd_m, right_m) {
-    const distance = Math.sqrt(fwd_m * fwd_m + right_m * right_m);
-    const offsetAngle = Math.atan2(right_m, fwd_m) * 180 / Math.PI;
-    return destinationPoint(lat, lng, azimuth + offsetAngle, distance);
-  }
-
-  return [pt(0, 0), pt(near_d, -near_w), pt(far_d, -far_w), pt(far_d, far_w), pt(near_d, near_w)];
-}
-/* Sector coords with scale factor (1.0 = normal, 0.45 = LTE small) */
 function makeSectorCoordsScaled(lat, lng, azimuth, scale) {
   const zoom = map.getZoom();
   let radius_m, half_width_m;
@@ -2720,7 +2058,6 @@ function makeSectorCoordsScaled(lat, lng, azimuth, scale) {
   else if (zoom >= 11) { radius_m = 1200; half_width_m = 350; }
   else { radius_m = 2000; half_width_m = 570; }
 
-  // طبّق المقياس
   radius_m *= scale;
   half_width_m *= scale;
 
@@ -2734,34 +2071,13 @@ function makeSectorCoordsScaled(lat, lng, azimuth, scale) {
     const offsetAngle = Math.atan2(right_m, fwd_m) * 180 / Math.PI;
     return destinationPoint(lat, lng, azimuth + offsetAngle, distance);
   }
-
   return [pt(0, 0), pt(near_d, -near_w), pt(far_d, -far_w), pt(far_d, far_w), pt(near_d, near_w)];
 }
-/* =========================================================
-   DESTINATION POINT
-   ========================================================= */
-function destinationPoint(lat, lng, bearing, distanceM) {
-  const R = 6371000;
-  const d = distanceM / R;
-  const theta = bearing * Math.PI / 180;
-  const phi1 = lat * Math.PI / 180;
-  const lambda1 = lng * Math.PI / 180;
 
-  const phi2 = Math.asin(Math.sin(phi1) * Math.cos(d) + Math.cos(phi1) * Math.sin(d) * Math.cos(theta));
-  const lambda2 = lambda1 + Math.atan2(Math.sin(theta) * Math.sin(d) * Math.cos(phi1), Math.cos(d) - Math.sin(phi1) * Math.sin(phi2));
-
-  return [phi2 * 180 / Math.PI, lambda2 * 180 / Math.PI];
-}
-
-/* =========================================================
-   ACTIONS
-   ========================================================= */
-function toggleLayer(type) {
-  renderMap();
-}
+function toggleLayer(type) { renderMap(); }
 
 function fitAllCells() {
-  window.__gsmMode = false;   // ← اخرج من وضع GSM
+  window.__gsmMode = false;
   if (!visibleCells.length) { toast('No cells to fit', 'error'); return; }
   const bounds = L.latLngBounds(visibleCells.map(c => [c.lat, c.long]));
   map.fitBounds(bounds, { padding: [50, 50] });
@@ -2779,11 +2095,7 @@ function clearFilters() {
    ========================================================= */
 async function loadProjects() {
   try {
-    const { data, error } = await db
-      .from('rf_projects')
-      .select('*')
-      .order('created_at', { ascending: false });
-
+    const { data, error } = await db.from('rf_projects').select('*').order('created_at', { ascending: false });
     if (error) throw error;
     allProjects = data || [];
     renderProjectsList();
@@ -2797,16 +2109,12 @@ async function loadProjects() {
 function renderProjectsList() {
   const container = document.getElementById('projectsList');
   if (!container) return;
-
   if (!allProjects.length) {
     container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#5A6B87;grid-column:1/-1;">' +
       '<div style="font-size:56px;opacity:.3;margin-bottom:14px;">📁</div>' +
-      '<h3 style="color:#0C1B3D;margin-bottom:8px;">No Projects Yet</h3>' +
-      '<p style="font-size:13px;">Click "New Project" to create your first one</p>' +
-      '</div>';
+      '<h3 style="color:#0C1B3D;margin-bottom:8px;">No Projects Yet</h3></div>';
     return;
   }
-
   container.innerHTML = allProjects.map(p =>
     '<div style="background:#fff;border-radius:12px;padding:18px 20px;border:1px solid #E9EEF6;box-shadow:0 2px 8px rgba(12,27,61,.05);">' +
       '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;cursor:pointer;" onclick="openProject(' + p.id + ')">' +
@@ -2818,41 +2126,26 @@ function renderProjectsList() {
       '</div>' +
       '<div style="display:flex;gap:8px;padding-top:12px;border-top:1px solid #F0F3F9;font-size:11.5px;color:#5A6B87;align-items:center;">' +
         '<span>📅 ' + new Date(p.created_at).toLocaleDateString('en-GB') + '</span>' +
-        '<button onclick="event.stopPropagation();editProject(' + p.id + ')" ' +
-          'style="margin-left:auto;padding:5px 10px;background:#EAF2FB;color:#124191;border:1px solid #D7DEEA;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;">✏️ Edit</button>' +
-        '<button onclick="event.stopPropagation();deleteProject(' + p.id + ')" ' +
-          'style="padding:5px 10px;background:#FCEAEA;color:#D64545;border:1px solid #F5D5D5;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;">🗑️ Delete</button>' +
+        '<button onclick="event.stopPropagation();editProject(' + p.id + ')" style="margin-left:auto;padding:5px 10px;background:#EAF2FB;color:#124191;border:1px solid #D7DEEA;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;">✏️ Edit</button>' +
+        '<button onclick="event.stopPropagation();deleteProject(' + p.id + ')" style="padding:5px 10px;background:#FCEAEA;color:#D64545;border:1px solid #F5D5D5;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;">🗑️ Delete</button>' +
       '</div>' +
     '</div>'
   ).join('');
 }
-   async function editProject(projectId) {
+
+async function editProject(projectId) {
   const proj = allProjects.find(p => p.id === projectId);
   if (!proj) return;
-
   const newName = prompt('New project name:', proj.name);
   if (newName === null) return;
   const trimmed = newName.trim();
   if (!trimmed) { toast('Name cannot be empty', 'error'); return; }
-
   const newDesc = prompt('New description (optional):', proj.description || '');
   if (newDesc === null) return;
 
   try {
-    const { error } = await db
-      .from('rf_projects')
-      .update({ name: trimmed, description: newDesc.trim() })
-      .eq('id', projectId);
-
-    if (error) {
-      if (error.message.includes('duplicate')) {
-        toast('Project name already exists', 'error');
-      } else {
-        throw error;
-      }
-      return;
-    }
-
+    const { error } = await db.from('rf_projects').update({ name: trimmed, description: newDesc.trim() }).eq('id', projectId);
+    if (error) throw error;
     toast('✅ Project updated', 'success');
     await loadProjects();
   } catch (e) {
@@ -2863,40 +2156,23 @@ function renderProjectsList() {
 async function deleteProject(projectId) {
   const proj = allProjects.find(p => p.id === projectId);
   if (!proj) return;
-
   let cellCount = 0;
   try {
-    const { count } = await db
-      .from('rf_cells')
-      .select('id', { count: 'exact', head: true })
-      .eq('project_id', projectId);
+    const { count } = await db.from('rf_cells').select('id', { count: 'exact', head: true }).eq('project_id', projectId);
     cellCount = count || 0;
-  } catch (e) {
-    console.warn('Could not count cells:', e);
-  }
+  } catch (e) { console.warn(e); }
 
-  const msg = 'Delete project "' + proj.name + '"?\n\n' +
-    '⚠️ This will also delete ' + cellCount + ' cells inside it.\n\n' +
-    'This action cannot be undone.';
-
+  const msg = 'Delete project "' + proj.name + '"?\n\n⚠️ This will also delete ' + cellCount + ' cells inside it.';
   if (!confirm(msg)) return;
 
   try {
-    const { error: cellErr } = await db
-      .from('rf_cells')
-      .delete()
-      .eq('project_id', projectId);
+    const { error: cellErr } = await db.from('rf_cells').delete().eq('project_id', projectId);
     if (cellErr) throw cellErr;
-
-    const { error: projErr } = await db
-      .from('rf_projects')
-      .delete()
-      .eq('id', projectId);
+    const { error: projErr } = await db.from('rf_projects').delete().eq('id', projectId);
     if (projErr) throw projErr;
 
     toast('✅ Project deleted', 'success');
     await loadProjects();
-
     if (currentProjectId === projectId) {
       currentProjectId = null;
       await loadCells();
@@ -2905,6 +2181,7 @@ async function deleteProject(projectId) {
     toast('Error: ' + e.message, 'error');
   }
 }
+
 function renderProjectSelect() {
   const sel = document.getElementById('importProjectSelect');
   if (!sel) return;
@@ -2916,7 +2193,6 @@ function openCreateProjectModal() {
   document.getElementById('createProjectModal').style.display = 'flex';
   setTimeout(() => document.getElementById('newProjectName').focus(), 200);
 }
-
 function closeCreateProjectModal() {
   document.getElementById('createProjectModal').style.display = 'none';
   document.getElementById('newProjectName').value = '';
@@ -2933,25 +2209,11 @@ async function createProject() {
   btn.textContent = 'Creating...';
 
   try {
-    const { data, error } = await db
-      .from('rf_projects')
-      .insert([{ name, description: desc }])
-      .select()
-      .single();
-
-    if (error) {
-      if (error.message.includes('duplicate')) {
-        toast('Project name already exists', 'error');
-      } else {
-        throw error;
-      }
-      return;
-    }
-
+    const { data, error } = await db.from('rf_projects').insert([{ name, description: desc }]).select().single();
+    if (error) throw error;
     toast('✅ Project created', 'success');
     closeCreateProjectModal();
     await loadProjects();
-
     if (data && data.id) {
       const sel = document.getElementById('importProjectSelect');
       if (sel) sel.value = data.id;
@@ -3033,95 +2295,40 @@ async function importPasteFromClipboard() {
   }
 }
 
-/* =========================================================
-   SMART COLUMN DETECTION
-   ========================================================= */
 function normalizeHeader(h) {
-  return String(h || '')
-    .toLowerCase()
-    .replace(/[\s_\-\(\)\[\]\.\/\\]/g, '')
-    .trim();
+  return String(h || '').toLowerCase().replace(/[\s_\-\(\)\[\]\.\/\\]/g, '').trim();
 }
 
 const HEADER_ALIASES = {
-  // اسم الخلية الحقيقي: BG3413A
-  cell_name: [
-    'cell', 'cellname', 'name', 'cell_name'
-  ],
-  // اسم الموقع: BG3413
-  site: [
-    'site', 'sitename', 'site_name', 'sitename', 'node', 'nodename', 'enodeb', 'gnodeb'
-  ],
-  // معرف الخلية
-  cell_id: [
-    'ci', 'cellid', 'cell_id', 'cid', 'localcellid', 'cellidentity'
-  ],
-  // PCI (LTE)
-  pci: [
-    'pci', 'physicalcellid', 'physicalcellidentity', 'phycellid'
-  ],
-  // RSI (LTE)
-  rsi: [
-    'rsi', 'rootsequenceindex', 'rootseqindex'
-  ],
-  // BCCH (GSM)
-  bcch: [
-    'bcch', 'bccharfcn', 'arfcn', 'bcchno', 'bcchnumber'
-  ],
-  // BSIC (GSM)
-  bsic: [
-    'bsic', 'bsiccode', 'nccbcc', 'colorcode'
-  ],
-  // TCH (GSM traffic channel)
-  tch: [
-    'tch', 'tchfreq', 'tch_arfcn'
-  ],
-  // LAC (GSM Location Area Code)
-  lac: [
-    'lac', 'locationarea', 'locationareacode', 'lac_code'
-  ],
-  // BSC
-  bsc: [
-    'bsc', 'bscname', 'controller', 'rnc'
-  ],
-  band: [
-    'band', 'gsmband', 'frequencyband', 'freqband'
-  ],
-  cell_radius: [
-    'cellradiusm', 'cellradius', 'radius', 'radiusm', 'cell_radius'
-  ],
-  lat: [
-    'lat', 'latitude', 'lattitude', 'y', 'ycoord'
-  ],
-  long: [
-    'long', 'lng', 'lon', 'longitude', 'x', 'xcoord'
-  ],
-  bore: [
-    'bore', 'azimuth', 'azm', 'az', 'bearing', 'direction', 'heading'
-  ],
-  bw: [
-    'bw', 'bandwidth', 'band_width'
-  ],
-  height: [
-    'height', 'antennaheight', 'antheight', 'hgt'
-  ]
+  cell_name:   ['cell', 'cellname', 'name', 'cell_name'],
+  site:        ['site', 'sitename', 'site_name', 'node', 'nodename', 'enodeb', 'gnodeb'],
+  cell_id:     ['ci', 'cellid', 'cell_id', 'cid', 'localcellid', 'cellidentity'],
+  pci:         ['pci', 'physicalcellid', 'physicalcellidentity', 'phycellid'],
+  rsi:         ['rsi', 'rootsequenceindex', 'rootseqindex'],
+  bcch:        ['bcch', 'bccharfcn', 'arfcn', 'bcchno', 'bcchnumber'],
+  bsic:        ['bsic', 'bsiccode', 'nccbcc', 'colorcode'],
+  tch:         ['tch', 'tchfreq', 'tch_arfcn'],
+  lac:         ['lac', 'locationarea', 'locationareacode', 'lac_code'],
+  bsc:         ['bsc', 'bscname', 'controller', 'rnc'],
+  band:        ['band', 'gsmband', 'frequencyband', 'freqband'],
+  cell_radius: ['cellradiusm', 'cellradius', 'radius', 'radiusm', 'cell_radius'],
+  lat:         ['lat', 'latitude', 'lattitude', 'y', 'ycoord'],
+  long:        ['long', 'lng', 'lon', 'longitude', 'x', 'xcoord'],
+  bore:        ['bore', 'azimuth', 'azm', 'az', 'bearing', 'direction', 'heading'],
+  bw:          ['bw', 'bandwidth', 'band_width'],
+  height:      ['height', 'antennaheight', 'antheight', 'hgt']
 };
 
-// أضف NB1..NB35 بعد الـ object
 for (let i = 1; i <= 35; i++) {
   HEADER_ALIASES['nb' + i] = ['nb' + i, 'neighbor' + i, 'nbr' + i, 'nb_' + i];
 }
 
 function findValueByAlias(row, aliases) {
   const keys = Object.keys(row);
-
-  // تطابق تام
   for (const k of keys) {
     const nk = normalizeHeader(k);
     if (aliases.includes(nk)) return row[k];
   }
-
-  // تطابق جزئي
   for (const k of keys) {
     const nk = normalizeHeader(k);
     for (const alias of aliases) {
@@ -3129,22 +2336,12 @@ function findValueByAlias(row, aliases) {
       if (alias.length >= 3 && nk.includes(alias)) return row[k];
     }
   }
-
   return '';
 }
 
 function importParseRows(rows) {
   if (!rows.length) { toast('No data found', 'error'); return; }
-
   console.log('📋 File headers:', Object.keys(rows[0]));
-  console.log('📋 Sample row:', rows[0]);
-
-  const firstRow = rows[0];
-  const detected = {};
-  Object.keys(HEADER_ALIASES).forEach(field => {
-    detected[field] = findValueByAlias(firstRow, HEADER_ALIASES[field]);
-  });
-  console.log('🎯 Auto-detected:', detected);
 
   importPreviewData = rows.map(row => {
     const cellName = String(findValueByAlias(row, HEADER_ALIASES.cell_name) || '').trim();
@@ -3166,8 +2363,7 @@ function importParseRows(rows) {
     const hgtVal = findValueByAlias(row, HEADER_ALIASES.height);
     const siteVal = findValueByAlias(row, HEADER_ALIASES.site);
 
-       const result = {
-      // بيانات أساسية
+    const result = {
       cell_name:   cellName,
       site:        String(siteVal || cellName.replace(/[A-Z]$/, '')).trim(),
       cell_id:     parseInt(findValueByAlias(row, HEADER_ALIASES.cell_id)) || 0,
@@ -3175,12 +2371,8 @@ function importParseRows(rows) {
       long:        lng,
       bore:        parseInt(findValueByAlias(row, HEADER_ALIASES.bore)) || 0,
       cell_radius: parseInt(findValueByAlias(row, HEADER_ALIASES.cell_radius)) || 5000,
-
-      // LTE
       pci:         pciVal ? parseInt(pciVal) : null,
       rsi:         rsiVal ? parseInt(rsiVal) : null,
-
-      // GSM
       bcch:        bcchVal ? parseInt(bcchVal) : null,
       bsic:        bsicVal ? String(bsicVal).trim() : null,
       tch:         tchVal ? parseInt(tchVal) : null,
@@ -3190,43 +2382,31 @@ function importParseRows(rows) {
       height:      hgtVal ? parseFloat(hgtVal) : null
     };
 
-    // أضف NB1..NB35
     for (let i = 1; i <= 35; i++) {
       const nbVal = findValueByAlias(row, HEADER_ALIASES['nb' + i]);
-      if (nbVal) result['nb' + i] = String(nbVal).trim();
+      if (nbVal) {
+        const s = String(nbVal).trim();
+        if (s && s !== '#VALUE!' && s !== '#N/A' && s !== '#REF!' && s !== '#DIV/0!' && s !== '#NAME?') {
+          result['nb' + i] = s;
+        }
+      }
     }
 
     return result;
   }).filter(Boolean);
 
-  console.log(`✅ Parsed ${importPreviewData.length} valid cells from ${rows.length} rows`);
-
   if (!importPreviewData.length) {
-    console.error('❌ No valid cells. Headers:', Object.keys(rows[0]));
-    toast('No valid cells. Open Console (F12) to see headers', 'error', 6000);
+    toast('No valid cells. Check Console (F12)', 'error', 6000);
     return;
   }
 
-    // إحصائية سريعة — كشف نوع الملف
-  const sample = importPreviewData[0];
-  const hasNb = sample && (sample['nb1'] !== undefined || rows[0]['NB1'] !== undefined || rows[0]['nb1'] !== undefined);
-  const hasBCCH = sample.bcch !== null && sample.bcch !== undefined;
-  const hasPCI = sample.pci !== null && sample.pci !== undefined && sample.pci > 0;
-
-  let type;
-  if (hasNb) type = 'Neighbor (NB)';
-  else if (hasBCCH) type = 'GSM';
-  else if (hasPCI) type = 'LTE';
-  else type = 'Unknown';
-
-  console.log(`📡 Detected technology: ${type}`);
+  console.log('✅ Parsed ' + importPreviewData.length + ' cells');
   importRenderPreview();
 }
 
 function importRenderPreview() {
   document.getElementById('importPreviewCard').style.display = 'block';
 
-   // اكتشف نوع التكنولوجيا
   const sample = importPreviewData[0];
   const hasNb = sample.nb1 !== undefined || sample.nb2 !== undefined ||
                 Object.keys(sample).some(k => k.startsWith('nb'));
@@ -3234,15 +2414,13 @@ function importRenderPreview() {
   const isLTE = (sample.pci !== null && sample.pci !== undefined && sample.pci > 0) && !hasNb;
   const isNBFile = hasNb;
 
-  // احسب الإحصائيات
   const sites = new Set(importPreviewData.map(r => r.site));
   const regions = new Set(importPreviewData.map(r => {
     const m = (r.cell_name || '').match(/^[A-Z]+/);
     return m ? m[0] : null;
   }).filter(Boolean));
 
-  // نوع الملف
-    let techLabel, techColor;
+  let techLabel, techColor;
   if (isNBFile) { techLabel = 'Neighbor (NB)'; techColor = '#7C3AED'; }
   else if (isGSM) { techLabel = 'GSM (2G)'; techColor = '#D97706'; }
   else if (isLTE) { techLabel = 'LTE (4G)'; techColor = '#124191'; }
@@ -3266,55 +2444,37 @@ function importRenderPreview() {
       '<div style="font-size:11.5px;opacity:.85;margin-top:2px;">Detected Type</div>' +
     '</div>';
 
-  // ====== جدول ديناميكي حسب النوع ======
   let columns;
   if (isNBFile) {
     columns = [
-      { key: 'cell_name', label: 'Cell' },
-      { key: 'site',      label: 'Site' },
-      { key: 'lat',       label: 'Lat' },
-      { key: 'long',      label: 'Long' },
-      { key: 'bore',      label: 'Bore' },
-      { key: 'nb1',       label: 'NB1' },
-      { key: 'nb2',       label: 'NB2' },
-      { key: 'nb3',       label: 'NB3' },
-      { key: 'nb4',       label: 'NB4' },
-      { key: 'nb5',       label: 'NB5' }
+      { key: 'cell_name', label: 'Cell' }, { key: 'site', label: 'Site' },
+      { key: 'lat', label: 'Lat' }, { key: 'long', label: 'Long' },
+      { key: 'bore', label: 'Bore' },
+      { key: 'nb1', label: 'NB1' }, { key: 'nb2', label: 'NB2' },
+      { key: 'nb3', label: 'NB3' }, { key: 'nb4', label: 'NB4' }, { key: 'nb5', label: 'NB5' }
     ];
   } else if (isGSM) {
     columns = [
-      { key: 'cell_name', label: 'Cell' },
-      { key: 'site',      label: 'Site' },
-      { key: 'bcch',      label: 'BCCH' },
-      { key: 'bsic',      label: 'BSIC' },
-      { key: 'tch',       label: 'TCH' },
-      { key: 'lac',       label: 'LAC' },
-      { key: 'bore',      label: 'Bore' },
-      { key: 'lat',       label: 'Lat' },
-      { key: 'long',      label: 'Long' }
+      { key: 'cell_name', label: 'Cell' }, { key: 'site', label: 'Site' },
+      { key: 'bcch', label: 'BCCH' }, { key: 'bsic', label: 'BSIC' },
+      { key: 'tch', label: 'TCH' }, { key: 'lac', label: 'LAC' },
+      { key: 'bore', label: 'Bore' }, { key: 'lat', label: 'Lat' }, { key: 'long', label: 'Long' }
     ];
   } else {
     columns = [
-      { key: 'cell_name', label: 'Cell' },
-      { key: 'site',      label: 'Site' },
-      { key: 'pci',       label: 'PCI' },
-      { key: 'rsi',       label: 'RSI' },
-      { key: 'bore',      label: 'Bore' },
-      { key: 'lat',       label: 'Lat' },
-      { key: 'long',      label: 'Long' }
+      { key: 'cell_name', label: 'Cell' }, { key: 'site', label: 'Site' },
+      { key: 'pci', label: 'PCI' }, { key: 'rsi', label: 'RSI' },
+      { key: 'bore', label: 'Bore' }, { key: 'lat', label: 'Lat' }, { key: 'long', label: 'Long' }
     ];
   }
 
   const preview = importPreviewData.slice(0, 30);
-
   let html = '<table style="width:100%;border-collapse:collapse;font-size:12px;font-family:monospace;">';
-  html += '<thead style="background:#EAF2FB;position:sticky;top:0;">';
-  html += '<tr>';
+  html += '<thead style="background:#EAF2FB;position:sticky;top:0;"><tr>';
   columns.forEach(col => {
     html += '<th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">' + col.label + '</th>';
   });
   html += '</tr></thead><tbody>';
-
   preview.forEach(r => {
     html += '<tr style="border-bottom:1px solid #F0F3F9;">';
     columns.forEach(col => {
@@ -3324,14 +2484,10 @@ function importRenderPreview() {
     });
     html += '</tr>';
   });
-
   html += '</tbody></table>';
-
   if (importPreviewData.length > 30) {
-    html += '<div style="padding:10px;text-align:center;color:#5A6B87;font-size:11.5px;">... and ' +
-      (importPreviewData.length - 30) + ' more</div>';
+    html += '<div style="padding:10px;text-align:center;color:#5A6B87;font-size:11.5px;">... and ' + (importPreviewData.length - 30) + ' more</div>';
   }
-
   document.getElementById('importPreviewTable').innerHTML = html;
 }
 
@@ -3353,35 +2509,27 @@ async function importSaveToSupabase() {
   try {
     const cellsWithProject = importPreviewData.map(c => {
       const obj = { project_id: parseInt(projectId) };
-
-      // أرسل فقط القيم الموجودة (تجنب null)
       Object.keys(c).forEach(k => {
-        if (c[k] !== null && c[k] !== undefined && c[k] !== '') {
-          obj[k] = c[k];
-        }
+        if (c[k] !== null && c[k] !== undefined && c[k] !== '') obj[k] = c[k];
       });
-
       return obj;
     });
 
-    console.log('📤 Sending', cellsWithProject.length, 'cells with fields:', Object.keys(cellsWithProject[0]));
+    console.log('📤 Sending ' + cellsWithProject.length + ' cells');
 
     const BATCH = 500;
     let saved = 0;
     for (let i = 0; i < cellsWithProject.length; i += BATCH) {
       const batch = cellsWithProject.slice(i, i + BATCH);
-      // upsert بدل insert — يحدّث الموجود ويضيف الجديد
-      const { error } = await db.from('rf_cells').upsert(batch, {
-        onConflict: 'cell_name,project_id',
-        ignoreDuplicates: false
-      });
+      const { error } = await db.from('rf_cells').insert(batch);
       if (error) {
-        console.error('❌ Upsert error:', error);
+        console.error('❌ Insert error:', error);
         throw error;
       }
       saved += batch.length;
       btn.textContent = 'Saving ' + saved + '/' + cellsWithProject.length + '...';
     }
+
     toast('✅ Saved ' + saved + ' cells', 'success');
     importClearPreview();
     await loadProjects();
@@ -3420,26 +2568,12 @@ function calcDistance() {
   const lat2 = parseFloat(document.getElementById('d_lat2').value);
   const lon2 = parseFloat(document.getElementById('d_lon2').value);
 
-  if ([lat1, lon1, lat2, lon2].some(isNaN)) {
-    toast('Please enter valid coordinates', 'error');
-    return;
-  }
+  if ([lat1, lon1, lat2, lon2].some(isNaN)) { toast('Please enter valid coordinates', 'error'); return; }
 
-  const R = 6371000;
-  const phi1 = lat1 * Math.PI / 180;
-  const phi2 = lat2 * Math.PI / 180;
-  const dphi = (lat2 - lat1) * Math.PI / 180;
-  const dlam = (lon2 - lon1) * Math.PI / 180;
-
-  const a = Math.sin(dphi / 2) ** 2 + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dlam / 2) ** 2;
-  const distM = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distM = haversineDistance(lat1, lon1, lat2, lon2);
   const distKm = distM / 1000;
-
-  const y = Math.sin(dlam) * Math.cos(phi2);
-  const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dlam);
-  const bearing = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-
-  const dirs = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+  const bearing = calculateBearing(lat1, lon1, lat2, lon2);
+  const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
   const direction = dirs[Math.round(bearing / 22.5) % 16];
 
   document.getElementById('res_dist_m').textContent = distM.toFixed(2) + ' m';
@@ -3462,24 +2596,10 @@ function calcAzimuth() {
   const lon2 = parseFloat(document.getElementById('a_lon2').value);
   const h2 = parseFloat(document.getElementById('a_h2').value);
 
-  if ([lat1, lon1, h1, lat2, lon2, h2].some(isNaN)) {
-    toast('Please enter valid values', 'error');
-    return;
-  }
+  if ([lat1, lon1, h1, lat2, lon2, h2].some(isNaN)) { toast('Please enter valid values', 'error'); return; }
 
-  const R = 6371000;
-  const phi1 = lat1 * Math.PI / 180;
-  const phi2 = lat2 * Math.PI / 180;
-  const dphi = (lat2 - lat1) * Math.PI / 180;
-  const dlam = (lon2 - lon1) * Math.PI / 180;
-
-  const a = Math.sin(dphi / 2) ** 2 + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dlam / 2) ** 2;
-  const distM = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  const y = Math.sin(dlam) * Math.cos(phi2);
-  const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dlam);
-  const azimuth = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-
+  const distM = haversineDistance(lat1, lon1, lat2, lon2);
+  const azimuth = calculateBearing(lat1, lon1, lat2, lon2);
   const heightDiff = h2 - h1;
   const tilt = Math.atan2(heightDiff, distM) * 180 / Math.PI;
 
@@ -3501,26 +2621,14 @@ function convertPower() {
   if (isNaN(val)) { toast('Enter a valid number', 'error'); return; }
 
   let dbm, mw, w;
-
-  if (from === 'dbm') {
-    dbm = val;
-    mw = Math.pow(10, val / 10);
-    w = mw / 1000;
-  } else if (from === 'mw') {
-    mw = val;
-    dbm = 10 * Math.log10(val);
-    w = val / 1000;
-  } else {
-    w = val;
-    mw = val * 1000;
-    dbm = 10 * Math.log10(mw);
-  }
+  if (from === 'dbm') { dbm = val; mw = Math.pow(10, val / 10); w = mw / 1000; }
+  else if (from === 'mw') { mw = val; dbm = 10 * Math.log10(val); w = val / 1000; }
+  else { w = val; mw = val * 1000; dbm = 10 * Math.log10(mw); }
 
   document.getElementById('res_dbm').textContent = dbm.toFixed(4) + ' dBm';
   document.getElementById('res_mw').textContent = mw.toFixed(6) + ' mW';
   document.getElementById('res_w').textContent = w.toFixed(8) + ' W';
   document.getElementById('powerResults').style.display = 'grid';
-
   toast('Converted successfully', 'success');
 }
 
@@ -3528,20 +2636,12 @@ function convertGain() {
   const val = parseFloat(document.getElementById('u_gain_val').value);
   const from = document.getElementById('u_gain_from').value;
   if (isNaN(val)) { toast('Enter a valid number', 'error'); return; }
-
   let dbi, dbd;
-  if (from === 'dbi') {
-    dbi = val;
-    dbd = val - 2.15;
-  } else {
-    dbd = val;
-    dbi = val + 2.15;
-  }
-
+  if (from === 'dbi') { dbi = val; dbd = val - 2.15; }
+  else { dbd = val; dbi = val + 2.15; }
   document.getElementById('res_dbi').textContent = dbi.toFixed(3) + ' dBi';
   document.getElementById('res_dbd').textContent = dbd.toFixed(3) + ' dBd';
   document.getElementById('gainResults').style.display = 'grid';
-
   toast('Converted successfully', 'success');
 }
 
@@ -3549,24 +2649,16 @@ function convertDistance() {
   const val = parseFloat(document.getElementById('u_dist_val').value);
   const from = document.getElementById('u_dist_from').value;
   if (isNaN(val)) { toast('Enter a valid number', 'error'); return; }
-
   let m, km, mi, ft;
-  if (from === 'm') {
-    m = val; km = val / 1000; mi = val * 0.000621371; ft = val * 3.28084;
-  } else if (from === 'km') {
-    m = val * 1000; km = val; mi = val * 0.621371; ft = val * 3280.84;
-  } else if (from === 'mi') {
-    m = val * 1609.34; km = val * 1.60934; mi = val; ft = val * 5280;
-  } else {
-    m = val * 0.3048; km = val * 0.0003048; mi = val * 0.000189394; ft = val;
-  }
-
+  if (from === 'm') { m = val; km = val / 1000; mi = val * 0.000621371; ft = val * 3.28084; }
+  else if (from === 'km') { m = val * 1000; km = val; mi = val * 0.621371; ft = val * 3280.84; }
+  else if (from === 'mi') { m = val * 1609.34; km = val * 1.60934; mi = val; ft = val * 5280; }
+  else { m = val * 0.3048; km = val * 0.0003048; mi = val * 0.000189394; ft = val; }
   document.getElementById('res_m').textContent = m.toFixed(3) + ' m';
   document.getElementById('res_km').textContent = km.toFixed(6) + ' km';
   document.getElementById('res_mi').textContent = mi.toFixed(6) + ' mi';
   document.getElementById('res_ft').textContent = ft.toFixed(3) + ' ft';
   document.getElementById('distResults').style.display = 'grid';
-
   toast('Converted successfully', 'success');
 }
 
@@ -3574,89 +2666,62 @@ function convertDistance() {
    TOOL — EXPORT KML
    ========================================================= */
 function exportKML() {
-  if (!allCells.length) {
-    toast('No cells loaded', 'error');
-    return;
-  }
+  if (!allCells.length) { toast('No cells loaded', 'error'); return; }
 
   const includeSectors = document.getElementById('kml_sectors').value === 'yes';
   const colorMode = document.getElementById('kml_color').value;
   const filename = (document.getElementById('kml_filename').value.trim() || 'RF_Planning_Export') + '.kml';
 
   function hexToKML(hex) {
-    const r = hex.substring(1, 3);
-    const g = hex.substring(3, 5);
-    const b = hex.substring(5, 7);
+    const r = hex.substring(1, 3), g = hex.substring(3, 5), b = hex.substring(5, 7);
     return 'ff' + b + g + r;
   }
-
-    function getColor(cell) {
+  function getColor(cell) {
     if (colorMode === 'sector') return SECTOR_COLORS[cell.sector] || CELL_COLOR;
     return CELL_COLOR;
   }
 
-  let kml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-  kml += '<kml xmlns="http://www.opengis.net/kml/2.2">\n';
-  kml += '<Document>\n';
+  let kml = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document>\n';
   kml += '  <name>' + filename + '</name>\n';
   kml += '  <description>RF Planning Export — ' + allCells.length + ' cells</description>\n';
 
   const stylesUsed = new Set();
   allCells.forEach(c => stylesUsed.add(getColor(c)));
-
   stylesUsed.forEach(color => {
     const kmlColor = hexToKML(color);
     kml += '  <Style id="style_' + color.substring(1) + '">\n';
     kml += '    <LineStyle><color>' + kmlColor + '</color><width>1.5</width></LineStyle>\n';
     kml += '    <PolyStyle><color>' + kmlColor.replace('ff', 'aa') + '</color></PolyStyle>\n';
-    kml += '    <IconStyle><color>' + kmlColor + '</color>\n';
-    kml += '      <Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>\n';
-    kml += '    </IconStyle>\n';
     kml += '  </Style>\n';
   });
 
   kml += '  <Folder><name>Cells</name>\n';
-
   allCells.forEach(cell => {
     if (!cell.lat || !cell.long) return;
-
     const color = getColor(cell);
     const styleId = 'style_' + color.substring(1);
-
     kml += '    <Placemark>\n';
     kml += '      <name>' + escapeHtml(cell.cell_name) + '</name>\n';
     kml += '      <description><![CDATA[\n';
     kml += '        <b>Cell:</b> ' + escapeHtml(cell.cell_name) + '<br/>';
     kml += '        <b>Site:</b> ' + escapeHtml(cell.site) + '<br/>';
-    kml += '        <b>Sector:</b> ' + escapeHtml(cell.sector) + '<br/>';
-       kml += '        <b>Region:</b> ' + escapeHtml(cell.region) + '<br/>';
+    kml += '        <b>Region:</b> ' + escapeHtml(cell.region) + '<br/>';
     kml += '        <b>PCI:</b> ' + cell.pci + '<br/>';
-    kml += '        <b>RSI:</b> ' + cell.rsi + '<br/>';
     kml += '        <b>Azimuth:</b> ' + cell.bore + '&deg;<br/>';
-    kml += '        <b>Radius:</b> ' + (cell.radius / 1000).toFixed(1) + ' km<br/>';
-    kml += '        <b>Lat/Long:</b> ' + cell.lat.toFixed(6) + ', ' + cell.long.toFixed(6);
     kml += '      ]]></description>\n';
     kml += '      <styleUrl>#' + styleId + '</styleUrl>\n';
 
     if (includeSectors) {
       const coords = kmlSectorCoords(cell.lat, cell.long, cell.bore);
-      kml += '      <Polygon>\n';
-      kml += '        <outerBoundaryIs><LinearRing><coordinates>\n          ';
-      coords.forEach(c => {
-        kml += c[1].toFixed(6) + ',' + c[0].toFixed(6) + ',0 ';
-      });
-      kml += '\n        </coordinates></LinearRing></outerBoundaryIs>\n';
-      kml += '      </Polygon>\n';
+      kml += '      <Polygon>\n<outerBoundaryIs><LinearRing><coordinates>\n          ';
+      coords.forEach(c => { kml += c[1].toFixed(6) + ',' + c[0].toFixed(6) + ',0 '; });
+      kml += '\n        </coordinates></LinearRing></outerBoundaryIs>\n      </Polygon>\n';
     } else {
       kml += '      <Point><coordinates>' + cell.long.toFixed(6) + ',' + cell.lat.toFixed(6) + ',0</coordinates></Point>\n';
     }
-
     kml += '    </Placemark>\n';
   });
-
-  kml += '  </Folder>\n';
-  kml += '</Document>\n';
-  kml += '</kml>\n';
+  kml += '  </Folder>\n</Document>\n</kml>\n';
 
   const blob = new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' });
   const url = URL.createObjectURL(blob);
@@ -3667,55 +2732,24 @@ function exportKML() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-
-  toast('✅ KML exported: ' + filename + ' (' + allCells.length + ' cells)', 'success');
+  toast('✅ KML exported: ' + filename, 'success');
 }
 
 function kmlSectorCoords(lat, lng, azimuth) {
-  const radius_m = 350;
-  const half_width_m = 100;
-  const near_d = radius_m * 0.04;
-  const far_d = radius_m;
-  const near_w = half_width_m * 0.30;
-  const far_w = half_width_m;
-
+  const radius_m = 350, half_width_m = 100;
+  const near_d = radius_m * 0.04, far_d = radius_m;
+  const near_w = half_width_m * 0.30, far_w = half_width_m;
   function pt(fwd_m, right_m) {
     const distance = Math.sqrt(fwd_m * fwd_m + right_m * right_m);
     const offsetAngle = Math.atan2(right_m, fwd_m) * 180 / Math.PI;
     return destinationPoint(lat, lng, azimuth + offsetAngle, distance);
   }
-
   return [pt(0, 0), pt(near_d, -near_w), pt(far_d, -far_w), pt(far_d, far_w), pt(near_d, near_w)];
 }
 
 /* =========================================================
-   TOOL — PCI CONFLICT CHECKER
+   TOOL — PCI CHECKER (LTE ONLY)
    ========================================================= */
-const EARTH_RADIUS_M = 6371000.0;
-
-function haversineDistance(lat1, lon1, lat2, lon2) {
-  const phi1 = lat1 * Math.PI / 180;
-  const phi2 = lat2 * Math.PI / 180;
-  const dphi = (lat2 - lat1) * Math.PI / 180;
-  const dlam = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dphi / 2) ** 2 + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dlam / 2) ** 2;
-  return EARTH_RADIUS_M * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-function calculateBearing(lat1, lon1, lat2, lon2) {
-  const phi1 = lat1 * Math.PI / 180;
-  const phi2 = lat2 * Math.PI / 180;
-  const dlambda = (lon2 - lon1) * Math.PI / 180;
-  const x = Math.sin(dlambda) * Math.cos(phi2);
-  const y = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dlambda);
-  return (Math.atan2(x, y) * 180 / Math.PI + 360) % 360;
-}
-
-function boreDifference(bore1, bore2) {
-  const diff = Math.abs(bore1 - bore2) % 360;
-  return diff <= 180 ? diff : 360 - diff;
-}
-
 function isFaceToFace(cell1, cell2, thresholdDeg) {
   thresholdDeg = thresholdDeg || 45;
   const b_1to2 = calculateBearing(cell1.lat, cell1.long, cell2.lat, cell2.long);
@@ -3728,10 +2762,7 @@ function findPairsWithin(cells, maxRadiusM) {
   if (cells.length < 2) return [];
   const bucketDeg = Math.max(maxRadiusM / 111000.0, 0.005);
   const buckets = new Map();
-
-  function key(lat, lon) {
-    return Math.floor(lat / bucketDeg) + ',' + Math.floor(lon / bucketDeg);
-  }
+  function key(lat, lon) { return Math.floor(lat / bucketDeg) + ',' + Math.floor(lon / bucketDeg); }
 
   cells.forEach((c, idx) => {
     const k = key(c.lat, c.long);
@@ -3756,28 +2787,25 @@ function findPairsWithin(cells, maxRadiusM) {
       });
     });
   });
-
   return Array.from(pairs).map(s => s.split(',').map(Number)).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
 }
 
 function analyzeConflicts(cells, settings) {
+  // 🛑 LTE only
+  cells = cells.filter(c => c.pci != null && c.pci > 0);
+
   const maxRadius = Math.max(
-    settings.same_pci_radius_m,
-    settings.mod3_radius_m,
+    settings.same_pci_radius_m, settings.mod3_radius_m,
     settings.check_mod6 ? settings.mod6_radius_m : 0,
-    settings.face_to_face_radius_m,
-    settings.same_heading_radius_m
+    settings.face_to_face_radius_m, settings.same_heading_radius_m
   );
 
   const pairs = findPairsWithin(cells, maxRadius);
-  const conflicts = [];
-  const faceToFaceConflicts = [];
-  const samePciSameHeading = [];
+  const conflicts = [], faceToFaceConflicts = [], samePciSameHeading = [];
   const neighborMap = new Map();
 
   const reachRadius = Math.max(
-    settings.same_pci_radius_m,
-    settings.mod3_radius_m,
+    settings.same_pci_radius_m, settings.mod3_radius_m,
     settings.check_mod6 ? settings.mod6_radius_m : 0
   );
 
@@ -3802,9 +2830,7 @@ function analyzeConflicts(cells, settings) {
     if (c1.pci === c2.pci && dist <= settings.same_heading_radius_m) {
       const azDiff = boreDifference(c1.bore, c2.bore);
       if (azDiff <= settings.same_heading_deg) {
-        samePciSameHeading.push({
-          cell1: c1, cell2: c2, pci: c1.pci, distance: dist, azimuth_diff: azDiff
-        });
+        samePciSameHeading.push({ cell1: c1, cell2: c2, pci: c1.pci, distance: dist, azimuth_diff: azDiff });
       }
     }
 
@@ -3820,10 +2846,7 @@ function analyzeConflicts(cells, settings) {
 }
 
 function conflictProfile(neighbors, currentPciOf, settings) {
-  const samePciPenalty = new Map();
-  const mod3Penalty = new Map();
-  const mod6Penalty = new Map();
-
+  const samePciPenalty = new Map(), mod3Penalty = new Map(), mod6Penalty = new Map();
   const samePciK = Math.max(settings.same_pci_radius_m, 1.0);
   const mod3K = Math.max(settings.mod3_radius_m, 1.0);
   const mod6K = Math.max(settings.mod6_radius_m || 1.0, 1.0);
@@ -3837,14 +2860,12 @@ function conflictProfile(neighbors, currentPciOf, settings) {
       if (nb.is_ff) p += 60000.0;
       samePciPenalty.set(nbPci, (samePciPenalty.get(nbPci) || 0) + p);
     }
-
     if (nb.dist <= settings.mod3_radius_m) {
       let p = 600.0 * Math.exp(-nb.dist / mod3K);
       if (nb.is_ff) p += 300.0;
       const k = nbPci % 3;
       mod3Penalty.set(k, (mod3Penalty.get(k) || 0) + p);
     }
-
     if (settings.check_mod6 && nb.dist <= settings.mod6_radius_m) {
       const p = 150.0 * Math.exp(-nb.dist / mod6K);
       const k = nbPci % 6;
@@ -3856,8 +2877,7 @@ function conflictProfile(neighbors, currentPciOf, settings) {
 }
 
 function scoreCandidate(candidate, profile, checkMod6) {
-  let score = (profile.samePciPenalty.get(candidate) || 0) +
-              (profile.mod3Penalty.get(candidate % 3) || 0);
+  let score = (profile.samePciPenalty.get(candidate) || 0) + (profile.mod3Penalty.get(candidate % 3) || 0);
   if (checkMod6) score += (profile.mod6Penalty.get(candidate % 6) || 0);
   return score;
 }
@@ -3882,13 +2902,11 @@ function optimizePCI(cells, analysis, settings, pciPool, passes) {
     const ordered = cells.slice().sort((a, b) =>
       (conflictCounts.get(b.id) || 0) - (conflictCounts.get(a.id) || 0)
     );
-
     let changed = false;
 
     ordered.forEach(cell => {
       const neighbors = neighborMap.get(cell.id) || [];
       if (!neighbors.length) return;
-
       const profile = conflictProfile(neighbors, currentPciOf, settings);
       const original = currentPci.get(cell.id);
       const currentScore = scoreCandidate(original, profile, settings.check_mod6);
@@ -3904,13 +2922,11 @@ function optimizePCI(cells, analysis, settings, pciPool, passes) {
           if (bestScore === 0) break;
         }
       }
-
       if (bestPci !== original) {
         currentPci.set(cell.id, bestPci);
         changed = true;
       }
     });
-
     if (!changed) break;
   }
 
@@ -3918,13 +2934,16 @@ function optimizePCI(cells, analysis, settings, pciPool, passes) {
   return cells;
 }
 
-let lastPCIResults = null;
-
 function runPCIChecker() {
-  if (!allCells.length) {
-    toast('No cells loaded. Import data first.', 'error');
+  if (!allCells.length) { toast('No cells loaded', 'error'); return; }
+
+  const lteCells = allCells.filter(c => c.tech === 'LTE' && c.pci > 0);
+  if (!lteCells.length) {
+    toast('No LTE cells (PCI > 0). PCI Checker works on LTE only.', 'error', 5000);
     return;
   }
+
+  console.log('📊 PCI Checker: ' + lteCells.length + ' LTE cells (skipped ' + (allCells.length - lteCells.length) + ')');
 
   const settings = {
     same_pci_radius_m: parseFloat(document.getElementById('pci_r_same').value) || 5000,
@@ -3938,15 +2957,14 @@ function runPCIChecker() {
 
   const pciMin = parseInt(document.getElementById('pci_min').value) || 0;
   const pciMax = parseInt(document.getElementById('pci_max').value) || 503;
-
   const pciPool = new Set();
   for (let p = pciMin; p <= pciMax; p++) pciPool.add(p);
 
-  toast('Analyzing ' + allCells.length + ' cells...', 'info');
+  toast('Analyzing ' + lteCells.length + ' LTE cells...', 'info');
 
   setTimeout(() => {
     try {
-      const cellsCopy = allCells.map(c => Object.assign({}, c));
+      const cellsCopy = lteCells.map(c => Object.assign({}, c));
       const analysis = analyzeConflicts(cellsCopy, settings);
       const optimized = optimizePCI(cellsCopy, analysis, settings, pciPool, 3);
 
@@ -3958,20 +2976,16 @@ function runPCIChecker() {
         const p1 = newPciById.get(c.cell1.id);
         const p2 = newPciById.get(c.cell2.id);
         if (c.type === 'Same PCI' && p1 === p2) {
-          stillConflicted.add(c.cell1.id);
-          stillConflicted.add(c.cell2.id);
+          stillConflicted.add(c.cell1.id); stillConflicted.add(c.cell2.id);
         } else if (c.type === 'MOD3 Conflict' && (p1 % 3) === (p2 % 3)) {
-          stillConflicted.add(c.cell1.id);
-          stillConflicted.add(c.cell2.id);
+          stillConflicted.add(c.cell1.id); stillConflicted.add(c.cell2.id);
         } else if (c.type === 'MOD6 Conflict' && (p1 % 6) === (p2 % 6)) {
-          stillConflicted.add(c.cell1.id);
-          stillConflicted.add(c.cell2.id);
+          stillConflicted.add(c.cell1.id); stillConflicted.add(c.cell2.id);
         }
       });
 
       lastPCIResults = {
-        cells: optimized,
-        conflicts: analysis.conflicts,
+        cells: optimized, conflicts: analysis.conflicts,
         faceToFace: analysis.faceToFaceConflicts,
         sameHeading: analysis.samePciSameHeading,
         stillConflicted: stillConflicted
@@ -4056,7 +3070,6 @@ function clearPCIResults() {
 
 function exportPCIResults() {
   if (!lastPCIResults) { toast('Run analysis first', 'error'); return; }
-
   const rows = [['Cell Name', 'Original PCI', 'New PCI', 'MOD3 Group', 'Lat', 'Long', 'Azimuth', 'Status']];
   lastPCIResults.cells.forEach(c => {
     const newPci = c.suggested_pci;
@@ -4065,7 +3078,6 @@ function exportPCIResults() {
     const status = unresolved ? 'Unresolved' : (changed ? 'Reassigned' : 'Clean');
     rows.push([c.cell_name, c.pci, newPci, newPci % 3, c.lat, c.long, c.bore, status]);
   });
-
   const csv = rows.map(r => r.join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -4076,13 +3088,13 @@ function exportPCIResults() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-
   toast('✅ CSV exported', 'success');
 }
 
 function showPCIOnMap() {
   if (!lastPCIResults) { toast('Run analysis first', 'error'); return; }
 
+  window.__gsmMode = true;
   switchView('map');
 
   setTimeout(() => {
@@ -4091,38 +3103,29 @@ function showPCIOnMap() {
 
     lastPCIResults.cells.forEach(cell => {
       if (!cell.lat || !cell.long) return;
-
       let color;
-      if (lastPCIResults.stillConflicted.has(cell.id)) {
-        color = '#D64545';
-      } else if (cell.suggested_pci !== cell.pci) {
-        color = '#1F9D55';
-      } else {
-        color = '#94A3B8';
-      }
+      if (lastPCIResults.stillConflicted.has(cell.id)) color = '#D64545';
+      else if (cell.suggested_pci !== cell.pci) color = '#1F9D55';
+      else color = '#94A3B8';
 
       const coords = makeSectorCoords(cell.lat, cell.long, cell.bore);
       const polygon = L.polygon(coords, {
-        color: color,
-        weight: 1,
-        fillColor: color,
-        fillOpacity: 0.7,
-        interactive: true
+        color: color, weight: 1, fillColor: color, fillOpacity: 0.7, interactive: true
       });
-
       polygon.bindPopup(
         '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:220px;">' +
           '<div style="font-weight:700;font-size:14px;font-family:monospace;margin-bottom:6px;">' + escapeHtml(cell.cell_name) + '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">Original PCI:</span><b>' + cell.pci + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">New PCI:</span><b style="color:' + (cell.suggested_pci !== cell.pci ? '#1F9D55' : '#0C1B3D') + ';">' + cell.suggested_pci + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">Status:</span><b>' + (lastPCIResults.stillConflicted.has(cell.id) ? 'Unresolved' : (cell.suggested_pci !== cell.pci ? 'Reassigned' : 'Clean')) + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Original PCI:</span><b>' + cell.pci + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>New PCI:</span><b style="color:#1F9D55;">' + cell.suggested_pci + '</b></div>' +
         '</div>'
       );
-
       sectorLayer.addLayer(polygon);
     });
 
-    fitAllCells();
+    if (lastPCIResults.cells.length) {
+      const bounds = L.latLngBounds(lastPCIResults.cells.map(c => [c.lat, c.long]));
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
     toast('Showing PCI results on map', 'success');
   }, 300);
 }
@@ -4132,14 +3135,13 @@ function showPCIOnMap() {
    ========================================================= */
 function toggleMultiSelectMode() {
   multiSelectMode = !multiSelectMode;
-
   const btn = document.getElementById('multiSelectBtn');
   if (multiSelectMode) {
     btn.classList.add('active');
     btn.style.background = '#D64545';
     btn.style.color = '#fff';
     btn.style.borderColor = '#D64545';
-    toast('Multi-Select ON — Click sectors to select', 'info');
+    toast('Multi-Select ON', 'info');
   } else {
     btn.classList.remove('active');
     btn.style.background = '';
@@ -4154,21 +3156,11 @@ function toggleCellSelection(cell, polygon) {
   if (selectedCellIds.has(cell.id)) {
     selectedCellIds.delete(cell.id);
     selectedPolygons.delete(cell.id);
-    polygon.setStyle({
-      color: cell.color,
-      fillColor: cell.color,
-      fillOpacity: 0.65,
-      weight: 0.8
-    });
+    polygon.setStyle({ color: cell.color, fillColor: cell.color, fillOpacity: 0.65, weight: 0.8 });
   } else {
     selectedCellIds.add(cell.id);
     selectedPolygons.set(cell.id, polygon);
-    polygon.setStyle({
-      color: '#FFD700',
-      fillColor: '#FFD700',
-      fillOpacity: 0.9,
-      weight: 3
-    });
+    polygon.setStyle({ color: '#FFD700', fillColor: '#FFD700', fillOpacity: 0.9, weight: 3 });
   }
   updateMultiSelectInfo();
 }
@@ -4177,26 +3169,16 @@ function updateMultiSelectInfo() {
   const el = document.getElementById('multiSelectInfo');
   const countEl = document.getElementById('multiSelectCount');
   if (!el) return;
-
   if (selectedCellIds.size > 0) {
     el.classList.add('show');
     countEl.textContent = selectedCellIds.size + ' cells selected';
-  } else {
-    el.classList.remove('show');
-  }
+  } else el.classList.remove('show');
 }
 
 function clearSelection() {
   selectedPolygons.forEach((polygon, id) => {
     const cell = allCells.find(c => c.id === id);
-    if (cell) {
-      polygon.setStyle({
-        color: cell.color,
-        fillColor: cell.color,
-        fillOpacity: 0.65,
-        weight: 0.8
-      });
-    }
+    if (cell) polygon.setStyle({ color: cell.color, fillColor: cell.color, fillOpacity: 0.65, weight: 0.8 });
   });
   selectedCellIds.clear();
   selectedPolygons.clear();
@@ -4205,13 +3187,9 @@ function clearSelection() {
 
 function exportSelectedCells() {
   if (!selectedCellIds.size) { toast('No cells selected', 'error'); return; }
-
   const selected = allCells.filter(c => selectedCellIds.has(c.id));
-    const rows = [['Cell Name', 'PCI', 'RSI', 'Lat', 'Long', 'Azimuth', 'Site', 'Region', 'Sector']];
-  selected.forEach(c => {
-    rows.push([c.cell_name, c.pci, c.rsi, c.lat, c.long, c.bore, c.site, c.region, c.sector]);
-  });
-
+  const rows = [['Cell Name', 'PCI', 'RSI', 'Lat', 'Long', 'Azimuth', 'Site', 'Region', 'Sector']];
+  selected.forEach(c => rows.push([c.cell_name, c.pci, c.rsi, c.lat, c.long, c.bore, c.site, c.region, c.sector]));
   const csv = rows.map(r => r.join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -4232,16 +3210,13 @@ function showSiteInfo(cell) {
   const card = document.getElementById('siteInfoCard');
   const title = document.getElementById('siteInfoTitle');
   const body = document.getElementById('siteInfoBody');
-
   title.textContent = cell.cell_name;
   card.classList.add('show');
 
   const gmapsLink = 'https://www.google.com/maps/search/?api=1&query=' + cell.lat + ',' + cell.long;
   const streetLink = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + cell.lat + ',' + cell.long;
-
   const isGSM = cell.tech === 'GSM';
 
-  // قسم RF حسب النوع
   let rfSection = '';
   if (isGSM) {
     rfSection =
@@ -4249,8 +3224,7 @@ function showSiteInfo(cell) {
       '<div class="info-row"><span class="k">BCCH</span><span class="v" style="color:#D97706;font-weight:800;">' + (cell.bcch || '—') + '</span></div>' +
       '<div class="info-row"><span class="k">BSIC</span><span class="v" style="color:#D97706;font-weight:800;">' + (cell.bsic || '—') + '</span></div>' +
       '<div class="info-row"><span class="k">TCH</span><span class="v">' + (cell.tch || '—') + '</span></div>' +
-      '<div class="info-row"><span class="k">LAC</span><span class="v">' + (cell.lac || '—') + '</span></div>' +
-      '<div class="info-row"><span class="k">BSC</span><span class="v">' + (cell.bsc || '—') + '</span></div>';
+      '<div class="info-row"><span class="k">LAC</span><span class="v">' + (cell.lac || '—') + '</span></div>';
   } else {
     rfSection =
       '<div class="info-section-title">🔢 LTE Parameters</div>' +
@@ -4258,20 +3232,16 @@ function showSiteInfo(cell) {
       '<div class="info-row"><span class="k">RSI</span><span class="v">' + (cell.rsi || '—') + '</span></div>';
   }
 
-  // قسم الهوائي
   const antSection =
     '<div class="info-section-title">📐 Antenna</div>' +
     '<div class="info-row"><span class="k">Azimuth</span><span class="v">' + cell.bore + '°</span></div>' +
-    '<div class="info-row"><span class="k">Height</span><span class="v">' + (cell.height || '—') + (cell.height ? ' m' : '') + '</span></div>' +
-    '<div class="info-row"><span class="k">Bandwidth</span><span class="v">' + (cell.bw || '—') + '</span></div>';
+    '<div class="info-row"><span class="k">Height</span><span class="v">' + (cell.height || '—') + '</span></div>';
 
-  // قسم الموقع
   const locSection =
     '<div class="info-section-title">📍 Location</div>' +
     '<div class="info-row"><span class="k">Latitude</span><span class="v">' + cell.lat.toFixed(6) + '</span></div>' +
     '<div class="info-row"><span class="k">Longitude</span><span class="v">' + cell.long.toFixed(6) + '</span></div>';
 
-  // زر التكنولوجيا
   const techBadge = cell.tech === 'GSM'
     ? '<span style="background:#FDF1DC;color:#8A5A00;padding:3px 10px;border-radius:12px;font-size:10.5px;font-weight:800;">GSM 2G</span>'
     : '<span style="background:#EAF2FB;color:#124191;padding:3px 10px;border-radius:12px;font-size:10.5px;font-weight:800;">LTE 4G</span>';
@@ -4282,12 +3252,7 @@ function showSiteInfo(cell) {
     '<div class="info-row"><span class="k">Cell Name</span><span class="v">' + escapeHtml(cell.cell_name) + '</span></div>' +
     '<div class="info-row"><span class="k">Site</span><span class="v">' + escapeHtml(cell.site) + '</span></div>' +
     '<div class="info-row"><span class="k">Sector</span><span class="v">' + escapeHtml(cell.sector) + '</span></div>' +
-    '<div class="info-row"><span class="k">Cell ID</span><span class="v">' + cell.cell_id + '</span></div>' +
-
-    rfSection +
-    antSection +
-    locSection +
-
+    rfSection + antSection + locSection +
     '<div style="display:flex;gap:8px;margin-top:18px;">' +
       '<a href="' + gmapsLink + '" target="_blank" rel="noopener" style="flex:1;text-align:center;padding:9px;background:#124191;color:#fff;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;">📍 Maps</a>' +
       '<a href="' + streetLink + '" target="_blank" rel="noopener" style="flex:1;text-align:center;padding:9px;background:#1F9D55;color:#fff;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;">🌐 Street View</a>' +
@@ -4304,55 +3269,33 @@ function closeSiteInfo() {
 function searchAndFly() {
   const query = (document.getElementById('searchFilter').value || '').trim().toLowerCase();
   if (!query) { toast('Enter search text', 'error'); return; }
-
   const match = allCells.find(c =>
     c.cell_name.toLowerCase() === query ||
     c.cell_name.toLowerCase().includes(query) ||
     String(c.pci) === query
   );
+  if (!match) { toast('No match found for "' + query + '"', 'error'); return; }
 
-  if (!match) {
-    toast('No match found for "' + query + '"', 'error');
-    return;
-  }
-
+  window.__gsmMode = false;
+  window.__nbMode = false;
   map.flyTo([match.lat, match.long], 16, { duration: 1.5 });
 
   setTimeout(() => {
-    sectorLayer.eachLayer(layer => {
-      if (layer.cellData && layer.cellData.id === match.id) {
-        layer.setStyle({
-          color: '#FFD700',
-          fillColor: '#FFD700',
-          fillOpacity: 1,
-          weight: 4
-        });
-        layer.openPopup();
-        setTimeout(() => {
-          layer.setStyle({
-            color: match.color,
-            fillColor: match.color,
-            fillOpacity: 0.65,
-            weight: 0.8
-          });
-        }, 4000);
-      }
-    });
+    renderMap();
     showSiteInfo(match);
   }, 1600);
 
   toast('📍 Flying to ' + match.cell_name, 'success');
 }
+
 /* =========================================================
    NB TABS — SWITCHER
    ========================================================= */
 function switchNbTab(tabName) {
   document.querySelectorAll('.nb-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nb-tab-content').forEach(c => c.classList.remove('active'));
-
   const btn = document.querySelector('.nb-tab[data-tab="' + tabName + '"]');
   if (btn) btn.classList.add('active');
-
   const content = document.getElementById('nb_tab_' + tabName);
   if (content) content.classList.add('active');
 }
@@ -4361,33 +3304,11 @@ function clearNeighborAnalysis() {
   document.getElementById('nb_stats').style.display = 'none';
   document.getElementById('nb_main').style.display = 'none';
   document.getElementById('nbResultsTable').querySelector('tbody').innerHTML = '';
-  document.getElementById('nbBatchTable').querySelector('tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#5A6B87;">No batch results yet</td></tr>';
-  document.getElementById('nbCompareTable').querySelector('tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:#5A6B87;">No comparison yet</td></tr>';
   nbCurrentNeighbors = [];
   nbCurrentSource = null;
   nbBeforeSnapshot = {};
   toast('Cleared', 'info');
 }
-
-/* =========================================================
-   NEIGHBOR ANALYSIS — Core
-   Ported from NB_TUNE_PRO.py
-   ========================================================= */
-let nbCurrentNeighbors = [];
-let nbCurrentSource = null;
-let nbBeforeSnapshot = {};
-let nbCurrentRadius = 1200;
-let nbBatchResults = {};
-
-/* ---------- Constants ---------- */
-const NB_FIELD_COUNT = 35;
-const NB_FRONT_THRESHOLD = 45;
-const NB_DEFAULT_RADIUS = 1200;
-
-/* ---------- Utilities ---------- */
-
-// نفس haversineDistance الموجودة في PCI Checker — نستخدمها
-// نفس calculateBearing الموجودة
 
 function nbSafeFloat(v, def) {
   def = def || 0;
@@ -4396,7 +3317,6 @@ function nbSafeFloat(v, def) {
 }
 
 function nbGetNbFields(cell) {
-  // يُرجع مصفوفة {slot, value} لكل NB1..NB35 الذي له قيمة
   const result = [];
   for (let i = 1; i <= NB_FIELD_COUNT; i++) {
     const slot = 'nb' + i;
@@ -4420,87 +3340,47 @@ function nbGetEmptySlots(cell) {
   return empty;
 }
 
-/* ---------- Find cell ---------- */
 function nbFindCell(cellName) {
   const target = cellName.toUpperCase();
   return allCells.find(c => c.cell_name.toUpperCase() === target);
 }
 
-/* ---------- Analyze neighbors ---------- */
 function nbAnalyzeCell(sourceCell, radius, threshold) {
   const sourceName = sourceCell.cell_name;
-  const sLat = sourceCell.lat;
-  const sLon = sourceCell.long;
-  const sBore = sourceCell.bore;
+  const sLat = sourceCell.lat, sLon = sourceCell.long, sBore = sourceCell.bore;
 
   const listedNBs = nbGetNbFields(sourceCell);
-  const listedNBNames = new Set(listedNBs.map(n => n.value.toUpperCase()));
-
   const neighbors = [];
   const seen = new Set();
 
-  // Pass 1: Listed NBs
   listedNBs.forEach(item => {
     const nbName = item.value;
     const feat = nbFindCell(nbName);
 
-    // 🛑 إذا كان الـ NB موقعاً وليس خلية (بدون sector)، اعتبره Not Found
     if (feat && !/[A-Z]$/.test(feat.cell_name)) {
-      neighbors.push({
-        name: nbName,
-        cell: null,
-        distance: null,
-        isFront: false,
-        status: 'Added (Not Found)',
-        nbField: item.slot,
-        nbSlotNum: item.slotNum
-      });
+      neighbors.push({ name: nbName, cell: null, distance: null, isFront: false, status: 'Added (Not Found)', nbField: item.slot, nbSlotNum: item.slotNum });
       seen.add(nbName.toUpperCase());
       return;
     }
-
     if (!feat) {
-      neighbors.push({
-        name: nbName,
-        cell: null,
-        distance: null,
-        isFront: false,
-        status: 'Added (Not Found)',
-        nbField: item.slot,
-        nbSlotNum: item.slotNum
-      });
+      neighbors.push({ name: nbName, cell: null, distance: null, isFront: false, status: 'Added (Not Found)', nbField: item.slot, nbSlotNum: item.slotNum });
       seen.add(nbName.toUpperCase());
       return;
     }
 
     const dist = haversineDistance(sLat, sLon, feat.lat, feat.long);
     const front = nbIsFront(sBore, feat.bore, threshold);
-
-    neighbors.push({
-      name: nbName,
-      cell: feat,
-      distance: dist,
-      isFront: front,
-      status: 'Added',
-      nbField: item.slot,
-      nbSlotNum: item.slotNum
-    });
+    neighbors.push({ name: nbName, cell: feat, distance: dist, isFront: front, status: 'Added', nbField: item.slot, nbSlotNum: item.slotNum });
     seen.add(nbName.toUpperCase());
   });
 
-  // Pass 2: Unlisted cells within radius (GSM only)
   allCells.forEach(feat => {
     const fname = feat.cell_name.toUpperCase();
     if (fname === sourceName.toUpperCase()) return;
     if (seen.has(fname)) return;
-
-    // 🛑 GSM فقط
     if (feat.tech !== 'GSM') return;
-
-    // 🛑 استثنِ الخلايا بدون sector (لا تنتهي بحرف A-Z)
     if (!/[A-Z]$/.test(feat.cell_name)) return;
 
-    // 🛑 استثنِ co-site cells
     const sourceSite = sourceName.replace(/[A-Z]$/, '');
     const featSite = feat.cell_name.replace(/[A-Z]$/, '');
     if (sourceSite === featSite) return;
@@ -4509,19 +3389,10 @@ function nbAnalyzeCell(sourceCell, radius, threshold) {
     if (dist > radius) return;
 
     const front = nbIsFront(sBore, feat.bore, threshold);
-    neighbors.push({
-      name: feat.cell_name,
-      cell: feat,
-      distance: dist,
-      isFront: front,
-      status: 'Missing',
-      nbField: null,
-      nbSlotNum: null
-    });
+    neighbors.push({ name: feat.cell_name, cell: feat, distance: dist, isFront: front, status: 'Missing', nbField: null, nbSlotNum: null });
     seen.add(fname);
   });
 
-  // Sort: front first, then Added before Missing, then by distance
   neighbors.sort((a, b) => {
     if (a.isFront !== b.isFront) return a.isFront ? -1 : 1;
     if (a.status !== b.status) {
@@ -4542,111 +3413,71 @@ function nbIsFront(sourceBore, neighborBore, threshold) {
   return d <= threshold;
 }
 
-/* ---------- Stats ---------- */
 function nbComputeStats(neighbors) {
   const total = neighbors.length;
   const added = neighbors.filter(n => n.status === 'Added').length;
   const missing = neighbors.filter(n => n.status === 'Missing').length;
   const front = neighbors.filter(n => n.isFront).length;
   const missFront = neighbors.filter(n => n.status === 'Missing' && n.isFront).length;
-
   const dists = neighbors.filter(n => n.distance != null).map(n => n.distance);
   const avgDist = dists.length ? dists.reduce((a, b) => a + b, 0) / dists.length : 0;
   const minDist = dists.length ? Math.min(...dists) : 0;
-
-  return {
-    total: total,
-    added: added,
-    missing: missing,
-    front: front,
-    missFront: missFront,
-    avgDist: avgDist,
-    minDist: minDist
-  };
+  return { total, added, missing, front, missFront, avgDist, minDist };
 }
 
-/* =========================================================
-   RUN ANALYSIS — Main Entry
-   ========================================================= */
 function runNeighborAnalysis() {
   const cellInput = document.getElementById('nb_cell');
-  if (!cellInput) { toast('Tool not loaded', 'error'); return; }
-
+  if (!cellInput) return;
   const cellName = (cellInput.value || '').trim().toUpperCase();
   const radius = parseInt(document.getElementById('nb_radius').value) || NB_DEFAULT_RADIUS;
   const threshold = parseInt(document.getElementById('nb_threshold').value) || NB_FRONT_THRESHOLD;
 
   if (!cellName) { toast('Please enter a source cell name', 'error'); return; }
-  if (!allCells.length) { toast('No cells loaded. Import GSM data first.', 'error', 5000); return; }
+  if (!allCells.length) { toast('No cells loaded', 'error', 5000); return; }
 
   const sourceCell = nbFindCell(cellName);
-  if (!sourceCell) {
-    toast('Cell "' + cellName + '" not found in database', 'error', 5000);
-    return;
-  }
-
-  if (sourceCell.tech !== 'GSM') {
-    toast('This tool works only on GSM (2G) cells', 'error', 5000);
-    return;
-  }
+  if (!sourceCell) { toast('Cell "' + cellName + '" not found', 'error', 5000); return; }
+  if (sourceCell.tech !== 'GSM') { toast('This tool works on GSM (2G) cells only', 'error', 5000); return; }
 
   const neighbors = nbAnalyzeCell(sourceCell, radius, threshold);
-
   nbCurrentNeighbors = neighbors;
   nbCurrentSource = sourceCell;
   nbCurrentRadius = radius;
 
-  // Render
   nbRenderStats(cellName, neighbors);
   nbRenderResultsTable(cellName, neighbors);
 
   document.getElementById('nb_stats').style.display = 'block';
   document.getElementById('nb_main').style.display = 'block';
-
   switchNbTab('results');
   toast('✅ ' + neighbors.length + ' neighbors found', 'success');
 }
 
-/* =========================================================
-   STATS BAR
-   ========================================================= */
 function nbRenderStats(cellName, neighbors) {
   const s = nbComputeStats(neighbors);
   const el = document.getElementById('nb_stats');
-
   el.innerHTML =
     '📍 <b style="color:#124191;">' + escapeHtml(cellName) + '</b>  |  ' +
     'Total: <b>' + s.total + '</b>  |  ' +
     '<span style="color:#1F9D55;">✅ Added: <b>' + s.added + '</b></span>  |  ' +
     '<span style="color:#D64545;">❌ Missing: <b>' + s.missing + '</b></span>  |  ' +
     '<span style="color:#D97706;">⚡ Missing Front: <b>' + s.missFront + '</b></span>  |  ' +
-    '📏 Avg: <b>' + s.avgDist.toFixed(0) + 'm</b>  |  ' +
-    '📏 Min: <b>' + s.minDist.toFixed(0) + 'm</b>';
+    '📏 Avg: <b>' + s.avgDist.toFixed(0) + 'm</b>';
 }
 
-/* =========================================================
-   RESULTS TABLE
-   ========================================================= */
 function nbRenderResultsTable(sourceName, neighbors) {
   const tbody = document.querySelector('#nbResultsTable tbody');
   if (!neighbors.length) {
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#5A6B87;">No neighbors found</td></tr>';
     return;
   }
-
   tbody.innerHTML = neighbors.map(nb => {
     const distStr = nb.distance != null ? nb.distance.toFixed(1) : '—';
     const dir = nb.isFront ? 'Front' : 'Non-Front';
-
-    // Row colors
     let rowBg;
-    if (nb.status === 'Missing') {
-      rowBg = nb.isFront ? '#FFCDD2' : '#FFEBEE';
-    } else if (nb.status === 'Added (Not Found)') {
-      rowBg = '#FFE0B2';
-    } else {
-      rowBg = '#E8F5E9';
-    }
+    if (nb.status === 'Missing') rowBg = nb.isFront ? '#FFCDD2' : '#FFEBEE';
+    else if (nb.status === 'Added (Not Found)') rowBg = '#FFE0B2';
+    else rowBg = '#E8F5E9';
 
     let statusColor;
     if (nb.status === 'Missing') statusColor = '#B91C1C';
@@ -4670,196 +3501,107 @@ function nbRenderResultsTable(sourceName, neighbors) {
     '</tr>';
   }).join('');
 }
-/* =========================================================
-   SNAPSHOT (Before)
-   ========================================================= */
+
 async function nbTakeSnapshot() {
   if (!allCells.length) { toast('No cells loaded', 'error'); return; }
-
   const gsmCells = allCells.filter(c => c.tech === 'GSM');
   if (!gsmCells.length) { toast('No GSM cells found', 'error'); return; }
-
-  // خذ snapshot من الذاكرة (لا حاجة لاستعلام DB)
   nbBeforeSnapshot = {};
   gsmCells.forEach(cell => {
     const nbs = [];
-    for (let i = 1; i <= NB_FIELD_COUNT; i++) {
-      nbs.push(cell['nb' + i] || '');
-    }
+    for (let i = 1; i <= NB_FIELD_COUNT; i++) nbs.push(cell['nb' + i] || '');
     nbBeforeSnapshot[cell.cell_name] = nbs;
   });
-
-  const count = Object.keys(nbBeforeSnapshot).length;
-  nbLog('📸 Snapshot taken: ' + count + ' cells');
-  toast('✅ Snapshot taken for ' + count + ' cells', 'success');
+  nbLog('📸 Snapshot taken: ' + Object.keys(nbBeforeSnapshot).length + ' cells');
+  toast('✅ Snapshot taken for ' + Object.keys(nbBeforeSnapshot).length + ' cells', 'success');
 }
 
-/* =========================================================
-   AUTO ADD MISSING NBs → Supabase
-   ========================================================= */
 async function nbDoAdd() {
-  if (!nbCurrentSource || !nbCurrentNeighbors.length) {
-    toast('Run an analysis first', 'error');
-    return;
-  }
-
+  if (!nbCurrentSource || !nbCurrentNeighbors.length) { toast('Run analysis first', 'error'); return; }
   const frontOnly = document.getElementById('nb_add_front_only').checked;
+  const missing = nbCurrentNeighbors.filter(n => n.status === 'Missing' && n.cell !== null && (!frontOnly || n.isFront));
+  if (!missing.length) { toast('No missing neighbors to add', 'info'); return; }
 
-  const missing = nbCurrentNeighbors.filter(n =>
-    n.status === 'Missing' && n.cell !== null && (!frontOnly || n.isFront)
-  );
-
-  if (!missing.length) {
-    toast('No missing neighbors to add', 'info');
-    return;
-  }
-
-  // احسب الـ slots الفارغة في الخلية الهدف
   const emptySlots = nbGetEmptySlots(nbCurrentSource);
-  if (!emptySlots.length) {
-    toast('No empty NB slots (NB1–NB35 full)', 'error');
-    return;
-  }
+  if (!emptySlots.length) { toast('No empty NB slots (NB1–NB35 full)', 'error'); return; }
 
   const toAdd = missing.slice(0, emptySlots.length);
-
   const msg = 'Add ' + toAdd.length + ' missing neighbors to ' + nbCurrentSource.cell_name + '?\n\n' +
               'Slots used: ' + toAdd.map((_, i) => emptySlots[i].slot.toUpperCase()).join(', ');
   if (!confirm(msg)) return;
 
-  // ابنِ تحديث
   const update = {};
-  toAdd.forEach((nb, i) => {
-    update[emptySlots[i].slot] = nb.name;
-  });
+  toAdd.forEach((nb, i) => { update[emptySlots[i].slot] = nb.name; });
 
   try {
-    const { error } = await db
-      .from('rf_cells')
-      .update(update)
-      .eq('id', nbCurrentSource.id);
-
+    const { error } = await db.from('rf_cells').update(update).eq('id', nbCurrentSource.id);
     if (error) throw error;
-
-    // حدّث الذاكرة المحلية
-    Object.keys(update).forEach(slot => {
-      nbCurrentSource[slot] = update[slot];
-    });
-
-    nbLog('➕ Added ' + toAdd.length + ' NBs to ' + nbCurrentSource.cell_name);
+    Object.keys(update).forEach(slot => { nbCurrentSource[slot] = update[slot]; });
+    nbLog('➕ Added ' + toAdd.length + ' NBs');
     toast('✅ Added ' + toAdd.length + ' neighbors', 'success');
-
-    // أعد التحليل ليظهر الجدول الجديد
     runNeighborAnalysis();
   } catch (e) {
     console.error(e);
-    nbLog('❌ Add failed: ' + e.message);
     toast('Error: ' + e.message, 'error');
   }
 }
 
-/* =========================================================
-   AUTO REMOVE FAR NBs → Supabase
-   ========================================================= */
 async function nbDoRemove() {
-  if (!nbCurrentSource || !nbCurrentNeighbors.length) {
-    toast('Run an analysis first', 'error');
-    return;
-  }
-
+  if (!nbCurrentSource || !nbCurrentNeighbors.length) { toast('Run analysis first', 'error'); return; }
   const keepRadius = parseInt(document.getElementById('nb_remove_radius').value) || 1500;
-
   const far = nbCurrentNeighbors.filter(n =>
-    n.status === 'Added' &&
-    n.distance != null &&
-    n.distance > keepRadius &&
-    n.nbField
+    n.status === 'Added' && n.distance != null && n.distance > keepRadius && n.nbField
   );
+  if (!far.length) { toast('No far neighbors to remove', 'info'); return; }
 
-  if (!far.length) {
-    toast('No far neighbors to remove', 'info');
-    return;
-  }
-
-  const msg = 'Remove ' + far.length + ' neighbors beyond ' + keepRadius + 'm from ' + nbCurrentSource.cell_name + '?';
+  const msg = 'Remove ' + far.length + ' neighbors beyond ' + keepRadius + 'm?';
   if (!confirm(msg)) return;
 
   const update = {};
-  far.forEach(n => {
-    update[n.nbField] = null;
-  });
+  far.forEach(n => { update[n.nbField] = null; });
 
   try {
-    const { error } = await db
-      .from('rf_cells')
-      .update(update)
-      .eq('id', nbCurrentSource.id);
-
+    const { error } = await db.from('rf_cells').update(update).eq('id', nbCurrentSource.id);
     if (error) throw error;
-
-    // حدّث الذاكرة
-    Object.keys(update).forEach(slot => {
-      nbCurrentSource[slot] = null;
-    });
-
-    nbLog('➖ Removed ' + far.length + ' far NBs from ' + nbCurrentSource.cell_name);
+    Object.keys(update).forEach(slot => { nbCurrentSource[slot] = null; });
+    nbLog('➖ Removed ' + far.length + ' far NBs');
     toast('✅ Removed ' + far.length + ' neighbors', 'success');
-
     runNeighborAnalysis();
   } catch (e) {
     console.error(e);
-    nbLog('❌ Remove failed: ' + e.message);
     toast('Error: ' + e.message, 'error');
   }
 }
 
-/* =========================================================
-   ACTION LOG
-   ========================================================= */
 function nbLog(msg) {
   const el = document.getElementById('nbActionLog');
   if (!el) return;
   const time = new Date().toLocaleTimeString('en-GB');
   const line = '[' + time + '] ' + escapeHtml(msg);
-  if (el.innerHTML.indexOf('No actions yet') !== -1) {
-    el.innerHTML = line;
-  } else {
-    el.innerHTML += '<br>' + line;
-  }
+  if (el.innerHTML.indexOf('No actions yet') !== -1) el.innerHTML = line;
+  else el.innerHTML += '<br>' + line;
   el.scrollTop = el.scrollHeight;
 }
 
-/* =========================================================
-   BATCH ANALYSIS
-   ========================================================= */
 function nbRunBatch() {
   const input = document.getElementById('nbBatchInput');
   const radius = parseInt(document.getElementById('nb_radius').value) || NB_DEFAULT_RADIUS;
   const threshold = parseInt(document.getElementById('nb_threshold').value) || NB_FRONT_THRESHOLD;
-
-  if (!input || !input.value.trim()) {
-    toast('Enter cell names (one per line)', 'error');
-    return;
-  }
+  if (!input || !input.value.trim()) { toast('Enter cell names', 'error'); return; }
 
   const lines = input.value.trim().split('\n').map(l => l.trim().toUpperCase()).filter(Boolean);
   if (!lines.length) { toast('No valid cell names', 'error'); return; }
 
   nbBatchResults = {};
   const tbody = document.querySelector('#nbBatchTable tbody');
-  let html = '';
-
-  let processed = 0;
-  let notFound = 0;
+  let html = '', processed = 0, notFound = 0;
 
   lines.forEach(cellName => {
     const source = nbFindCell(cellName);
-    if (!source) { notFound++; return; }
-    if (source.tech !== 'GSM') { notFound++; return; }
+    if (!source || source.tech !== 'GSM') { notFound++; return; }
 
     const neighbors = nbAnalyzeCell(source, radius, threshold);
     const stats = nbComputeStats(neighbors);
-
     nbBatchResults[cellName] = neighbors;
     processed++;
 
@@ -4868,54 +3610,35 @@ function nbRunBatch() {
       '<td>' + stats.total + '</td>' +
       '<td style="color:#1F9D55;font-weight:700;">' + stats.added + '</td>' +
       '<td style="color:#B91C1C;font-weight:700;">' + stats.missing + '</td>' +
-      '<td style="background:' + (stats.missFront > 0 ? '#FFCDD2' : 'transparent') + ';color:' + (stats.missFront > 0 ? '#B91C1C' : '#5A6B87') + ';font-weight:700;">' + stats.missFront + '</td>' +
+      '<td style="background:' + (stats.missFront > 0 ? '#FFCDD2' : 'transparent') + ';font-weight:700;">' + stats.missFront + '</td>' +
       '<td>' + stats.avgDist.toFixed(0) + '</td>' +
     '</tr>';
   });
 
-  if (!html) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#5A6B87;">No cells found</td></tr>';
-  } else {
-    tbody.innerHTML = html;
-  }
+  if (!html) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#5A6B87;">No cells found</td></tr>';
+  else tbody.innerHTML = html;
 
   toast('✅ Analyzed ' + processed + ' cells' + (notFound ? ' · ' + notFound + ' not found' : ''), 'success', 4000);
 }
 
-/* =========================================================
-   COMPARE (Before vs After)
-   ========================================================= */
 function nbRefreshCompare() {
   if (!nbBeforeSnapshot || !Object.keys(nbBeforeSnapshot).length) {
-    toast('Take a Before Snapshot first (Actions tab)', 'error');
-    return;
+    toast('Take a Before Snapshot first', 'error'); return;
   }
-
   const tbody = document.querySelector('#nbCompareTable tbody');
-  let html = '';
-  let changes = 0;
+  let html = '', changes = 0;
 
-  // قارن كل خلية GSM في الذاكرة مع الـ snapshot
   allCells.filter(c => c.tech === 'GSM').forEach(cell => {
     const before = nbBeforeSnapshot[cell.cell_name];
     if (!before) return;
-
     for (let i = 0; i < NB_FIELD_COUNT; i++) {
       const slot = 'nb' + (i + 1);
       const b = (before[i] || '').trim();
       const a = (cell[slot] || '').trim();
-
       if (b === a) continue;
 
-      let changeType;
-      if (!b && a) changeType = 'Added';
-      else if (b && !a) changeType = 'Removed';
-      else changeType = 'Changed';
-
-      let bg;
-      if (changeType === 'Added') bg = '#C8E6C9';
-      else if (changeType === 'Removed') bg = '#FFCDD2';
-      else bg = '#FFF9C4';
+      let changeType = (!b && a) ? 'Added' : (b && !a) ? 'Removed' : 'Changed';
+      let bg = changeType === 'Added' ? '#C8E6C9' : changeType === 'Removed' ? '#FFCDD2' : '#FFF9C4';
 
       html += '<tr style="background:' + bg + ';">' +
         '<td><b>' + escapeHtml(cell.cell_name) + '</b></td>' +
@@ -4937,158 +3660,73 @@ function nbRefreshCompare() {
   }
 }
 
-/* =========================================================
-   MAP LAYERS (radius + source + neighbors + lines)
-   ========================================================= */
-let nbMapLayers = [];
-
 function nbShowOnMap() {
-  if (!nbCurrentSource || !nbCurrentNeighbors.length) {
-    toast('Run an analysis first', 'error');
-    return;
-  }
+  if (!nbCurrentSource || !nbCurrentNeighbors.length) { toast('Run analysis first', 'error'); return; }
 
-  // 🛑 IMPORTANT: ادخل "وضع NB" — يمنع renderMap من رسم كل الخلايا
   window.__nbMode = true;
-
   switchView('map');
 
   setTimeout(() => {
-    // 🧹 احذف كل الطبقات السابقة (الخلايا العادية، GSM، إلخ)
     if (sectorLayer) sectorLayer.clearLayers();
     if (labelLayer) labelLayer.clearLayers();
     if (coverageLayer) coverageLayer.clearLayers();
-
-    // احذف طبقات NB السابقة إذا موجودة
     nbMapLayers.forEach(l => map.removeLayer(l));
     nbMapLayers = [];
 
-    const sLat = nbCurrentSource.lat;
-    const sLon = nbCurrentSource.long;
-    const sBore = nbCurrentSource.bore;
-
-    // ⭐ حدد zoom منخفض معقول قبل أي رسم
+    const sLat = nbCurrentSource.lat, sLon = nbCurrentSource.long, sBore = nbCurrentSource.bore;
     map.setView([sLat, sLon], 14);
 
-    // 1. Radius circle (خط أزرق متقطع، بدون fill قوي)
     const radiusCircle = L.circle([sLat, sLon], {
-      radius: nbCurrentRadius,
-      color: '#2563EB',
-      weight: 2,
-      dashArray: '6,6',
-      fillColor: '#2563EB',
-      fillOpacity: 0.04,
-      interactive: false
+      radius: nbCurrentRadius, color: '#2563EB', weight: 2, dashArray: '6,6',
+      fillColor: '#2563EB', fillOpacity: 0.04, interactive: false
     }).addTo(map);
     nbMapLayers.push(radiusCircle);
 
-    // 2. Source cell sector — أحمر واضح
     const srcCoords = makeSectorCoords(sLat, sLon, sBore);
     const srcPoly = L.polygon(srcCoords, {
-      color: '#991B1B',
-      weight: 2.5,
-      fillColor: '#DC2626',
-      fillOpacity: 0.85
+      color: '#991B1B', weight: 2.5, fillColor: '#DC2626', fillOpacity: 0.85
     }).addTo(map);
-
-    srcPoly.bindTooltip('🎯 ' + nbCurrentSource.cell_name, {
-      permanent: true,
-      direction: 'top',
-      offset: [0, -10],
-      className: 'nb-label-source'
-    });
-
-    srcPoly.bindPopup(
-      '<div style="font-family:Inter,sans-serif;font-size:13px;">' +
-        '<b style="font-size:15px;">🎯 ' + escapeHtml(nbCurrentSource.cell_name) + '</b><br>' +
-        '<span style="color:#5A6B87;">Source Cell</span><br>' +
-        '<b>Bore:</b> ' + sBore + '°<br>' +
-        '<b>Radius:</b> ' + nbCurrentRadius + ' m<br>' +
-        '<b>Neighbors:</b> ' + nbCurrentNeighbors.length
-      + '</div>'
-    );
+    srcPoly.bindTooltip('🎯 ' + nbCurrentSource.cell_name, { permanent: true, direction: 'top', offset: [0, -10], className: 'nb-label-source' });
     nbMapLayers.push(srcPoly);
 
-    // 3. Neighbor sectors + lines
     nbCurrentNeighbors.forEach(nb => {
       if (!nb.cell) return;
-
-      const nLat = nb.cell.lat;
-      const nLon = nb.cell.long;
-
-      // 🎨 اللون حسب الحالة
+      const nLat = nb.cell.lat, nLon = nb.cell.long;
       let fill, stroke;
-      if (nb.status === 'Missing') {
-        fill = '#F97316';    // برتقالي = Missing
-        stroke = '#C2410C';
-      } else if (nb.status === 'Added (Not Found)') {
-        fill = '#EAB308';    // أصفر = Added but not found in layer
-        stroke = '#A16207';
-      } else {
-        fill = '#16A34A';    // أخضر = Added (موجود)
-        stroke = '#15803D';
-      }
+      if (nb.status === 'Missing') { fill = '#F97316'; stroke = '#C2410C'; }
+      else if (nb.status === 'Added (Not Found)') { fill = '#EAB308'; stroke = '#A16207'; }
+      else { fill = '#16A34A'; stroke = '#15803D'; }
 
-      // الخط
       const line = L.polyline([[sLat, sLon], [nLat, nLon]], {
         color: nb.status === 'Missing' ? '#DC2626' : '#16A34A',
-        weight: nb.isFront ? 3 : 1.5,
-        opacity: 0.85,
+        weight: nb.isFront ? 3 : 1.5, opacity: 0.85,
         dashArray: nb.status === 'Missing' ? '8,6' : null
       }).addTo(map);
       nbMapLayers.push(line);
 
-      // الـ sector
       const nCoords = makeSectorCoords(nLat, nLon, nb.cell.bore);
-      const nPoly = L.polygon(nCoords, {
-        color: stroke,
-        weight: 1.5,
-        fillColor: fill,
-        fillOpacity: 0.7
-      }).addTo(map);
-
-      // Label دائم — يظهر اسم الخلية
-      nPoly.bindTooltip(nb.name, {
-        permanent: true,
-        direction: 'center',
-        className: 'nb-label'
-      });
-
+      const nPoly = L.polygon(nCoords, { color: stroke, weight: 1.5, fillColor: fill, fillOpacity: 0.7 }).addTo(map);
+      nPoly.bindTooltip(nb.name, { permanent: true, direction: 'center', className: 'nb-label' });
       nPoly.bindPopup(
         '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:200px;">' +
-          '<div style="font-weight:800;font-family:monospace;margin-bottom:6px;color:#0C1B3D;">' + escapeHtml(nb.name) + '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #F0F3F9;"><span style="color:#5A6B87;">Status:</span><b style="color:' + (nb.status === 'Missing' ? '#DC2626' : '#16A34A') + ';">' + nb.status + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">Distance:</span><b>' + (nb.distance != null ? nb.distance.toFixed(0) + ' m' : '—') + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">Bore:</span><b>' + nb.cell.bore + '°</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">Direction:</span><b>' + (nb.isFront ? '🟧 Front' : '⬜ Non-Front') + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">NB Slot:</span><b>' + (nb.nbField ? nb.nbField.toUpperCase() : '—') + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">Site:</span><b>' + (nb.cell.site || '—') + '</b></div>' +
+          '<div style="font-weight:800;font-family:monospace;margin-bottom:6px;">' + escapeHtml(nb.name) + '</div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Status:</span><b style="color:' + (nb.status === 'Missing' ? '#DC2626' : '#16A34A') + ';">' + nb.status + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Distance:</span><b>' + (nb.distance != null ? nb.distance.toFixed(0) + ' m' : '—') + '</b></div>' +
         '</div>'
       );
-
       nbMapLayers.push(nPoly);
     });
 
-    // 4. Fit bounds
     const points = [[sLat, sLon]];
-    nbCurrentNeighbors.forEach(nb => {
-      if (nb.cell) points.push([nb.cell.lat, nb.cell.long]);
-    });
-
+    nbCurrentNeighbors.forEach(nb => { if (nb.cell) points.push([nb.cell.lat, nb.cell.long]); });
     if (points.length > 1) {
       const bounds = L.latLngBounds(points);
-      const ne = bounds.getNorthEast();
-      const sw = bounds.getSouthWest();
-      ne.lat += 0.005;
-      ne.lng += 0.005;
-      sw.lat -= 0.005;
-      sw.lng -= 0.005;
+      const ne = bounds.getNorthEast(), sw = bounds.getSouthWest();
+      ne.lat += 0.005; ne.lng += 0.005; sw.lat -= 0.005; sw.lng -= 0.005;
       map.fitBounds(L.latLngBounds(sw, ne), { padding: [40, 40], maxZoom: 15 });
     }
 
-    // 5. اعرض Legend خاصة بـ NB
     nbShowLegend();
-
     toast('📍 ' + nbCurrentNeighbors.length + ' neighbors shown on map', 'success');
   }, 500);
 }
@@ -5101,7 +3739,6 @@ function nbHideMapLayers() {
   toast('Map layers hidden', 'info');
 }
 
-/* ---------- Legend خاصة بـ NB ---------- */
 function nbShowLegend() {
   let legend = document.getElementById('nbLegend');
   if (!legend) {
@@ -5117,18 +3754,7 @@ function nbShowLegend() {
     '<div class="legend-item"><span class="legend-dot" style="background:#DC2626;"></span><span>Source Cell</span></div>' +
     '<div class="legend-item"><span class="legend-dot" style="background:#16A34A;"></span><span>Added Neighbor</span></div>' +
     '<div class="legend-item"><span class="legend-dot" style="background:#F97316;"></span><span>Missing Neighbor</span></div>' +
-    '<div class="legend-item"><span class="legend-dot" style="background:#EAB308;"></span><span>Not Found in DB</span></div>' +
-    '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #E9EEF6;font-size:10.5px;">' +
-      '<div style="display:flex;align-items:center;gap:6px;padding:2px 0;">' +
-        '<span style="width:24px;height:0;border-top:3px solid #16A34A;"></span><span>Line = Added NB</span>' +
-      '</div>' +
-      '<div style="display:flex;align-items:center;gap:6px;padding:2px 0;">' +
-        '<span style="width:24px;height:0;border-top:3px dashed #DC2626;"></span><span>Dashed = Missing NB</span>' +
-      '</div>' +
-    '</div>' +
-    '<div style="margin-top:6px;font-size:10px;color:#5A6B87;">' +
-      '🔵 Circle = ' + nbCurrentRadius + 'm radius' +
-    '</div>';
+    '<div class="legend-item"><span class="legend-dot" style="background:#EAB308;"></span><span>Not Found in DB</span></div>';
 }
 
 function nbHideLegend() {
@@ -5136,12 +3762,8 @@ function nbHideLegend() {
   if (legend) legend.style.display = 'none';
 }
 
-/* =========================================================
-   EXPORT CSV + COPY
-   ========================================================= */
 function nbExportCSV() {
-  if (!nbCurrentNeighbors.length) { toast('Run an analysis first', 'error'); return; }
-
+  if (!nbCurrentNeighbors.length) { toast('Run analysis first', 'error'); return; }
   const rows = [['Source', 'Neighbor', 'Distance (m)', 'Direction', 'Status', 'Site', 'NB Slot']];
   nbCurrentNeighbors.forEach(nb => {
     rows.push([
@@ -5154,12 +3776,10 @@ function nbExportCSV() {
       nb.nbField ? nb.nbField.toUpperCase() : ''
     ]);
   });
-
   const csv = rows.map(r => r.map(v => {
     const s = String(v);
     return s.indexOf(',') !== -1 ? '"' + s.replace(/"/g, '""') + '"' : s;
   }).join(',')).join('\n');
-
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -5169,13 +3789,11 @@ function nbExportCSV() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-
   toast('✅ CSV exported', 'success');
 }
 
 function nbCopyResults() {
-  if (!nbCurrentNeighbors.length) { toast('Run an analysis first', 'error'); return; }
-
+  if (!nbCurrentNeighbors.length) { toast('Run analysis first', 'error'); return; }
   const rows = [['Source', 'Neighbor', 'Distance (m)', 'Direction', 'Status', 'Site', 'NB Slot']];
   nbCurrentNeighbors.forEach(nb => {
     rows.push([
@@ -5188,95 +3806,48 @@ function nbCopyResults() {
       nb.nbField ? nb.nbField.toUpperCase() : ''
     ]);
   });
-
   const text = rows.map(r => r.join('\t')).join('\n');
-
-  navigator.clipboard.writeText(text).then(() => {
-    toast('✅ Copied to clipboard', 'success');
-  }).catch(() => {
-    toast('Copy failed — try manual selection', 'error');
-  });
+  navigator.clipboard.writeText(text).then(() => toast('✅ Copied', 'success')).catch(() => toast('Copy failed', 'error'));
 }
-/* =========================================================
-   FILTERS
-   ========================================================= */
+
 function applyNbFilters() {
   const distF = document.getElementById('nb_filter_dist').value;
-  const dirF  = document.getElementById('nb_filter_dir').value;
+  const dirF = document.getElementById('nb_filter_dir').value;
   const statF = document.getElementById('nb_filter_status').value;
 
-  const rows = document.querySelectorAll('#nbResultsTable tbody tr');
-  rows.forEach(row => {
+  document.querySelectorAll('#nbResultsTable tbody tr').forEach(row => {
     const status = row.getAttribute('data-status');
     const dir = row.getAttribute('data-dir');
     const distStr = row.getAttribute('data-dist');
     const dist = distStr ? parseFloat(distStr) : null;
-
     let show = true;
 
-    // Distance filter
     if (distF !== 'all' && dist != null) {
       if (distF === 'lt500' && dist >= 500) show = false;
       else if (distF === '500_1000' && !(dist >= 500 && dist <= 1000)) show = false;
       else if (distF === 'gt1000' && dist <= 1000) show = false;
     }
-
-    // Direction filter
     if (show && dirF !== 'all') {
       if (dirF === 'front' && dir !== 'front') show = false;
       if (dirF === 'nonfront' && dir !== 'nonfront') show = false;
     }
-
-    // Status filter
     if (show && statF !== 'all') {
       if (statF === 'added' && status !== 'added') show = false;
       if (statF === 'missing' && status !== 'missing') show = false;
     }
-
     row.style.display = show ? '' : 'none';
   });
 }
-/* =========================================================
-   READY
-   ========================================================= */
-console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
-console.log('%cTools: PCI Checker · GSM · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
 
 /* =========================================================
    TOOL — GSM BCCH/BSIC PLANNER
-   Ported from rf_core.py
    ========================================================= */
-const GSM_BAND_ARFCN = {
-  '900':  { from: 34,  to: 46  },
-  '1800': { from: 663, to: 680 }
-};
-const GSM_BAND_SUFFIX = {
-  'A':'900','B':'900','C':'900',
-  'D':'1800','E':'1800','F':'1800'
-};
-const GSM_RADIUS_M = 1200;
-const GSM_FRONT_THRESHOLD = 45;
-
-let gsmLastResults = null;
-
 function gsmGetBand(cellName) {
   if (!cellName || cellName.length < 1) return null;
   return GSM_BAND_SUFFIX[cellName.slice(-1).toUpperCase()] || null;
 }
 
-function gsmCalculateBearing(lat1, lon1, lat2, lon2) {
-  const phi1 = lat1 * Math.PI / 180;
-  const phi2 = lat2 * Math.PI / 180;
-  const dlambda = (lon2 - lon1) * Math.PI / 180;
-  const x = Math.sin(dlambda) * Math.cos(phi2);
-  const y = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dlambda);
-  return (Math.atan2(x, y) * 180 / Math.PI + 360) % 360;
-}
-
-function gsmBoreDifference(bore1, bore2) {
-  const diff = Math.abs(bore1 - bore2) % 360;
-  return diff <= 180 ? diff : 360 - diff;
-}
+function gsmBoreDifference(b1, b2) { return boreDifference(b1, b2); }
 
 function gsmIsFrontSector(targetBore, bearingToNeighbor, threshold) {
   threshold = threshold || GSM_FRONT_THRESHOLD;
@@ -5301,40 +3872,30 @@ function gsmRandomBSIC() {
 
 function gsmGetNearbyCells(targetCell, targetBand, radius) {
   const results = [];
-  const tLat = targetCell.lat;
-  const tLon = targetCell.long;
-  const tName = targetCell.cell_name;
-  const tBore = targetCell.bore;
-  const tSite = tName.replace(/[A-Z]$/, '');   // ← اسم السايت
+  const tLat = targetCell.lat, tLon = targetCell.long;
+  const tName = targetCell.cell_name, tBore = targetCell.bore;
+  const tSite = tName.replace(/[A-Z]$/, '');
 
   allCells.forEach(feat => {
     if (feat.cell_name === tName) return;
-
-    // 🛑 1. استثنِ خلايا نفس السايت (Co-site)
-    const featSite = feat.cell_name.replace(/[A-Z]$/, '');
-    if (featSite === tSite) return;
-
-    // 🛑 2. استثنِ خلايا LTE (اقبل GSM فقط)
     if (feat.tech !== 'GSM') return;
 
-    // 3. تحقق من الباند
     const cellBand = gsmGetBand(feat.cell_name);
     if (cellBand !== targetBand) return;
 
-    // 4. تحقق من المسافة
     const dist = haversineDistance(tLat, tLon, feat.lat, feat.long);
     if (dist > radius) return;
 
-    const bearingFromTarget = gsmCalculateBearing(tLat, tLon, feat.lat, feat.long);
+    const featSite = feat.cell_name.replace(/[A-Z]$/, '');
+    const isCoSite = (featSite === tSite);
+    const bearingFromTarget = calculateBearing(tLat, tLon, feat.lat, feat.long);
+
     results.push({
-      cell: feat.cell_name,
-      distance: dist,
-      bore: feat.bore,
-      band: cellBand,
-      bcch: feat.bcch || null,
-      bsic: feat.bsic || null,
+      cell: feat.cell_name, distance: dist, bore: feat.bore, band: cellBand,
+      bcch: feat.bcch || null, bsic: feat.bsic || null,
       bearingFromTarget: bearingFromTarget,
-      isFront: gsmIsFrontSector(tBore, bearingFromTarget)
+      isFront: gsmIsFrontSector(tBore, bearingFromTarget),
+      isCoSite: isCoSite
     });
   });
 
@@ -5343,9 +3904,10 @@ function gsmGetNearbyCells(targetCell, targetBand, radius) {
 }
 
 function gsmSelectOptimalBCCH(availableFreqs, usedFreqs, nearbyCells, targetBore) {
-  const frontCells   = nearbyCells.filter(c => c.isFront);
-  const frontFreqs   = new Set(frontCells.map(c => c.bcch).filter(f => f != null));
-  const allNearFreqs = new Set(nearbyCells.map(c => c.bcch).filter(f => f != null));
+  const analysisCells = nearbyCells.filter(c => !c.isCoSite);
+  const frontCells = analysisCells.filter(c => c.isFront);
+  const frontFreqs = new Set(frontCells.map(c => c.bcch).filter(f => f != null));
+  const allNearFreqs = new Set(analysisCells.map(c => c.bcch).filter(f => f != null));
 
   const frontAdj = new Set();
   frontFreqs.forEach(f => { frontAdj.add(f - 1); frontAdj.add(f + 1); });
@@ -5353,17 +3915,16 @@ function gsmSelectOptimalBCCH(availableFreqs, usedFreqs, nearbyCells, targetBore
   allNearFreqs.forEach(f => { nearAdj.add(f - 1); nearAdj.add(f + 1); });
 
   const freqScores = {};
-
   availableFreqs.forEach(freq => {
     let score = 1000.0;
-    if (frontFreqs.has(freq))   score -= 15000;
-    if (frontAdj.has(freq))     score -= 8000;
+    if (frontFreqs.has(freq)) score -= 15000;
+    if (frontAdj.has(freq)) score -= 8000;
     if (allNearFreqs.has(freq)) score -= 2000;
-    if (nearAdj.has(freq))      score -= 800;
+    if (nearAdj.has(freq)) score -= 800;
 
-    nearbyCells.forEach(c => {
+    analysisCells.forEach(c => {
       if (c.bcch === freq) {
-        const distPen  = 600 * Math.exp(-c.distance / 400);
+        const distPen = 600 * Math.exp(-c.distance / 400);
         const anglePen = 300 * (1 - gsmBoreDifference(targetBore, c.bearingFromTarget) / 180);
         score -= (distPen + anglePen);
       }
@@ -5371,7 +3932,6 @@ function gsmSelectOptimalBCCH(availableFreqs, usedFreqs, nearbyCells, targetBore
     freqScores[freq] = score;
   });
 
-  // Tier-1
   let best = -Infinity, bestFreq = null;
   Object.keys(freqScores).forEach(f => {
     const n = parseInt(f);
@@ -5381,7 +3941,6 @@ function gsmSelectOptimalBCCH(availableFreqs, usedFreqs, nearbyCells, targetBore
   });
   if (bestFreq !== null) return bestFreq;
 
-  // Tier-2
   best = -Infinity;
   Object.keys(freqScores).forEach(f => {
     const n = parseInt(f);
@@ -5391,89 +3950,59 @@ function gsmSelectOptimalBCCH(availableFreqs, usedFreqs, nearbyCells, targetBore
   });
   if (bestFreq !== null) return bestFreq;
 
-  // Tier-3
   const tier3 = availableFreqs.filter(f => !frontFreqs.has(f));
   if (tier3.length) {
     const freqCounts = {};
-    nearbyCells.forEach(c => {
+    analysisCells.forEach(c => {
       if (tier3.includes(c.bcch)) freqCounts[c.bcch] = (freqCounts[c.bcch] || 0) + 1;
     });
     tier3.sort((a, b) => (freqCounts[a] || 0) - (freqCounts[b] || 0));
     return tier3[0];
   }
-
   return null;
 }
 
 function gsmSelectOptimalBSIC(usedBsics, nearbyCells, targetBore) {
+  const analysisCells = nearbyCells.filter(c => !c.isCoSite);
   const allBsics = [];
-  for (let ncc = 0; ncc < 8; ncc++) {
-    for (let bcc = 0; bcc < 8; bcc++) {
-      allBsics.push(String(ncc) + String(bcc));
-    }
-  }
+  for (let ncc = 0; ncc < 8; ncc++) for (let bcc = 0; bcc < 8; bcc++) allBsics.push(String(ncc) + String(bcc));
 
-  const frontBsics = new Set(nearbyCells.filter(c => c.isFront && c.bsic).map(c => c.bsic));
-  const nearBsics  = new Set(nearbyCells.filter(c => c.bsic).map(c => c.bsic));
+  const frontBsics = new Set(analysisCells.filter(c => c.isFront && c.bsic).map(c => c.bsic));
+  const nearBsics = new Set(analysisCells.filter(c => c.bsic).map(c => c.bsic));
 
   const tier1 = allBsics.filter(b => !usedBsics.has(b) && !frontBsics.has(b) && !nearBsics.has(b));
   if (tier1.length) return tier1[Math.floor(Math.random() * tier1.length)];
-
   const tier2 = allBsics.filter(b => !frontBsics.has(b) && !usedBsics.has(b));
   if (tier2.length) return tier2[Math.floor(Math.random() * tier2.length)];
-
   const tier3 = allBsics.filter(b => !frontBsics.has(b));
   if (tier3.length) return tier3[Math.floor(Math.random() * tier3.length)];
-
   return gsmRandomBSIC();
 }
 
 function runGSMPlanner() {
   const cellInput = document.getElementById('gsm_cell');
-  if (!cellInput) { toast('Tool not loaded', 'error'); return; }
-
+  if (!cellInput) return;
   const cellName = (cellInput.value || '').trim().toUpperCase();
   const radius = parseInt(document.getElementById('gsm_radius').value) || GSM_RADIUS_M;
 
   if (!cellName) { toast('Please enter a cell name', 'error'); return; }
-
   const band = gsmGetBand(cellName);
-  if (!band) {
-    toast('Invalid cell name — must end with A/B/C (900MHz) or D/E/F (1800MHz)', 'error', 5000);
-    return;
-  }
-
-  if (!allCells.length) {
-    toast('No cells loaded. Import GSM data first.', 'error', 5000);
-    return;
-  }
+  if (!band) { toast('Invalid cell name — must end with A/B/C or D/E/F', 'error', 5000); return; }
+  if (!allCells.length) { toast('No cells loaded', 'error', 5000); return; }
 
   const targetCell = allCells.find(c => c.cell_name.toUpperCase() === cellName);
-  if (!targetCell) {
-    toast('Cell "' + cellName + '" not found in database', 'error', 5000);
-    return;
-  }
-
-  const targetBore = targetCell.bore;
+  if (!targetCell) { toast('Cell "' + cellName + '" not found', 'error', 5000); return; }
 
   const availableFreqs = gsmGetAvailableFreqs(band);
-  if (!availableFreqs.length) {
-    toast('No frequencies for band ' + band + 'MHz', 'error');
-    return;
-  }
+  if (!availableFreqs.length) { toast('No frequencies for band ' + band, 'error'); return; }
 
   const nearbyCells = gsmGetNearbyCells(targetCell, band, radius);
-
   const siteName = cellName.slice(0, -1);
-  const usedFreqs = new Set();
-  const cositeFreqs = new Set();
-  const usedBsics = new Set();
-  const cositeBsics = new Set();
+  const usedFreqs = new Set(), cositeFreqs = new Set(), usedBsics = new Set(), cositeBsics = new Set();
 
   allCells.forEach(feat => {
     const featCell = feat.cell_name.toUpperCase();
     if (featCell === cellName) return;
-
     const isCoSite = featCell.slice(0, -1) === siteName;
 
     if (isCoSite) {
@@ -5481,7 +4010,6 @@ function runGSMPlanner() {
       if (feat.bsic && /^\d{2}$/.test(feat.bsic)) cositeBsics.add(feat.bsic);
       return;
     }
-
     const dist = haversineDistance(targetCell.lat, targetCell.long, feat.lat, feat.long);
     if (dist <= radius) {
       if (feat.bcch) usedFreqs.add(feat.bcch);
@@ -5492,38 +4020,27 @@ function runGSMPlanner() {
   const finalUsedFreqs = new Set([...usedFreqs, ...cositeFreqs]);
   const finalUsedBsics = new Set([...usedBsics, ...cositeBsics]);
 
-  const suggestedBCCH = gsmSelectOptimalBCCH(availableFreqs, finalUsedFreqs, nearbyCells, targetBore);
-  if (suggestedBCCH === null) {
-    toast('Could not find any valid BCCH — review frequency plan', 'error', 6000);
-    return;
-  }
+  const suggestedBCCH = gsmSelectOptimalBCCH(availableFreqs, finalUsedFreqs, nearbyCells, targetCell.bore);
+  if (suggestedBCCH === null) { toast('No BCCH available', 'error', 6000); return; }
 
-  const suggestedBSIC = gsmSelectOptimalBSIC(finalUsedBsics, nearbyCells, targetBore);
+  const suggestedBSIC = gsmSelectOptimalBSIC(finalUsedBsics, nearbyCells, targetCell.bore);
 
   const conflicts = [];
   nearbyCells.forEach(c => {
-    if (c.isFront && c.bcch === suggestedBCCH) {
-      conflicts.push(c.cell);
-    }
+    if (c.isCoSite) return;
+    if (c.isFront && c.bcch === suggestedBCCH) conflicts.push(c.cell);
   });
 
   gsmLastResults = {
-    cell: targetCell,
-    band: band,
-    bcch: suggestedBCCH,
-    bsic: suggestedBSIC,
-    nearby: nearbyCells,
-    conflicts: conflicts,
-    cositeFreqs: Array.from(cositeFreqs),
-    cositeBsics: Array.from(cositeBsics),
-    usedFreqs: Array.from(usedFreqs),
+    cell: targetCell, band: band, bcch: suggestedBCCH, bsic: suggestedBSIC,
+    nearby: nearbyCells, conflicts: conflicts,
+    cositeFreqs: Array.from(cositeFreqs), cositeBsics: Array.from(cositeBsics),
     radius: radius
   };
 
   renderGSMResults(gsmLastResults);
   document.getElementById('gsmResults').style.display = 'block';
-
-   toast('✅ BCCH=' + suggestedBCCH + ' · BSIC=' + suggestedBSIC, 'success', 4000);
+  toast('✅ BCCH=' + suggestedBCCH + ' · BSIC=' + suggestedBSIC, 'success', 4000);
 }
 
 function renderGSMResults(r) {
@@ -5537,20 +4054,15 @@ function renderGSMResults(r) {
   let warnHtml = '';
   if (r.conflicts.length) {
     warnHtml += '<div style="background:#FCEAEA;color:#B91C1C;padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:8px;">' +
-      '<b>⚠️ ' + r.conflicts.length + ' conflict(s) in front sector:</b> ' +
-      r.conflicts.slice(0, 5).join(', ') +
-      (r.conflicts.length > 5 ? ' ...' : '') +
-      '</div>';
+      '<b>⚠️ ' + r.conflicts.length + ' conflict(s):</b> ' + r.conflicts.slice(0, 5).join(', ') + '</div>';
   }
   if (r.cositeFreqs.length) {
     warnHtml += '<div style="background:#FDF1DC;color:#8A5A00;padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:8px;">' +
-      '<b>🔒 Co-site blocked BCCH:</b> ' + r.cositeFreqs.sort((a,b)=>a-b).join(', ') +
-      '</div>';
+      '<b>🔒 Co-site blocked BCCH:</b> ' + r.cositeFreqs.sort((a,b)=>a-b).join(', ') + '</div>';
   }
   if (r.cositeBsics.length) {
     warnHtml += '<div style="background:#FDF1DC;color:#8A5A00;padding:10px 14px;border-radius:8px;font-size:12.5px;">' +
-      '<b>🔒 Co-site blocked BSIC:</b> ' + r.cositeBsics.sort().join(', ') +
-      '</div>';
+      '<b>🔒 Co-site blocked BSIC:</b> ' + r.cositeBsics.sort().join(', ') + '</div>';
   }
   document.getElementById('gsmWarnings').innerHTML = warnHtml;
 
@@ -5561,96 +4073,71 @@ function renderGSMResults(r) {
   }
 
   tbody.innerHTML = r.nearby.slice(0, 200).map(c => {
-    const isConflict = c.isFront && c.bcch === r.bcch;
-    const frontBg = c.isFront ? '#FFF9C4' : '#F5F5F5';
-    const confBg  = isConflict ? '#FFCDD2' : '#C8E6C9';
-    const confText = isConflict ? 'Yes' : 'No';
-    const frontText = c.isFront ? 'Yes' : 'No';
+    const isConflict = !c.isCoSite && c.isFront && c.bcch === r.bcch;
 
-    return '<tr>' +
-      '<td>' + escapeHtml(c.cell) + '</td>' +
+    let rowBg;
+    if (c.isCoSite) rowBg = '#E5E7EB';
+    else if (c.isFront) rowBg = '#FFF9C4';
+    else rowBg = '#F5F5F5';
+
+    const confBg = isConflict ? '#FFCDD2' : '#C8E6C9';
+    const confText = isConflict ? 'Yes' : (c.isCoSite ? '—' : 'No');
+    const frontText = c.isCoSite ? '🏠 Co-site' : (c.isFront ? 'Yes' : 'No');
+
+    const cellDisplay = c.isCoSite
+      ? '<b style="color:#6B7280;">' + escapeHtml(c.cell) + '</b>'
+      : escapeHtml(c.cell);
+
+    return '<tr style="background:' + rowBg + ';">' +
+      '<td>' + cellDisplay + '</td>' +
       '<td>' + c.distance.toFixed(0) + '</td>' +
       '<td>' + c.bore + '°</td>' +
       '<td>' + c.band + '</td>' +
       '<td>' + (c.bcch != null ? c.bcch : '—') + '</td>' +
-      '<td style="background:' + frontBg + ';text-align:center;font-weight:600;">' + frontText + '</td>' +
+      '<td style="text-align:center;font-weight:600;">' + frontText + '</td>' +
       '<td style="background:' + confBg + ';text-align:center;font-weight:700;">' + confText + '</td>' +
-      '</tr>';
+    '</tr>';
   }).join('');
-}
-
-function clearGSMResults() {
-  gsmLastResults = null;
-  document.getElementById('gsmResults').style.display = 'none';
-  toast('Results cleared', 'info');
 }
 
 function gsmShowOnMap() {
   if (!gsmLastResults) { toast('Run analysis first', 'error'); return; }
-
-   switchView('map');
+  window.__gsmMode = true;
+  switchView('map');
 
   setTimeout(() => {
-    // 🛑 علّم الماب إنه في وضع "GSM" — يمنع renderMap من رسم 3502 خلية
-    window.__gsmMode = true;
-
     if (sectorLayer) sectorLayer.clearLayers();
     if (labelLayer) labelLayer.clearLayers();
 
     const target = gsmLastResults.cell;
-
-    // ⭐ Zoom أولاً حتى makeSectorCoords يحسب الحجم الصحيح
     map.setView([target.lat, target.long], 14);
-    // Target cell — أحمر
+
     const targetCoords = makeSectorCoords(target.lat, target.long, target.bore);
     const targetPoly = L.polygon(targetCoords, {
-      color: '#FF3232',
-      weight: 1.2,
-      fillColor: '#FF3232',
-      fillOpacity: 0.82,
-      interactive: true
+      color: '#FF3232', weight: 1.2, fillColor: '#FF3232', fillOpacity: 0.82, interactive: true
     });
-
     targetPoly.bindPopup(
-      '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:220px;">' +
-        '<div style="font-weight:800;font-size:14px;font-family:monospace;margin-bottom:8px;color:#0C1B3D;">🎯 ' + escapeHtml(target.cell_name) + '</div>' +
-        '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #F0F3F9;"><span style="color:#5A6B87;">Band:</span><b>' + gsmLastResults.band + ' MHz</b></div>' +
-        '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #F0F3F9;"><span style="color:#5A6B87;">Bore:</span><b>' + target.bore + '°</b></div>' +
-        '<div style="display:flex;justify-content:space-between;padding:3px 0;margin-top:6px;"><span style="color:#5A6B87;">Suggested BCCH:</span><b style="color:#1F9D55;font-size:14px;">' + gsmLastResults.bcch + '</b></div>' +
-        '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">Suggested BSIC:</span><b style="color:#1F9D55;font-size:14px;">' + gsmLastResults.bsic + '</b></div>' +
+      '<div style="font-family:Inter,sans-serif;font-size:12.5px;">' +
+        '<b>🎯 ' + escapeHtml(target.cell_name) + '</b><br>' +
+        'BCCH: <b style="color:#1F9D55;">' + gsmLastResults.bcch + '</b><br>' +
+        'BSIC: <b style="color:#1F9D55;">' + gsmLastResults.bsic + '</b>' +
       '</div>'
     );
-
     sectorLayer.addLayer(targetPoly);
 
-    // Nearby
     gsmLastResults.nearby.forEach(c => {
       const full = allCells.find(x => x.cell_name === c.cell);
       if (!full) return;
-
       const coords = makeSectorCoords(full.lat, full.long, full.bore);
-      const isConflict = c.isFront && c.bcch === gsmLastResults.bcch;
-      const color = isConflict ? '#D64545' : (c.isFront ? '#FF5050' : '#FFDC00');
+      const isConflict = !c.isCoSite && c.isFront && c.bcch === gsmLastResults.bcch;
+      let color;
+      if (isConflict) color = '#D64545';
+      else if (c.isCoSite) color = '#6B7280';
+      else if (c.isFront) color = '#FF5050';
+      else color = '#FFDC00';
 
-      const poly = L.polygon(coords, {
-        color: '#FFFFFF',
-        weight: 0.8,
-        fillColor: color,
-        fillOpacity: 0.7,
-        interactive: true
-      });
-
-      poly.bindPopup(
-        '<div style="font-family:Inter,sans-serif;font-size:12px;min-width:200px;">' +
-          '<div style="font-weight:700;font-family:monospace;margin-bottom:6px;">' + escapeHtml(c.cell) + '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span style="color:#5A6B87;">Distance:</span><b>' + c.distance.toFixed(0) + ' m</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span style="color:#5A6B87;">Bore:</span><b>' + c.bore + '°</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span style="color:#5A6B87;">BCCH:</span><b>' + (c.bcch != null ? c.bcch : '—') + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span style="color:#5A6B87;">BSIC:</span><b>' + (c.bsic || '—') + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span style="color:#5A6B87;">Front:</span><b>' + (c.isFront ? 'Yes' : 'No') + '</b></div>' +
-        '</div>'
-      );
-
+      const poly = L.polygon(coords, { color: '#FFFFFF', weight: 0.8, fillColor: color, fillOpacity: 0.7, interactive: true });
+      poly.bindPopup('<b>' + escapeHtml(c.cell) + '</b><br>BCCH: ' + (c.bcch != null ? c.bcch : '—') + '<br>BSIC: ' + (c.bsic || '—'));
       sectorLayer.addLayer(poly);
     });
 
@@ -5659,71 +4146,39 @@ function gsmShowOnMap() {
       const full = allCells.find(x => x.cell_name === c.cell);
       if (full) points.push([full.lat, full.long]);
     });
-    if (points.length > 1) {
-      map.fitBounds(L.latLngBounds(points), { padding: [60, 60] });
-    } else {
-      map.setView([target.lat, target.long], 15);
-    }
-
-    toast('📍 Showing GSM plan on map', 'success');
+    if (points.length > 1) map.fitBounds(L.latLngBounds(points), { padding: [60, 60] });
+    toast('📍 Showing GSM plan', 'success');
   }, 350);
 }
 
 async function gsmSaveToDatabase() {
   if (!gsmLastResults) { toast('Run analysis first', 'error'); return; }
-
   const cell = gsmLastResults.cell;
-  if (!cell.id) { toast('Cell has no ID — cannot save', 'error'); return; }
+  if (!cell.id) { toast('Cell has no ID', 'error'); return; }
 
-  const msg = 'Save BCCH=' + gsmLastResults.bcch + ', BSIC=' + gsmLastResults.bsic +
-              ' to cell ' + cell.cell_name + '?';
+  const msg = 'Save BCCH=' + gsmLastResults.bcch + ', BSIC=' + gsmLastResults.bsic + ' to ' + cell.cell_name + '?';
   if (!confirm(msg)) return;
 
   try {
-    const { error } = await db
-      .from('rf_cells')
-      .update({
-        bcch: gsmLastResults.bcch,
-        bsic: gsmLastResults.bsic
-      })
-      .eq('id', cell.id);
-
+    const { error } = await db.from('rf_cells').update({
+      bcch: gsmLastResults.bcch, bsic: gsmLastResults.bsic
+    }).eq('id', cell.id);
     if (error) throw error;
-
-    toast('✅ Saved to database', 'success');
-
+    toast('✅ Saved', 'success');
     const local = allCells.find(c => c.id === cell.id);
-    if (local) {
-      local.bcch = gsmLastResults.bcch;
-      local.bsic = gsmLastResults.bsic;
-    }
-  } catch (e) {
-    console.error(e);
-    toast('Save failed: ' + e.message, 'error');
-  }
+    if (local) { local.bcch = gsmLastResults.bcch; local.bsic = gsmLastResults.bsic; }
+  } catch (e) { console.error(e); toast('Save failed: ' + e.message, 'error'); }
 }
 
 function gsmExportCSV() {
   if (!gsmLastResults) { toast('Run analysis first', 'error'); return; }
-
-  const rows = [
-    ['Cell', 'Distance (m)', 'Bore', 'Band', 'BCCH', 'BSIC', 'Front Sector', 'Conflict']
-  ];
-
+  const rows = [['Cell', 'Distance (m)', 'Bore', 'Band', 'BCCH', 'BSIC', 'Front', 'Conflict']];
   gsmLastResults.nearby.forEach(c => {
-    const isConflict = c.isFront && c.bcch === gsmLastResults.bcch;
-    rows.push([
-      c.cell,
-      c.distance.toFixed(0),
-      c.bore,
-      c.band,
-      c.bcch != null ? c.bcch : '',
-      c.bsic || '',
-      c.isFront ? 'Yes' : 'No',
-      isConflict ? 'Yes' : 'No'
-    ]);
+    const isConflict = !c.isCoSite && c.isFront && c.bcch === gsmLastResults.bcch;
+    rows.push([c.cell, c.distance.toFixed(0), c.bore, c.band,
+      c.bcch != null ? c.bcch : '', c.bsic || '',
+      c.isFront ? 'Yes' : 'No', isConflict ? 'Yes' : 'No']);
   });
-
   const csv = rows.map(r => r.join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -5734,9 +4189,11 @@ function gsmExportCSV() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-
   toast('✅ CSV exported', 'success');
 }
+
+console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
+console.log('%cTools: PCI · GSM · NB · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
 </script>
 
 </body>
