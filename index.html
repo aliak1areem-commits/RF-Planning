@@ -1273,7 +1273,7 @@ body {
             </div>
             <div class="form-field">
               <label>Analysis Radius (km)</label>
-              <input type="number" id="bsic_analysis_radius" value="200" min="10" max="500" step="10">
+              <input type="number" id="bsic_analysis_radius" value="3" min="1" max="5" step="1">
               <div class="hint">نطاق عد الجيران</div>
             </div>
           </div>
@@ -6057,7 +6057,8 @@ function runBSICAnalyzer() {
       const dM = haversineDistance(r.lat, r.lon, o.lat, o.lon);
       if (dM <= analysisRadiusM) {
         r.neighbors_count++;
-        if (r.bsic === o.bsic && dM <= clashRadiusM) {
+                // 🎯 تعارض = نفس BCCH + نفس BSIC + ضمن المسافة
+        if (r.bcch === o.bcch && r.bsic === o.bsic && dM <= clashRadiusM) {
           r.same_bsic_nearby++;
           r.conflict_peers.push({ cell: o.cell_name, distance_m: dM, bsic: o.bsic });
         }
@@ -6130,22 +6131,27 @@ function bsicSuggestStrict(cells, minDistanceKm) {
     // Collect BSICs used within minDistance
     const forbidden = new Set();
 
-    // Existing assignments
+      // Existing assignments
     Object.keys(assignments).forEach(bs => {
       assignments[bs].forEach(entry => {
         if (entry.cell_id === cellId) return;
         const d = bsicDistanceKm(lat, lon, entry.lat, entry.lon);
-        if (d < minDistanceKm) forbidden.add(bs);
+        // 🎯 فقط إذا كان نفس BCCH
+        if (d < minDistanceKm && entry.bcch === cell.bcch) {
+          forbidden.add(bs);
+        }
       });
     });
 
-    // Other analyzed cells (not yet assigned)
+      // Other analyzed cells (not yet assigned)
     cells.forEach(other => {
       if (other.id === cellId) return;
       const d = bsicDistanceKm(lat, lon, other.lat, other.lon);
-      if (d < minDistanceKm) forbidden.add(other.bsic);
+      // 🎯 منع نفس BSIC فقط إذا كان نفس BCCH
+      if (d < minDistanceKm && other.bcch === cell.bcch) {
+        forbidden.add(other.bsic);
+      }
     });
-
     // Available BSICs
     const available = allBsics.filter(bs => !forbidden.has(bs));
 
@@ -6177,8 +6183,8 @@ function bsicSuggestStrict(cells, minDistanceKm) {
     }
 
     suggestions.set(cellId, chosen);
-    if (!assignments[chosen]) assignments[chosen] = [];
-    assignments[chosen].push({ lat, lon, cell_id: cellId });
+       if (!assignments[chosen]) assignments[chosen] = [];
+    assignments[chosen].push({ lat, lon, cell_id: cellId, bcch: cell.bcch });
   });
 
   return suggestions;
