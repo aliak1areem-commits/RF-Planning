@@ -1874,13 +1874,18 @@ function toggleMapSidebar() {
 /* =========================================================
    MAP INIT
    ========================================================= */
+let canvasRenderer = null;
+
 function initMap() {
   map = L.map('map', {
     center: [33.3, 44.4],
     zoom: 8,
     zoomControl: true,
-    preferCanvas: true
+    preferCanvas: true,
+    renderer: L.canvas({ padding: 0.5 })   // ← Canvas renderer مع padding
   });
+
+  canvasRenderer = map.options.renderer;
 
   basemaps.street = L.tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -1903,10 +1908,14 @@ function initMap() {
 
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
 
+    let zoomTimer = null;
   map.on('zoomend', function() {
-    if (visibleCells.length && document.getElementById('showSectors') && document.getElementById('showSectors').checked) {
-      renderMap();
-    }
+    if (zoomTimer) clearTimeout(zoomTimer);
+    zoomTimer = setTimeout(function() {
+      if (visibleCells.length && document.getElementById('showSectors') && document.getElementById('showSectors').checked) {
+        renderMap();
+      }
+    }, 250);   // ← انتظر 250ms بعد توقف الـ zoom
   });
 
   document.querySelectorAll('.basemap-btn').forEach(function(btn) {
@@ -2185,14 +2194,66 @@ function renderMap() {
     return;
   }
 
-    // Sectors Mode (Zoom >= 11)
+   // 🚀 في Zoom منخفض → اعرض دوائر Sites فقط (سريع)
+  // في Zoom مرتفع → اعرض المثلثات
+  const SHOW_SECTORS_MIN_ZOOM = 14;   // ← لا ترسم مثلثات قبل zoom 14
+
+  if (zoom < SHOW_SECTORS_MIN_ZOOM) {
+    // اعرض دوائر للـ Sites فقط
+    const sites = {};
+    visibleCells.forEach(cell => {
+      if (!cell.lat || !cell.long) return;
+      const key = cell.site;
+      if (!sites[key]) {
+        sites[key] = { lat: cell.lat, long: cell.long, gsm: 0, lte: 0 };
+      }
+      if (cell.tech === 'GSM') sites[key].gsm++;
+      else if (cell.tech === 'LTE') sites[key].lte++;
+    });
+
+    Object.entries(sites).forEach(([siteName, info]) => {
+      const hasGSM = info.gsm > 0;
+      const hasLTE = info.lte > 0;
+      const color = hasGSM && hasLTE ? '#7C3AED' :
+                    hasGSM ? '#D97706' :
+                    hasLTE ? '#124191' : '#94A3B8';
+      const total = info.gsm + info.lte;
+
+      const circle = L.circleMarker([info.lat, info.long], {
+        renderer: canvasRenderer,
+        radius: 6 + Math.min(total / 3, 6),
+        color: '#fff',
+        weight: 2,
+        fillColor: color,
+        fillOpacity: 0.85,
+        interactive: true
+      });
+
+      circle.bindPopup(
+        '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:180px;">' +
+          '<div style="font-weight:800;font-size:14px;font-family:monospace;margin-bottom:8px;color:#0C1B3D;">' + escapeHtml(siteName) + '</div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;"><span style="color:#D97706;">📡 GSM:</span><b>' + info.gsm + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:#124191;">📶 LTE:</span><b>' + info.lte + '</b></div>' +
+        '</div>'
+      );
+
+      sectorLayer.addLayer(circle);
+    });
+
+    return;  // ← خروج — لا ترسم مثلثات
+  }
+
+  // Sectors Mode (Zoom >= 14)
   visibleCells.forEach(function(cell) {
     if (!cell.lat || !cell.long) return;
     const center = [cell.lat, cell.long];
 
-    if (showSectors) {
+        if (showSectors) {
       const isGSM = cell.tech === 'GSM';
       const isLTE = cell.tech === 'LTE';
+
+      // 🛑 لا ترسم LTE قبل zoom 16
+      if (isLTE && zoom < 16) return;
 
       // 🎨 ألوان حسب التكنولوجيا
       let cellColor, fillOpacity, weight, scale;
@@ -2213,8 +2274,9 @@ function renderMap() {
         scale = 1.0;
       }
 
-      const coords = makeSectorCoordsScaled(cell.lat, cell.long, cell.bore, scale);
+           const coords = makeSectorCoordsScaled(cell.lat, cell.long, cell.bore, scale);
       const polygon = L.polygon(coords, {
+        renderer: canvasRenderer,        // ← مهم للسرعة
         color: cellColor,
         weight: weight,
         opacity: 1,
