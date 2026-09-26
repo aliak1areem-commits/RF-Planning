@@ -3804,7 +3804,498 @@ function searchAndFly() {
    READY
    ========================================================= */
 console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
-console.log('%cTools: PCI Checker · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
+console.log('%cTools: PCI Checker · GSM · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
+
+/* =========================================================
+   TOOL — GSM BCCH/BSIC PLANNER
+   Ported from rf_core.py
+   ========================================================= */
+const GSM_BAND_ARFCN = {
+  '900':  { from: 34,  to: 46  },
+  '1800': { from: 663, to: 680 }
+};
+const GSM_BAND_SUFFIX = {
+  'A':'900','B':'900','C':'900',
+  'D':'1800','E':'1800','F':'1800'
+};
+const GSM_RADIUS_M = 1200;
+const GSM_FRONT_THRESHOLD = 45;
+
+let gsmLastResults = null;
+
+function gsmGetBand(cellName) {
+  if (!cellName || cellName.length < 1) return null;
+  return GSM_BAND_SUFFIX[cellName.slice(-1).toUpperCase()] || null;
+}
+
+function gsmCalculateBearing(lat1, lon1, lat2, lon2) {
+  const phi1 = lat1 * Math.PI / 180;
+  const phi2 = lat2 * Math.PI / 180;
+  const dlambda = (lon2 - lon1) * Math.PI / 180;
+  const x = Math.sin(dlambda) * Math.cos(phi2);
+  const y = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dlambda);
+  return (Math.atan2(x, y) * 180 / Math.PI + 360) % 360;
+}
+
+function gsmBoreDifference(bore1, bore2) {
+  const diff = Math.abs(bore1 - bore2) % 360;
+  return diff <= 180 ? diff : 360 - diff;
+}
+
+function gsmIsFrontSector(targetBore, bearingToNeighbor, threshold) {
+  threshold = threshold || GSM_FRONT_THRESHOLD;
+  return gsmBoreDifference(targetBore, bearingToNeighbor) <= threshold;
+}
+
+function gsmGetAvailableFreqs(band) {
+  const range = GSM_BAND_ARFCN[band];
+  if (!range) return [];
+  const freqs = [];
+  for (let f = range.from; f <= range.to; f++) freqs.push(f);
+  for (let i = freqs.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [freqs[i], freqs[j]] = [freqs[j], freqs[i]];
+  }
+  return freqs;
+}
+
+function gsmRandomBSIC() {
+  return String(Math.floor(Math.random() * 8)) + String(Math.floor(Math.random() * 8));
+}
+
+function gsmGetNearbyCells(targetCell, targetBand, radius) {
+  const results = [];
+  const tLat = targetCell.lat;
+  const tLon = targetCell.long;
+  const tName = targetCell.cell_name;
+  const tBore = targetCell.bore;
+
+  allCells.forEach(feat => {
+    if (feat.cell_name === tName) return;
+    const cellBand = gsmGetBand(feat.cell_name);
+    if (cellBand !== targetBand) return;
+    const dist = haversineDistance(tLat, tLon, feat.lat, feat.long);
+    if (dist > radius) return;
+    const bearingFromTarget = gsmCalculateBearing(tLat, tLon, feat.lat, feat.long);
+    results.push({
+      cell: feat.cell_name,
+      distance: dist,
+      bore: feat.bore,
+      band: cellBand,
+      bcch: feat.bcch || null,
+      bsic: feat.bsic || null,
+      bearingFromTarget: bearingFromTarget,
+      isFront: gsmIsFrontSector(tBore, bearingFromTarget)
+    });
+  });
+
+  results.sort((a, b) => a.distance - b.distance);
+  return results;
+}
+
+function gsmSelectOptimalBCCH(availableFreqs, usedFreqs, nearbyCells, targetBore) {
+  const frontCells   = nearbyCells.filter(c => c.isFront);
+  const frontFreqs   = new Set(frontCells.map(c => c.bcch).filter(f => f != null));
+  const allNearFreqs = new Set(nearbyCells.map(c => c.bcch).filter(f => f != null));
+
+  const frontAdj = new Set();
+  frontFreqs.forEach(f => { frontAdj.add(f - 1); frontAdj.add(f + 1); });
+  const nearAdj = new Set();
+  allNearFreqs.forEach(f => { nearAdj.add(f - 1); nearAdj.add(f + 1); });
+
+  const freqScores = {};
+
+  availableFreqs.forEach(freq => {
+    let score = 1000.0;
+    if (frontFreqs.has(freq))   score -= 15000;
+    if (frontAdj.has(freq))     score -= 8000;
+    if (allNearFreqs.has(freq)) score -= 2000;
+    if (nearAdj.has(freq))      score -= 800;
+
+    nearbyCells.forEach(c => {
+      if (c.bcch === freq) {
+        const distPen  = 600 * Math.exp(-c.distance / 400);
+        const anglePen = 300 * (1 - gsmBoreDifference(targetBore, c.bearingFromTarget) / 180);
+        score -= (distPen + anglePen);
+      }
+    });
+    freqScores[freq] = score;
+  });
+
+  // Tier-1
+  let best = -Infinity, bestFreq = null;
+  Object.keys(freqScores).forEach(f => {
+    const n = parseInt(f);
+    if (!usedFreqs.has(n) && !frontFreqs.has(n) && !frontAdj.has(n) && freqScores[f] > 0) {
+      if (freqScores[f] > best) { best = freqScores[f]; bestFreq = n; }
+    }
+  });
+  if (bestFreq !== null) return bestFreq;
+
+  // Tier-2
+  best = -Infinity;
+  Object.keys(freqScores).forEach(f => {
+    const n = parseInt(f);
+    if (!frontFreqs.has(n) && !frontAdj.has(n) && freqScores[f] > 0) {
+      if (freqScores[f] > best) { best = freqScores[f]; bestFreq = n; }
+    }
+  });
+  if (bestFreq !== null) return bestFreq;
+
+  // Tier-3
+  const tier3 = availableFreqs.filter(f => !frontFreqs.has(f));
+  if (tier3.length) {
+    const freqCounts = {};
+    nearbyCells.forEach(c => {
+      if (tier3.includes(c.bcch)) freqCounts[c.bcch] = (freqCounts[c.bcch] || 0) + 1;
+    });
+    tier3.sort((a, b) => (freqCounts[a] || 0) - (freqCounts[b] || 0));
+    return tier3[0];
+  }
+
+  return null;
+}
+
+function gsmSelectOptimalBSIC(usedBsics, nearbyCells, targetBore) {
+  const allBsics = [];
+  for (let ncc = 0; ncc < 8; ncc++) {
+    for (let bcc = 0; bcc < 8; bcc++) {
+      allBsics.push(String(ncc) + String(bcc));
+    }
+  }
+
+  const frontBsics = new Set(nearbyCells.filter(c => c.isFront && c.bsic).map(c => c.bsic));
+  const nearBsics  = new Set(nearbyCells.filter(c => c.bsic).map(c => c.bsic));
+
+  const tier1 = allBsics.filter(b => !usedBsics.has(b) && !frontBsics.has(b) && !nearBsics.has(b));
+  if (tier1.length) return tier1[Math.floor(Math.random() * tier1.length)];
+
+  const tier2 = allBsics.filter(b => !frontBsics.has(b) && !usedBsics.has(b));
+  if (tier2.length) return tier2[Math.floor(Math.random() * tier2.length)];
+
+  const tier3 = allBsics.filter(b => !frontBsics.has(b));
+  if (tier3.length) return tier3[Math.floor(Math.random() * tier3.length)];
+
+  return gsmRandomBSIC();
+}
+
+function runGSMPlanner() {
+  const cellInput = document.getElementById('gsm_cell');
+  if (!cellInput) { toast('Tool not loaded', 'error'); return; }
+
+  const cellName = (cellInput.value || '').trim().toUpperCase();
+  const radius = parseInt(document.getElementById('gsm_radius').value) || GSM_RADIUS_M;
+
+  if (!cellName) { toast('Please enter a cell name', 'error'); return; }
+
+  const band = gsmGetBand(cellName);
+  if (!band) {
+    toast('Invalid cell name — must end with A/B/C (900MHz) or D/E/F (1800MHz)', 'error', 5000);
+    return;
+  }
+
+  if (!allCells.length) {
+    toast('No cells loaded. Import GSM data first.', 'error', 5000);
+    return;
+  }
+
+  const targetCell = allCells.find(c => c.cell_name.toUpperCase() === cellName);
+  if (!targetCell) {
+    toast('Cell "' + cellName + '" not found in database', 'error', 5000);
+    return;
+  }
+
+  const targetBore = targetCell.bore;
+
+  const availableFreqs = gsmGetAvailableFreqs(band);
+  if (!availableFreqs.length) {
+    toast('No frequencies for band ' + band + 'MHz', 'error');
+    return;
+  }
+
+  const nearbyCells = gsmGetNearbyCells(targetCell, band, radius);
+
+  const siteName = cellName.slice(0, -1);
+  const usedFreqs = new Set();
+  const cositeFreqs = new Set();
+  const usedBsics = new Set();
+  const cositeBsics = new Set();
+
+  allCells.forEach(feat => {
+    const featCell = feat.cell_name.toUpperCase();
+    if (featCell === cellName) return;
+
+    const isCoSite = featCell.slice(0, -1) === siteName;
+
+    if (isCoSite) {
+      if (feat.bcch) cositeFreqs.add(feat.bcch);
+      if (feat.bsic && /^\d{2}$/.test(feat.bsic)) cositeBsics.add(feat.bsic);
+      return;
+    }
+
+    const dist = haversineDistance(targetCell.lat, targetCell.long, feat.lat, feat.long);
+    if (dist <= radius) {
+      if (feat.bcch) usedFreqs.add(feat.bcch);
+      if (feat.bsic && /^\d{2}$/.test(feat.bsic)) usedBsics.add(feat.bsic);
+    }
+  });
+
+  const finalUsedFreqs = new Set([...usedFreqs, ...cositeFreqs]);
+  const finalUsedBsics = new Set([...usedBsics, ...cositeBsics]);
+
+  const suggestedBCCH = gsmSelectOptimalBCCH(availableFreqs, finalUsedFreqs, nearbyCells, targetBore);
+  if (suggestedBCCH === null) {
+    toast('Could not find any valid BCCH — review frequency plan', 'error', 6000);
+    return;
+  }
+
+  const suggestedBSIC = gsmSelectOptimalBSIC(finalUsedBsics, nearbyCells, targetBore);
+
+  const conflicts = [];
+  nearbyCells.forEach(c => {
+    if (c.isFront && c.bcch === suggestedBCCH) {
+      conflicts.push(c.cell);
+    }
+  });
+
+  gsmLastResults = {
+    cell: targetCell,
+    band: band,
+    bcch: suggestedBCCH,
+    bsic: suggestedBSIC,
+    nearby: nearbyCells,
+    conflicts: conflicts,
+    cositeFreqs: Array.from(cositeFreqs),
+    cositeBsics: Array.from(cositeBsics),
+    usedFreqs: Array.from(usedFreqs),
+    radius: radius
+  };
+
+  renderGSMResults(gsmLastResults);
+  document.getElementById('gsmResults').style.display = 'block';
+
+  toast('✅ BCCH=' + suggestedBCCH + ' · BSIC=' + suggestedBSIC, 'success', 4000);
+
+  // Auto Show on Map إذا الخيار مفعّل
+  const hl = document.getElementById('gsm_opt_highlight');
+  const nb = document.getElementById('gsm_opt_nearby');
+  if (hl && (hl.checked || (nb && nb.checked))) {
+    setTimeout(() => gsmShowOnMap(), 400);
+  }
+
+  // Auto Save إذا الخيار مفعّل
+  const sv = document.getElementById('gsm_opt_save');
+  if (sv && sv.checked) {
+    setTimeout(() => gsmSaveToDatabase(), 800);
+  }
+}
+
+function renderGSMResults(r) {
+  document.getElementById('gsm_kpi_cell').textContent = r.cell.cell_name;
+  document.getElementById('gsm_kpi_bcch').textContent = r.bcch;
+  document.getElementById('gsm_kpi_bsic').textContent = r.bsic;
+  document.getElementById('gsm_kpi_band').textContent = r.band + ' MHz';
+  document.getElementById('gsm_kpi_conflicts').textContent = r.conflicts.length;
+  document.getElementById('gsm_kpi_neighbors').textContent = r.nearby.length;
+
+  let warnHtml = '';
+  if (r.conflicts.length) {
+    warnHtml += '<div style="background:#FCEAEA;color:#B91C1C;padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:8px;">' +
+      '<b>⚠️ ' + r.conflicts.length + ' conflict(s) in front sector:</b> ' +
+      r.conflicts.slice(0, 5).join(', ') +
+      (r.conflicts.length > 5 ? ' ...' : '') +
+      '</div>';
+  }
+  if (r.cositeFreqs.length) {
+    warnHtml += '<div style="background:#FDF1DC;color:#8A5A00;padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:8px;">' +
+      '<b>🔒 Co-site blocked BCCH:</b> ' + r.cositeFreqs.sort((a,b)=>a-b).join(', ') +
+      '</div>';
+  }
+  if (r.cositeBsics.length) {
+    warnHtml += '<div style="background:#FDF1DC;color:#8A5A00;padding:10px 14px;border-radius:8px;font-size:12.5px;">' +
+      '<b>🔒 Co-site blocked BSIC:</b> ' + r.cositeBsics.sort().join(', ') +
+      '</div>';
+  }
+  document.getElementById('gsmWarnings').innerHTML = warnHtml;
+
+  const tbody = document.querySelector('#gsmNearbyTable tbody');
+  if (!r.nearby.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#5A6B87;">No nearby cells</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = r.nearby.slice(0, 200).map(c => {
+    const isConflict = c.isFront && c.bcch === r.bcch;
+    const frontBg = c.isFront ? '#FFF9C4' : '#F5F5F5';
+    const confBg  = isConflict ? '#FFCDD2' : '#C8E6C9';
+    const confText = isConflict ? 'Yes' : 'No';
+    const frontText = c.isFront ? 'Yes' : 'No';
+
+    return '<tr>' +
+      '<td>' + escapeHtml(c.cell) + '</td>' +
+      '<td>' + c.distance.toFixed(0) + '</td>' +
+      '<td>' + c.bore + '°</td>' +
+      '<td>' + c.band + '</td>' +
+      '<td>' + (c.bcch != null ? c.bcch : '—') + '</td>' +
+      '<td style="background:' + frontBg + ';text-align:center;font-weight:600;">' + frontText + '</td>' +
+      '<td style="background:' + confBg + ';text-align:center;font-weight:700;">' + confText + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function clearGSMResults() {
+  gsmLastResults = null;
+  document.getElementById('gsmResults').style.display = 'none';
+  toast('Results cleared', 'info');
+}
+
+function gsmShowOnMap() {
+  if (!gsmLastResults) { toast('Run analysis first', 'error'); return; }
+
+  switchView('map');
+
+  setTimeout(() => {
+    if (sectorLayer) sectorLayer.clearLayers();
+    if (labelLayer) labelLayer.clearLayers();
+
+    const target = gsmLastResults.cell;
+
+    // Target cell — أحمر
+    const targetCoords = makeSectorCoords(target.lat, target.long, target.bore);
+    const targetPoly = L.polygon(targetCoords, {
+      color: '#FF3232',
+      weight: 1.2,
+      fillColor: '#FF3232',
+      fillOpacity: 0.82,
+      interactive: true
+    });
+
+    targetPoly.bindPopup(
+      '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:220px;">' +
+        '<div style="font-weight:800;font-size:14px;font-family:monospace;margin-bottom:8px;color:#0C1B3D;">🎯 ' + escapeHtml(target.cell_name) + '</div>' +
+        '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #F0F3F9;"><span style="color:#5A6B87;">Band:</span><b>' + gsmLastResults.band + ' MHz</b></div>' +
+        '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #F0F3F9;"><span style="color:#5A6B87;">Bore:</span><b>' + target.bore + '°</b></div>' +
+        '<div style="display:flex;justify-content:space-between;padding:3px 0;margin-top:6px;"><span style="color:#5A6B87;">Suggested BCCH:</span><b style="color:#1F9D55;font-size:14px;">' + gsmLastResults.bcch + '</b></div>' +
+        '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#5A6B87;">Suggested BSIC:</span><b style="color:#1F9D55;font-size:14px;">' + gsmLastResults.bsic + '</b></div>' +
+      '</div>'
+    );
+
+    sectorLayer.addLayer(targetPoly);
+
+    // Nearby
+    gsmLastResults.nearby.forEach(c => {
+      const full = allCells.find(x => x.cell_name === c.cell);
+      if (!full) return;
+
+      const coords = makeSectorCoords(full.lat, full.long, full.bore);
+      const isConflict = c.isFront && c.bcch === gsmLastResults.bcch;
+      const color = isConflict ? '#D64545' : (c.isFront ? '#FF5050' : '#FFDC00');
+
+      const poly = L.polygon(coords, {
+        color: '#FFFFFF',
+        weight: 0.8,
+        fillColor: color,
+        fillOpacity: 0.7,
+        interactive: true
+      });
+
+      poly.bindPopup(
+        '<div style="font-family:Inter,sans-serif;font-size:12px;min-width:200px;">' +
+          '<div style="font-weight:700;font-family:monospace;margin-bottom:6px;">' + escapeHtml(c.cell) + '</div>' +
+          '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span style="color:#5A6B87;">Distance:</span><b>' + c.distance.toFixed(0) + ' m</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span style="color:#5A6B87;">Bore:</span><b>' + c.bore + '°</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span style="color:#5A6B87;">BCCH:</span><b>' + (c.bcch != null ? c.bcch : '—') + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span style="color:#5A6B87;">BSIC:</span><b>' + (c.bsic || '—') + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span style="color:#5A6B87;">Front:</span><b>' + (c.isFront ? 'Yes' : 'No') + '</b></div>' +
+        '</div>'
+      );
+
+      sectorLayer.addLayer(poly);
+    });
+
+    const points = [[target.lat, target.long]];
+    gsmLastResults.nearby.forEach(c => {
+      const full = allCells.find(x => x.cell_name === c.cell);
+      if (full) points.push([full.lat, full.long]);
+    });
+    if (points.length > 1) {
+      map.fitBounds(L.latLngBounds(points), { padding: [60, 60] });
+    } else {
+      map.setView([target.lat, target.long], 15);
+    }
+
+    toast('📍 Showing GSM plan on map', 'success');
+  }, 350);
+}
+
+async function gsmSaveToDatabase() {
+  if (!gsmLastResults) { toast('Run analysis first', 'error'); return; }
+
+  const cell = gsmLastResults.cell;
+  if (!cell.id) { toast('Cell has no ID — cannot save', 'error'); return; }
+
+  const msg = 'Save BCCH=' + gsmLastResults.bcch + ', BSIC=' + gsmLastResults.bsic +
+              ' to cell ' + cell.cell_name + '?';
+  if (!confirm(msg)) return;
+
+  try {
+    const { error } = await db
+      .from('rf_cells')
+      .update({
+        bcch: gsmLastResults.bcch,
+        bsic: gsmLastResults.bsic
+      })
+      .eq('id', cell.id);
+
+    if (error) throw error;
+
+    toast('✅ Saved to database', 'success');
+
+    const local = allCells.find(c => c.id === cell.id);
+    if (local) {
+      local.bcch = gsmLastResults.bcch;
+      local.bsic = gsmLastResults.bsic;
+    }
+  } catch (e) {
+    console.error(e);
+    toast('Save failed: ' + e.message, 'error');
+  }
+}
+
+function gsmExportCSV() {
+  if (!gsmLastResults) { toast('Run analysis first', 'error'); return; }
+
+  const rows = [
+    ['Cell', 'Distance (m)', 'Bore', 'Band', 'BCCH', 'BSIC', 'Front Sector', 'Conflict']
+  ];
+
+  gsmLastResults.nearby.forEach(c => {
+    const isConflict = c.isFront && c.bcch === gsmLastResults.bcch;
+    rows.push([
+      c.cell,
+      c.distance.toFixed(0),
+      c.bore,
+      c.band,
+      c.bcch != null ? c.bcch : '',
+      c.bsic || '',
+      c.isFront ? 'Yes' : 'No',
+      isConflict ? 'Yes' : 'No'
+    ]);
+  });
+
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'GSM_Plan_' + gsmLastResults.cell.cell_name + '_' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  toast('✅ CSV exported', 'success');
+}
 </script>
 
 </body>
