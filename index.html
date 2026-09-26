@@ -1896,10 +1896,6 @@ function initMap() {
   );
 
   basemaps.street.addTo(map);
-
-
-
- 
   labelLayer = L.layerGroup().addTo(map);
   coverageLayer = L.layerGroup();
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
@@ -2103,6 +2099,12 @@ function renderMap() {
   if (!map) return;
   if (window.__gsmMode) return;
   if (window.__nbMode) return;
+
+  // 🛡️ حماية: تحقق من وجود الطبقات
+  if (!sectorLayer || !labelLayer || !coverageLayer) {
+    console.warn('⚠️ Layers not initialized yet');
+    return;
+  }
 
   sectorLayer.clearLayers();
   labelLayer.clearLayers();
