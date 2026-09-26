@@ -1312,7 +1312,8 @@ body {
             <div class="action-row">
               <button class="btn btn-success" onclick="hsnExportCSV()">📥 Export CSV</button>
               <button class="btn btn-gold" onclick="hsnApplyAll()">💾 Apply All Suggestions</button>
-              <button class="btn btn-secondary" onclick="hsnShowOnMap()">🗺️ Show on Map</button>
+              <button class="btn btn-secondary" onclick="hsnShowOnMap()">🗺️ Show Conflicts Only</button>
+<button class="btn btn-ghost" onclick="hsnShowAllOnMap()">🗺️ Show All Cells</button>
             </div>
           </div>
         </div>
@@ -1778,6 +1779,7 @@ body {
 </div>
 
 <div class="toast" id="toast"></div>
+  
 
 <script>
 /* =========================================================
@@ -5647,50 +5649,48 @@ function hsnShowOnMap() {
     sectorLayer.clearLayers();
     labelLayer.clearLayers();
 
-    // 🎯 رتّب: GSM 900 أولاً (أسفل)، ثم GSM 1800 (فوقها)، ثم المتعارضة (فوق الكل)
-    const sortedCells = hsnLastResults.cells.slice().sort((a, b) => {
-      const priority = (cell) => {
-        const hasConflict = hsnLastResults.conflictMap.has(cell.id);
-        const band = cell.gsmBand;
-        if (hasConflict && band === '1800') return 4;
-        if (hasConflict && band === '900') return 3;
-        if (band === '1800') return 2;
-        return 1; // 900 clean
-      };
-      return priority(a) - priority(b);
+    // 🎯 اعرض فقط الخلايا المتعارضة (Clean لا تظهر)
+    const conflictCells = hsnLastResults.cells.filter(c =>
+      hsnLastResults.conflictMap.has(c.id)
+    );
+
+    if (!conflictCells.length) {
+      toast('✅ No conflicts to show — all cells are clean!', 'success', 5000);
+      return;
+    }
+
+    console.log('🎵 Showing ' + conflictCells.length + ' conflicting cells (skipped ' +
+                (hsnLastResults.cells.length - conflictCells.length) + ' clean)');
+
+    // رتّب: 900 أولاً (أسفل) ثم 1800 فوق
+    conflictCells.sort((a, b) => {
+      const bandPriority = (c) => c.gsmBand === '900' ? 1 : 2;
+      return bandPriority(a) - bandPriority(b);
     });
 
-    sortedCells.forEach(cell => {
+    conflictCells.forEach(cell => {
       if (!cell.lat || !cell.long) return;
 
-      const hasConflict = hsnLastResults.conflictMap.has(cell.id);
-      const isHighPriority = hasConflict && (() => {
-        const c = hsnLastResults.conflictMap.get(cell.id);
-        const avg = c.reduce((a, x) => a + (x.conflictLevel || 0.5), 0) / c.length;
-        return c.length >= 3 && avg > 0.7;
-      })();
+      const conflicts = hsnLastResults.conflictMap.get(cell.id);
+      const conflictCount = conflicts.length;
+      const avgLevel = conflicts.reduce((a, c) => a + (c.conflictLevel || 0.5), 0) / conflictCount;
 
-      // 🎨 اللون حسب الحالة والباند
+      // 🎨 الألوان حسب الأولوية
       let color, fillOpacity, weight;
-      if (isHighPriority) {
-        color = '#B91C1C';         // أحمر داكن = HIGH
-        fillOpacity = 0.85;
+      if (conflictCount >= 3 && avgLevel > 0.7) {
+        color = '#B91C1C';      // أحمر داكن = HIGH
+        fillOpacity = 0.9;
+        weight = 2.5;
+      } else if (conflictCount >= 2 || conflicts.some(c => c.sameSite)) {
+        color = '#F97316';      // برتقالي = MEDIUM
+        fillOpacity = 0.8;
         weight = 2;
-      } else if (hasConflict) {
-        color = '#F2A900';         // أصفر = MEDIUM/LOW
-        fillOpacity = 0.75;
-        weight = 1.5;
-      } else if (cell.gsmBand === '1800') {
-        color = '#7C3AED';         // بنفسجي = 1800 clean
-        fillOpacity = 0.5;
-        weight = 1;
       } else {
-        color = '#1F9D55';         // أخضر = 900 clean
-        fillOpacity = 0.4;
-        weight = 1;
+        color = '#FBBF24';      // أصفر = LOW
+        fillOpacity = 0.7;
+        weight = 1.5;
       }
 
-      // 🎯 استخدم الدالة المُحدَّثة (بمقاسات صغيرة + 1800 أصغر)
       const coords = makeSectorCoordsScaled(cell.lat, cell.long, cell.bore, 1.0, cell.gsmBand);
       const poly = L.polygon(coords, {
         color: color,
@@ -5700,27 +5700,38 @@ function hsnShowOnMap() {
         lineJoin: 'round'
       });
 
-      const conflictCount = hasConflict ? hsnLastResults.conflictMap.get(cell.id).length : 0;
       const suggested = hsnLastResults.suggestedHSNs.get(cell.id);
+      const sameSiteCount = conflicts.filter(c => c.sameSite).length;
+      const neighborCount = conflicts.length - sameSiteCount;
 
       poly.bindPopup(
-        '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:220px;">' +
-          '<div style="font-weight:800;font-family:monospace;margin-bottom:6px;color:#0C1B3D;">' + escapeHtml(cell.cell_name) + '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #F0F3F9;">' +
+        '<div style="font-family:Inter,sans-serif;font-size:13px;min-width:240px;">' +
+          '<div style="font-weight:800;font-family:monospace;margin-bottom:8px;color:#0C1B3D;font-size:14px;">' +
+            escapeHtml(cell.cell_name) +
+          '</div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;">' +
             '<span style="color:#5A6B87;">Band:</span>' +
-            '<b>' + (cell.gsmBand === '1800' ? '1800 MHz' : cell.gsmBand === '900' ? '900 MHz' : '—') + '</b>' +
+            '<b>' + (cell.gsmBand === '1800' ? '1800 MHz' : '900 MHz') + '</b>' +
           '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;">' +
-            '<span style="color:#5A6B87;">Current HSN:</span><b>' + cell.hsn + '</b>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;">' +
+            '<span style="color:#5A6B87;">Current HSN:</span>' +
+            '<b style="color:#B91C1C;">' + cell.hsn + '</b>' +
           '</div>' +
-          (suggested != null ?
-            '<div style="display:flex;justify-content:space-between;padding:3px 0;">' +
-              '<span style="color:#5A6B87;">Suggested:</span>' +
-              '<b style="color:#124191;">' + suggested + '</b>' +
-            '</div>' : '') +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;">' +
-            '<span style="color:#5A6B87;">Conflicts:</span>' +
-            '<b style="color:' + (conflictCount > 0 ? '#B91C1C' : '#1F9D55') + ';">' + conflictCount + '</b>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;">' +
+            '<span style="color:#5A6B87;">Suggested HSN:</span>' +
+            '<b style="color:#1F9D55;">' + (suggested != null ? suggested : '—') + '</b>' +
+          '</div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;">' +
+            '<span style="color:#5A6B87;">Total Conflicts:</span>' +
+            '<b style="color:#B91C1C;">' + conflictCount + '</b>' +
+          '</div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;">' +
+            '<span style="color:#5A6B87;">🏠 Same-Site:</span>' +
+            '<b>' + sameSiteCount + '</b>' +
+          '</div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;">' +
+            '<span style="color:#5A6B87;">📡 Neighbor:</span>' +
+            '<b>' + neighborCount + '</b>' +
           '</div>' +
         '</div>'
       );
@@ -5729,17 +5740,15 @@ function hsnShowOnMap() {
     });
 
     // Fit bounds
-    if (hsnLastResults.cells.length) {
-      const bounds = L.latLngBounds(hsnLastResults.cells.map(c => [c.lat, c.long]));
-      if (bounds.isValid()) map.fitBounds(bounds, { padding: [50, 50] });
-    }
+    const bounds = L.latLngBounds(conflictCells.map(c => [c.lat, c.long]));
+    if (bounds.isValid()) map.fitBounds(bounds, { padding: [60, 60] });
 
-    showHSNLegend();
-    toast('📍 Showing HSN results on map', 'success');
+    showHSNLegend(conflictCells.length);
+    toast('⚠️ Showing ' + conflictCells.length + ' conflicting cells only', 'success', 4000);
   }, 400);
 }
 
-function showHSNLegend() {
+function showHSNLegend(count) {
   let legend = document.getElementById('hsnLegend');
   if (!legend) {
     legend = document.createElement('div');
@@ -5750,14 +5759,60 @@ function showHSNLegend() {
   }
   legend.style.display = 'block';
   legend.innerHTML =
-    '<div class="legend-title">🎵 HSN Analysis</div>' +
-    '<div class="legend-item"><span class="legend-dot" style="background:#B91C1C;"></span><span>HIGH Conflict</span></div>' +
-    '<div class="legend-item"><span class="legend-dot" style="background:#F2A900;"></span><span>MEDIUM/LOW</span></div>' +
-    '<div class="legend-item"><span class="legend-dot" style="background:#1F9D55;"></span><span>900 Clean</span></div>' +
-    '<div class="legend-item"><span class="legend-dot" style="background:#7C3AED;"></span><span>1800 Clean</span></div>' +
-    '<div style="margin-top:8px;font-size:10px;color:#5A6B87;line-height:1.4;">' +
-      '🎯 900 = حجم كامل · 1800 = 55%' +
+    '<div class="legend-title">🎵 HSN Conflicts (' + (count || 0) + ')</div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#B91C1C;"></span><span>HIGH (≥3 & strong)</span></div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#F97316;"></span><span>MEDIUM (2+, same-site)</span></div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#FBBF24;"></span><span>LOW (1 conflict)</span></div>' +
+    '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #E9EEF6;font-size:10.5px;color:#5A6B87;line-height:1.5;">' +
+      '✅ Clean cells hidden<br>' +
+      '🎯 900 = full · 1800 = 55%' +
     '</div>';
+}
+  function hsnShowAllOnMap() {
+  if (!hsnLastResults) { toast('Run analysis first', 'error'); return; }
+
+  window.__gsmMode = true;
+  switchView('map');
+
+  setTimeout(() => {
+    sectorLayer.clearLayers();
+    labelLayer.clearLayers();
+
+    hsnLastResults.cells.forEach(cell => {
+      if (!cell.lat || !cell.long) return;
+
+      const hasConflict = hsnLastResults.conflictMap.has(cell.id);
+
+      let color;
+      if (hasConflict) color = '#B91C1C';
+      else if (cell.gsmBand === '1800') color = '#7C3AED';
+      else color = '#1F9D55';
+
+      const coords = makeSectorCoordsScaled(cell.lat, cell.long, cell.bore, 1.0, cell.gsmBand);
+      const poly = L.polygon(coords, {
+        color: color, weight: 1,
+        fillColor: color,
+        fillOpacity: hasConflict ? 0.8 : 0.3
+      });
+
+      poly.bindPopup(
+        '<div style="font-family:Inter,sans-serif;font-size:12px;">' +
+          '<b style="font-family:monospace;">' + escapeHtml(cell.cell_name) + '</b><br>' +
+          'HSN: <b>' + cell.hsn + '</b><br>' +
+          'Conflicts: <b style="color:' + (hasConflict ? '#B91C1C' : '#1F9D55') + ';">' +
+            (hasConflict ? hsnLastResults.conflictMap.get(cell.id).length : 0) + '</b>' +
+        '</div>'
+      );
+
+      sectorLayer.addLayer(poly);
+    });
+
+    const bounds = L.latLngBounds(hsnLastResults.cells.map(c => [c.lat, c.long]));
+    if (bounds.isValid()) map.fitBounds(bounds, { padding: [50, 50] });
+
+    showHSNLegend(hsnLastResults.conflictMap.size);
+    toast('📍 Showing all ' + hsnLastResults.cells.length + ' cells', 'success');
+  }, 400);
 }
 /* =========================================================
    INIT — أضف hsn في normalizeCell
