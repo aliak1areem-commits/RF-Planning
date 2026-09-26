@@ -1836,22 +1836,43 @@ function normalizeCell(row) {
   const name = row.cell_name || '';
   const prefixMatch = name.match(/^[A-Z]+/);
   const region = prefixMatch ? prefixMatch[0] : 'UNKNOWN';
-  const site = name.replace(/[A-Z]$/, '');
+  const site = row.site || name.replace(/[A-Z]$/, '');
   const sector = name.slice(-1);
+
+  // كشف النوع
+  const isGSM = row.bcch != null && row.bcch > 0;
+  const isLTE = row.pci != null && row.pci > 0;
 
   return {
     id: row.id,
     cell_name: name,
     cell_id: row.cell_id || 0,
-    pci: row.pci || 0,
-    rsi: row.rsi || 0,
-    radius: row.cell_radius || 15000,
+
+    // موقع
+    site: site,
+    region: region,
+    sector: sector,
     lat: parseFloat(row.lat) || 0,
     long: parseFloat(row.long) || 0,
     bore: row.bore || 0,
-    region: region,
-    site: site,
-    sector: sector,
+    radius: row.cell_radius || 5000,
+
+    // LTE
+    pci: row.pci || 0,
+    rsi: row.rsi || 0,
+
+    // GSM
+    bcch: row.bcch || 0,
+    bsic: row.bsic || '',
+    tch: row.tch || 0,
+    lac: row.lac || 0,
+    bsc: row.bsc || '',
+    bw: row.bw || 0,
+    height: row.height || 0,
+
+    // نوع
+    tech: isGSM ? 'GSM' : (isLTE ? 'LTE' : 'Unknown'),
+
     color: CELL_COLOR
   };
 }
@@ -2157,9 +2178,7 @@ function renderProjectsList() {
   }
 
   container.innerHTML = allProjects.map(p =>
-    '<div style="background:#fff;border-radius:12px;padding:18px 20px;border:1px solid #E9EEF6;box-shadow:0 2px 8px rgba(12,27,61,.05);transition:all .2s;">' +
-
-      // Header: icon + name + description
+    '<div style="background:#fff;border-radius:12px;padding:18px 20px;border:1px solid #E9EEF6;box-shadow:0 2px 8px rgba(12,27,61,.05);">' +
       '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;cursor:pointer;" onclick="openProject(' + p.id + ')">' +
         '<div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#124191,#00A1E0);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;">📁</div>' +
         '<div style="flex:1;min-width:0;">' +
@@ -2167,23 +2186,94 @@ function renderProjectsList() {
           '<div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">' + escapeHtml(p.description || 'No description') + '</div>' +
         '</div>' +
       '</div>' +
-
-      // Footer: date + action buttons
       '<div style="display:flex;gap:8px;padding-top:12px;border-top:1px solid #F0F3F9;font-size:11.5px;color:#5A6B87;align-items:center;">' +
         '<span>📅 ' + new Date(p.created_at).toLocaleDateString('en-GB') + '</span>' +
-
-        // Edit button
         '<button onclick="event.stopPropagation();editProject(' + p.id + ')" ' +
-          'style="margin-left:auto;padding:5px 10px;background:#EAF2FB;color:#124191;border:1px solid #D7DEEA;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;" ' +
-          'title="Rename">✏️ Edit</button>' +
-
-        // Delete button
+          'style="margin-left:auto;padding:5px 10px;background:#EAF2FB;color:#124191;border:1px solid #D7DEEA;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;">✏️ Edit</button>' +
         '<button onclick="event.stopPropagation();deleteProject(' + p.id + ')" ' +
-          'style="padding:5px 10px;background:#FCEAEA;color:#D64545;border:1px solid #F5D5D5;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;" ' +
-          'title="Delete">🗑️ Delete</button>' +
+          'style="padding:5px 10px;background:#FCEAEA;color:#D64545;border:1px solid #F5D5D5;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;">🗑️ Delete</button>' +
       '</div>' +
     '</div>'
   ).join('');
+}
+   async function editProject(projectId) {
+  const proj = allProjects.find(p => p.id === projectId);
+  if (!proj) return;
+
+  const newName = prompt('New project name:', proj.name);
+  if (newName === null) return;
+  const trimmed = newName.trim();
+  if (!trimmed) { toast('Name cannot be empty', 'error'); return; }
+
+  const newDesc = prompt('New description (optional):', proj.description || '');
+  if (newDesc === null) return;
+
+  try {
+    const { error } = await db
+      .from('rf_projects')
+      .update({ name: trimmed, description: newDesc.trim() })
+      .eq('id', projectId);
+
+    if (error) {
+      if (error.message.includes('duplicate')) {
+        toast('Project name already exists', 'error');
+      } else {
+        throw error;
+      }
+      return;
+    }
+
+    toast('✅ Project updated', 'success');
+    await loadProjects();
+  } catch (e) {
+    toast('Error: ' + e.message, 'error');
+  }
+}
+
+async function deleteProject(projectId) {
+  const proj = allProjects.find(p => p.id === projectId);
+  if (!proj) return;
+
+  let cellCount = 0;
+  try {
+    const { count } = await db
+      .from('rf_cells')
+      .select('id', { count: 'exact', head: true })
+      .eq('project_id', projectId);
+    cellCount = count || 0;
+  } catch (e) {
+    console.warn('Could not count cells:', e);
+  }
+
+  const msg = 'Delete project "' + proj.name + '"?\n\n' +
+    '⚠️ This will also delete ' + cellCount + ' cells inside it.\n\n' +
+    'This action cannot be undone.';
+
+  if (!confirm(msg)) return;
+
+  try {
+    const { error: cellErr } = await db
+      .from('rf_cells')
+      .delete()
+      .eq('project_id', projectId);
+    if (cellErr) throw cellErr;
+
+    const { error: projErr } = await db
+      .from('rf_projects')
+      .delete()
+      .eq('id', projectId);
+    if (projErr) throw projErr;
+
+    toast('✅ Project deleted', 'success');
+    await loadProjects();
+
+    if (currentProjectId === projectId) {
+      currentProjectId = null;
+      await loadCells();
+    }
+  } catch (e) {
+    toast('Error: ' + e.message, 'error');
+  }
 }
 function renderProjectSelect() {
   const sel = document.getElementById('importProjectSelect');
@@ -2484,11 +2574,21 @@ function importParseRows(rows) {
 function importRenderPreview() {
   document.getElementById('importPreviewCard').style.display = 'block';
 
+  // اكتشف نوع التكنولوجيا
+  const sample = importPreviewData[0];
+  const isGSM = sample.bcch !== null && sample.bcch !== undefined;
+  const isLTE = sample.pci !== null && sample.pci !== undefined && sample.pci > 0;
+
+  // احسب الإحصائيات
+  const sites = new Set(importPreviewData.map(r => r.site));
   const regions = new Set(importPreviewData.map(r => {
-    const m = r.cell_name.match(/^[A-Z]+/);
+    const m = (r.cell_name || '').match(/^[A-Z]+/);
     return m ? m[0] : null;
   }).filter(Boolean));
-  const sites = new Set(importPreviewData.map(r => r.cell_name.replace(/[A-Z]$/, '')));
+
+  // نوع الملف
+  const techLabel = isGSM ? 'GSM (2G)' : (isLTE ? 'LTE (4G)' : 'Unknown');
+  const techColor = isGSM ? '#D97706' : (isLTE ? '#124191' : '#5A6B87');
 
   document.getElementById('importPreviewStats').innerHTML =
     '<div style="background:#EAF2FB;border-radius:10px;padding:14px;">' +
@@ -2502,35 +2602,66 @@ function importRenderPreview() {
     '<div style="background:#EAF2FB;border-radius:10px;padding:14px;">' +
       '<div style="font-family:monospace;font-size:20px;font-weight:700;color:#0C1B3D;">' + regions.size + '</div>' +
       '<div style="font-size:11.5px;color:#5A6B87;margin-top:2px;">Regions</div>' +
+    '</div>' +
+    '<div style="background:' + techColor + ';border-radius:10px;padding:14px;color:#fff;">' +
+      '<div style="font-family:monospace;font-size:20px;font-weight:700;">' + techLabel + '</div>' +
+      '<div style="font-size:11.5px;opacity:.85;margin-top:2px;">Detected Type</div>' +
     '</div>';
 
+  // ====== جدول ديناميكي حسب النوع ======
+  let columns;
+  if (isGSM) {
+    columns = [
+      { key: 'cell_name', label: 'Cell' },
+      { key: 'site',      label: 'Site' },
+      { key: 'bcch',      label: 'BCCH' },
+      { key: 'bsic',      label: 'BSIC' },
+      { key: 'tch',       label: 'TCH' },
+      { key: 'lac',       label: 'LAC' },
+      { key: 'bore',      label: 'Bore' },
+      { key: 'lat',       label: 'Lat' },
+      { key: 'long',      label: 'Long' }
+    ];
+  } else {
+    columns = [
+      { key: 'cell_name', label: 'Cell' },
+      { key: 'site',      label: 'Site' },
+      { key: 'pci',       label: 'PCI' },
+      { key: 'rsi',       label: 'RSI' },
+      { key: 'bore',      label: 'Bore' },
+      { key: 'lat',       label: 'Lat' },
+      { key: 'long',      label: 'Long' }
+    ];
+  }
+
   const preview = importPreviewData.slice(0, 30);
-  document.getElementById('importPreviewTable').innerHTML =
-    '<table style="width:100%;border-collapse:collapse;font-size:12px;font-family:monospace;">' +
-      '<thead style="background:#EAF2FB;position:sticky;top:0;">' +
-        '<tr>' +
-          '<th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Cell Name</th>' +
-          '<th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">PCI</th>' +
-          '<th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">RSI</th>' +
-          '<th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Lat</th>' +
-          '<th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Long</th>' +
-          '<th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">Bore</th>' +
-        '</tr>' +
-      '</thead>' +
-      '<tbody>' +
-        preview.map(r =>
-          '<tr style="border-bottom:1px solid #F0F3F9;">' +
-            '<td style="padding:7px 10px;">' + escapeHtml(r.cell_name) + '</td>' +
-            '<td style="padding:7px 10px;">' + r.pci + '</td>' +
-            '<td style="padding:7px 10px;">' + r.rsi + '</td>' +
-            '<td style="padding:7px 10px;">' + r.lat + '</td>' +
-            '<td style="padding:7px 10px;">' + r.long + '</td>' +
-            '<td style="padding:7px 10px;">' + r.bore + '</td>' +
-          '</tr>'
-        ).join('') +
-      '</tbody>' +
-    '</table>' +
-    (importPreviewData.length > 30 ? '<div style="padding:10px;text-align:center;color:#5A6B87;font-size:11.5px;">... and ' + (importPreviewData.length - 30) + ' more</div>' : '');
+
+  let html = '<table style="width:100%;border-collapse:collapse;font-size:12px;font-family:monospace;">';
+  html += '<thead style="background:#EAF2FB;position:sticky;top:0;">';
+  html += '<tr>';
+  columns.forEach(col => {
+    html += '<th style="padding:8px 10px;text-align:left;color:#124191;font-size:10.5px;">' + col.label + '</th>';
+  });
+  html += '</tr></thead><tbody>';
+
+  preview.forEach(r => {
+    html += '<tr style="border-bottom:1px solid #F0F3F9;">';
+    columns.forEach(col => {
+      let val = r[col.key];
+      if (val === null || val === undefined) val = '—';
+      html += '<td style="padding:7px 10px;">' + escapeHtml(String(val)) + '</td>';
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+
+  if (importPreviewData.length > 30) {
+    html += '<div style="padding:10px;text-align:center;color:#5A6B87;font-size:11.5px;">... and ' +
+      (importPreviewData.length - 30) + ' more</div>';
+  }
+
+  document.getElementById('importPreviewTable').innerHTML = html;
 }
 
 function importClearPreview() {
@@ -3434,23 +3565,54 @@ function showSiteInfo(cell) {
   const gmapsLink = 'https://www.google.com/maps/search/?api=1&query=' + cell.lat + ',' + cell.long;
   const streetLink = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + cell.lat + ',' + cell.long;
 
+  const isGSM = cell.tech === 'GSM';
+
+  // قسم RF حسب النوع
+  let rfSection = '';
+  if (isGSM) {
+    rfSection =
+      '<div class="info-section-title">📡 GSM Parameters</div>' +
+      '<div class="info-row"><span class="k">BCCH</span><span class="v" style="color:#D97706;font-weight:800;">' + (cell.bcch || '—') + '</span></div>' +
+      '<div class="info-row"><span class="k">BSIC</span><span class="v" style="color:#D97706;font-weight:800;">' + (cell.bsic || '—') + '</span></div>' +
+      '<div class="info-row"><span class="k">TCH</span><span class="v">' + (cell.tch || '—') + '</span></div>' +
+      '<div class="info-row"><span class="k">LAC</span><span class="v">' + (cell.lac || '—') + '</span></div>' +
+      '<div class="info-row"><span class="k">BSC</span><span class="v">' + (cell.bsc || '—') + '</span></div>';
+  } else {
+    rfSection =
+      '<div class="info-section-title">🔢 LTE Parameters</div>' +
+      '<div class="info-row"><span class="k">PCI</span><span class="v" style="color:#124191;font-weight:800;">' + (cell.pci || '—') + '</span></div>' +
+      '<div class="info-row"><span class="k">RSI</span><span class="v">' + (cell.rsi || '—') + '</span></div>';
+  }
+
+  // قسم الهوائي
+  const antSection =
+    '<div class="info-section-title">📐 Antenna</div>' +
+    '<div class="info-row"><span class="k">Azimuth</span><span class="v">' + cell.bore + '°</span></div>' +
+    '<div class="info-row"><span class="k">Height</span><span class="v">' + (cell.height || '—') + (cell.height ? ' m' : '') + '</span></div>' +
+    '<div class="info-row"><span class="k">Bandwidth</span><span class="v">' + (cell.bw || '—') + '</span></div>';
+
+  // قسم الموقع
+  const locSection =
+    '<div class="info-section-title">📍 Location</div>' +
+    '<div class="info-row"><span class="k">Latitude</span><span class="v">' + cell.lat.toFixed(6) + '</span></div>' +
+    '<div class="info-row"><span class="k">Longitude</span><span class="v">' + cell.long.toFixed(6) + '</span></div>';
+
+  // زر التكنولوجيا
+  const techBadge = cell.tech === 'GSM'
+    ? '<span style="background:#FDF1DC;color:#8A5A00;padding:3px 10px;border-radius:12px;font-size:10.5px;font-weight:800;">GSM 2G</span>'
+    : '<span style="background:#EAF2FB;color:#124191;padding:3px 10px;border-radius:12px;font-size:10.5px;font-weight:800;">LTE 4G</span>';
+
   body.innerHTML =
+    '<div style="margin-bottom:12px;">' + techBadge + '</div>' +
     '<div class="info-section-title">📡 Cell Info</div>' +
     '<div class="info-row"><span class="k">Cell Name</span><span class="v">' + escapeHtml(cell.cell_name) + '</span></div>' +
     '<div class="info-row"><span class="k">Site</span><span class="v">' + escapeHtml(cell.site) + '</span></div>' +
     '<div class="info-row"><span class="k">Sector</span><span class="v">' + escapeHtml(cell.sector) + '</span></div>' +
-          '<div class="info-row"><span class="k">Region</span><span class="v">' + escapeHtml(cell.region) + '</span></div>' +
     '<div class="info-row"><span class="k">Cell ID</span><span class="v">' + cell.cell_id + '</span></div>' +
 
-    '<div class="info-section-title">🔢 RF Parameters</div>' +
-    '<div class="info-row"><span class="k">PCI</span><span class="v" style="color:#124191;">' + cell.pci + '</span></div>' +
-    '<div class="info-row"><span class="k">RSI</span><span class="v">' + cell.rsi + '</span></div>' +
-    '<div class="info-row"><span class="k">Azimuth</span><span class="v">' + cell.bore + '°</span></div>' +
-    '<div class="info-row"><span class="k">Radius</span><span class="v">' + (cell.radius / 1000).toFixed(2) + ' km</span></div>' +
-
-    '<div class="info-section-title">📍 Location</div>' +
-    '<div class="info-row"><span class="k">Latitude</span><span class="v">' + cell.lat.toFixed(6) + '</span></div>' +
-    '<div class="info-row"><span class="k">Longitude</span><span class="v">' + cell.long.toFixed(6) + '</span></div>' +
+    rfSection +
+    antSection +
+    locSection +
 
     '<div style="display:flex;gap:8px;margin-top:18px;">' +
       '<a href="' + gmapsLink + '" target="_blank" rel="noopener" style="flex:1;text-align:center;padding:9px;background:#124191;color:#fff;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;">📍 Maps</a>' +
