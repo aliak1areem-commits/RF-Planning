@@ -5649,23 +5649,49 @@ function hsnShowOnMap() {
     sectorLayer.clearLayers();
     labelLayer.clearLayers();
 
-    // 🎯 اعرض فقط الخلايا المتعارضة (Clean لا تظهر)
+    // 🎯 اعرض فقط الخلايا المتعارضة
     const conflictCells = hsnLastResults.cells.filter(c =>
       hsnLastResults.conflictMap.has(c.id)
     );
 
     if (!conflictCells.length) {
-      toast('✅ No conflicts to show — all cells are clean!', 'success', 5000);
+      toast('✅ No conflicts — all cells clean!', 'success', 5000);
       return;
     }
 
-    console.log('🎵 Showing ' + conflictCells.length + ' conflicting cells (skipped ' +
-                (hsnLastResults.cells.length - conflictCells.length) + ' clean)');
+    // 🎯 حجم ثابت بالمتر — لا يعتمد على zoom
+    // 80 متر فقط (يظهر صغير في كل الـ zooms)
+    const FIXED_RADIUS_M = 80;
 
-    // رتّب: 900 أولاً (أسفل) ثم 1800 فوق
+    function makeFixedSector(lat, lng, azimuth) {
+      const radius_m = FIXED_RADIUS_M;
+      const half_width_m = FIXED_RADIUS_M * 0.35;
+
+      const near_d = radius_m * 0.04;
+      const far_d = radius_m;
+      const near_w = half_width_m * 0.30;
+      const far_w = half_width_m;
+
+      function pt(fwd_m, right_m) {
+        const distance = Math.sqrt(fwd_m * fwd_m + right_m * right_m);
+        const offsetAngle = Math.atan2(right_m, fwd_m) * 180 / Math.PI;
+        return destinationPoint(lat, lng, azimuth + offsetAngle, distance);
+      }
+
+      return [pt(0, 0), pt(near_d, -near_w), pt(far_d, -far_w), pt(far_d, far_w), pt(near_d, near_w)];
+    }
+
+    // رتّب: LOW أولاً، ثم MEDIUM، ثم HIGH (الأعلى فوق)
     conflictCells.sort((a, b) => {
-      const bandPriority = (c) => c.gsmBand === '900' ? 1 : 2;
-      return bandPriority(a) - bandPriority(b);
+      const priority = (cell) => {
+        const conflicts = hsnLastResults.conflictMap.get(cell.id);
+        const count = conflicts.length;
+        const avg = conflicts.reduce((s, c) => s + (c.conflictLevel || 0.5), 0) / count;
+        if (count >= 3 && avg > 0.7) return 3;   // HIGH
+        if (count >= 2 || conflicts.some(c => c.sameSite)) return 2; // MEDIUM
+        return 1; // LOW
+      };
+      return priority(a) - priority(b);
     });
 
     conflictCells.forEach(cell => {
@@ -5675,28 +5701,19 @@ function hsnShowOnMap() {
       const conflictCount = conflicts.length;
       const avgLevel = conflicts.reduce((a, c) => a + (c.conflictLevel || 0.5), 0) / conflictCount;
 
-      // 🎨 الألوان حسب الأولوية
       let color, fillOpacity, weight;
       if (conflictCount >= 3 && avgLevel > 0.7) {
-        color = '#B91C1C';      // أحمر داكن = HIGH
-        fillOpacity = 0.9;
-        weight = 2.5;
+        color = '#B91C1C'; fillOpacity = 0.95; weight = 2.5;
       } else if (conflictCount >= 2 || conflicts.some(c => c.sameSite)) {
-        color = '#F97316';      // برتقالي = MEDIUM
-        fillOpacity = 0.8;
-        weight = 2;
+        color = '#F97316'; fillOpacity = 0.85; weight = 2;
       } else {
-        color = '#FBBF24';      // أصفر = LOW
-        fillOpacity = 0.7;
-        weight = 1.5;
+        color = '#FBBF24'; fillOpacity = 0.75; weight = 1.5;
       }
 
-      const coords = makeSectorCoordsScaled(cell.lat, cell.long, cell.bore, 1.0, cell.gsmBand);
+      const coords = makeFixedSector(cell.lat, cell.long, cell.bore);
       const poly = L.polygon(coords, {
-        color: color,
-        weight: weight,
-        fillColor: color,
-        fillOpacity: fillOpacity,
+        color: color, weight: weight,
+        fillColor: color, fillOpacity: fillOpacity,
         lineJoin: 'round'
       });
 
@@ -5706,45 +5723,30 @@ function hsnShowOnMap() {
 
       poly.bindPopup(
         '<div style="font-family:Inter,sans-serif;font-size:13px;min-width:240px;">' +
-          '<div style="font-weight:800;font-family:monospace;margin-bottom:8px;color:#0C1B3D;font-size:14px;">' +
-            escapeHtml(cell.cell_name) +
-          '</div>' +
+          '<div style="font-weight:800;font-family:monospace;margin-bottom:8px;color:#0C1B3D;">' + escapeHtml(cell.cell_name) + '</div>' +
           '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;">' +
-            '<span style="color:#5A6B87;">Band:</span>' +
-            '<b>' + (cell.gsmBand === '1800' ? '1800 MHz' : '900 MHz') + '</b>' +
-          '</div>' +
+            '<span style="color:#5A6B87;">Band:</span><b>' + (cell.gsmBand === '1800' ? '1800 MHz' : '900 MHz') + '</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;">' +
-            '<span style="color:#5A6B87;">Current HSN:</span>' +
-            '<b style="color:#B91C1C;">' + cell.hsn + '</b>' +
-          '</div>' +
+            '<span style="color:#5A6B87;">Current HSN:</span><b style="color:#B91C1C;">' + cell.hsn + '</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;">' +
-            '<span style="color:#5A6B87;">Suggested HSN:</span>' +
-            '<b style="color:#1F9D55;">' + (suggested != null ? suggested : '—') + '</b>' +
-          '</div>' +
+            '<span style="color:#5A6B87;">Suggested:</span><b style="color:#1F9D55;">' + (suggested != null ? suggested : '—') + '</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;">' +
-            '<span style="color:#5A6B87;">Total Conflicts:</span>' +
-            '<b style="color:#B91C1C;">' + conflictCount + '</b>' +
-          '</div>' +
+            '<span style="color:#5A6B87;">Conflicts:</span><b style="color:#B91C1C;">' + conflictCount + '</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;">' +
-            '<span style="color:#5A6B87;">🏠 Same-Site:</span>' +
-            '<b>' + sameSiteCount + '</b>' +
-          '</div>' +
+            '<span style="color:#5A6B87;">🏠 Same-Site:</span><b>' + sameSiteCount + '</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:4px 0;">' +
-            '<span style="color:#5A6B87;">📡 Neighbor:</span>' +
-            '<b>' + neighborCount + '</b>' +
-          '</div>' +
+            '<span style="color:#5A6B87;">📡 Neighbor:</span><b>' + neighborCount + '</b></div>' +
         '</div>'
       );
 
       sectorLayer.addLayer(poly);
     });
 
-    // Fit bounds
     const bounds = L.latLngBounds(conflictCells.map(c => [c.lat, c.long]));
-    if (bounds.isValid()) map.fitBounds(bounds, { padding: [60, 60] });
+    if (bounds.isValid()) map.fitBounds(bounds, { padding: [80, 80] });
 
     showHSNLegend(conflictCells.length);
-    toast('⚠️ Showing ' + conflictCells.length + ' conflicting cells only', 'success', 4000);
+    toast('⚠️ ' + conflictCells.length + ' conflicts (fixed 80m size)', 'success', 4000);
   }, 400);
 }
 
