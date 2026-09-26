@@ -608,9 +608,22 @@ body {
     <section class="page active" id="page-map">
       <div class="map-container">
         <div class="map-sidebar" id="mapSidebar">
-          <h3>Search</h3>
+                   <h3>Search</h3>
           <div class="filter-group">
-            <input type="text" class="filter-search" id="searchFilter" placeholder="🔍 Cell name, site, PCI..." oninput="applyFilters()">
+            <input type="text" class="filter-search" id="searchFilter" placeholder="🔍 Cell name, site..." oninput="applyFilters()" style="margin-bottom:8px;">
+            <div style="display:flex;gap:6px;">
+              <select id="findByField" style="flex:1;padding:8px 10px;border:1.5px solid #D7DEEA;border-radius:8px;font-size:12px;font-family:inherit;background:#fff;">
+                <option value="">🔎 Find by...</option>
+                <option value="pci">PCI</option>
+                <option value="rsi">RSI</option>
+                <option value="bcch">BCCH</option>
+                <option value="tch">TCH</option>
+                <option value="bsic">BSIC</option>
+                <option value="lac">LAC</option>
+              </select>
+              <input type="text" id="findByValue" placeholder="Value" style="width:90px;padding:8px 10px;border:1.5px solid #D7DEEA;border-radius:8px;font-size:12px;font-family:'JetBrains Mono',monospace;outline:none;">
+              <button onclick="findCellByField()" style="padding:8px 12px;background:#124191;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🔍</button>
+            </div>
           </div>
           <h3>Filter by Technology</h3>
           <div class="filter-group">
@@ -1876,10 +1889,16 @@ function initMap() {
 
   basemaps.street.addTo(map);
 
+   // 🎯 Pane خاص لـ LTE — يظهر فوق GSM
+  map.createPane('gsmPane');
+  map.getPane('gsmPane').style.zIndex = 400;
+
+  map.createPane('ltePane');
+  map.getPane('ltePane').style.zIndex = 450;
+
   sectorLayer = L.layerGroup().addTo(map);
   labelLayer = L.layerGroup().addTo(map);
   coverageLayer = L.layerGroup();
-
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
 
   let zoomTimer = null;
@@ -2156,11 +2175,18 @@ function renderMap() {
     return;
   }
 
-  visibleCells.forEach(function(cell) {
+   // Sectors Mode (Zoom >= 14)
+  // 🎯 رتّب: GSM أولاً (أسفل) ثم LTE فوقه (يُمكن النقر عليه)
+  const sortedCells = visibleCells.slice().sort((a, b) => {
+    const priority = { 'GSM': 1, 'LTE': 2, 'Unknown': 3 };
+    return (priority[a.tech] || 99) - (priority[b.tech] || 99);
+  });
+
+  sortedCells.forEach(function(cell) {
     if (!cell.lat || !cell.long) return;
     const center = [cell.lat, cell.long];
 
-      if (showSectors) {
+        if (showSectors) {
       const isGSM = cell.tech === 'GSM';
       const isLTE = cell.tech === 'LTE';
       if (isLTE && zoom < 16) return;
@@ -2198,12 +2224,15 @@ function renderMap() {
       }
 
       const coords = makeSectorCoordsScaled(cell.lat, cell.long, cell.bore, scale);
-      const polygon = L.polygon(coords, {
-        renderer: canvasRenderer,
+                const polygon = L.polygon(coords, {
+        pane: isLTE ? 'ltePane' : (isGSM ? 'gsmPane' : 'overlayPane'),
         color: cellColor, weight: weight, opacity: 1,
         fillColor: cellColor, fillOpacity: fillOpacity,
         interactive: true, lineJoin: 'round'
       });
+
+      // 🎯 LTE فوق GSM — ليُمكن النقر
+      if (isLTE) polygon.bringToFront();
 
       polygon.cellData = cell;
       polygon.on('click', function(e) {
@@ -4903,6 +4932,107 @@ function cellsExportFiltered() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   toast('✅ Exported ' + filtered.length + ' cells', 'success');
+}
+  /* =========================================================
+   FIND CELL BY FIELD
+   ========================================================= */
+function findCellByField() {
+  const field = document.getElementById('findByField').value;
+  const value = (document.getElementById('findByValue').value || '').trim();
+
+  if (!field) { toast('اختر الحقل أولاً', 'error'); return; }
+  if (!value) { toast('أدخل قيمة البحث', 'error'); return; }
+
+  const matches = allCells.filter(c => {
+    const v = c[field];
+    if (v == null) return false;
+    return String(v).trim() === value || String(v).toLowerCase() === value.toLowerCase();
+  });
+
+  if (!matches.length) {
+    toast('❌ لا توجد خلية بهذا ' + field.toUpperCase() + ' = ' + value, 'error', 5000);
+    return;
+  }
+
+  // إذا أكثر من نتيجة → عرض قائمة
+  if (matches.length === 1) {
+    flyToCellById(matches[0].id);
+    toast('📍 ' + matches[0].cell_name + ' (' + field.toUpperCase() + '=' + value + ')', 'success');
+    return;
+  }
+
+  // قائمة اختيار
+  showCellPicker(matches, field, value);
+}
+
+function flyToCellById(id) {
+  const cell = allCells.find(c => c.id === id);
+  if (!cell) return;
+  window.__gsmMode = false;
+  window.__nbMode = false;
+  switchView('map');
+  setTimeout(() => {
+    renderMap();
+    map.flyTo([cell.lat, cell.long], 16, { duration: 1 });
+    setTimeout(() => showSiteInfo(cell), 1200);
+  }, 200);
+}
+
+function showCellPicker(cells, field, value) {
+  // أنشئ modal مؤقت
+  const existing = document.getElementById('cellPickerModal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'cellPickerModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(12,27,61,.65);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:3000;padding:20px;';
+
+  modal.innerHTML =
+    '<div style="background:#fff;border-radius:14px;width:100%;max-width:600px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3);">' +
+      '<div style="padding:16px 22px;border-bottom:1px solid #E9EEF6;display:flex;align-items:center;justify-content:space-between;">' +
+        '<div>' +
+          '<div style="font-size:15px;font-weight:800;color:#0C1B3D;">🔍 نتائج البحث</div>' +
+          '<div style="font-size:12px;color:#5A6B87;margin-top:2px;">' + field.toUpperCase() + ' = ' + escapeHtml(value) + ' · ' + cells.length + ' نتيجة</div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'cellPickerModal\').remove()" style="width:32px;height:32px;border-radius:8px;background:#FCEAEA;color:#D64545;border:none;cursor:pointer;font-size:16px;">✕</button>' +
+      '</div>' +
+      '<div style="padding:12px 22px;overflow-y:auto;flex:1;">' +
+        cells.map(c =>
+          '<div onclick="selectFromPicker(' + c.id + ')" style="padding:12px 14px;border:1px solid #E9EEF6;border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .15s;" ' +
+            'onmouseover="this.style.borderColor=\'#124191\';this.style.background=\'#F9FBFE\';" ' +
+            'onmouseout="this.style.borderColor=\'#E9EEF6\';this.style.background=\'#fff\';">' +
+            '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
+              '<b style="font-family:\'JetBrains Mono\',monospace;font-size:13px;">' + escapeHtml(c.cell_name) + '</b>' +
+              '<span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:' +
+                (c.tech === 'LTE' ? '#EAF2FB;color:#124191' : '#FDF1DC;color:#8A5A00') + ';">' + c.tech + '</span>' +
+              (c.gsmBand ? '<span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:' +
+                (c.gsmBand === '1800' ? '#F3E8FF;color:#7C3AED' : '#FDF1DC;color:#8A5A00') + ';">' + c.gsmBand + ' MHz</span>' : '') +
+            '</div>' +
+            '<div style="font-size:11.5px;color:#5A6B87;font-family:\'JetBrains Mono\',monospace;line-height:1.6;">' +
+              'Site: ' + escapeHtml(c.site) + ' · Sector: ' + c.sector + ' · Bore: ' + c.bore + '°' +
+              (c.pci ? '<br>PCI: ' + c.pci : '') +
+              (c.rsi ? ' · RSI: ' + c.rsi : '') +
+              (c.bcch ? ' · BCCH: ' + c.bcch : '') +
+              (c.tch ? ' · TCH: ' + c.tch : '') +
+              (c.bsic ? ' · BSIC: ' + c.bsic : '') +
+            '</div>' +
+          '</div>'
+        ).join('') +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(modal);
+
+  // إغلاق بالنقر خارج الصندوق
+  modal.addEventListener('click', e => {
+    if (e.target.id === 'cellPickerModal') modal.remove();
+  });
+}
+
+function selectFromPicker(id) {
+  const modal = document.getElementById('cellPickerModal');
+  if (modal) modal.remove();
+  flyToCellById(id);
 }
 console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
 console.log('%cTools: PCI · GSM · NB · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
