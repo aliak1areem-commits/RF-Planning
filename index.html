@@ -2386,9 +2386,6 @@ function initMap() {
   });
 }
 
-/* =========================================================
-   LOAD CELLS
-   ========================================================= */
 async function loadCells(useCache) {
   useCache = useCache !== false; // افتراضي = استخدام cache
 
@@ -2428,10 +2425,12 @@ async function loadCells(useCache) {
         allData = allData.concat(data);
         from += PAGE_SIZE;
         hasMore = data.length === PAGE_SIZE;
-      } else hasMore = false;
+      } else {
+        hasMore = false;
+      }
     }
 
-        allCells = allData.map(normalizeCell);
+    allCells = allData.map(normalizeCell);
     updateStats();
     renderBandFilters();
     renderLegend();
@@ -2440,7 +2439,10 @@ async function loadCells(useCache) {
     // 💾 احفظ في cache (فقط للمشروع الكامل)
     if (!currentProjectId) {
       saveCacheToDisk(allCells);
-    } => {
+    }
+
+    // 🎯 Zoom للخلايا
+    setTimeout(() => {
       if (map) map.invalidateSize();
       setTimeout(() => fitAllCells(), 200);
     }, 150);
