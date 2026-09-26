@@ -2213,40 +2213,118 @@ async function importPasteFromClipboard() {
   }
 }
 
+/* =========================================================
+   SMART COLUMN DETECTION
+   ========================================================= */
+function normalizeHeader(h) {
+  return String(h || '')
+    .toLowerCase()
+    .replace(/[\s_\-\(\)\[\]\.\/\\]/g, '')
+    .trim();
+}
+
+const HEADER_ALIASES = {
+  cell_name: [
+    'cellname', 'cell', 'name', 'sitename', 'site',
+    'cgi', 'eci', 'ecgi', 'cellidentity', 'sector'
+  ],
+  cell_id: [
+    'cellid', 'cid', 'id', 'localcellid'
+  ],
+  pci: [
+    'pci', 'physicalcellid', 'physicalcellidentity', 'phycellid'
+  ],
+  rsi: [
+    'rsi', 'rootsequenceindex', 'rootseqindex'
+  ],
+  bcch: [
+    'bcch', 'arfcn', 'frequency', 'freq', 'bcchfreq', 'bccharfcn',
+    'bcchno', 'bcchnumber', 'gsmfrequency'
+  ],
+  bsic: [
+    'bsic', 'colorcode', 'nccbcc', 'bsiccode', 'bsicvalue'
+  ],
+  band: [
+    'band', 'gsmband', 'frequencyband', 'freqband'
+  ],
+  cell_radius: [
+    'cellradiusm', 'cellradius', 'radius', 'cellradiusmeter', 'radiusm'
+  ],
+  lat: [
+    'lat', 'latitude', 'lattitude', 'y', 'ycoord', 'ylat'
+  ],
+  long: [
+    'long', 'lng', 'lon', 'longitude', 'x', 'xcoord', 'xlong'
+  ],
+  bore: [
+    'bore', 'azimuth', 'azm', 'az', 'bearing', 'direction', 'heading'
+  ]
+};
+
+function findValueByAlias(row, aliases) {
+  const keys = Object.keys(row);
+
+  // تطابق تام
+  for (const k of keys) {
+    const nk = normalizeHeader(k);
+    if (aliases.includes(nk)) return row[k];
+  }
+
+  // تطابق جزئي
+  for (const k of keys) {
+    const nk = normalizeHeader(k);
+    for (const alias of aliases) {
+      if (nk.startsWith(alias) || nk.endsWith(alias)) return row[k];
+      if (alias.length >= 3 && nk.includes(alias)) return row[k];
+    }
+  }
+
+  return '';
+}
+
 function importParseRows(rows) {
   if (!rows.length) { toast('No data found', 'error'); return; }
 
-  const colMap = {
-    cell_name:   ['Cell Name', 'cell_name', 'CELL_NAME'],
-    cell_id:     ['Cell ID', 'cell_id', 'CELL_ID'],
-    pci:         ['Physical cell ID', 'Physical Cell ID', 'PCI', 'pci', 'Physical cell id'],
-    rsi:         ['Root sequence index', 'RSI', 'rsi'],
-    cell_radius: ['Cell radius(m)', 'Cell radius (m)', 'Cell Radius', 'cell_radius'],
-    lat:         ['Lat', 'LAT', 'lat', 'Latitude', 'latitude'],
-    long:        ['Long', 'LONG', 'long', 'Longitude', 'longitude'],
-    bore:        ['Bore', 'BORE', 'bore', 'Azimuth']
-  };
+  console.log('📋 File headers:', Object.keys(rows[0]));
+  console.log('📋 Sample row:', rows[0]);
 
-  function findVal(row, keys) {
-    for (const k of keys) {
-      if (row[k] !== undefined && row[k] !== '') return row[k];
-    }
-    return '';
-  }
+  const firstRow = rows[0];
+  const detected = {};
+  Object.keys(HEADER_ALIASES).forEach(field => {
+    detected[field] = findValueByAlias(firstRow, HEADER_ALIASES[field]);
+  });
+  console.log('🎯 Auto-detected:', detected);
 
-  importPreviewData = rows.map(row => ({
-    cell_name:   String(findVal(row, colMap.cell_name)).trim(),
-    cell_id:     parseInt(findVal(row, colMap.cell_id)) || 0,
-    pci:         parseInt(findVal(row, colMap.pci)) || 0,
-    rsi:         parseInt(findVal(row, colMap.rsi)) || 0,
-    cell_radius: parseInt(findVal(row, colMap.cell_radius)) || 15000,
-    lat:         parseFloat(findVal(row, colMap.lat)) || 0,
-    long:        parseFloat(findVal(row, colMap.long)) || 0,
-    bore:        parseInt(findVal(row, colMap.bore)) || 0
-  })).filter(r => r.cell_name);
+  importPreviewData = rows.map(row => {
+    const cellName = String(findValueByAlias(row, HEADER_ALIASES.cell_name)).trim();
+    const lat = parseFloat(findValueByAlias(row, HEADER_ALIASES.lat)) || 0;
+    const lng = parseFloat(findValueByAlias(row, HEADER_ALIASES.long)) || 0;
+
+    if (!cellName) return null;
+    if (!lat || !lng) return null;
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+
+    return {
+      cell_name:   cellName,
+      cell_id:     parseInt(findValueByAlias(row, HEADER_ALIASES.cell_id)) || 0,
+      pci:         parseInt(findValueByAlias(row, HEADER_ALIASES.pci)) || 0,
+      rsi:         parseInt(findValueByAlias(row, HEADER_ALIASES.rsi)) || 0,
+      bcch:        parseInt(findValueByAlias(row, HEADER_ALIASES.bcch)) || 0,
+      bsic:        String(findValueByAlias(row, HEADER_ALIASES.bsic) || '').trim(),
+      band:        String(findValueByAlias(row, HEADER_ALIASES.band) || '').trim(),
+      cell_radius: parseInt(findValueByAlias(row, HEADER_ALIASES.cell_radius)) || 15000,
+      lat:         lat,
+      long:        lng,
+      bore:        parseInt(findValueByAlias(row, HEADER_ALIASES.bore)) || 0
+    };
+  }).filter(Boolean);
+
+  console.log(`✅ Parsed ${importPreviewData.length} valid cells from ${rows.length} rows`);
 
   if (!importPreviewData.length) {
-    toast('No valid cells detected. Check column names.', 'error');
+    console.error('❌ No valid cells. Headers:', Object.keys(rows[0]));
+    console.error('❌ Sample rows:', rows.slice(0, 3));
+    toast('No valid cells. Open Console (F12) to see headers', 'error', 6000);
     return;
   }
 
