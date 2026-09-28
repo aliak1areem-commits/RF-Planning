@@ -2433,8 +2433,10 @@ function rebuildLookups() {
 async function loadCells(useCache) {
   useCache = useCache !== false; // افتراضي = استخدام cache
 
-  // جرّب Cache أولاً
-     if (cached && cached.length) {
+    // جرّب Cache أولاً
+  if (useCache && !currentProjectId) {
+    const cached = loadCacheFromDisk();
+    if (cached && cached.length) {
       allCells = cached.map(normalizeCell);
       rebuildLookups();
       updateStats();
