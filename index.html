@@ -2430,11 +2430,9 @@ async function loadCells(useCache) {
       }
     }
 
-    allCells = allData.map(normalizeCell);
-    updateStats();
-    renderBandFilters();
-    renderLegend();
-    applyFilters();
+   allCells = allData.map(normalizeCell);
+updateStats();
+applyFilters();
 
     // 💾 احفظ في cache (فقط للمشروع الكامل)
     if (!currentProjectId) {
