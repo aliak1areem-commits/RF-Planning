@@ -2832,7 +2832,10 @@ function initMap() {
   let isRendering = false;
 
   // 🚫 أخفِ الطبقات فوراً عند بدء الزوم
-  map.on('zoomstart movestart', function() {
+map.on('zoomstart movestart', function() {
+    // ✅ لا تمسح الطبقات أثناء عرض نتائج الأدوات
+    if (window.__gsmMode || window.__nbMode) return;
+    
     if (sectorLayer) sectorLayer.clearLayers();
     if (labelLayer) labelLayer.clearLayers();
     if (neighborLineLayer) neighborLineLayer.clearLayers();
