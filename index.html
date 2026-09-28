@@ -7,11 +7,7 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- ✅ أضف هذا السطر -->
-<script src="https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js"></script>
-
-<script src="https://unpkg.com/leaflet.tilelayer.pouchdbcached@1.0.0/L.TileLayer.PouchDBCached.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -2364,9 +2360,7 @@ function initMap() {
     { 
       maxZoom: 19, 
       attribution: '© OpenStreetMap',
-      useCache: true,
-      saveToCache: true,
-      cacheMaxAge: 30 * 24 * 60 * 60 * 1000
+    
     }
   );
    basemaps.satellite = L.tileLayer(
@@ -2374,9 +2368,7 @@ function initMap() {
     { 
       maxZoom: 19, 
       attribution: '© Esri',
-      useCache: true,
-      saveToCache: true,
-      cacheMaxAge: 30 * 24 * 60 * 60 * 1000
+     
     }
   );
    basemaps.terrain = L.tileLayer(
@@ -2384,9 +2376,7 @@ function initMap() {
     { 
       maxZoom: 17, 
       attribution: '© OpenTopoMap',
-      useCache: true,
-      saveToCache: true,
-      cacheMaxAge: 30 * 24 * 60 * 60 * 1000
+     
     }
   );
 
