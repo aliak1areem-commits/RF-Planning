@@ -946,6 +946,9 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
         </button>
         <button class="btn btn-ghost" id="toggleSidebarBtn" onclick="toggleMapSidebar()" title="Collapse/Expand panel">
         </button>
+           <button class="btn btn-ghost" onclick="resetMapView()" title="Show Normal Map" style="background:#FCEAEA;color:#D64545;border-color:#F5D5D5;">
+  <span>🗺️</span><span>Reset View</span>
+</button> 
                <button class="btn btn-ghost" onclick="loadCells(false)">
           <span>🔄</span><span>Refresh</span>
         </button>
@@ -2611,6 +2614,12 @@ function destinationPoint(lat, lng, bearing, distanceM) {
    ========================================================= */
 function switchView(page) {
   currentView = page;
+  
+  // ✅ صفّر الفلاغ لما ترجع لصفحة الماب أو أي صفحة عادية
+  if (page === 'map' || page === 'dashboard' || page === 'cells' || page === 'projects' || page === 'import' || page === 'tools') {
+    window.__gsmMode = false;
+    window.__nbMode = false;
+  }
       if (page !== 'map') {
     window.__gsmMode = false;
     window.__nbMode = false;
@@ -3146,7 +3155,41 @@ document.addEventListener('keydown', function(e) {
     searchAndFly();
   }
 });
-
+/* =========================================================
+   🗺️ إعادة الماب للوضع الطبيعي
+   ========================================================= */
+function resetMapView() {
+  window.__gsmMode = false;
+  window.__nbMode = false;
+  currentView = 'map';
+  
+  if (sectorLayer) sectorLayer.clearLayers();
+  if (labelLayer) labelLayer.clearLayers();
+  if (neighborLineLayer) neighborLineLayer.clearLayers();
+  
+  if (typeof nbHideLegend === 'function') nbHideLegend();
+  if (typeof hideNeighborLinesLegend === 'function') hideNeighborLinesLegend();
+  
+  // اذهب لصفحة الماب
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  const mapBtn = document.querySelector('[data-page="map"]');
+  if (mapBtn) mapBtn.classList.add('active');
+  
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const mapPage = document.getElementById('page-map');
+  if (mapPage) mapPage.classList.add('active');
+  
+  document.getElementById('pageIcon').textContent = '🗺️';
+  document.getElementById('pageTitle').textContent = 'Cell Map';
+  document.getElementById('pageSubtitle').textContent = 'Visualize cells on the map';
+  
+  if (map) {
+    setTimeout(() => map.invalidateSize(), 100);
+  }
+  
+  applyFilters();
+  toast('🗺️ تم إعادة عرض الخلايا', 'success');
+}
 function applyFilters() {
   const searchEl = document.getElementById('searchFilter');
     const pciEl = document.getElementById('pciFilter');
