@@ -2923,27 +2923,7 @@ function rebuildLookups() {
     cellById.set(c.id, c);
   });
 }
-  /* =========================================================
-   🔄 تحديث صامت في الخلفية (بدون شاشة تحميل)
-   ========================================================= */
 
-
-    // قارن مع النسخة القديمة — لو تغيّرت، حدّث
-    if (allData.length !== allCells.length) {
-      console.log('✅ Background refresh: ' + allData.length + ' cells (was ' + allCells.length + ')');
-      allCells = allData.map(normalizeCell);
-      rebuildLookups();
-      updateStats();
-      applyFilters();
-      if (!currentProjectId) saveCacheToDisk(allCells);
-      toast('🔄 Network updated (' + allCells.length + ' cells)', 'info', 3000);
-    } else {
-      console.log('✅ Background refresh: no changes');
-    }
-  } catch (e) {
-    console.warn('Background refresh failed:', e);
-  }
-}
   /* =========================================================
    🔄 تحديث صامت في الخلفية
    ========================================================= */
