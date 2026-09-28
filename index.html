@@ -2615,8 +2615,8 @@ function destinationPoint(lat, lng, bearing, distanceM) {
 function switchView(page) {
   currentView = page;
   
-  // ✅ صفّر الفلاغ لما ترجع لصفحة الماب أو أي صفحة عادية
-  if (page === 'map' || page === 'dashboard' || page === 'cells' || page === 'projects' || page === 'import' || page === 'tools') {
+  // ✅ صفّر الفلاغ فقط لما تخرج من الماب
+  if (page !== 'map') {
     window.__gsmMode = false;
     window.__nbMode = false;
   }
