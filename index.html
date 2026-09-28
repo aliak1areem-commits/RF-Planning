@@ -3201,8 +3201,9 @@ function renderMap() {
   const showSectors = document.getElementById('showSectors') && document.getElementById('showSectors').checked;
   const showLabels = document.getElementById('showLabels') && document.getElementById('showLabels').checked;
   const showSiteCircle = document.getElementById('showSiteCircle') && document.getElementById('showSiteCircle').checked;
-  const labelMode = document.getElementById('labelMode') ? document.getElementById('labelMode').value : 'name';
+const labelMode = document.getElementById('labelMode') ? document.getElementById('labelMode').value : 'name';
   const zoom = map.getZoom();
+  const viewportBounds = map.getBounds().pad(0.1);  const zoom = map.getZoom();
 
   if (showSiteCircle && zoom < 11) {
     const sites = {};
@@ -3277,6 +3278,7 @@ function renderMap() {
 
   sortedCells.forEach(function(cell) {
     if (!cell.lat || !cell.long) return;
+    if (!viewportBounds.contains([cell.lat, cell.long])) return;
     const center = [cell.lat, cell.long];
 
         if (showSectors) {
