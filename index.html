@@ -8652,12 +8652,32 @@ console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-
 console.log('%cTools: PCI · GSM · NB · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
 
 </script>
-  <script>
+ <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').then(() => {
-    console.log('✅ Offline mode ready');
-  }).catch(err => {
-    console.log('❌ SW failed:', err);
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+    console.log('✅ SW registered');
+    
+    // 🔄 اكتشف تحديث جديد
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          // فيه نسخة جديدة → حدّث تلقائياً
+          console.log('🔄 New version available — updating...');
+          newWorker.postMessage('SKIP_WAITING');
+          setTimeout(() => window.location.reload(), 500);
+        }
+      });
+    });
+  }).catch(err => console.log('❌ SW failed:', err));
+  
+  // لما يتغير SW → أعد التحميل
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
   });
 }
 </script>
