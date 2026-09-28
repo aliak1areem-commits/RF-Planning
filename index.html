@@ -1118,9 +1118,14 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
         </div>
 
         <div class="loading-overlay" id="loadingOverlay">
-          <div class="spinner"></div>
-          <div class="text">Loading cells from Supabase...</div>
-        </div>
+  <div class="spinner"></div>
+  <div class="text">Loading cells from Supabase...</div>
+  <div style="font-size:11px;color:#94A3B8;margin-top:4px;" id="loadingSubtext">Initializing...</div>
+  <div style="width:240px;height:4px;background:#E9EEF6;border-radius:4px;margin-top:8px;overflow:hidden;">
+    <div id="loadingProgressBar" style="width:0%;height:100%;background:linear-gradient(90deg,#124191,#00A1E0);transition:width .3s;"></div>
+  </div>
+</div>
+          
       </div>
     </section>
 
@@ -2918,6 +2923,75 @@ function rebuildLookups() {
     cellById.set(c.id, c);
   });
 }
+  /* =========================================================
+   🔄 تحديث صامت في الخلفية (بدون شاشة تحميل)
+   ========================================================= */
+
+
+    // قارن مع النسخة القديمة — لو تغيّرت، حدّث
+    if (allData.length !== allCells.length) {
+      console.log('✅ Background refresh: ' + allData.length + ' cells (was ' + allCells.length + ')');
+      allCells = allData.map(normalizeCell);
+      rebuildLookups();
+      updateStats();
+      applyFilters();
+      if (!currentProjectId) saveCacheToDisk(allCells);
+      toast('🔄 Network updated (' + allCells.length + ' cells)', 'info', 3000);
+    } else {
+      console.log('✅ Background refresh: no changes');
+    }
+  } catch (e) {
+    console.warn('Background refresh failed:', e);
+  }
+}
+  /* =========================================================
+   🔄 تحديث صامت في الخلفية
+   ========================================================= */
+async function refreshCellsInBackground() {
+  try {
+    console.log('🔄 Background refresh started...');
+    
+    let countQuery = db.from('rf_cells').select('id', { count: 'exact', head: true });
+    if (currentProjectId) countQuery = countQuery.eq('project_id', currentProjectId);
+    const { count } = await countQuery;
+    const total = count || 0;
+
+    const PAGE_SIZE = 1000;
+    const pages = Math.ceil(total / PAGE_SIZE);
+    const promises = [];
+
+    for (let i = 0; i < pages; i++) {
+      let q = db.from('rf_cells')
+        .select('*')
+        .order('cell_name')
+        .range(i * PAGE_SIZE, (i + 1) * PAGE_SIZE - 1);
+      if (currentProjectId) q = q.eq('project_id', currentProjectId);
+      promises.push(q);
+    }
+
+    const results = await Promise.all(promises);
+    let allData = [];
+    results.forEach(r => {
+      if (r.error) throw r.error;
+      if (r.data) allData = allData.concat(r.data);
+    });
+
+    // قارن مع الموجود — لو تغيّر، حدّث
+    if (allData.length !== allCells.length) {
+      console.log('✅ Background refresh: ' + allData.length + ' cells (was ' + allCells.length + ')');
+      allCells = allData.map(normalizeCell);
+      rebuildLookups();
+      updateStats();
+      applyFilters();
+      if (!currentProjectId) saveCacheToDisk(allCells);
+      toast('🔄 Network updated (' + allCells.length + ' cells)', 'info', 3000);
+    } else {
+      console.log('✅ Background refresh: no changes');
+    }
+  } catch (e) {
+    console.warn('Background refresh failed:', e);
+  }
+}
 async function loadCells(useCache) {
   useCache = useCache !== false; // افتراضي = استخدام cache
 
@@ -2933,40 +3007,52 @@ async function loadCells(useCache) {
         if (map) map.invalidateSize();
         setTimeout(() => fitAllCells(), 200);
       }, 150);
-      toast('⚡ Loaded ' + allCells.length + ' cells from cache', 'success');
+            toast('⚡ Loaded ' + allCells.length + ' cells from cache', 'success');
+      setTimeout(() => refreshCellsInBackground(), 2000);
       return;
+   
     }
   }
 
   const loadingEl = document.getElementById('loadingOverlay');
   if (loadingEl) loadingEl.style.display = 'flex';
 
-  try {
-    let allData = [];
-    let from = 0;
+    try {
+    // 🚀 1. اجلب العدد الإجمالي
+    let countQuery = db.from('rf_cells').select('id', { count: 'exact', head: true });
+    if (currentProjectId) countQuery = countQuery.eq('project_id', currentProjectId);
+    const { count } = await countQuery;
+    const total = count || 0;
+
+    console.log('📊 Total cells: ' + total);
+
+    // 🚀 2. اجلب كل الصفحات بالتوازي
     const PAGE_SIZE = 1000;
-    let hasMore = true;
+    const pages = Math.ceil(total / PAGE_SIZE);
+    const promises = [];
 
-    while (hasMore) {
-      let query = db.from('rf_cells').select('*').order('cell_name').range(from, from + PAGE_SIZE - 1);
-      if (currentProjectId) query = query.eq('project_id', currentProjectId);
-
-      const { data, error } = await query;
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        allData = allData.concat(data);
-        from += PAGE_SIZE;
-        hasMore = data.length === PAGE_SIZE;
-      } else {
-        hasMore = false;
-      }
+    for (let i = 0; i < pages; i++) {
+      let q = db.from('rf_cells')
+        .select('*')
+        .order('cell_name')
+        .range(i * PAGE_SIZE, (i + 1) * PAGE_SIZE - 1);
+      if (currentProjectId) q = q.eq('project_id', currentProjectId);
+      promises.push(q);
     }
 
-      allCells = allData.map(normalizeCell);
-rebuildLookups();        // ← أضف هذا
+    const results = await Promise.all(promises);
+    let allData = [];
+    results.forEach(r => {
+      if (r.error) throw r.error;
+      if (r.data) allData = allData.concat(r.data);
+    });
+
+   allCells = allData.map(normalizeCell);
+rebuildLookups();
 updateStats();
 applyFilters();
+
+     
 
     // 💾 احفظ في cache (فقط للمشروع الكامل)
     if (!currentProjectId) {
@@ -3307,8 +3393,7 @@ function renderMap() {
         labelLayer.addLayer(commentIcon);
       }
     }
-  // 📊 تحديث الإحصائيات الصغيرة
-  if (typeof updateMiniStats === 'function') updateMiniStats();
+ 
     // Labels — تظهر فقط للـ zoom >= 13
 
     if (showLabels && zoom >= 13) {
@@ -3328,9 +3413,12 @@ function renderMap() {
         }),
         interactive: false
       });
-      labelLayer.addLayer(label);
+           labelLayer.addLayer(label);
     }
   });
+
+  // 📊 تحديث الإحصائيات الصغيرة (مرة واحدة فقط)
+  if (typeof updateMiniStats === 'function') updateMiniStats();
 }
 
 function makeSectorCoords(lat, lng, azimuth) { return makeSectorCoordsScaled(lat, lng, azimuth, 1.0); }
