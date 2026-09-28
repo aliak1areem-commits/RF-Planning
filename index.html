@@ -3203,7 +3203,7 @@ function renderMap() {
   const showSiteCircle = document.getElementById('showSiteCircle') && document.getElementById('showSiteCircle').checked;
 const labelMode = document.getElementById('labelMode') ? document.getElementById('labelMode').value : 'name';
   const zoom = map.getZoom();
-  const viewportBounds = map.getBounds().pad(0.1);  const zoom = map.getZoom();
+  const viewportBounds = map.getBounds().pad(0.1);
 
   if (showSiteCircle && zoom < 11) {
     const sites = {};
