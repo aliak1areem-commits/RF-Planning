@@ -2434,13 +2434,12 @@ async function loadCells(useCache) {
   useCache = useCache !== false; // افتراضي = استخدام cache
 
   // جرّب Cache أولاً
-  if (useCache && !currentProjectId) {
-    const cached = loadCacheFromDisk();
-   if (cached && cached.length) {
-  allCells = cached.map(normalizeCell);
-  rebuildLookups();       // ← أضف هذا
-  updateStats();
-  applyFilters();
+     if (cached && cached.length) {
+      allCells = cached.map(normalizeCell);
+      rebuildLookups();
+      updateStats();
+      applyFilters();
+      setTimeout(() => {
         if (map) map.invalidateSize();
         setTimeout(() => fitAllCells(), 200);
       }, 150);
