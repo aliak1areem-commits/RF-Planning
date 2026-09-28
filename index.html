@@ -689,7 +689,7 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
         <div class="map-sidebar" id="mapSidebar">
                    <h3>Search</h3>
           <div class="filter-group">
-            <input type="text" class="filter-search" id="searchFilter" placeholder="🔍 Cell name, site..." oninput="applyFilters()" style="margin-bottom:8px;">
+            <input type="text" class="filter-search" id="searchFilter" placeholder="🔍 Cell name, site..." oninput="debouncedApplyFilters()" style="margin-bottom:8px;">
             <div style="display:flex;gap:6px;">
               <select id="findByField" style="flex:1;padding:8px 10px;border:1.5px solid #D7DEEA;border-radius:8px;font-size:12px;font-family:inherit;background:#fff;">
                 <option value="">🔎 Find by...</option>
@@ -2197,6 +2197,8 @@ let lastPCIResults = null;
 /* =========================================================
    PAGE TITLES
    ========================================================= */
+  const debouncedApplyFilters = debounce(applyFilters, 200);
+const debouncedRenderCells = debounce(() => renderCellsPage(1), 250);
 const PAGE_TITLES = {
   'map':              { icon: '🗺️', title: 'Cell Map',                sub: 'Visualize cells on the map' },
   'dashboard':        { icon: '📊', title: 'Dashboard',               sub: 'Overview and statistics' },
@@ -2220,6 +2222,16 @@ const PAGE_TITLES = {
 /* =========================================================
    TOAST
    ========================================================= */
+  /* =========================================================
+   DEBOUNCE — لتأخير تنفيذ الدوال
+   ========================================================= */
+function debounce(fn, delay) {
+  let t;
+  return function(...args) {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
 function toast(msg, type, duration) {
   type = type || 'info';
   duration = duration || 3000;
@@ -2424,11 +2436,11 @@ async function loadCells(useCache) {
   // جرّب Cache أولاً
   if (useCache && !currentProjectId) {
     const cached = loadCacheFromDisk();
-    if (cached && cached.length) {
-      allCells = cached.map(normalizeCell);
-      updateStats();
-      applyFilters();
-      setTimeout(() => {
+   if (cached && cached.length) {
+  allCells = cached.map(normalizeCell);
+  rebuildLookups();       // ← أضف هذا
+  updateStats();
+  applyFilters();
         if (map) map.invalidateSize();
         setTimeout(() => fitAllCells(), 200);
       }, 150);
@@ -2462,7 +2474,8 @@ async function loadCells(useCache) {
       }
     }
 
-   allCells = allData.map(normalizeCell);
+      allCells = allData.map(normalizeCell);
+rebuildLookups();        // ← أضف هذا
 updateStats();
 applyFilters();
 
@@ -7679,9 +7692,19 @@ async function deleteComment(cellId) {
     toast('Delete failed: ' + e.message, 'error');
   }
 }
+ 
 console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
 console.log('%cTools: PCI · GSM · NB · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
-</script>
 
+</script>
+  <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').then(() => {
+    console.log('✅ Offline mode ready');
+  }).catch(err => {
+    console.log('❌ SW failed:', err);
+  });
+}
+</script>
 </body>
 </html>
