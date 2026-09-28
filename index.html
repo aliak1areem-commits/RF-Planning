@@ -7,6 +7,8 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"/>
+<script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -15,6 +17,29 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
+  /* 🖱️ Context Menu */
+.cell-context-menu {
+  position: fixed;
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.2);
+  z-index: 10000;
+  display: none;
+  min-width: 180px;
+  border: 1px solid #E9EEF6;
+}
+.cell-context-menu.show { display: block; }
+.ctx-item {
+  padding: 8px 12px;
+  font-size: 12.5px;
+  color: #1B1F2A;
+  cursor: pointer;
+  border-radius: 6px;
+  font-family: inherit;
+}
+.ctx-item:hover { background: #F4F7FB; color: #124191; }
+.ctx-sep { height: 1px; background: #F0F3F9; margin: 4px 0; }
 /* NB Labels on map */
 .nb-label {
   background: rgba(255,255,255,.95) !important;
@@ -576,6 +601,259 @@ body.dark .modal-backdrop > div > div { border-color: #1E3A6D !important; }
 body.dark .modal-backdrop h3 { color: #fff !important; }
 body.dark .modal-backdrop label { color: #AEB9D4 !important; }
 body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !important; border-color: #1E3A6D !important; } 
+  /* 🔍 Map Search Box */
+.map-search-box {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  background: rgba(255,255,255,.98);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 4px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.15);
+  display: flex;
+  gap: 4px;
+  width: 380px;
+  max-width: calc(100% - 400px);
+}
+.map-search-box input {
+  flex: 1;
+  padding: 9px 14px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  color: #0C1B3D;
+}
+.map-search-box button {
+  padding: 9px 14px;
+  background: #124191;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.map-search-box button:hover { background: #0e336f; }
+
+/* 🎯 Go to Coordinates */
+.goto-coords {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  margin-top: 50px;
+  z-index: 500;
+}
+.goto-coords > button {
+  width: 40px;
+  height: 40px;
+  background: rgba(255,255,255,.98);
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.15);
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.goto-coords > button:hover { background: #F4F7FB; }
+.goto-panel {
+  display: none;
+  position: absolute;
+  top: 48px;
+  right: 0;
+  background: rgba(255,255,255,.98);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.15);
+  width: 220px;
+  gap: 6px;
+  flex-direction: column;
+}
+.goto-panel.show { display: flex; }
+.goto-panel input {
+  padding: 8px 10px;
+  border: 1.5px solid #D7DEEA;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  outline: none;
+}
+.goto-panel input:focus { border-color: #00A1E0; }
+.goto-panel button {
+  padding: 8px;
+  background: #124191;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* 📸 Screenshot Button */
+.screenshot-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 500;
+  background: rgba(255,255,255,.98);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.15);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #5A6B87;
+  font-family: inherit;
+}
+.screenshot-btn:hover { color: #124191; background: #F4F7FB; }
+
+/* 📊 Mini Stats on Map */
+.map-mini-stats {
+  position: absolute;
+  bottom: 20px;
+  left: 340px;
+  z-index: 500;
+  background: rgba(255,255,255,.98);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 8px 14px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.15);
+  font-size: 11.5px;
+  font-family: 'JetBrains Mono', monospace;
+  display: flex;
+  gap: 14px;
+  color: #0C1B3D;
+}
+.map-mini-stats span b { color: #124191; }
+
+/* ⚡ Quick Filter Chips */
+.quick-chips {
+  position: absolute;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: calc(100% - 400px);
+}
+.chip {
+  padding: 5px 12px;
+  background: rgba(255,255,255,.98);
+  border: 1.5px solid #D7DEEA;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #5A6B87;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+}
+.chip:hover { background: #F4F7FB; color: #124191; }
+.chip.active { background: #124191; color: #fff; border-color: #124191; }
+.chip.gsm { background: #FFF7ED; color: #D97706; border-color: #FED7AA; }
+.chip.gsm.active { background: #D97706; color: #fff; }
+.chip.lte { background: #EAF2FB; color: #124191; border-color: #BFDBFE; }
+.chip.lte.active { background: #124191; color: #fff; }
+.chip.b900 { background: #FDF1DC; color: #8A5A00; border-color: #FDE68A; }
+.chip.b900.active { background: #D97706; color: #fff; }
+.chip.b1800 { background: #F3E8FF; color: #7C3AED; border-color: #DDD6FE; }
+.chip.b1800.active { background: #7C3AED; color: #fff; }
+
+/* 🗺️ Bookmarks */
+.bookmarks-btn {
+  position: absolute;
+  top: 120px;
+  right: 16px;
+  z-index: 500;
+  width: 40px;
+  height: 40px;
+  background: rgba(255,255,255,.98);
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.15);
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bookmarks-panel {
+  display: none;
+  position: absolute;
+  top: 168px;
+  right: 16px;
+  width: 260px;
+  background: rgba(255,255,255,.98);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.15);
+  z-index: 500;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.bookmarks-panel.show { display: block; }
+.bookmark-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  border-bottom: 1px solid #F0F3F9;
+}
+.bookmark-item:hover { background: #F4F7FB; }
+.bookmark-item b { flex: 1; color: #0C1B3D; }
+.bookmark-item button {
+  background: none;
+  border: none;
+  color: #D64545;
+  cursor: pointer;
+  font-size: 14px;
+}
+/* 🖱️ Cell Context Menu */
+.cell-context-menu {
+  position: fixed;
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.2);
+  z-index: 10000;
+  display: none;
+  min-width: 180px;
+  border: 1px solid #E9EEF6;
+}
+.cell-context-menu.show { display: block; }
+.ctx-item {
+  padding: 8px 12px;
+  font-size: 12.5px;
+  color: #1B1F2A;
+  cursor: pointer;
+  border-radius: 6px;
+  font-family: inherit;
+}
+.ctx-item:hover { background: #F4F7FB; color: #124191; }
+.ctx-sep { height: 1px; background: #F0F3F9; margin: 4px 0; }
+/* Responsive */
+@media (max-width: 900px) {
+  .map-search-box { width: 240px; max-width: calc(100% - 100px); left: 16px; transform: none; }
+  .quick-chips { display: none; }
+  .map-mini-stats { display: none; }
+}
 </style>
 </head>
 <body>
@@ -678,7 +956,6 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
       <div class="stats-bar-item">📡 <b id="statTotal">0</b> Cells</div>
       <div class="stats-bar-item">📍 <b id="statSites">0</b> Sites</div>
       <div class="stats-bar-item">🌐 <b id="statBands">0</b> Regions</div>
-      <div class="stats-bar-item">⚠️ <b id="statPCI">0</b> PCI Conflicts</div>
       <div class="stats-bar-item" style="margin-left:auto;">🎯 Visible: <b id="statVisible">0</b></div>
     </div>
 
@@ -714,10 +991,7 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
               <span style="color:#124191;font-weight:700;">📶 LTE (4G)</span>
             </label>
           </div>
-          <h3>Filter by PCI</h3>
-          <div class="filter-group">
-            <input type="text" class="filter-search" id="pciFilter" placeholder="PCI number..." oninput="applyFilters()">
-          </div>
+        
           <h3>Display Options</h3>
           <div class="filter-group">
             <label class="filter-checkbox">
@@ -769,6 +1043,8 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
             <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="clearFilters()">🗑️ Clear Filters</button>
                         <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="clearCache()">⚡ Clear Cache</button>
             <button class="btn btn-ghost" id="multiSelectBtn" style="width:100%;justify-content:center;" onclick="toggleMultiSelectMode()">🎯 Multi-Select Mode</button>
+                        <button class="btn btn-gold" style="width:100%;justify-content:center;margin-top:8px;" onclick="copyPolygonCells()">📋 Copy Polygon Cells</button>
+            <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:8px;" onclick="clearDrawings()">🗑️ Clear Drawings</button>
           </div>
         </div>
 
@@ -792,6 +1068,43 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
             </div>
           </div>
         </div>
+                <!-- 🔍 Search Box على الماب -->
+        <div class="map-search-box" id="mapSearchBox">
+          <input type="text" id="mapSearchInput" placeholder="🔍 Search cell / site / PCI..." 
+                 onkeypress="if(event.key==='Enter') mapSearchFly()">
+          <button onclick="mapSearchFly()" title="Search">🔍</button>
+        </div>
+
+        <!-- 🎯 Go to Coordinates -->
+        <div class="goto-coords" id="gotoCoords">
+          <button onclick="toggleGotoCoords()" title="Go to Coordinates">🎯</button>
+          <div class="goto-panel" id="gotoPanel">
+            <input type="text" id="gotoLat" placeholder="Latitude" value="33.3">
+            <input type="text" id="gotoLon" placeholder="Longitude" value="44.4">
+            <button onclick="gotoCoordinates()">Go</button>
+          </div>
+        </div>
+                <!-- ⚡ Quick Filter Chips -->
+        <div class="quick-chips">
+          <button class="chip active" data-filter="all" onclick="applyQuickChip('all')">🌐 All</button>
+          <button class="chip gsm" data-filter="gsm" onclick="applyQuickChip('gsm')">📡 GSM</button>
+          <button class="chip lte" data-filter="lte" onclick="applyQuickChip('lte')">📶 LTE</button>
+          <button class="chip b900" data-filter="b900" onclick="applyQuickChip('b900')">900 MHz</button>
+          <button class="chip b1800" data-filter="b1800" onclick="applyQuickChip('b1800')">1800 MHz</button>
+        </div>
+
+        <!-- 📊 Mini Stats -->
+        <div class="map-mini-stats" id="miniStats">
+          <span>👁️ Visible: <b>0</b></span>
+          <span>📍 Sites: <b>0</b></span>
+        </div>
+
+        <!-- 📸 Screenshot -->
+        <button class="screenshot-btn" onclick="takeMapScreenshot()">📸 Screenshot</button>
+
+        <!-- 🗺️ Bookmarks -->
+        <button class="bookmarks-btn" onclick="toggleBookmarksPanel()" title="Bookmarks">🗺️</button>
+        <div class="bookmarks-panel" id="bookmarksPanel"></div>
 
         <div class="basemap-switcher">
           <button class="basemap-btn active" data-basemap="street">Street</button>
@@ -2387,6 +2700,107 @@ function initMap() {
   // 🔗 طبقة خطوط الجيران
   neighborLineLayer = L.layerGroup().addTo(map);
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
+    /* =======================================================
+     📏 أدوات الرسم — مسافة + مضلع
+     ======================================================= */
+  const drawnItems = new L.FeatureGroup();
+  map.addLayer(drawnItems);
+
+  const drawControl = new L.Control.Draw({
+    position: 'topleft',
+    draw: {
+      polyline: {
+        shapeOptions: { color: '#F2A900', weight: 3 },
+        metric: true,
+        feet: false,
+        showLength: true
+      },
+      polygon: {
+        allowIntersection: false,
+        showArea: false,
+        shapeOptions: { color: '#124191', fillOpacity: 0.15, weight: 2 }
+      },
+      rectangle: false,
+      circle: false,
+      circlemarker: false,
+      marker: false
+    },
+    edit: {
+      featureGroup: drawnItems,
+      remove: true
+    }
+  });
+  map.addControl(drawControl);
+
+  window.__lastPolygonCells = [];
+
+  map.on(L.Draw.Event.CREATED, function(e) {
+    drawnItems.addLayer(e.layer);
+
+    if (e.layerType === 'polyline') {
+      const latlngs = e.layer.getLatLngs();
+      if (latlngs.length < 2) return;
+      const p1 = latlngs[0];
+      const p2 = latlngs[latlngs.length - 1];
+      const dist = haversineDistance(p1.lat, p1.lng, p2.lat, p2.lng);
+      const bearing = calculateBearing(p1.lat, p1.lng, p2.lat, p2.lng);
+      const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+      const dir = dirs[Math.round(bearing / 22.5) % 16];
+
+      e.layer.bindTooltip(
+        '📏 ' + dist.toFixed(0) + ' m · ' + (dist/1000).toFixed(2) + ' km<br>' +
+        '🧭 ' + bearing.toFixed(1) + '° (' + dir + ')',
+        { permanent: true, direction: 'center', className: 'nb-label' }
+      ).openTooltip();
+
+      toast('📏 ' + dist.toFixed(0) + ' m · ' + bearing.toFixed(1) + '°', 'success', 4000);
+    }
+
+    if (e.layerType === 'polygon') {
+      const cellsInside = allCells.filter(c => {
+        if (!c.lat || !c.long) return false;
+        return e.layer.getBounds().contains([c.lat, c.long]);
+      });
+      window.__lastPolygonCells = cellsInside;
+      toast('📦 ' + cellsInside.length + ' خلية داخل المضلع — اضغط "Copy Polygon Cells"', 'success', 5000);
+    }
+  });
+
+  window.copyPolygonCells = function() {
+    if (!window.__lastPolygonCells || !window.__lastPolygonCells.length) {
+      toast('⚠️ ارسم مضلع أولاً', 'error');
+      return;
+    }
+
+    const rows = [['Cell', 'Site', 'Tech', 'PCI', 'BCCH', 'BSIC', 'HSN', 'Bore', 'Lat', 'Long', 'Comment']];
+    window.__lastPolygonCells.forEach(c => {
+      rows.push([
+        c.cell_name, c.site, c.tech, c.pci || '', c.bcch || '',
+        c.bsic || '', c.hsn != null ? c.hsn : '', c.bore, c.lat, c.long, c.comment || ''
+      ]);
+    });
+
+    const tsv = rows.map(r => r.join('\t')).join('\n');
+    navigator.clipboard.writeText(tsv).then(() => {
+      toast('✅ تم نسخ ' + window.__lastPolygonCells.length + ' خلية — الصق في Excel', 'success', 5000);
+    }).catch(() => {
+      const csv = rows.map(r => r.join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Polygon_Cells_' + new Date().toISOString().slice(0,10) + '.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+      toast('📥 تم تنزيل CSV', 'success');
+    });
+  };
+
+  window.clearDrawings = function() {
+    drawnItems.clearLayers();
+    window.__lastPolygonCells = [];
+    toast('🗑️ تم مسح الرسومات', 'info');
+  };
   let zoomTimer = null;
   map.on('zoomend', function() {
     if (zoomTimer) clearTimeout(zoomTimer);
@@ -2398,7 +2812,47 @@ function initMap() {
       }
     }, 250);
   });
+  /* =======================================================
+     🌐 Reverse Geocoding — اسم المنطقة عند الضغط
+     ======================================================= */
+  map.on('contextmenu', function(e) {
+    // Right-click = reverse geocoding
+    const lat = e.latlng.lat.toFixed(6);
+    const lon = e.latlng.lng.toFixed(6);
 
+    const url = 'https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lon + '&zoom=14&accept-language=ar,en';
+
+    toast('🌐 جاري البحث...', 'info', 2000);
+
+    fetch(url)
+      .then(r => r.json())
+      .then(data => {
+        const addr = data.display_name || 'Unknown location';
+        const short = data.address ?
+          (data.address.city || data.address.town || data.address.village || data.address.state || '') +
+          (data.address.country ? ', ' + data.address.country : '') : '';
+
+        const popup = L.popup()
+          .setLatLng(e.latlng)
+          .setContent(
+            '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:220px;">' +
+              '<div style="font-weight:800;color:#0C1B3D;margin-bottom:6px;">📍 ' + (short || 'Location') + '</div>' +
+              '<div style="color:#5A6B87;font-size:11.5px;margin-bottom:6px;line-height:1.4;">' + addr + '</div>' +
+              '<div style="font-family:monospace;font-size:11px;color:#124191;">' + lat + ', ' + lon + '</div>' +
+              '<div style="margin-top:8px;display:flex;gap:6px;">' +
+                '<button onclick="navigator.clipboard.writeText(\'' + lat + ',' + lon + '\');event.stopPropagation();" ' +
+                  'style="flex:1;padding:5px;background:#EAF2FB;color:#124191;border:none;border-radius:6px;font-size:11px;cursor:pointer;">📋 Copy</button>' +
+                '<button onclick="map.flyTo([' + lat + ',' + lon + '],16);map.closePopup();" ' +
+                  'style="flex:1;padding:5px;background:#124191;color:#fff;border:none;border-radius:6px;font-size:11px;cursor:pointer;">🔍 Zoom</button>' +
+              '</div>' +
+            '</div>'
+          )
+          .openOn(map);
+      })
+      .catch(() => {
+        toast('❌ فشل الاتصال', 'error');
+      });
+  });
   document.querySelectorAll('.basemap-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.basemap-btn').forEach(b => b.classList.remove('active'));
@@ -2555,12 +3009,14 @@ function normalizeCell(row) {
 function updateStats() {
   const el = (id) => document.getElementById(id);
   if (el('statTotal')) el('statTotal').textContent = allCells.length;
-
-  const sites = new Set(allCells.map(c => {
-    let s = c.site || c.cell_name.replace(/[A-Z]$/, '');
-    s = s.replace(/^L(?=BG|CW|UCW|LSA)/, '');
-    return s.toUpperCase();
-  }));
+  const sites = new Set(allCells
+    .filter(c => /[A-Z]$/.test(c.cell_name))
+    .map(c => {
+      let site = c.cell_name.replace(/[A-Z]$/, '');
+      site = site.replace(/^L/, '');
+      return site.toUpperCase();
+    })
+  );
   if (el('statSites')) el('statSites').textContent = sites.size;
 
   const regions = new Set(allCells.map(c => c.region));
@@ -2571,7 +3027,6 @@ function updateStats() {
     pciCount[c.pci] = (pciCount[c.pci] || 0) + 1;
   });
   const conflicts = Object.values(pciCount).filter(v => v > 1).length;
-  if (el('statPCI')) el('statPCI').textContent = conflicts;
 
   if (el('navCellsCount')) el('navCellsCount').textContent = allCells.length;
 }
@@ -2587,11 +3042,11 @@ document.addEventListener('keydown', function(e) {
 
 function applyFilters() {
   const searchEl = document.getElementById('searchFilter');
-  const pciEl = document.getElementById('pciFilter');
-  if (!searchEl || !pciEl) return;
+    const pciEl = document.getElementById('pciFilter');
+  if (!searchEl) return;
 
   const search = (searchEl.value || '').toLowerCase().trim();
-  const pciQuery = (pciEl.value || '').trim();
+   const pciQuery = pciEl ? (pciEl.value || '').trim() : '';
 
   const gsmEl = document.getElementById('filterGSM');
   const lteEl = document.getElementById('filterLTE');
@@ -2766,6 +3221,11 @@ function renderMap() {
       polygon.options.myCell = cell;
 
       polygon.cellData = cell;
+                polygon.on('contextmenu', function(e) {
+        L.DomEvent.stopPropagation(e);
+        e.originalEvent.preventDefault();
+        showCellContextMenu(cell, e);
+      });
                      polygon.on('click', function(e) {
         if (multiSelectMode) {
           toggleCellSelection(cell, this);
@@ -2806,7 +3266,8 @@ function renderMap() {
         labelLayer.addLayer(commentIcon);
       }
     }
-
+  // 📊 تحديث الإحصائيات الصغيرة
+  if (typeof updateMiniStats === 'function') updateMiniStats();
     // Labels — تظهر فقط للـ zoom >= 13
 
     if (showLabels && zoom >= 13) {
@@ -7686,7 +8147,353 @@ async function deleteComment(cellId) {
     toast('Delete failed: ' + e.message, 'error');
   }
 }
- 
+  /* =========================================================
+   🔍 MAP SEARCH BOX
+   ========================================================= */
+function mapSearchFly() {
+  const input = document.getElementById('mapSearchInput');
+  if (!input) return;
+  const query = input.value.trim().toLowerCase();
+  if (!query) return;
+
+  const match = allCells.find(c =>
+    c.cell_name.toLowerCase() === query ||
+    c.cell_name.toLowerCase().includes(query) ||
+    c.site.toLowerCase() === query ||
+    String(c.pci) === query
+  );
+
+  if (!match) {
+    toast('❌ ما لقيت "' + query + '"', 'error', 3000);
+    return;
+  }
+
+  window.__gsmMode = false;
+  window.__nbMode = false;
+  map.flyTo([match.lat, match.long], 16, { duration: 1.2 });
+  setTimeout(() => {
+    renderMap();
+    showSiteInfo(match);
+  }, 1300);
+  toast('📍 ' + match.cell_name, 'success', 3000);
+}
+
+/* =========================================================
+   🎯 GO TO COORDINATES
+   ========================================================= */
+function toggleGotoCoords() {
+  const panel = document.getElementById('gotoPanel');
+  if (panel) panel.classList.toggle('show');
+}
+
+function gotoCoordinates() {
+  const lat = parseFloat(document.getElementById('gotoLat').value);
+  const lon = parseFloat(document.getElementById('gotoLon').value);
+  if (isNaN(lat) || isNaN(lon)) {
+    toast('❌ إحداثيات غير صحيحة', 'error');
+    return;
+  }
+  if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+    toast('❌ خارج النطاق المسموح', 'error');
+    return;
+  }
+  map.flyTo([lat, lon], 15, { duration: 1.2 });
+  document.getElementById('gotoPanel').classList.remove('show');
+  toast('🎯 ' + lat.toFixed(4) + ', ' + lon.toFixed(4), 'success');
+}
+
+/* =========================================================
+   ⚡ QUICK FILTER CHIPS
+   ========================================================= */
+function applyQuickChip(filter) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  const chip = document.querySelector('.chip[data-filter="' + filter + '"]');
+  if (chip) chip.classList.add('active');
+
+  // reset
+  window.__gsmMode = false;
+  window.__nbMode = false;
+
+  if (filter === 'all') {
+    document.getElementById('filterGSM').checked = true;
+    document.getElementById('filterLTE').checked = true;
+    applyFilters();
+  } else if (filter === 'gsm') {
+    document.getElementById('filterGSM').checked = true;
+    document.getElementById('filterLTE').checked = false;
+    applyFilters();
+  } else if (filter === 'lte') {
+    document.getElementById('filterGSM').checked = false;
+    document.getElementById('filterLTE').checked = true;
+    applyFilters();
+  } else if (filter === 'b900' || filter === 'b1800') {
+    // فلتر حسب الباند
+    visibleCells = allCells.filter(c => {
+      if (c.tech !== 'GSM') return false;
+      if (!/[A-Z]$/.test(c.cell_name)) return false;
+      return c.gsmBand === filter.replace('b', '');
+    });
+    renderMap();
+    document.getElementById('statVisible').textContent = visibleCells.length;
+    if (visibleCells.length) {
+      const bounds = L.latLngBounds(visibleCells.map(c => [c.lat, c.long]));
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }
+
+  toast('⚡ فلتر: ' + filter, 'info', 2000);
+}
+
+/* =========================================================
+   📸 SCREENSHOT
+   ========================================================= */
+function takeMapScreenshot() {
+  toast('📸 جاري تجهيز الصورة...', 'info', 2000);
+
+  // استخدم html2canvas إن وجدت، أو الطريقة اليدوية
+  const mapEl = document.getElementById('map');
+  if (!mapEl) return;
+
+  // طريقة بديلة: رسم canvas من tiles
+  // الأسهل: استخدام مكتبة html2canvas
+  if (typeof html2canvas === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    script.onload = () => captureMap();
+    document.head.appendChild(script);
+  } else {
+    captureMap();
+  }
+}
+
+function captureMap() {
+  const mapContainer = document.querySelector('.map-container');
+  const target = document.getElementById('map');
+
+  html2canvas(mapContainer, {
+    useCORS: true,
+    allowTaint: false,
+    backgroundColor: '#F4F7FB',
+    scale: 1.5,
+    width: mapContainer.offsetWidth,
+    height: mapContainer.offsetHeight,
+    ignoreElements: (el) => {
+      return el.classList && (
+        el.classList.contains('map-sidebar') ||
+        el.classList.contains('basemap-switcher') ||
+        el.classList.contains('map-search-box') ||
+        el.classList.contains('quick-chips') ||
+        el.classList.contains('goto-coords') ||
+        el.classList.contains('screenshot-btn') ||
+        el.classList.contains('bookmarks-btn') ||
+        el.classList.contains('bookmarks-panel')
+      );
+    }
+  }).then(canvas => {
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'RF_Map_' + new Date().toISOString().slice(0, 19).replace(/:/g, '-') + '.png';
+      a.click();
+      URL.revokeObjectURL(url);
+      toast('✅ تم حفظ الصورة', 'success', 3000);
+    }, 'image/png');
+  }).catch(err => {
+    console.error(err);
+    toast('❌ فشل التصوير — جرب مرة ثانية', 'error');
+  });
+}
+
+/* =========================================================
+   🗺️ BOOKMARKS
+   ========================================================= */
+const BOOKMARKS_KEY = 'rf_map_bookmarks_v1';
+
+function getBookmarks() {
+  try {
+    return JSON.parse(localStorage.getItem(BOOKMARKS_KEY) || '[]');
+  } catch (e) { return []; }
+}
+
+function saveBookmarks(list) {
+  localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(list));
+}
+
+function toggleBookmarksPanel() {
+  const panel = document.getElementById('bookmarksPanel');
+  if (!panel) return;
+  panel.classList.toggle('show');
+  if (panel.classList.contains('show')) renderBookmarks();
+}
+
+function addCurrentBookmark() {
+  const name = prompt('اسم الموقع:');
+  if (!name) return;
+  const center = map.getCenter();
+  const zoom = map.getZoom();
+  const bookmarks = getBookmarks();
+  bookmarks.push({
+    name: name.trim(),
+    lat: center.lat,
+    lon: center.lng,
+    zoom: zoom,
+    created: Date.now()
+  });
+  saveBookmarks(bookmarks);
+  renderBookmarks();
+  toast('✅ تم حفظ "' + name + '"', 'success');
+}
+
+function renderBookmarks() {
+  const panel = document.getElementById('bookmarksPanel');
+  if (!panel) return;
+  const bookmarks = getBookmarks();
+
+  let html = '<div style="font-size:12px;font-weight:800;color:#0C1B3D;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">' +
+             '<span>🗺️ Bookmarks (' + bookmarks.length + ')</span>' +
+             '<button onclick="addCurrentBookmark()" style="background:#124191;color:#fff;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">+ Add</button>' +
+             '</div>';
+
+  if (!bookmarks.length) {
+    html += '<div style="text-align:center;color:#94A3B8;font-size:12px;padding:20px;">ما فيه Bookmarks بعد</div>';
+  } else {
+    bookmarks.forEach((bm, idx) => {
+      html += '<div class="bookmark-item" onclick="goToBookmark(' + idx + ')">' +
+                '<b>' + escapeHtml(bm.name) + '</b>' +
+                '<button onclick="event.stopPropagation();deleteBookmark(' + idx + ')">🗑️</button>' +
+              '</div>';
+    });
+  }
+  panel.innerHTML = html;
+}
+
+function goToBookmark(idx) {
+  const bookmarks = getBookmarks();
+  const bm = bookmarks[idx];
+  if (!bm) return;
+  map.flyTo([bm.lat, bm.lon], bm.zoom || 14, { duration: 1.2 });
+  document.getElementById('bookmarksPanel').classList.remove('show');
+}
+
+function deleteBookmark(idx) {
+  const bookmarks = getBookmarks();
+  bookmarks.splice(idx, 1);
+  saveBookmarks(bookmarks);
+  renderBookmarks();
+  toast('🗑️ تم الحذف', 'info');
+}
+
+/* =========================================================
+   📊 MINI STATS UPDATE
+   ========================================================= */
+function updateMiniStats() {
+  const el = document.getElementById('miniStats');
+  if (!el) return;
+  const visible = visibleCells.length;
+  const total = allCells.length;
+  const sites = new Set(visibleCells.map(c => c.cell_name.replace(/[A-Z]$/, ''))).size;
+
+  el.innerHTML =
+    '<span>👁️ Visible: <b>' + visible + '</b></span>' +
+    '<span>📍 Sites: <b>' + sites + '</b></span>' +
+    '<span>📊 Total: <b>' + total + '</b></span>';
+}
+ /* =========================================================
+   🖱️ CONTEXT MENU — قائمة عند الضغط بحق الفأرة على خلية
+   ========================================================= */
+function showCellContextMenu(cell, event) {
+  const menu = document.getElementById('cellContextMenu') || createContextMenu();
+
+  menu.innerHTML =
+    '<div class="ctx-item" onclick="flyToCellById(' + cell.id + ')">🗺️ Go to Cell</div>' +
+    '<div class="ctx-item" onclick="copyCellInfo(' + cell.id + ')">📋 Copy Info</div>' +
+    '<div class="ctx-item" onclick="showNeighborLinesForCell(' + cell.id + ')">🔗 Show Neighbors</div>' +
+    '<div class="ctx-item" onclick="copyCellCoordinates(' + cell.id + ')">📍 Copy Coordinates</div>' +
+    '<div class="ctx-sep"></div>' +
+    '<div class="ctx-item" onclick="googleMapsCell(' + cell.id + ')">🌍 Google Maps</div>' +
+    '<div class="ctx-item" onclick="streetViewCell(' + cell.id + ')">🌐 Street View</div>';
+
+  menu.style.left = event.originalEvent.pageX + 'px';
+  menu.style.top = event.originalEvent.pageY + 'px';
+  menu.classList.add('show');
+
+  setTimeout(() => {
+    document.addEventListener('click', hideContextMenu, { once: true });
+  }, 100);
+}
+
+function createContextMenu() {
+  const menu = document.createElement('div');
+  menu.id = 'cellContextMenu';
+  menu.className = 'cell-context-menu';
+  document.body.appendChild(menu);
+  return menu;
+}
+
+function hideContextMenu() {
+  const menu = document.getElementById('cellContextMenu');
+  if (menu) menu.classList.remove('show');
+}
+
+function copyCellInfo(id) {
+  const cell = cellById.get(id);
+  if (!cell) return;
+  const text =
+    'Cell: ' + cell.cell_name + '\n' +
+    'Site: ' + cell.site + '\n' +
+    'Tech: ' + cell.tech + '\n' +
+    'PCI: ' + (cell.pci || '—') + '\n' +
+    'BCCH: ' + (cell.bcch || '—') + '\n' +
+    'BSIC: ' + (cell.bsic || '—') + '\n' +
+    'Bore: ' + cell.bore + '°\n' +
+    'Lat/Long: ' + cell.lat + ', ' + cell.long;
+  navigator.clipboard.writeText(text).then(() => toast('📋 تم النسخ', 'success'));
+  hideContextMenu();
+}
+
+function copyCellCoordinates(id) {
+  const cell = cellById.get(id);
+  if (!cell) return;
+  navigator.clipboard.writeText(cell.lat + ',' + cell.long)
+    .then(() => toast('📍 تم نسخ الإحداثيات', 'success'));
+  hideContextMenu();
+}
+
+function googleMapsCell(id) {
+  const cell = cellById.get(id);
+  if (!cell) return;
+  window.open('https://www.google.com/maps/search/?api=1&query=' + cell.lat + ',' + cell.long, '_blank');
+  hideContextMenu();
+}
+
+function streetViewCell(id) {
+  const cell = cellById.get(id);
+  if (!cell) return;
+  window.open('https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + cell.lat + ',' + cell.long, '_blank');
+  hideContextMenu();
+}
+
+function flyToCellById(id) {
+  const cell = cellById.get(id);
+  if (!cell) return;
+  map.flyTo([cell.lat, cell.long], 16, { duration: 1 });
+  setTimeout(() => showSiteInfo(cell), 1100);
+  hideContextMenu();
+}
+
+function showNeighborLinesForCell(id) {
+  const cell = cellById.get(id);
+  if (!cell) return;
+  // فعّل Neighbor Lines ثم ارسم
+  const chk = document.getElementById('showNeighborLines');
+  if (chk) {
+    chk.checked = true;
+    toggleNeighborLines();
+  }
+  drawNeighborLines(cell);
+  hideContextMenu();
+}
 console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
 console.log('%cTools: PCI · GSM · NB · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
 
