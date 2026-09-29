@@ -771,6 +771,10 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
 .chip.b900.active { background: #D97706; color: #fff; }
 .chip.b1800 { background: #F3E8FF; color: #7C3AED; border-color: #DDD6FE; }
 .chip.b1800.active { background: #7C3AED; color: #fff; }
+.chip.threeg { background: #CCFBF1; color: #0F766E; border-color: #5EEAD4; }
+.chip.threeg.active { background: #0D9488; color: #fff; }
+.chip.b2100 { background: #CCFBF1; color: #0F766E; border-color: #5EEAD4; }
+.chip.b2100.active { background: #0D9488; color: #fff; }
 
 /* 🗺️ Bookmarks */
 .bookmarks-btn {
@@ -973,34 +977,45 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
           <div class="filter-group">
             <input type="text" class="filter-search" id="searchFilter" placeholder="🔍 Cell name, site..." oninput="debouncedApplyFilters()" style="margin-bottom:8px;">
             <div style="display:flex;gap:6px;">
-              <select id="findByField" style="flex:1;padding:8px 10px;border:1.5px solid #D7DEEA;border-radius:8px;font-size:12px;font-family:inherit;background:#fff;">
-                <option value="">🔎 Find by...</option>
-                <option value="pci">PCI</option>
-                <option value="rsi">RSI</option>
-                <option value="bcch">BCCH</option>
-                <option value="tch">TCH</option>
-                <option value="bsic">BSIC</option>
-                <option value="lac">LAC</option>
-              </select>
+            <select id="findByField" style="flex:1;padding:8px 10px;border:1.5px solid #D7DEEA;border-radius:8px;font-size:12px;font-family:inherit;background:#fff;">
+  <option value="">🔎 Find by...</option>
+  <optgroup label="📡 GSM (2G)">
+    <option value="bcch">BCCH</option>
+    <option value="tch">TCH</option>
+    <option value="bsic">BSIC</option>
+    <option value="lac">LAC</option>
+    <option value="hsn">HSN</option>
+  </optgroup>
+  <optgroup label="📶 3G (UMTS)">
+    <option value="psc">PSC</option>
+    <option value="uarfcn_dl">DL UARFCN</option>
+    <option value="uarfcn_ul">UL UARFCN</option>
+    <option value="rnc_id">RNC ID</option>
+  </optgroup>
+  <optgroup label="📡 LTE (4G)">
+    <option value="pci">PCI</option>
+    <option value="rsi">RSI</option>
+  </optgroup>
+</select>
               <input type="text" id="findByValue" placeholder="Value" style="width:90px;padding:8px 10px;border:1.5px solid #D7DEEA;border-radius:8px;font-size:12px;font-family:'JetBrains Mono',monospace;outline:none;">
               <button onclick="findCellByField()" style="padding:8px 12px;background:#124191;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🔍</button>
             </div>
           </div>
-          <h3>Filter by Technology</h3>
-          <div class="filter-group">
-            <label class="filter-checkbox">
-              <input type="checkbox" id="filterGSM" checked onchange="applyFilters()">
-              <span style="color:#D97706;font-weight:700;">📡 GSM (2G)</span>
-            </label>
-            <label class="filter-checkbox">
-              <input type="checkbox" id="filterLTE" checked onchange="applyFilters()">
-              <span style="color:#124191;font-weight:700;">📶 LTE (4G)</span>
-            </label>
-          </div>
-          <label class="filter-checkbox">
-  <input type="checkbox" id="filter3G" checked onchange="applyFilters()">
-  <span style="color:#14B8A6;font-weight:700;">📡 3G (UMTS)</span>
-</label>
+        <h3>Filter by Technology</h3>
+<div class="filter-group">
+  <label class="filter-checkbox">
+    <input type="checkbox" id="filterGSM" checked onchange="applyFilters()">
+    <span style="color:#D97706;font-weight:700;">📡 GSM (2G)</span>
+  </label>
+  <label class="filter-checkbox">
+    <input type="checkbox" id="filter3G" checked onchange="applyFilters()">
+    <span style="color:#14B8A6;font-weight:700;">📶 3G (UMTS)</span>
+  </label>
+  <label class="filter-checkbox">
+    <input type="checkbox" id="filterLTE" checked onchange="applyFilters()">
+    <span style="color:#124191;font-weight:700;">📡 LTE (4G)</span>
+  </label>
+</div>
         
           <h3>Display Options</h3>
           <div class="filter-group">
@@ -1095,13 +1110,15 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
           </div>
         </div>
                 <!-- ⚡ Quick Filter Chips -->
-        <div class="quick-chips">
-          <button class="chip active" data-filter="all" onclick="applyQuickChip('all')">🌐 All</button>
-          <button class="chip gsm" data-filter="gsm" onclick="applyQuickChip('gsm')">📡 GSM</button>
-          <button class="chip lte" data-filter="lte" onclick="applyQuickChip('lte')">📶 LTE</button>
-          <button class="chip b900" data-filter="b900" onclick="applyQuickChip('b900')">900 MHz</button>
-          <button class="chip b1800" data-filter="b1800" onclick="applyQuickChip('b1800')">1800 MHz</button>
-        </div>
+      <div class="quick-chips">
+  <button class="chip active" data-filter="all" onclick="applyQuickChip('all')">🌐 All</button>
+  <button class="chip gsm" data-filter="gsm" onclick="applyQuickChip('gsm')">📡 2G</button>
+  <button class="chip threeg" data-filter="threeg" onclick="applyQuickChip('threeg')">📶 3G</button>
+  <button class="chip lte" data-filter="lte" onclick="applyQuickChip('lte')">📡 4G</button>
+  <button class="chip b900" data-filter="b900" onclick="applyQuickChip('b900')">900 MHz</button>
+  <button class="chip b1800" data-filter="b1800" onclick="applyQuickChip('b1800')">1800 MHz</button>
+  <button class="chip b2100" data-filter="b2100" onclick="applyQuickChip('b2100')">2100 MHz</button>
+</div>
 
         <!-- 📊 Mini Stats -->
         <div class="map-mini-stats" id="miniStats">
@@ -6461,15 +6478,36 @@ function findCellByField() {
   if (!field) { toast('اختر الحقل أولاً', 'error'); return; }
   if (!value) { clearFieldSearch(); return; }
 
+  // 🎯 خريطة الحقول → التكنولوجيا المتوقعة (للفلترة الذكية)
+  const FIELD_TECH = {
+    // GSM
+    bcch: 'GSM', tch: 'GSM', bsic: 'GSM', lac: 'GSM', hsn: 'GSM',
+    // 3G
+    psc: '3G', uarfcn_dl: '3G', uarfcn_ul: '3G', rnc_id: '3G',
+    // LTE
+    pci: 'LTE', rsi: 'LTE'
+  };
+
+  const expectedTech = FIELD_TECH[field] || null;
+  const valLower = value.toLowerCase();
+
   // 🎯 فلترة كل الخلايا حسب الحقل
   const matches = allCells.filter(c => {
+    // تحقق التكنولوجيا إذا الحقل خاص بتكنولوجيا معينة
+    if (expectedTech && c.tech !== expectedTech) return false;
+
     const v = c[field];
-    if (v == null) return false;
-    return String(v).trim() === value || String(v).toLowerCase() === value.toLowerCase();
+    if (v == null || v === '') return false;
+
+    // مقارنة رقمية دقيقة
+    const vStr = String(v).trim();
+    return vStr === value || vStr.toLowerCase() === valLower;
   });
 
   if (!matches.length) {
-    toast('❌ لا توجد خلية بهذا ' + field.toUpperCase() + ' = ' + value, 'error', 5000);
+    const techName = expectedTech ? ' (' + expectedTech + ')' : '';
+    toast('❌ لا توجد خلية بـ ' + field.toUpperCase() + ' = ' + value + techName, 'error', 5000);
+
     // أفرغ الماب
     visibleCells = [];
     window.__gsmMode = false;
@@ -6484,14 +6522,12 @@ function findCellByField() {
   window.__gsmMode = false;
   window.__nbMode = false;
 
-  // استخدم visibleCells مباشرة
   visibleCells = matches;
   switchView('map');
 
   setTimeout(() => {
     renderMap();
 
-    // Zoom للنتائج
     if (matches.length === 1) {
       map.flyTo([matches[0].lat, matches[0].long], 16, { duration: 1 });
       setTimeout(() => showSiteInfo(matches[0]), 1200);
@@ -6501,10 +6537,15 @@ function findCellByField() {
     }
 
     document.getElementById('statVisible').textContent = matches.length;
-    toast('🎯 ' + matches.length + ' خلية بـ ' + field.toUpperCase() + ' = ' + value, 'success');
+
+    // اعرض تفاصيل بالتكنولوجيا
+    const techs = {};
+    matches.forEach(m => { techs[m.tech] = (techs[m.tech] || 0) + 1; });
+    const techSummary = Object.entries(techs).map(([t, n]) => t + ': ' + n).join(' · ');
+
+    toast('🎯 ' + matches.length + ' خلية بـ ' + field.toUpperCase() + ' = ' + value + ' — ' + techSummary, 'success', 6000);
   }, 200);
 
-  // أظهر زر Clear
   showSearchClearButton();
 }
 
@@ -9128,34 +9169,68 @@ function applyQuickChip(filter) {
   const chip = document.querySelector('.chip[data-filter="' + filter + '"]');
   if (chip) chip.classList.add('active');
 
-  // reset
+  // reset modes
   window.__gsmMode = false;
   window.__nbMode = false;
 
+  // 🎯 احصل على الـ checkboxes مرة واحدة
+  const chkGSM = document.getElementById('filterGSM');
+  const chk3G  = document.getElementById('filter3G');
+  const chkLTE = document.getElementById('filterLTE');
+
   if (filter === 'all') {
-    document.getElementById('filterGSM').checked = true;
-    document.getElementById('filterLTE').checked = true;
+    chkGSM.checked = true;
+    chk3G.checked  = true;
+    chkLTE.checked = true;
     applyFilters();
+
   } else if (filter === 'gsm') {
-    document.getElementById('filterGSM').checked = true;
-    document.getElementById('filterLTE').checked = false;
+    chkGSM.checked = true;
+    chk3G.checked  = false;
+    chkLTE.checked = false;
     applyFilters();
+
+  } else if (filter === 'threeg') {
+    chkGSM.checked = false;
+    chk3G.checked  = true;
+    chkLTE.checked = false;
+    applyFilters();
+
   } else if (filter === 'lte') {
-    document.getElementById('filterGSM').checked = false;
-    document.getElementById('filterLTE').checked = true;
+    chkGSM.checked = false;
+    chk3G.checked  = false;
+    chkLTE.checked = true;
     applyFilters();
-  } else if (filter === 'b900' || filter === 'b1800') {
-    // فلتر حسب الباند
+
+  } else if (filter === 'b900' || filter === 'b1800' || filter === 'b2100') {
+    // 🎯 فلتر حسب الباند — يشمل 2G و 3G
+    const targetBand = filter.replace('b', '');
+
     visibleCells = allCells.filter(c => {
-      if (c.tech !== 'GSM') return false;
+      // لازم اسم الخلية ينتهي بحرف (A/B/C...)
       if (!/[A-Z]$/.test(c.cell_name)) return false;
-      return c.gsmBand === filter.replace('b', '');
+
+      // لازم الباند يطابق
+      if (c.gsmBand !== targetBand) return false;
+
+      // 🎯 قواعد خاصة:
+      // - 900 MHz: 2G + 3G
+      // - 1800 MHz: 2G فقط
+      // - 2100 MHz: 3G فقط
+      if (targetBand === '1800' && c.tech !== 'GSM') return false;
+      if (targetBand === '2100' && c.tech !== '3G') return false;
+
+      return true;
     });
+
     renderMap();
     document.getElementById('statVisible').textContent = visibleCells.length;
+
     if (visibleCells.length) {
       const bounds = L.latLngBounds(visibleCells.map(c => [c.lat, c.long]));
       map.fitBounds(bounds, { padding: [50, 50] });
+    } else {
+      toast('⚠️ لا توجد خلايا في باند ' + targetBand + ' MHz', 'error', 3000);
     }
   }
 
