@@ -4045,7 +4045,6 @@ function importRenderPreview() {
   const isLTE = sample.pci !== null && sample.pci !== undefined && sample.pci > 0 && !is3G;
   const isGSM = !is3G && !isLTE && !hasNb;
   const isNBFile = hasNb && !is3G && !isLTE;
-  const isNBFile = hasNb;
 
   const sites = new Set(importPreviewData.map(r => r.site));
   const regions = new Set(importPreviewData.map(r => {
