@@ -3448,10 +3448,30 @@ const viewportBounds = map.getBounds().pad(0.1);
 
    // Sectors Mode (Zoom >= 14)
   // 🎯 رتّب: GSM أولاً (أسفل) ثم LTE فوقه (يُمكن النقر عليه)
- function getLayerPriority(cell) {
+function getLayerPriority(cell) {
     const isGSM = cell.tech === 'GSM';
     const isLTE = cell.tech === 'LTE';
     const is3G = cell.tech === '3G';
+
+    // أصغر = أسفل (خلفية) · أكبر = أعلى (يُضغط عليه)
+
+    // 1. 3G-900 → أسفل
+    if (is3G && cell.gsmBand === '900') return 1;
+
+    // 2. GSM-900 → فوق 3G-900
+    if (isGSM && cell.gsmBand === '900') return 2;
+
+    // 3. 3G-2100 → أسفل
+    if (is3G && cell.gsmBand === '2100') return 3;
+
+    // 4. GSM-1800 → فوق 3G-2100
+    if (isGSM && cell.gsmBand === '1800') return 4;
+
+    // 5. LTE → الأعلى
+    if (isLTE) return 5;
+
+    return 6;
+  }
     
     // أصغر رقم = يُرسم أولاً = في الأسفل (خلفية)
     // أكبر رقم = يُرسم أخيراً = في الأعلى (فوق، ينضغط عليه)
@@ -3478,6 +3498,26 @@ const viewportBounds = map.getBounds().pad(0.1);
     const isGSM = cell.tech === 'GSM';
     const isLTE = cell.tech === 'LTE';
     const is3G = cell.tech === '3G';
+
+    // أصغر = أسفل (خلفية) · أكبر = أعلى (يُضغط عليه)
+
+    // 1. 3G-900 → أسفل
+    if (is3G && cell.gsmBand === '900') return 1;
+
+    // 2. GSM-900 → فوق 3G-900
+    if (isGSM && cell.gsmBand === '900') return 2;
+
+    // 3. 3G-2100 → أسفل
+    if (is3G && cell.gsmBand === '2100') return 3;
+
+    // 4. GSM-1800 → فوق 3G-2100
+    if (isGSM && cell.gsmBand === '1800') return 4;
+
+    // 5. LTE → الأعلى
+    if (isLTE) return 5;
+
+    return 6;
+  }
 
     // أصغر رقم = يُرسم أولاً = في الأسفل (خلفية)
     // أكبر رقم = يُرسم أخيراً = في الأعلى (ينضغط عليه)
