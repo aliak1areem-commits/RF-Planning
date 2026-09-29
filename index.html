@@ -3464,20 +3464,37 @@ const viewportBounds = map.getBounds().pad(0.1);
       let cellColor, fillOpacity, weight, scale;
 
       if (isGSM) {
-        // 🎨 لون وحجم حسب الباند
+      if (isGSM) {
         if (cell.gsmBand === '1800') {
-          cellColor = '#7C3AED';   // بنفسجي = GSM 1800
+          cellColor = '#7C3AED';
           fillOpacity = 0.65;
           weight = 1.2;
-          scale = 0.55;            // أصغر → يظهر داخل 900
+          scale = 0.55;
         } else if (cell.gsmBand === '900') {
-          cellColor = '#D97706';   // برتقالي = GSM 900
+          cellColor = '#D97706';
           fillOpacity = 0.45;
           weight = 1.5;
-          scale = 1.0;             // الحجم الكامل
+          scale = 1.0;
         } else {
-          cellColor = '#9CA3AF';   // رمادي = Unknown
+          cellColor = '#9CA3AF';
           fillOpacity = 0.55;
+          weight = 1.2;
+          scale = 0.75;
+        }
+      } else if (is3G) {
+        if (cell.gsmBand === '900') {
+          cellColor = '#14B8A6';
+          fillOpacity = 0.60;
+          weight = 1.5;
+          scale = 1.0;
+        } else if (cell.gsmBand === '2100') {
+          cellColor = '#0D9488';
+          fillOpacity = 0.75;
+          weight = 1.2;
+          scale = 0.55;
+        } else {
+          cellColor = '#5EEAD4';
+          fillOpacity = 0.60;
           weight = 1.2;
           scale = 0.75;
         }
@@ -3492,25 +3509,6 @@ const viewportBounds = map.getBounds().pad(0.1);
         weight = 0.8;
         scale = 1.0;
       }
-         } else if (is3G) {
-        if (cell.gsmBand === '900') {
-          cellColor = '#14B8A6';   // 🩵 تركواز فاتح - 900
-          fillOpacity = 0.60;
-          weight = 1.5;
-          scale = 1.0;
-        } else if (cell.gsmBand === '2100') {
-          cellColor = '#0D9488';   // 🩵 تركواز غامق - 2100
-          fillOpacity = 0.75;
-          weight = 1.2;
-          scale = 0.55;
-        } else {
-          cellColor = '#5EEAD4';   // 🩵 تركواز خفيف - unknown
-          fillOpacity = 0.60;
-          weight = 1.2;
-          scale = 0.75;
-        }
-      } else if (isLTE) {
-        cellColor = '#124191';
 
       const coords = makeSectorCoordsScaled(cell.lat, cell.long, cell.bore, scale);
                      const polygon = L.polygon(coords, {
