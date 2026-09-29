@@ -3226,8 +3226,12 @@ const isGSM = !isLTE && !is3G;
        lac: row.lac || 0,
     hsn: row.hsn != null ? parseInt(row.hsn) : null,
          psc: row.psc != null ? parseInt(row.psc) : null,
-    uarfcn_dl: row.downlink_uarfcn != null ? parseInt(row.downlink_uarfcn) : (row.dl_uarfcn != null ? parseInt(row.dl_uarfcn) : null),
-    uarfcn_ul: row.uplink_uarfcn != null ? parseInt(row.uplink_uarfcn) : (row.ul_uarfcn != null ? parseInt(row.ul_uarfcn) : null),
+   uarfcn_dl: row.downlink_uarfcn != null ? parseInt(row.downlink_uarfcn) 
+              : (row.dl_uarfcn != null ? parseInt(row.dl_uarfcn) 
+              : (row.uarfcn_dl != null ? parseInt(row.uarfcn_dl) : null)),
+   uarfcn_ul: row.uplink_uarfcn != null ? parseInt(row.uplink_uarfcn) 
+              : (row.ul_uarfcn != null ? parseInt(row.ul_uarfcn) 
+              : (row.uarfcn_ul != null ? parseInt(row.uarfcn_ul) : null)),
     rnc_id: row.rnc_id != null ? parseInt(row.rnc_id) : null,
     bsc: row.bsc || '',
     bw: row.bw || 0,
