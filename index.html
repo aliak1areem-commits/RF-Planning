@@ -3482,17 +3482,17 @@ const viewportBounds = map.getBounds().pad(0.1);
 
       let cellColor, fillOpacity, weight, scale;
 
-    if (isGSM) {
+  if (isGSM) {
         if (cell.gsmBand === '1800') {
           cellColor = '#7C3AED';
-          fillOpacity = 0.65;
-          weight = 1.2;
-          scale = 0.55;
+          fillOpacity = 0.75;
+          weight = 1.5;
+          scale = 0.65;          // 🎯 GSM-1800 — متوسط
         } else if (cell.gsmBand === '900') {
           cellColor = '#D97706';
-          fillOpacity = 0.45;
-          weight = 1.5;
-          scale = 1.0;
+          fillOpacity = 0.55;
+          weight = 1.8;
+          scale = 1.0;           // 🎯 GSM-900 — الأكبر (خلفية)
         } else {
           cellColor = '#9CA3AF';
           fillOpacity = 0.55;
@@ -3502,25 +3502,25 @@ const viewportBounds = map.getBounds().pad(0.1);
       } else if (is3G) {
         if (cell.gsmBand === '900') {
           cellColor = '#14B8A6';
-          fillOpacity = 0.60;
-          weight = 1.5;
-          scale = 1.0;
+          fillOpacity = 0.75;
+          weight = 2.0;
+          scale = 0.85;          // 🎯 3G-900 — أصغر من GSM-900 ✅
         } else if (cell.gsmBand === '2100') {
           cellColor = '#0D9488';
-          fillOpacity = 0.75;
-          weight = 1.2;
-          scale = 0.55;
+          fillOpacity = 0.85;
+          weight = 2.0;
+          scale = 0.50;          // 🎯 3G-2100 — أصغر من GSM-1800 ✅
         } else {
           cellColor = '#5EEAD4';
-          fillOpacity = 0.60;
+          fillOpacity = 0.6;
           weight = 1.2;
-          scale = 0.75;
+          scale = 0.65;
         }
       } else if (isLTE) {
         cellColor = '#124191';
-        fillOpacity = 0.75;
-        weight = 1.0;
-        scale = 0.45;
+        fillOpacity = 0.85;
+        weight = 2.0;
+        scale = 0.35;            // 🎯 LTE — الأصغر (يظهر داخل الكل)
       } else {
         cellColor = cell.color;
         fillOpacity = 0.65;
