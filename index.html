@@ -903,6 +903,9 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
             <button class="nav-item" data-page="tool-hsn">
         <span class="icon">🎵</span><span>HSN Analysis</span>
       </button>
+      <button class="nav-item" data-page="tool-psc-checker">
+  <span class="icon">📶</span><span>PSC Checker (3G)</span>
+</button>
             <button class="nav-item" data-page="tool-bsic">
         <span class="icon">🎨</span><span>BSIC Analyzer</span>
       </button>
@@ -1415,6 +1418,12 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
           <div class="tool-desc">Detect asymmetric neighbor relations (A→B exists but B→A missing). Improve handover success rate.</div>
           <div class="tool-tag" style="background:#E0F2FE;color:#0369A1;">Audit</div>
         </div>
+        <div class="tool-card" onclick="switchView('tool-psc-checker')">
+  <div class="tool-icon" style="background:linear-gradient(135deg,#0EA5E9,#0284C7);color:#fff;">📶</div>
+  <div class="tool-title">PSC Conflict Checker (3G)</div>
+  <div class="tool-desc">Detect same PSC conflicts per band (900/2100), classify Same/Opposite Sector, auto-assign new PSC with geographic separation.</div>
+  <div class="tool-tag" style="background:#E0F2FE;color:#0369A1;">3G Optimization</div>
+</div>
                 <div class="tool-card" onclick="switchView('tool-bsic')">
           <div class="tool-icon" style="background:linear-gradient(135deg,#DB2777,#EC4899);color:#fff;">🎨</div>
           <div class="tool-title">BSIC Analyzer</div>
@@ -1653,6 +1662,101 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
         </div>
       </div>
     </section>
+    <!-- ============ PAGE: PSC CHECKER (3G) ============ -->
+<section class="page" id="page-tool-psc-checker">
+  <div class="tool-page">
+    <div class="tool-page-header">
+      <button class="back-btn" onclick="switchView('tools')">←</button>
+      <div>
+        <div class="tool-page-title">📶 PSC Conflict Checker (3G)</div>
+        <div class="tool-page-sub">Detect PSC conflicts per band · Same/Opposite Sector · Auto-assign</div>
+      </div>
+    </div>
+
+    <div class="tool-section">
+      <h3>⚙️ Detection Parameters</h3>
+      <div class="form-row">
+        <div class="form-field">
+          <label>PSC Range — From</label>
+          <input type="number" id="psc_min" value="0" min="0" max="511">
+        </div>
+        <div class="form-field">
+          <label>PSC Range — To</label>
+          <input type="number" id="psc_max" value="511" min="0" max="511">
+        </div>
+        <div class="form-field">
+          <label>Max Distance (m)</label>
+          <input type="number" id="psc_distance" value="2000" min="100" max="20000" step="100">
+        </div>
+      </div>
+      <div class="action-row">
+        <button class="btn btn-primary" onclick="runPSCChecker()">🚀 Detect & Optimize</button>
+        <button class="btn btn-ghost" onclick="clearPSCResults()">🗑️ Clear</button>
+      </div>
+    </div>
+
+    <div id="pscResults" style="display:none;">
+      <div class="tool-section">
+        <h3>📊 Summary</h3>
+        <div class="kpi-grid">
+          <div class="kpi-card"><div class="kpi-label">Total 3G Cells</div><div class="kpi-value" id="psc_kpi_total">0</div></div>
+          <div class="kpi-card warn"><div class="kpi-label">Conflicts</div><div class="kpi-value" id="psc_kpi_conflicts">0</div></div>
+          <div class="kpi-card warn"><div class="kpi-label">Same Sector</div><div class="kpi-value" id="psc_kpi_same">0</div></div>
+          <div class="kpi-card danger"><div class="kpi-label">Opposite Sector</div><div class="kpi-value" id="psc_kpi_opp">0</div></div>
+          <div class="kpi-card success"><div class="kpi-label">Reassigned</div><div class="kpi-value" id="psc_kpi_reassigned">0</div></div>
+          <div class="kpi-card" id="psc_kpi_unresolved_card"><div class="kpi-label">Unresolved</div><div class="kpi-value" id="psc_kpi_unresolved">0</div></div>
+        </div>
+        <div id="pscWarnings" style="margin-top:12px;"></div>
+      </div>
+
+      <div class="tool-section">
+        <h3>⚠️ Conflicts List</h3>
+        <div style="overflow:auto;max-height:400px;border:1px solid #E9EEF6;border-radius:10px;">
+          <table class="data-table" id="pscConflictsTable">
+            <thead>
+              <tr>
+                <th>Primary Cell</th>
+                <th>PSC</th>
+                <th>Band</th>
+                <th>Dir</th>
+                <th>Conflict Cell</th>
+                <th>PSC</th>
+                <th>Band</th>
+                <th>Dir</th>
+                <th>Distance (m)</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tool-section">
+        <h3>✅ Optimization Results</h3>
+        <div style="overflow:auto;max-height:400px;border:1px solid #E9EEF6;border-radius:10px;">
+          <table class="data-table" id="pscOptTable">
+            <thead>
+              <tr>
+                <th>Cell</th>
+                <th>Original PSC</th>
+                <th>New PSC</th>
+                <th>Band</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="action-row">
+          <button class="btn btn-success" onclick="exportPSCResults()">📥 Export CSV</button>
+          <button class="btn btn-secondary" onclick="showPSCOnMap()">🗺️ Show on Map</button>
+          <button class="btn btn-gold" onclick="pscApplyAll()">💾 Apply All Suggestions</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
         <!-- ============ PAGE: BSIC ANALYZER ============ -->
     <section class="page" id="page-tool-bsic">
       <div class="tool-page" style="max-width:1500px;">
@@ -2530,6 +2634,7 @@ const PAGE_TITLES = {
   'tool-gsm-planner': { icon: '📡', title: 'GSM BCCH/BSIC Planner',   sub: 'Suggest conflict-free BCCH and BSIC' },
   'tool-neighbor':    { icon: '🔗', title: 'Neighbor Analysis',       sub: 'Audit missing neighbor relations' },
     'tool-hsn':         { icon: '🎵', title: 'HSN Conflict Analyzer',   sub: 'Detect & fix HSN conflicts in GSM' },
+  'tool-psc-checker': { icon: '📶', title: 'PSC Conflict Checker (3G)', sub: 'Detect & fix PSC conflicts in 3G UMTS' },
     'tool-bsic':        { icon: '🎨', title: 'BSIC Analyzer',            sub: 'Detect & fix BSIC conflicts with strict separation' },
     'tool-symmetry':    { icon: '🔗', title: 'Neighbor Symmetry Checker', sub: 'Detect asymmetric neighbor relations' },
     'tool-azimuth-opt': { icon: '🎯', title: 'Azimuth Optimization',      sub: 'Suggest optimal azimuth based on neighbors' },
@@ -3084,8 +3189,9 @@ function normalizeCell(row) {
 
    // 🎯 قاعدة بسيطة: يبدأ بـ L = LTE، غير ذلك = GSM
   const nameUpper = name.toUpperCase();
-  const isLTE = nameUpper.startsWith('L');
-  const isGSM = !isLTE;
+const isLTE = nameUpper.startsWith('L');
+const is3G = nameUpper.startsWith('U');
+const isGSM = !isLTE && !is3G;
 
    const result = {
     id: row.id,
@@ -3106,10 +3212,14 @@ function normalizeCell(row) {
     tch: row.tch || 0,
        lac: row.lac || 0,
     hsn: row.hsn != null ? parseInt(row.hsn) : null,
+         psc: row.psc != null ? parseInt(row.psc) : null,
+    uarfcn_dl: row.downlink_uarfcn != null ? parseInt(row.downlink_uarfcn) : (row.dl_uarfcn != null ? parseInt(row.dl_uarfcn) : null),
+    uarfcn_ul: row.uplink_uarfcn != null ? parseInt(row.uplink_uarfcn) : (row.ul_uarfcn != null ? parseInt(row.ul_uarfcn) : null),
+    rnc_id: row.rnc_id != null ? parseInt(row.rnc_id) : null,
     bsc: row.bsc || '',
     bw: row.bw || 0,
     height: row.height || 0,
-    tech: isGSM ? 'GSM' : (isLTE ? 'LTE' : 'Unknown'),
+   tech: isGSM ? 'GSM' : (isLTE ? 'LTE' : (is3G ? '3G' : 'Unknown')),
     color: CELL_COLOR
   };
 
@@ -6904,6 +7014,432 @@ function showHSNLegend(count) {
    ========================================================= */
 // في normalizeCell، أضف بعد lac: row.lac || 0, :
 //   hsn: row.hsn != null ? parseInt(row.hsn) : null,
+/* =========================================================
+   TOOL — PSC CHECKER (3G UMTS)
+   Ported from SC-finally.py (QGIS)
+   ========================================================= */
+let pscLastResults = null;
+
+/* 📡 استخرج الباند من UARFCN حسب 3GPP */
+function pscGetBandFromUarfcn(uarfcn) {
+  if (uarfcn == null) return 'Unknown';
+  const n = parseInt(uarfcn);
+  if (isNaN(n)) return 'Unknown';
+  if (n >= 2937 && n <= 3088) return '900';      // Band VIII
+  if (n >= 10562 && n <= 10838) return '2100';   // Band I
+  if (n >= 1207 && n <= 1949) return '1800';     // Band III
+  if (n >= 6150 && n <= 6449) return '800';      // Band VI
+  return 'Other';
+}
+
+/* 🎯 فرق الاتجاه (0-180) */
+function pscDirectionDiff(d1, d2) {
+  const diff = Math.abs(d1 - d2) % 360;
+  return diff <= 180 ? diff : 360 - diff;
+}
+
+/* 🚀 التحليل الرئيسي */
+function runPSCChecker() {
+  // 1. اجلب خلايا 3G
+  const cells3G = allCells.filter(c =>
+    c.tech === '3G' && /[A-Z]$/.test(c.cell_name) && c.psc != null && c.psc >= 0
+  );
+
+  if (!cells3G.length) {
+    toast('❌ لا توجد خلايا 3G بـ PSC. تأكد من رفع بيانات 3G أولاً.', 'error', 6000);
+    return;
+  }
+
+  // 2. اقرأ الإعدادات
+  const pscMin = parseInt(document.getElementById('psc_min').value) || 0;
+  const pscMax = parseInt(document.getElementById('psc_max').value) || 511;
+  const maxDistance = parseFloat(document.getElementById('psc_distance').value) || 2000;
+
+  if (pscMin < 0 || pscMax > 511 || pscMin > pscMax) {
+    toast('❌ نطاق PSC غير صحيح (0-511)', 'error');
+    return;
+  }
+
+  // 3. فلتر حسب النطاق
+  const features = cells3G.filter(c => c.psc >= pscMin && c.psc <= pscMax);
+
+  if (!features.length) {
+    toast('❌ لا توجد خلايا PSC في النطاق ' + pscMin + '-' + pscMax, 'error');
+    return;
+  }
+
+  console.log('📶 PSC Checker: ' + features.length + ' خلية 3G');
+
+  // 4. جهّز البيانات
+  const cells = features.map(c => ({
+    id: c.id,
+    name: c.cell_name,
+    psc: parseInt(c.psc),
+    band: pscGetBandFromUarfcn(c.uarfcn_dl || c.uarfcn || 0),
+    lat: c.lat,
+    lon: c.long,
+    dir: c.bore || 0,
+    originalPsc: parseInt(c.psc),
+    suggestedPsc: parseInt(c.psc),
+    cell: c
+  }));
+
+  // 5. ابحث عن التعارضات (نفس PSC + نفس الباند + ضمن المسافة)
+  const conflicts = [];
+  for (let i = 0; i < cells.length; i++) {
+    for (let j = i + 1; j < cells.length; j++) {
+      const c1 = cells[i], c2 = cells[j];
+      if (c1.psc !== c2.psc) continue;
+      if (c1.band !== c2.band) continue;
+      if (c1.band === 'Unknown' || c1.band === 'Other') continue;
+
+      const dist = haversineDistance(c1.lat, c1.lon, c2.lat, c2.lon);
+      if (dist > maxDistance) continue;
+
+      const dirDiff = pscDirectionDiff(c1.dir, c2.dir);
+      const conflictType = (dirDiff >= 120 && dirDiff <= 240)
+        ? 'Opposite Sector Conflict'
+        : 'Same Sector Conflict';
+
+      conflicts.push({
+        cell1: c1, cell2: c2,
+        distance: dist,
+        dirDiff: dirDiff,
+        type: conflictType
+      });
+    }
+  }
+
+  console.log('⚠️ ' + conflicts.length + ' تعارض موجود');
+
+  // 6. اقترح PSC جديدة
+  const suggestions = pscSuggestNewCodes(cells, conflicts, pscMin, pscMax, maxDistance);
+
+  // 7. حدّد من تغيّر PSC
+  let changed = 0;
+  cells.forEach(c => {
+    const s = suggestions.get(c.id);
+    if (s != null && s !== c.originalPsc) {
+      c.suggestedPsc = s;
+      changed++;
+    } else {
+      c.suggestedPsc = c.originalPsc;
+    }
+  });
+
+  // 8. احسب التعارضات المتبقية
+  const stillConflicted = new Set();
+  conflicts.forEach(cf => {
+    const p1 = suggestions.get(cf.cell1.id) ?? cf.cell1.originalPsc;
+    const p2 = suggestions.get(cf.cell2.id) ?? cf.cell2.originalPsc;
+    if (p1 === p2) {
+      stillConflicted.add(cf.cell1.id);
+      stillConflicted.add(cf.cell2.id);
+    }
+  });
+
+  pscLastResults = {
+    cells: cells,
+    conflicts: conflicts,
+    suggestions: suggestions,
+    stillConflicted: stillConflicted,
+    changed: changed,
+    maxDistance: maxDistance,
+    pscRange: [pscMin, pscMax]
+  };
+
+  renderPSCResults(pscLastResults);
+  document.getElementById('pscResults').style.display = 'block';
+  toast('✅ ' + conflicts.length + ' تعارض · ' + changed + ' اقتراح', 'success', 5000);
+}
+
+/* 🎯 اقتراح PSC جديدة بتجنب التعارضات */
+function pscSuggestNewCodes(cells, conflicts, pscMin, pscMax, maxDistance) {
+  const suggestions = new Map();
+
+  // ترتيب: الخلايا الأكثر تعارضاً أولاً
+  const conflictCount = new Map();
+  conflicts.forEach(cf => {
+    conflictCount.set(cf.cell1.id, (conflictCount.get(cf.cell1.id) || 0) + 1);
+    conflictCount.set(cf.cell2.id, (conflictCount.get(cf.cell2.id) || 0) + 1);
+  });
+
+  const sorted = cells.slice().sort((a, b) =>
+    (conflictCount.get(b.id) || 0) - (conflictCount.get(a.id) || 0)
+  );
+
+  // تتبّع PSC المستخدمة لكل باند
+  const usedByBand = {};
+  const allCodes = [];
+  for (let i = pscMin; i <= pscMax; i++) allCodes.push(i);
+
+  sorted.forEach(cell => {
+    const band = cell.band;
+    if (!usedByBand[band]) usedByBand[band] = [];
+
+    const nearby = usedByBand[band].filter(e =>
+      haversineDistance(cell.lat, cell.lon, e.lat, e.lon) <= maxDistance
+    );
+
+    const hasConflict = (conflictCount.get(cell.id) || 0) > 0;
+
+    // إذا الخلية نظيفة → احتفظ بـ PSC
+    if (!hasConflict) {
+      suggestions.set(cell.id, cell.originalPsc);
+      usedByBand[band].push({ psc: cell.originalPsc, lat: cell.lat, lon: cell.lon });
+      return;
+    }
+
+    // خلية متعارضة → ابحث عن PSC جديدة
+    const forbidden = new Set(nearby.map(e => e.psc));
+
+    // جرّب PSC موزّعة (تجنب الأولاد المتتالية)
+    const candidates = allCodes.filter(c => !forbidden.has(c));
+
+    let chosen = null;
+    if (candidates.length > 0) {
+      // اختر الأقل استخداماً عالمياً
+      const globalUsage = {};
+      cells.forEach(c => {
+        globalUsage[c.originalPsc] = (globalUsage[c.originalPsc] || 0) + 1;
+      });
+      candidates.sort((a, b) => (globalUsage[a] || 0) - (globalUsage[b] || 0));
+      chosen = candidates[0];
+    } else {
+      // ما فيه PSC متاحة → اختر الأبعد جغرافياً
+      let best = cell.originalPsc, bestMin = -1;
+      allCodes.forEach(psc => {
+        if (psc === cell.originalPsc) return;
+        let minDist = Infinity;
+        usedByBand[band].forEach(e => {
+          if (e.psc === psc) {
+            minDist = Math.min(minDist, haversineDistance(cell.lat, cell.lon, e.lat, e.lon));
+          }
+        });
+        if (minDist > bestMin) { bestMin = minDist; best = psc; }
+      });
+      chosen = best;
+    }
+
+    suggestions.set(cell.id, chosen);
+    usedByBand[band].push({ psc: chosen, lat: cell.lat, lon: cell.lon });
+  });
+
+  return suggestions;
+}
+
+/* 📊 عرض النتائج */
+function renderPSCResults(r) {
+  const total = r.cells.length;
+  const conflictCount = r.conflicts.length;
+  const sameSector = r.conflicts.filter(c => c.type === 'Same Sector Conflict').length;
+  const oppositeSector = r.conflicts.filter(c => c.type === 'Opposite Sector Conflict').length;
+  const reassigned = r.cells.filter(c => c.suggestedPsc !== c.originalPsc).length;
+  const unresolved = r.stillConflicted.size;
+
+  document.getElementById('psc_kpi_total').textContent = total;
+  document.getElementById('psc_kpi_conflicts').textContent = conflictCount;
+  document.getElementById('psc_kpi_same').textContent = sameSector;
+  document.getElementById('psc_kpi_opp').textContent = oppositeSector;
+  document.getElementById('psc_kpi_reassigned').textContent = reassigned;
+  document.getElementById('psc_kpi_unresolved').textContent = unresolved;
+
+  const card = document.getElementById('psc_kpi_unresolved_card');
+  card.className = 'kpi-card ' + (unresolved > 0 ? 'danger' : 'success');
+
+  // Warnings
+  const warnEl = document.getElementById('pscWarnings');
+  let warnHtml = '';
+  if (conflictCount === 0) {
+    warnHtml += '<div style="background:#E7F7EE;color:#1F9D55;padding:10px 14px;border-radius:8px;font-size:12.5px;">' +
+      '<b>✅ لا توجد تعارضات — كل PSCs سليمة</b></div>';
+  } else {
+    if (oppositeSector > 0) {
+      warnHtml += '<div style="background:#FCEAEA;color:#B91C1C;padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:8px;">' +
+        '<b>🔴 Opposite Sector Conflicts:</b> ' + oppositeSector + ' — خطيرة (تؤثر على handover)</div>';
+    }
+    if (sameSector > 0) {
+      warnHtml += '<div style="background:#FDF1DC;color:#8A5A00;padding:10px 14px;border-radius:8px;font-size:12.5px;">' +
+        '<b>🟠 Same Sector Conflicts:</b> ' + sameSector + '</div>';
+    }
+  }
+  warnEl.innerHTML = warnHtml;
+
+  // جدول التعارضات
+  const tbody = document.querySelector('#pscConflictsTable tbody');
+  if (!r.conflicts.length) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;color:#5A6B87;">No conflicts 🎉</td></tr>';
+  } else {
+    tbody.innerHTML = r.conflicts.slice(0, 300).map(cf => {
+      const isOpposite = cf.type === 'Opposite Sector Conflict';
+      const bg = isOpposite ? '#FCEAEA' : '#FDF1DC';
+      const color = isOpposite ? '#B91C1C' : '#8A5A00';
+
+      return '<tr>' +
+        '<td><b>' + escapeHtml(cf.cell1.name) + '</b></td>' +
+        '<td>' + cf.cell1.psc + '</td>' +
+        '<td>' + cf.cell1.band + '</td>' +
+        '<td>' + cf.cell1.dir.toFixed(0) + '°</td>' +
+        '<td><b>' + escapeHtml(cf.cell2.name) + '</b></td>' +
+        '<td>' + cf.cell2.psc + '</td>' +
+        '<td>' + cf.cell2.band + '</td>' +
+        '<td>' + cf.cell2.dir.toFixed(0) + '°</td>' +
+        '<td>' + cf.distance.toFixed(0) + '</td>' +
+        '<td><span style="padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:' + bg + ';color:' + color + ';">' + cf.type + '</span></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // جدول الترقيم الجديد
+  const optBody = document.querySelector('#pscOptTable tbody');
+  const sorted = r.cells.slice().sort((a, b) => {
+    const aChanged = a.suggestedPsc !== a.originalPsc ? 1 : 0;
+    const bChanged = b.suggestedPsc !== b.originalPsc ? 1 : 0;
+    return bChanged - aChanged;
+  });
+
+  optBody.innerHTML = sorted.slice(0, 500).map(c => {
+    const changed = c.suggestedPsc !== c.originalPsc;
+    const unresolved = r.stillConflicted.has(c.id);
+
+    let statusText, statusColor, statusBg;
+    if (unresolved) { statusText = 'Unresolved'; statusColor = '#B91C1C'; statusBg = '#FCEAEA'; }
+    else if (changed) { statusText = 'Reassigned'; statusColor = '#1F9D55'; statusBg = '#E7F7EE'; }
+    else { statusText = 'Clean'; statusColor = '#5A6B87'; statusBg = '#F4F7FB'; }
+
+    return '<tr>' +
+      '<td>' + escapeHtml(c.name) + '</td>' +
+      '<td>' + c.originalPsc + '</td>' +
+      '<td style="font-weight:700;color:' + (changed ? '#124191' : '#0C1B3D') + ';">' + c.suggestedPsc + '</td>' +
+      '<td>' + c.band + '</td>' +
+      '<td><span style="padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:' + statusBg + ';color:' + statusColor + ';">' + statusText + '</span></td>' +
+    '</tr>';
+  }).join('');
+}
+
+/* 🗑️ مسح النتائج */
+function clearPSCResults() {
+  pscLastResults = null;
+  document.getElementById('pscResults').style.display = 'none';
+  toast('Results cleared', 'info');
+}
+
+/* 📥 تصدير CSV */
+function exportPSCResults() {
+  if (!pscLastResults) { toast('Run analysis first', 'error'); return; }
+
+  const rows = [['Cell', 'Original_PSC', 'New_PSC', 'Band', 'Direction', 'Lat', 'Long', 'Status']];
+
+  pscLastResults.cells.forEach(c => {
+    const changed = c.suggestedPsc !== c.originalPsc;
+    const unresolved = pscLastResults.stillConflicted.has(c.id);
+    const status = unresolved ? 'Unresolved' : (changed ? 'Reassigned' : 'Clean');
+    rows.push([
+      c.name, c.originalPsc, c.suggestedPsc, c.band, c.dir.toFixed(0),
+      c.lat.toFixed(6), c.lon.toFixed(6), status
+    ]);
+  });
+
+  const csv = rows.map(r => r.map(v => {
+    const s = String(v);
+    return s.indexOf(',') !== -1 ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }).join(',')).join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'PSC_Optimization_' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('✅ تم تصدير CSV', 'success');
+}
+
+/* 🗺️ عرض على الماب */
+function showPSCOnMap() {
+  if (!pscLastResults) { toast('Run analysis first', 'error'); return; }
+
+  window.__gsmMode = true;
+  switchView('map');
+
+  setTimeout(() => {
+    if (sectorLayer) sectorLayer.clearLayers();
+    if (labelLayer) labelLayer.clearLayers();
+
+    pscLastResults.cells.forEach(c => {
+      if (!c.lat || !c.lon) return;
+
+      let color;
+      if (pscLastResults.stillConflicted.has(c.id)) color = '#D64545';        // أحمر = لم يُحل
+      else if (c.suggestedPsc !== c.originalPsc) color = '#1F9D55';           // أخضر = جديد
+      else color = '#94A3B8';                                                  // رمادي = نظيف
+
+      const coords = makeSectorCoords(c.lat, c.lon, c.dir);
+      const poly = L.polygon(coords, {
+        color: color, weight: 1.2, fillColor: color, fillOpacity: 0.7, interactive: true
+      });
+
+      poly.bindPopup(
+        '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:230px;">' +
+          '<div style="font-weight:800;font-family:monospace;margin-bottom:8px;">' + escapeHtml(c.name) + '</div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Band:</span><b>' + c.band + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Dir:</span><b>' + c.dir.toFixed(0) + '°</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Original PSC:</span><b>' + c.originalPsc + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>New PSC:</span><b style="color:#1F9D55;">' + c.suggestedPsc + '</b></div>' +
+        '</div>'
+      );
+
+      sectorLayer.addLayer(poly);
+    });
+
+    if (pscLastResults.cells.length) {
+      const bounds = L.latLngBounds(pscLastResults.cells.map(c => [c.lat, c.lon]));
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+    toast('📍 عرض نتائج PSC على الماب', 'success');
+  }, 300);
+}
+
+/* 💾 تطبيق الاقتراحات في Supabase */
+async function pscApplyAll() {
+  if (!pscLastResults) { toast('Run analysis first', 'error'); return; }
+
+  const changes = pscLastResults.cells.filter(c => c.suggestedPsc !== c.originalPsc);
+  if (!changes.length) { toast('لا توجد تغييرات', 'info'); return; }
+
+  if (!confirm('تطبيق ' + changes.length + ' تغيير PSC في Supabase؟')) return;
+
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = 'Applying...';
+
+  let applied = 0, failed = 0;
+
+  try {
+    for (let i = 0; i < changes.length; i++) {
+      const c = changes[i];
+      const { error } = await db.from('rf_cells').update({ psc: c.suggestedPsc }).eq('id', c.id);
+      if (error) { failed++; console.error(error); }
+      else {
+        applied++;
+        const local = allCells.find(x => x.id === c.id);
+        if (local) local.psc = c.suggestedPsc;
+      }
+      if (applied % 20 === 0) btn.textContent = 'Applying ' + applied + '/' + changes.length + '...';
+    }
+
+    toast('✅ تم تطبيق ' + applied + ' تغيير' + (failed ? ' (' + failed + ' فشل)' : ''), 'success', 5000);
+    setTimeout(() => runPSCChecker(), 500);
+  } catch (e) {
+    console.error(e);
+    toast('خطأ: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💾 Apply All Suggestions';
+  }
+}
 
   /* =========================================================
    TOOL — BSIC ANALYZER
