@@ -2789,7 +2789,6 @@ function initMap() {
     zoomSnap: 0.5,
     zoomDelta: 1,
     wheelPxPerZoomLevel: 120,
-    preferCanvas: true,
     renderer: L.canvas({ padding: 0.5 }),
     // 🚀 تحسينات الأداء
     updateWhenZooming: false,
@@ -3226,7 +3225,7 @@ const isGSM = !isLTE && !is3G;
        lac: row.lac || 0,
     hsn: row.hsn != null ? parseInt(row.hsn) : null,
          psc: row.psc != null ? parseInt(row.psc) : null,
-   uarfcn_dl: row.downlink_uarfcn != null ? parseInt(row.downlink_uarfcn) 
+  uarfcn_dl: row.downlink_uarfcn != null ? parseInt(row.downlink_uarfcn) 
               : (row.dl_uarfcn != null ? parseInt(row.dl_uarfcn) 
               : (row.uarfcn_dl != null ? parseInt(row.uarfcn_dl) : null)),
    uarfcn_ul: row.uplink_uarfcn != null ? parseInt(row.uplink_uarfcn) 
