@@ -3444,9 +3444,34 @@ const viewportBounds = map.getBounds().pad(0.1);
 
    // Sectors Mode (Zoom >= 14)
   // 🎯 رتّب: GSM أولاً (أسفل) ثم LTE فوقه (يُمكن النقر عليه)
+ function getLayerPriority(cell) {
+    const isGSM = cell.tech === 'GSM';
+    const isLTE = cell.tech === 'LTE';
+    const is3G = cell.tech === '3G';
+    
+    // أصغر رقم = يُرسم أولاً = في الأسفل (خلفية)
+    // أكبر رقم = يُرسم أخيراً = في الأعلى (فوق، ينضغط عليه)
+    
+    // أكبر حجم أولاً (خلفية)
+    if (isGSM && cell.gsmBand === '900') return 1;
+    if (is3G && cell.gsmBand === '900') return 2;
+    
+    // حجم متوسط
+    if (isGSM && cell.gsmBand !== '900' && cell.gsmBand !== '1800') return 3;
+    if (is3G && cell.gsmBand !== '900' && cell.gsmBand !== '2100') return 4;
+    
+    // حجم صغير
+    if (isGSM && cell.gsmBand === '1800') return 5;
+    if (is3G && cell.gsmBand === '2100') return 6;
+    
+    // أصغر حجم — في الأعلى (LTE)
+    if (isLTE) return 7;
+    
+    return 8;
+  }
+  
   const sortedCells = visibleCells.slice().sort((a, b) => {
-    const priority = { 'GSM': 1, 'LTE': 2, 'Unknown': 3 };
-    return (priority[a.tech] || 99) - (priority[b.tech] || 99);
+    return getLayerPriority(a) - getLayerPriority(b);
   });
 
   sortedCells.forEach(function(cell) {
@@ -4956,6 +4981,13 @@ function showSiteInfo(cell) {
     techBadge = '<span style="background:' + badgeBg + ';color:' + badgeColor + ';padding:3px 10px;border-radius:12px;font-size:10.5px;font-weight:800;">' + bandLabel + '</span>';
   } else if (cell.tech === 'LTE') {
     techBadge = '<span style="background:#EAF2FB;color:#124191;padding:3px 10px;border-radius:12px;font-size:10.5px;font-weight:800;">LTE 4G</span>';
+  } else if (cell.tech === '3G') {
+    const bandLabel = cell.gsmBand === '2100' ? '3G UMTS · 2100 MHz' :
+                      cell.gsmBand === '900'  ? '3G UMTS · 900 MHz'  :
+                      '3G UMTS';
+    const badgeBg = cell.gsmBand === '2100' ? '#CCFBF1' : '#D1FAE5';
+    const badgeColor = cell.gsmBand === '2100' ? '#0F766E' : '#047857';
+    techBadge = '<span style="background:' + badgeBg + ';color:' + badgeColor + ';padding:3px 10px;border-radius:12px;font-size:10.5px;font-weight:800;">' + bandLabel + '</span>';
   } else {
     techBadge = '<span style="background:#F4F7FB;color:#5A6B87;padding:3px 10px;border-radius:12px;font-size:10.5px;font-weight:800;">❓ Unknown</span>';
   }
