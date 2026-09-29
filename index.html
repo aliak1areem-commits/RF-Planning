@@ -8189,11 +8189,15 @@ function saveCacheToDisk(cells) {
     const payload = {
       timestamp: Date.now(),
       cells: cells.map(c => ({
-        // نبقي فقط الحقول المهمة (لتقليل الحجم)
         id: c.id, cell_name: c.cell_name, site: c.site, lat: c.lat, long: c.long,
         bore: c.bore, pci: c.pci, rsi: c.rsi, bcch: c.bcch, bsic: c.bsic,
         hsn: c.hsn, tch: c.tch, lac: c.lac, bsc: c.bsc, bw: c.bw, height: c.height,
-        cell_radius: c.radius, comment: c.comment || null, project_id: c.project_id
+        cell_radius: c.radius, comment: c.comment || null, project_id: c.project_id,
+        // ✅ حقول 3G
+        psc: c.psc,
+        uarfcn_dl: c.uarfcn_dl,
+        uarfcn_ul: c.uarfcn_ul,
+        rnc_id: c.rnc_id
       }))
     };
     localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
