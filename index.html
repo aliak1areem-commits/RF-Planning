@@ -3391,7 +3391,7 @@ const viewportBounds = map.getBounds().pad(0.1);
     Object.entries(sites).forEach(([siteName, info]) => {
       const count = info.cells.length;
       const circle = L.circleMarker([info.lat, info.long], {
-        renderer: canvasRenderer,
+        
         radius: 7 + Math.min(count, 5),
         color: '#fff', weight: 2.5,
         fillColor: CELL_COLOR, fillOpacity: 0.9, interactive: true
@@ -3425,7 +3425,7 @@ const viewportBounds = map.getBounds().pad(0.1);
       const total = info.gsm + info.lte;
 
       const circle = L.circleMarker([info.lat, info.long], {
-        renderer: canvasRenderer,
+        
         radius: 6 + Math.min(total / 3, 6),
         color: '#fff', weight: 2,
         fillColor: color, fillOpacity: 0.85, interactive: true
@@ -3536,7 +3536,7 @@ const viewportBounds = map.getBounds().pad(0.1);
 
       const coords = makeSectorCoordsScaled(cell.lat, cell.long, cell.bore, scale);
                      const polygon = L.polygon(coords, {
-        renderer: canvasRenderer,
+        
         color: cellColor, weight: weight, opacity: 1,
         fillColor: cellColor, fillOpacity: fillOpacity,
         interactive: true, lineJoin: 'round'
