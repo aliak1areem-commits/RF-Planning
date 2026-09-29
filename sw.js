@@ -1,15 +1,14 @@
 /* =========================================================
-   RF Planning — Service Worker v3
+   RF Planning — Service Worker v4
    ========================================================= */
-const VERSION = 'v3.0.0';
+const VERSION = 'v4.0.0';
 const STATIC_CACHE = 'rf-static-' + VERSION;
 const TILE_CACHE = 'rf-tiles-' + VERSION;
 
-// ملفات ثابتة (تُحفظ مرة واحدة)
+// ✅ ملفات ثابتة — فقط ملفات تعمل دائماً (بدون Google Fonts)
 const STATIC_FILES = [
   './',
   './index.html',
-  './sw.js',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css',
@@ -24,8 +23,8 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then(cache => {
       return Promise.all(
-        STATIC_FILES.map(url => 
-          cache.add(url).catch(err => console.warn('Failed:', url, err))
+        STATIC_FILES.map(url =>
+          cache.add(url).catch(err => console.warn('⚠️ Skipped:', url))
         )
       );
     }).then(() => self.skipWaiting())
@@ -35,7 +34,7 @@ self.addEventListener('install', event => {
 // ============ ACTIVATE ============
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => 
+    caches.keys().then(keys =>
       Promise.all(
         keys.filter(k => k !== STATIC_CACHE && k !== TILE_CACHE)
             .map(k => {
@@ -55,21 +54,28 @@ self.addEventListener('fetch', event => {
   // تجاهل غير GET
   if (method !== 'GET') return;
 
-  // ═══ 1. HTML → Network First (يجيب الجديد دائماً) ═══
-  if (url.includes('index.html') || 
-      url.endsWith('/') || 
+  // ═══ 0. طلبات خارجية حساسة → تمرير مباشر بدون cache ═══
+  // ✅ هذا يحل مشكلة "Failed to fetch" مع Google Fonts و Supabase
+  if (url.includes('fonts.googleapis.com') ||
+      url.includes('fonts.gstatic.com') ||
+      url.includes('supabase.co') ||
+      url.includes('nominatim.openstreetmap.org')) {
+    return; // مرّر للشبكة مباشرة
+  }
+
+  // ═══ 1. HTML → Network First ═══
+  if (url.includes('index.html') ||
+      url.endsWith('/') ||
       url.includes('RF-Planning')) {
     event.respondWith(
       fetch(event.request)
         .then(response => {
-          // حدّث الـ cache
           const clone = response.clone();
-          caches.open(STATIC_CACHE).then(c => c.put(event.request, clone));
+          caches.open(STATIC_CACHE).then(c => c.put(event.request, clone)).catch(() => {});
           return response;
         })
         .catch(() => {
-          // لا يوجد إنترنت → ارجع من cache
-          return caches.match(event.request).then(cached => 
+          return caches.match(event.request).then(cached =>
             cached || caches.match('./index.html')
           );
         })
@@ -77,17 +83,17 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // ═══ 2. Tiles الخريطة → Cache First (سريع جداً) ═══
-  if (url.includes('tile.openstreetmap') || 
-      url.includes('arcgisonline') || 
+  // ═══ 2. Tiles الخريطة → Cache First ═══
+  if (url.includes('tile.openstreetmap') ||
+      url.includes('arcgisonline') ||
       url.includes('opentopomap') ||
       url.includes('cartocdn')) {
     event.respondWith(
-      caches.open(TILE_CACHE).then(cache => 
+      caches.open(TILE_CACHE).then(cache =>
         cache.match(event.request).then(cached => {
           if (cached) return cached;
           return fetch(event.request).then(response => {
-            if (response.ok) cache.put(event.request, response.clone());
+            if (response.ok) cache.put(event.request, response.clone()).catch(() => {});
             return response;
           }).catch(() => new Response('', { status: 408 }));
         })
@@ -96,30 +102,26 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // ═══ 3. Supabase → Network First (البيانات لازم حديثة) ═══
-  if (url.includes('supabase.co')) {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
-    );
-    return;
-  }
-
-  // ═══ 4. الباقي (CDN, Fonts) → Cache First ═══
+  // ═══ 3. الباقي (CDN) → Cache First مع fallback آمن ═══
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached) return cached;
       return fetch(event.request).then(response => {
-        if (response.ok && (url.includes('unpkg.com') || url.includes('cdn') || url.includes('fonts'))) {
+        if (response && response.ok && response.status === 200) {
           const clone = response.clone();
-          caches.open(STATIC_CACHE).then(c => c.put(event.request, clone));
+          caches.open(STATIC_CACHE).then(c => c.put(event.request, clone)).catch(() => {});
         }
         return response;
+      }).catch(err => {
+        // ✅ لا تنكسر — أرجع رد افتراضي بدل رمي الخطأ
+        console.warn('⚠️ Fetch failed:', url);
+        return new Response('', { status: 503, statusText: 'Offline' });
       });
     })
   );
 });
 
-// ============ MESSAGE (لتحديث فوري) ============
+// ============ MESSAGE ============
 self.addEventListener('message', event => {
   if (event.data === 'SKIP_WAITING') {
     self.skipWaiting();
