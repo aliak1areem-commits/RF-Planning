@@ -999,7 +999,7 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
           </div>
           <label class="filter-checkbox">
   <input type="checkbox" id="filter3G" checked onchange="applyFilters()">
-  <span style="color:#3B82F6;font-weight:700;">📡 3G (UMTS)</span>
+  <span style="color:#14B8A6;font-weight:700;">📡 3G (UMTS)</span>
 </label>
         
           <h3>Display Options</h3>
@@ -1423,7 +1423,7 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
           <div class="tool-tag" style="background:#E0F2FE;color:#0369A1;">Audit</div>
         </div>
         <div class="tool-card" onclick="switchView('tool-psc-checker')">
-  <div class="tool-icon" style="background:linear-gradient(135deg,#0EA5E9,#0284C7);color:#fff;">📶</div>
+  <div class="tool-icon" style="background:linear-gradient(135deg,#14B8A6,#0D9488);color:#fff;">📶</div>
   <div class="tool-title">PSC Conflict Checker (3G)</div>
   <div class="tool-desc">Detect same PSC conflicts per band (900/2100), classify Same/Opposite Sector, auto-assign new PSC with geographic separation.</div>
   <div class="tool-tag" style="background:#E0F2FE;color:#0369A1;">3G Optimization</div>
@@ -3492,19 +3492,19 @@ const viewportBounds = map.getBounds().pad(0.1);
         weight = 0.8;
         scale = 1.0;
       }
-          } else if (is3G) {
+         } else if (is3G) {
         if (cell.gsmBand === '900') {
-          cellColor = '#3B82F6';   // 🔵 أزرق متوسط - 900
+          cellColor = '#14B8A6';   // 🩵 تركواز فاتح - 900
           fillOpacity = 0.60;
           weight = 1.5;
           scale = 1.0;
         } else if (cell.gsmBand === '2100') {
-          cellColor = '#1E3A8A';   // 🔵 أزرق غامق - 2100
+          cellColor = '#0D9488';   // 🩵 تركواز غامق - 2100
           fillOpacity = 0.75;
           weight = 1.2;
           scale = 0.55;
         } else {
-          cellColor = '#60A5FA';   // 🔵 أزرق فاتح - unknown
+          cellColor = '#5EEAD4';   // 🩵 تركواز خفيف - unknown
           fillOpacity = 0.60;
           weight = 1.2;
           scale = 0.75;
@@ -4918,7 +4918,7 @@ function showSiteInfo(cell) {
     rfSection =
       '<div class="info-section-title">📡 3G Parameters</div>' +
       '<div class="info-row"><span class="k">Band</span><span class="v">' + (cell.gsmBand === '900' ? '900 MHz' : (cell.gsmBand === '2100' ? '2100 MHz' : '—')) + '</span></div>' +
-      '<div class="info-row"><span class="k">PSC</span><span class="v" style="color:#3B82F6;font-weight:800;">' + (cell.psc || '—') + '</span></div>' +
+     '<div class="info-row"><span class="k">PSC</span><span class="v" style="color:#14B8A6;font-weight:800;">' + (cell.psc || '—') + '</span></div>' +
       '<div class="info-row"><span class="k">DL UARFCN</span><span class="v">' + (cell.uarfcn_dl || '—') + '</span></div>' +
       '<div class="info-row"><span class="k">UL UARFCN</span><span class="v">' + (cell.uarfcn_ul || '—') + '</span></div>' +
       '<div class="info-row"><span class="k">RNC ID</span><span class="v">' + (cell.rnc_id || '—') + '</span></div>';
