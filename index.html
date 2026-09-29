@@ -3455,20 +3455,21 @@ const viewportBounds = map.getBounds().pad(0.1);
 // Sectors Mode (Zoom >= 14)
   // 🎯 رتّب: 3G أولاً (أسفل) ثم GSM ثم LTE فوقه
 
-  function getLayerPriority(cell) {
+function getLayerPriority(cell) {
     const isGSM = cell.tech === 'GSM';
     const isLTE = cell.tech === 'LTE';
     const is3G = cell.tech === '3G';
 
-    // أصغر = أسفل · أكبر = أعلى (يُضغط عليه)
-    if (is3G && cell.gsmBand === '900') return 1;   // 3G-900 → أسفل
-    if (isGSM && cell.gsmBand === '900') return 2;  // GSM-900 → فوقه
-    if (is3G && cell.gsmBand === '2100') return 3;  // 3G-2100
-    if (isGSM && cell.gsmBand === '1800') return 4; // GSM-1800
-    if (isLTE) return 5;                            // LTE → الأعلى
+    // 🎯 أصغر = أسفل · أكبر = أعلى (يُضغط عليه)
+    // 3G دائماً أسفل 2G بغض النظر عن الباند
+    if (is3G && cell.gsmBand === '2100') return 1;   // 3G-2100 → الأسفل
+    if (is3G && cell.gsmBand === '900') return 2;    // 3G-900 → فوقه
+    if (isGSM && cell.gsmBand === '1800') return 3;  // GSM-1800
+    if (isGSM && cell.gsmBand === '900') return 4;   // GSM-900 → فوق 3G ✅
+    if (isLTE) return 5;                             // LTE → الأعلى
 
     return 6;
-  }
+}
 
   const sortedCells = visibleCells.slice().sort(function(a, b) {
     return getLayerPriority(a) - getLayerPriority(b);
@@ -8185,6 +8186,14 @@ const CACHE_KEY = 'rf_cells_cache_v2';
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 دقائق
 
 function saveCacheToDisk(cells) {
+  // 🎯 لا تخزّن كاش للبيانات الضخمة — localStorage حدّه ~5MB
+  const MAX_CACHE_CELLS = 3000;
+  if (cells.length > MAX_CACHE_CELLS) {
+    console.log('⏭️ Skip cache: ' + cells.length + ' cells (limit ' + MAX_CACHE_CELLS + ')');
+    try { localStorage.removeItem(CACHE_KEY); } catch (e) {}
+    return;
+  }
+
   try {
     const payload = {
       timestamp: Date.now(),
@@ -8193,7 +8202,6 @@ function saveCacheToDisk(cells) {
         bore: c.bore, pci: c.pci, rsi: c.rsi, bcch: c.bcch, bsic: c.bsic,
         hsn: c.hsn, tch: c.tch, lac: c.lac, bsc: c.bsc, bw: c.bw, height: c.height,
         cell_radius: c.radius, comment: c.comment || null, project_id: c.project_id,
-        // ✅ حقول 3G — مهمة جداً
         psc: c.psc,
         uarfcn_dl: c.uarfcn_dl,
         uarfcn_ul: c.uarfcn_ul,
@@ -8203,7 +8211,9 @@ function saveCacheToDisk(cells) {
     localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
     console.log('💾 Cache saved:', cells.length, 'cells');
   } catch (e) {
-    console.warn('Cache save failed:', e);
+    // 🎯 إذا فشل الحفظ → احذف الكاش القديم وتجاهل بهدوء
+    console.warn('⚠️ Cache save failed, clearing:', e.name);
+    try { localStorage.removeItem(CACHE_KEY); } catch (err) {}
   }
 }
 
