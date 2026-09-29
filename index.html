@@ -3190,11 +3190,31 @@ function normalizeCell(row) {
     site = site.replace(/^L/, '');
   }
 
-   // 🎯 قاعدة بسيطة: يبدأ بـ L = LTE، غير ذلك = GSM
+   // 🎯 قاعدة بسيطة: يبدأ بـ L = LTE، U = 3G، غير ذلك = GSM
   const nameUpper = name.toUpperCase();
 const isLTE = nameUpper.startsWith('L');
 const is3G = nameUpper.startsWith('U');
 const isGSM = !isLTE && !is3G;
+
+// ✅ احسب UARFCN مرة واحدة (تدعم كل أسماء الحقول — من DB أو من Cache)
+const uarfcn_dl_val = row.downlink_uarfcn != null ? parseInt(row.downlink_uarfcn)
+                    : (row.dl_uarfcn != null ? parseInt(row.dl_uarfcn)
+                    : (row.uarfcn_dl != null ? parseInt(row.uarfcn_dl) : null));
+const uarfcn_ul_val = row.uplink_uarfcn != null ? parseInt(row.uplink_uarfcn)
+                    : (row.ul_uarfcn != null ? parseInt(row.ul_uarfcn)
+                    : (row.uarfcn_ul != null ? parseInt(row.uarfcn_ul) : null));
+
+// ✅ حدد الباند من القيمة المحسوبة (مو من row مباشرة)
+const gsmBand = (function() {
+  if (isGSM) return GSM_BAND_SUFFIX[sector.toUpperCase()] || 'unknown';
+  if (is3G) {
+    const dl = uarfcn_dl_val || 0;
+    if (dl >= 2937 && dl <= 3088) return '900';
+    if (dl >= 10562 && dl <= 10838) return '2100';
+    return 'unknown';
+  }
+  return null;
+})();
 
    const result = {
     id: row.id,
@@ -3203,16 +3223,7 @@ const isGSM = !isLTE && !is3G;
     site: site,
     region: region,
     sector: sector,
-    gsmBand: (function() {
-  if (isGSM) return GSM_BAND_SUFFIX[sector.toUpperCase()] || 'unknown';
-  if (is3G) {
-    const dl = parseInt(row.downlink_uarfcn) || 0;
-    if (dl >= 2937 && dl <= 3088) return '900';
-    if (dl >= 10562 && dl <= 10838) return '2100';
-    return 'unknown';
-  }
-  return null;
-})(),
+    gsmBand: gsmBand,
     lat: parseFloat(row.lat) || 0,
     long: parseFloat(row.long) || 0,
     bore: row.bore || 0,
@@ -3225,12 +3236,8 @@ const isGSM = !isLTE && !is3G;
        lac: row.lac || 0,
     hsn: row.hsn != null ? parseInt(row.hsn) : null,
          psc: row.psc != null ? parseInt(row.psc) : null,
-  uarfcn_dl: row.downlink_uarfcn != null ? parseInt(row.downlink_uarfcn) 
-              : (row.dl_uarfcn != null ? parseInt(row.dl_uarfcn) 
-              : (row.uarfcn_dl != null ? parseInt(row.uarfcn_dl) : null)),
-   uarfcn_ul: row.uplink_uarfcn != null ? parseInt(row.uplink_uarfcn) 
-              : (row.ul_uarfcn != null ? parseInt(row.ul_uarfcn) 
-              : (row.uarfcn_ul != null ? parseInt(row.uarfcn_ul) : null)),
+   uarfcn_dl: uarfcn_dl_val,
+  uarfcn_ul: uarfcn_ul_val,
     rnc_id: row.rnc_id != null ? parseInt(row.rnc_id) : null,
     bsc: row.bsc || '',
     bw: row.bw || 0,
@@ -8174,7 +8181,7 @@ function toggleDarkMode() {
 /* =========================================================
    PERFORMANCE CACHE
    ========================================================= */
-const CACHE_KEY = 'rf_cells_cache_v1';
+const CACHE_KEY = 'rf_cells_cache_v2';
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 دقائق
 
 function saveCacheToDisk(cells) {
@@ -8186,7 +8193,7 @@ function saveCacheToDisk(cells) {
         bore: c.bore, pci: c.pci, rsi: c.rsi, bcch: c.bcch, bsic: c.bsic,
         hsn: c.hsn, tch: c.tch, lac: c.lac, bsc: c.bsc, bw: c.bw, height: c.height,
         cell_radius: c.radius, comment: c.comment || null, project_id: c.project_id,
-        // ✅ حقول 3G
+        // ✅ حقول 3G — مهمة جداً
         psc: c.psc,
         uarfcn_dl: c.uarfcn_dl,
         uarfcn_ul: c.uarfcn_ul,
