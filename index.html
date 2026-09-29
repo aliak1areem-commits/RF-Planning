@@ -3094,7 +3094,8 @@ async function refreshCellsInBackground() {
   }
 }
 async function loadCells(useCache) {
-  useCache = useCache !== false; // افتراضي = استخدام cache
+  useCache = useCache !== false;
+  const loadingEl = document.getElementById('loadingOverlay');
 
     // جرّب Cache أولاً
   if (useCache && !currentProjectId) {
@@ -3116,7 +3117,6 @@ async function loadCells(useCache) {
     }
   }
 
-  const loadingEl = document.getElementById('loadingOverlay');
   if (loadingEl) loadingEl.style.display = 'flex';
 
     try {
