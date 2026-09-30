@@ -3509,31 +3509,60 @@ function resetMapView() {
   window.__gsmMode = false;
   window.__nbMode = false;
   currentView = 'map';
-  
+
+  // ═══ 1. مسح الطبقات الأساسية ═══
   if (sectorLayer) sectorLayer.clearLayers();
   if (labelLayer) labelLayer.clearLayers();
   if (neighborLineLayer) neighborLineLayer.clearLayers();
-  
-  if (typeof nbHideLegend === 'function') nbHideLegend();
-  if (typeof hideNeighborLinesLegend === 'function') hideNeighborLinesLegend();
-  
-  // اذهب لصفحة الماب
+  if (coverageLayer) coverageLayer.clearLayers();
+
+  // ═══ 2. مسح طبقات الأدوات (3G/IRAT/NB) ═══
+  if (typeof nbMapLayers !== 'undefined' && nbMapLayers.length) {
+    nbMapLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
+    nbMapLayers = [];
+  }
+  if (typeof threeGMapLayers !== 'undefined' && threeGMapLayers.length) {
+    threeGMapLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
+    threeGMapLayers = [];
+  }
+  if (typeof symMapLayers !== 'undefined' && symMapLayers.length) {
+    symMapLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
+    symMapLayers = [];
+  }
+  if (typeof azoptMapLayers !== 'undefined' && azoptMapLayers.length) {
+    azoptMapLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
+    azoptMapLayers = [];
+  }
+
+  // ═══ 3. مسح كل الـ Legends ═══
+  ['nbLegend', 'nbLinesLegend', 'pscLegend', 'hsnLegend', 'bsicLegend', 'azoptLegend'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  // ═══ 4. مسح متغيرات الأدوات ═══
+  if (typeof nbCurrentSource !== 'undefined') nbCurrentSource = null;
+  if (typeof nbCurrentNeighbors !== 'undefined') nbCurrentNeighbors = [];
+  if (typeof threeGNbCurrent !== 'undefined') threeGNbCurrent = null;
+
+  // ═══ 5. الرجوع لصفحة الماب ═══
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   const mapBtn = document.querySelector('[data-page="map"]');
   if (mapBtn) mapBtn.classList.add('active');
-  
+
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const mapPage = document.getElementById('page-map');
   if (mapPage) mapPage.classList.add('active');
-  
+
   document.getElementById('pageIcon').textContent = '🗺️';
   document.getElementById('pageTitle').textContent = 'Cell Map';
   document.getElementById('pageSubtitle').textContent = 'Visualize cells on the map';
-  
+
   if (map) {
     setTimeout(() => map.invalidateSize(), 100);
   }
-  
+
+  // ═══ 6. إعادة رسم الخلايا العادية ═══
   applyFilters();
   toast('🗺️ تم إعادة عرض الخلايا', 'success');
 }
@@ -10392,7 +10421,6 @@ function threeGShowOnMap(mode) {
     if (sectorLayer) sectorLayer.clearLayers();
     if (labelLayer) labelLayer.clearLayers();
     if (coverageLayer) coverageLayer.clearLayers();
-    // 🎯 استخدم nbMapLayers (نفس مصفوفة 2G) — عشان Hide Layers يمسح الكل
     nbMapLayers.forEach(l => map.removeLayer(l));
     nbMapLayers = [];
     threeGMapLayers = [];
@@ -10401,7 +10429,7 @@ function threeGShowOnMap(mode) {
     const sLat = src.lat, sLon = src.long, sBore = src.bore;
     map.setView([sLat, sLon], 14);
 
-    // ═══ 1. دائرة نصف القطر (مثل 2G) ═══
+    // ═══ 1. دائرة نصف القطر ═══
     const radiusCircle = L.circle([sLat, sLon], {
       radius: threeGNbCurrent.radius || 1200,
       color: '#2563EB', weight: 2, dashArray: '6,6',
@@ -10419,44 +10447,123 @@ function threeGShowOnMap(mode) {
     });
     nbMapLayers.push(srcPoly);
 
-    // ═══ 3. الجيران (بنفس أسلوب 2G) ═══
+    // ═══ 3. الجيران (تمييز Intra/Inter + Added/Missing) ═══
     const points = [[sLat, sLon]];
     threeGNbCurrent.neighbors.forEach(nb => {
       if (!nb.cell) return;
       points.push([nb.cell.lat, nb.cell.long]);
 
-      let fill, stroke;
-      if (nb.status === 'Missing') { fill = '#F97316'; stroke = '#C2410C'; }
-      else if (nb.status === 'Added (Not Found)') { fill = '#EAB308'; stroke = '#A16207'; }
-      else { fill = '#16A34A'; stroke = '#15803D'; }
+      // 🎯 تحديد اللون حسب Type + Status
+      const style = getNeighborStyle(nb);
 
       // خط بين المصدر والجار
       const line = L.polyline([[sLat, sLon], [nb.cell.lat, nb.cell.long]], {
-        color: nb.status === 'Missing' ? '#DC2626' : '#16A34A',
-        weight: nb.isFront ? 3 : 1.5, opacity: 0.85,
-        dashArray: nb.status === 'Missing' ? '8,6' : null
+        color: style.lineColor,
+        weight: nb.isFront ? 3 : 1.5,
+        opacity: 0.85,
+        dashArray: style.dashArray
       }).addTo(map);
       nbMapLayers.push(line);
 
       // قطاع الجار
       const nCoords = makeSectorCoords(nb.cell.lat, nb.cell.long, nb.cell.bore);
       const nPoly = L.polygon(nCoords, {
-        color: stroke, weight: 1.5, fillColor: fill, fillOpacity: 0.7
+        color: style.stroke,
+        weight: 1.5,
+        fillColor: style.fill,
+        fillOpacity: 0.75
       }).addTo(map);
       nPoly.bindTooltip(nb.name, { permanent: true, direction: 'center', className: 'nb-label' });
 
       nPoly.bindPopup(
-        '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:220px;">' +
+        '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:230px;">' +
           '<div style="font-weight:800;font-family:monospace;margin-bottom:6px;">' + escapeHtml(nb.name) + '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Status:</span><b style="color:' + (nb.status === 'Missing' ? '#DC2626' : '#16A34A') + ';">' + nb.status + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Type:</span><b style="color:' + style.textColor + ';">' + nb.type + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Status:</span><b style="color:' + style.textColor + ';">' + nb.status + '</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Distance:</span><b>' + (nb.distance != null ? nb.distance.toFixed(0) + ' m' : '—') + '</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Direction:</span><b>' + nb.direction + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Type:</span><b>' + nb.type + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Band:</span><b>' + (nb.nbBand || '—') + '</b></div>' +
         '</div>'
       );
       nbMapLayers.push(nPoly);
     });
 
+    // ═══ 4. Zoom ═══
+    if (points.length > 1) {
+      const bounds = L.latLngBounds(points);
+      const ne = bounds.getNorthEast(), sw = bounds.getSouthWest();
+      ne.lat += 0.005; ne.lng += 0.005; sw.lat -= 0.005; sw.lng -= 0.005;
+      map.fitBounds(L.latLngBounds(sw, ne), { padding: [40, 40], maxZoom: 15 });
+    }
+
+    // ═══ 5. Legend ═══
+    showThreeGNeighborLegend(threeGNbCurrent.neighbors, mode);
+
+    toast('📍 ' + threeGNbCurrent.neighbors.length + ' neighbors on map', 'success');
+  }, 400);
+}
+
+// 🎯 دالة تحدد اللون والخط حسب Type + Status
+function getNeighborStyle(nb) {
+  const isIntra = nb.type === 'Intra-Freq';
+  const isMissing = nb.status === 'Missing';
+
+  if (isIntra && !isMissing) {
+    // 🟢 Intra + Added → أخضر
+    return { fill: '#16A34A', stroke: '#15803D', lineColor: '#16A34A', dashArray: null, textColor: '#15803D' };
+  } else if (!isIntra && !isMissing) {
+    // 🔵 Inter + Added → أزرق
+    return { fill: '#2563EB', stroke: '#1E40AF', lineColor: '#2563EB', dashArray: null, textColor: '#1E40AF' };
+  } else if (isIntra && isMissing) {
+    // 🔴 Intra + Missing → أحمر (dashed)
+    return { fill: '#DC2626', stroke: '#991B1B', lineColor: '#DC2626', dashArray: '8,6', textColor: '#991B1B' };
+  } else {
+    // 🟠 Inter + Missing → برتقالي (dashed)
+    return { fill: '#F97316', stroke: '#C2410C', lineColor: '#F97316', dashArray: '8,6', textColor: '#C2410C' };
+  }
+}
+
+// 🎯 Legend
+function showThreeGNeighborLegend(neighbors, mode) {
+  let legend = document.getElementById('nbLegend');
+  if (!legend) {
+    legend = document.createElement('div');
+    legend.id = 'nbLegend';
+    legend.className = 'legend';
+    legend.style.cssText = 'left:20px;bottom:20px;display:block;';
+    document.querySelector('.map-container').appendChild(legend);
+  }
+
+  // احسب العدد لكل نوع
+  let intraAdded = 0, intraMissing = 0, interAdded = 0, interMissing = 0;
+  neighbors.forEach(nb => {
+    const isIntra = nb.type === 'Intra-Freq';
+    const isMissing = nb.status === 'Missing';
+    if (isIntra && !isMissing) intraAdded++;
+    else if (!isIntra && !isMissing) interAdded++;
+    else if (isIntra && isMissing) intraMissing++;
+    else interMissing++;
+  });
+
+  const title = mode === 'irat'
+    ? '🔗 IRAT (3G → 2G) · ' + neighbors.length
+    : '📡 3G Neighbor · ' + neighbors.length;
+
+  legend.style.display = 'block';
+  legend.innerHTML =
+    '<div class="legend-title">' + title + '</div>' +
+
+    '<div style="font-size:10px;font-weight:800;color:#5A6B87;text-transform:uppercase;margin:6px 0 4px;letter-spacing:.4px;">📡 Source</div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#DC2626;"></span><span>Source Cell</span></div>' +
+
+    '<div style="font-size:10px;font-weight:800;color:#5A6B87;text-transform:uppercase;margin:8px 0 4px;letter-spacing:.4px;">🟢 Intra-Freq</div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#16A34A;"></span><span>Added (' + intraAdded + ')</span></div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#DC2626;"></span><span>Missing (' + intraMissing + ') — dashed</span></div>' +
+
+    '<div style="font-size:10px;font-weight:800;color:#5A6B87;text-transform:uppercase;margin:8px 0 4px;letter-spacing:.4px;">🔵 Inter-Freq</div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#2563EB;"></span><span>Added (' + interAdded + ')</span></div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#F97316;"></span><span>Missing (' + interMissing + ') — dashed</span></div>';
+}
     // ═══ 4. Zoom للنتائج ═══
     if (points.length > 1) {
       const bounds = L.latLngBounds(points);
