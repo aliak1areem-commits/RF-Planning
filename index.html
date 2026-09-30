@@ -10384,56 +10384,121 @@ function run3GDuplicateCheck() {
 /* ─────────── Map ─────────── */
 function threeGShowOnMap(mode) {
   if (!threeGNbCurrent) { toast('شغّل التحليل أولاً', 'error'); return; }
-  window.__gsmMode = true;
+  window.__nbMode = true;
+  window.__gsmMode = false;
   switchView('map');
 
   setTimeout(() => {
     if (sectorLayer) sectorLayer.clearLayers();
     if (labelLayer) labelLayer.clearLayers();
-    threeGMapLayers.forEach(l => map.removeLayer(l));
+    if (coverageLayer) coverageLayer.clearLayers();
+    // 🎯 استخدم nbMapLayers (نفس مصفوفة 2G) — عشان Hide Layers يمسح الكل
+    nbMapLayers.forEach(l => map.removeLayer(l));
+    nbMapLayers = [];
     threeGMapLayers = [];
 
     const src = threeGNbCurrent.source;
+    const sLat = src.lat, sLon = src.long, sBore = src.bore;
+    map.setView([sLat, sLon], 14);
 
-    const srcCoords = makeSectorCoords(src.lat, src.long, src.bore);
-    const srcPoly = L.polygon(srcCoords, { color: '#B91C1C', weight: 2.5, fillColor: '#DC2626', fillOpacity: 0.85 });
-    srcPoly.bindTooltip('🎯 ' + escapeHtml(src.cell_name), { permanent: true, direction: 'top', offset: [0, -10], className: 'nb-label-source' });
-    sectorLayer.addLayer(srcPoly);
+    // ═══ 1. دائرة نصف القطر (مثل 2G) ═══
+    const radiusCircle = L.circle([sLat, sLon], {
+      radius: threeGNbCurrent.radius || 1200,
+      color: '#2563EB', weight: 2, dashArray: '6,6',
+      fillColor: '#2563EB', fillOpacity: 0.04, interactive: false
+    }).addTo(map);
+    nbMapLayers.push(radiusCircle);
 
-    const points = [[src.lat, src.long]];
+    // ═══ 2. الخلية المصدر (حمراء كبيرة) ═══
+    const srcCoords = makeSectorCoords(sLat, sLon, sBore);
+    const srcPoly = L.polygon(srcCoords, {
+      color: '#991B1B', weight: 2.5, fillColor: '#DC2626', fillOpacity: 0.85
+    }).addTo(map);
+    srcPoly.bindTooltip('🎯 ' + escapeHtml(src.cell_name), {
+      permanent: true, direction: 'top', offset: [0, -10], className: 'nb-label-source'
+    });
+    nbMapLayers.push(srcPoly);
+
+    // ═══ 3. الجيران (بنفس أسلوب 2G) ═══
+    const points = [[sLat, sLon]];
     threeGNbCurrent.neighbors.forEach(nb => {
       if (!nb.cell) return;
       points.push([nb.cell.lat, nb.cell.long]);
 
-      let fill, stroke, dash;
-      if (nb.status === 'Missing') { fill = '#F97316'; stroke = '#C2410C'; dash = '8,6'; }
-      else if (nb.status === 'Added') { fill = '#16A34A'; stroke = '#15803D'; dash = null; }
-      else { fill = '#EAB308'; stroke = '#A16207'; dash = null; }
+      let fill, stroke;
+      if (nb.status === 'Missing') { fill = '#F97316'; stroke = '#C2410C'; }
+      else if (nb.status === 'Added (Not Found)') { fill = '#EAB308'; stroke = '#A16207'; }
+      else { fill = '#16A34A'; stroke = '#15803D'; }
 
-      const line = L.polyline([[src.lat, src.long], [nb.cell.lat, nb.cell.long]], {
+      // خط بين المصدر والجار
+      const line = L.polyline([[sLat, sLon], [nb.cell.lat, nb.cell.long]], {
         color: nb.status === 'Missing' ? '#DC2626' : '#16A34A',
-        weight: nb.isFront ? 3 : 1.5, opacity: 0.85, dashArray: dash
-      });
-      threeGMapLayers.push(line);
-      map.addLayer(line);
+        weight: nb.isFront ? 3 : 1.5, opacity: 0.85,
+        dashArray: nb.status === 'Missing' ? '8,6' : null
+      }).addTo(map);
+      nbMapLayers.push(line);
 
-      const nbCoords = makeSectorCoords(nb.cell.lat, nb.cell.long, nb.cell.bore);
-      const nbPoly = L.polygon(nbCoords, { color: stroke, weight: 1.5, fillColor: fill, fillOpacity: 0.7 });
-      nbPoly.bindTooltip(nb.name, { permanent: true, direction: 'center', className: 'nb-label' });
-      threeGMapLayers.push(nbPoly);
-      map.addLayer(nbPoly);
+      // قطاع الجار
+      const nCoords = makeSectorCoords(nb.cell.lat, nb.cell.long, nb.cell.bore);
+      const nPoly = L.polygon(nCoords, {
+        color: stroke, weight: 1.5, fillColor: fill, fillOpacity: 0.7
+      }).addTo(map);
+      nPoly.bindTooltip(nb.name, { permanent: true, direction: 'center', className: 'nb-label' });
+
+      nPoly.bindPopup(
+        '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:220px;">' +
+          '<div style="font-weight:800;font-family:monospace;margin-bottom:6px;">' + escapeHtml(nb.name) + '</div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Status:</span><b style="color:' + (nb.status === 'Missing' ? '#DC2626' : '#16A34A') + ';">' + nb.status + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Distance:</span><b>' + (nb.distance != null ? nb.distance.toFixed(0) + ' m' : '—') + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Direction:</span><b>' + nb.direction + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Type:</span><b>' + nb.type + '</b></div>' +
+        '</div>'
+      );
+      nbMapLayers.push(nPoly);
     });
 
+    // ═══ 4. Zoom للنتائج ═══
     if (points.length > 1) {
-      const b = L.latLngBounds(points);
-      const ne = b.getNorthEast(), sw = b.getSouthWest();
+      const bounds = L.latLngBounds(points);
+      const ne = bounds.getNorthEast(), sw = bounds.getSouthWest();
       ne.lat += 0.005; ne.lng += 0.005; sw.lat -= 0.005; sw.lng -= 0.005;
-      map.fitBounds(L.latLngBounds(sw, ne), { padding: [50, 50] });
+      map.fitBounds(L.latLngBounds(sw, ne), { padding: [40, 40], maxZoom: 15 });
     }
+
+    // ═══ 5. Legend (نفس 2G) ═══
+    showThreeGNeighborLegend(threeGNbCurrent.neighbors.length, mode);
+
     toast('📍 ' + threeGNbCurrent.neighbors.length + ' neighbors on map', 'success');
   }, 400);
 }
 
+// 🎯 Legend خاص بـ 3G/IRAT
+function showThreeGNeighborLegend(count, mode) {
+  let legend = document.getElementById('nbLegend');
+  if (!legend) {
+    legend = document.createElement('div');
+    legend.id = 'nbLegend';
+    legend.className = 'legend';
+    legend.style.cssText = 'left:20px;bottom:20px;display:block;';
+    document.querySelector('.map-container').appendChild(legend);
+  }
+
+  const title = mode === 'irat'
+    ? '🔗 IRAT (3G → 2G) · ' + (count || 0)
+    : '📡 3G Neighbor · ' + (count || 0);
+
+  legend.style.display = 'block';
+  legend.innerHTML =
+    '<div class="legend-title">' + title + '</div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#DC2626;"></span><span>Source Cell</span></div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#16A34A;"></span><span>Added Neighbor</span></div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#F97316;"></span><span>Missing Neighbor</span></div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#EAB308;"></span><span>Not Found in DB</span></div>' +
+    '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #E9EEF6;font-size:10.5px;color:#5A6B87;line-height:1.5;">' +
+      '🚫 Missing = dashed red line<br>' +
+      '✅ Added = solid green line' +
+    '</div>';
+}
 /* ─────────── Export ─────────── */
 function threeGExportCSV(mode) {
   if (!threeGNbCurrent) { toast('شغّل التحليل أولاً', 'error'); return; }
