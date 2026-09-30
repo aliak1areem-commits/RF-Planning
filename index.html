@@ -12034,7 +12034,6 @@ function applyLanguage(lang) {
   localStorage.setItem(LANG_KEY, lang);
 
   document.documentElement.lang = lang === 'ar' ? 'ar' : 'en';
-  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
 
   const btn = document.getElementById('langToggleBtn');
   const label = document.getElementById('langLabel');
