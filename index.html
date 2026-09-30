@@ -11028,6 +11028,81 @@ function nsRunPlanner() {
     }
   }, 100);
 }
+  function nsPlanAll(siteName, lat, lng, height, sectors, sectorAz, siteType, band2G, band3G, nearby, radius, opts) {
+  const plan = {
+    siteName, lat, lng, height, radius, opts,
+    cells: [], neighbors: [], conflicts: [], warnings: []
+  };
+
+  const has2G = siteType.includes('2G');
+  const has3G = siteType.includes('3G');
+  const has4G = siteType.includes('4G');
+
+  const nearby2G = nearby.filter(c => c.tech === 'GSM');
+  const nearby3G = nearby.filter(c => c.tech === '3G');
+  const nearby4G = nearby.filter(c => c.tech === 'LTE');
+
+  const bands2G = band2G === 'both' ? ['900', '1800'] : [band2G];
+  const bands3G = band3G === 'both' ? ['2100', '900'] : [band3G];
+
+  // Co-site tracking sets
+  const siteUsedBcch = new Set();
+  const siteUsedBsic = new Set();
+  const siteUsedBcchBsic = new Set();
+  const siteUsedPsc = new Set();
+  const siteUsedPci = new Set();
+  const siteUsedRsi = new Set();
+
+  // Plan each sector
+  sectors.forEach((sec) => {
+    const az = sectorAz[sec];
+
+    // 2G
+    if (has2G) {
+      bands2G.forEach(b => {
+        const letter = nsGet2GLetter(sec, b);
+        const cellName = siteName + letter;
+
+        const cell = nsPlan2GCell(
+          cellName, lat, lng, az, height, b, nearby2G,
+          siteUsedBcch, siteUsedBsic, siteUsedBcchBsic, opts
+        );
+        plan.cells.push(cell);
+
+        siteUsedBcch.add(cell.bcch);
+        siteUsedBsic.add(cell.bsic);
+        siteUsedBcchBsic.add(cell.bcch + '_' + cell.bsic);
+      });
+    }
+
+    // 3G
+    if (has3G) {
+      bands3G.forEach(b => {
+        const cellName = 'U' + siteName + sec;
+        const cell = nsPlan3GCell(cellName, lat, lng, az, height, b, nearby3G, siteUsedPsc, opts);
+        plan.cells.push(cell);
+        siteUsedPsc.add(cell.psc);
+      });
+    }
+
+    // 4G
+    if (has4G) {
+      const cellName = 'L' + siteName + sec;
+      const cell = nsPlan4GCell(cellName, lat, lng, az, height, nearby4G, siteUsedPci, siteUsedRsi, opts);
+      plan.cells.push(cell);
+      siteUsedPci.add(cell.pci);
+      siteUsedRsi.add(cell.rsi);
+    }
+  });
+
+  if (opts.autoNb) {
+    plan.neighbors = nsPlanNeighbors(plan.cells, nearby, radius, opts);
+  }
+
+  plan.conflicts = nsCheckConflicts(plan.cells, nearby, opts);
+
+  return plan;
+}
 /* =========================================================
    CORE PLANNING ENGINE
    ========================================================= */
