@@ -7609,7 +7609,7 @@ function exportPSCResults() {
   toast('✅ تم تصدير CSV', 'success');
 }
 
-/* 🗺️ عرض على الماب */
+/* 🗺️ عرض على الماب — الخلايا المتعارضة فقط */
 function showPSCOnMap() {
   if (!pscLastResults) { toast('Run analysis first', 'error'); return; }
 
@@ -7620,18 +7620,57 @@ function showPSCOnMap() {
     if (sectorLayer) sectorLayer.clearLayers();
     if (labelLayer) labelLayer.clearLayers();
 
-    pscLastResults.cells.forEach(c => {
+    // 🎯 اجمع IDs الخلايا المتعارضة فقط
+    const conflictIds = new Set();
+    pscLastResults.conflicts.forEach(cf => {
+      conflictIds.add(cf.cell1.id);
+      conflictIds.add(cf.cell2.id);
+    });
+
+    if (!conflictIds.size) {
+      toast('✅ لا توجد تعارضات — كل الخلايا نظيفة', 'success', 5000);
+      return;
+    }
+
+    // 🎯 فلتر — اعرض فقط الخلايا المتعارضة
+    const conflictCells = pscLastResults.cells.filter(c => conflictIds.has(c.id));
+
+    // رتّب: النظيفة أولاً (أسفل) → المعاد تخصيصها → Unresolved (فوق)
+    conflictCells.sort((a, b) => {
+      const priority = (cell) => {
+        if (pscLastResults.stillConflicted.has(cell.id)) return 3;
+        if (cell.suggestedPsc !== cell.originalPsc) return 2;
+        return 1;
+      };
+      return priority(a) - priority(b);
+    });
+
+    conflictCells.forEach(c => {
       if (!c.lat || !c.lon) return;
 
-      let color;
-      if (pscLastResults.stillConflicted.has(c.id)) color = '#D64545';        // أحمر = لم يُحل
-      else if (c.suggestedPsc !== c.originalPsc) color = '#1F9D55';           // أخضر = جديد
-      else color = '#94A3B8';                                                  // رمادي = نظيف
+      let color, statusText;
+      if (pscLastResults.stillConflicted.has(c.id)) {
+        color = '#D64545';       // 🔴 لم يُحل بعد
+        statusText = 'Unresolved';
+      } else if (c.suggestedPsc !== c.originalPsc) {
+        color = '#1F9D55';       // 🟢 سيتم تغييره
+        statusText = 'Will Change';
+      } else {
+        color = '#F59E0B';       // 🟠 متعارض لكن ما تغيّر
+        statusText = 'Conflict';
+      }
 
       const coords = makeSectorCoords(c.lat, c.lon, c.dir);
       const poly = L.polygon(coords, {
-        color: color, weight: 1.2, fillColor: color, fillOpacity: 0.7, interactive: true
+        color: color, weight: 2,
+        fillColor: color, fillOpacity: 0.8,
+        interactive: true
       });
+
+      // عدّ التعارضات لهذي الخلية
+      const cellConflicts = pscLastResults.conflicts.filter(cf =>
+        cf.cell1.id === c.id || cf.cell2.id === c.id
+      );
 
       poly.bindPopup(
         '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:230px;">' +
@@ -7640,17 +7679,37 @@ function showPSCOnMap() {
           '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Dir:</span><b>' + c.dir.toFixed(0) + '°</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Original PSC:</span><b>' + c.originalPsc + '</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>New PSC:</span><b style="color:#1F9D55;">' + c.suggestedPsc + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;border-top:1px solid #F0F3F9;margin-top:6px;"><span>Conflicts:</span><b style="color:#B91C1C;">' + cellConflicts.length + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Status:</span><b>' + statusText + '</b></div>' +
         '</div>'
       );
 
       sectorLayer.addLayer(poly);
     });
 
-    if (pscLastResults.cells.length) {
-      const bounds = L.latLngBounds(pscLastResults.cells.map(c => [c.lat, c.lon]));
+    // 🎯 Zoom على الخلايا المتعارضة فقط
+    if (conflictCells.length) {
+      const bounds = L.latLngBounds(conflictCells.map(c => [c.lat, c.lon]));
       map.fitBounds(bounds, { padding: [50, 50] });
     }
-    toast('📍 عرض نتائج PSC على الماب', 'success');
+
+    // 🎯 Legend
+    let legend = document.getElementById('pscLegend');
+    if (!legend) {
+      legend = document.createElement('div');
+      legend.id = 'pscLegend';
+      legend.className = 'legend';
+      legend.style.cssText = 'left:20px;bottom:20px;display:block;';
+      document.querySelector('.map-container').appendChild(legend);
+    }
+    legend.style.display = 'block';
+    legend.innerHTML =
+      '<div class="legend-title">📶 PSC Conflicts (' + conflictCells.length + ')</div>' +
+      '<div class="legend-item"><span class="legend-dot" style="background:#D64545;"></span><span>Unresolved</span></div>' +
+      '<div class="legend-item"><span class="legend-dot" style="background:#1F9D55;"></span><span>Will Change</span></div>' +
+      '<div class="legend-item"><span class="legend-dot" style="background:#F59E0B;"></span><span>Conflict</span></div>';
+
+    toast('⚠️ ' + conflictCells.length + ' خلية متعارضة على الماب', 'success', 4000);
   }, 300);
 }
 
