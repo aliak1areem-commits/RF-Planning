@@ -10523,8 +10523,11 @@ function getNeighborStyle(nb) {
   }
 }
 
-// 🎯 Legend
+// 🎯 Legend خاص بـ 3G/IRAT — نسخة واحدة نهائية
 function showThreeGNeighborLegend(neighbors, mode) {
+  // 🎯 حماية: تأكد أنها مصفوفة
+  if (!Array.isArray(neighbors)) neighbors = [];
+
   let legend = document.getElementById('nbLegend');
   if (!legend) {
     legend = document.createElement('div');
@@ -10563,35 +10566,6 @@ function showThreeGNeighborLegend(neighbors, mode) {
     '<div style="font-size:10px;font-weight:800;color:#5A6B87;text-transform:uppercase;margin:8px 0 4px;letter-spacing:.4px;">🔵 Inter-Freq</div>' +
     '<div class="legend-item"><span class="legend-dot" style="background:#2563EB;"></span><span>Added (' + interAdded + ')</span></div>' +
     '<div class="legend-item"><span class="legend-dot" style="background:#F97316;"></span><span>Missing (' + interMissing + ') — dashed</span></div>';
-}
-
-
-// 🎯 Legend خاص بـ 3G/IRAT
-function showThreeGNeighborLegend(count, mode) {
-  let legend = document.getElementById('nbLegend');
-  if (!legend) {
-    legend = document.createElement('div');
-    legend.id = 'nbLegend';
-    legend.className = 'legend';
-    legend.style.cssText = 'left:20px;bottom:20px;display:block;';
-    document.querySelector('.map-container').appendChild(legend);
-  }
-
-  const title = mode === 'irat'
-    ? '🔗 IRAT (3G → 2G) · ' + (count || 0)
-    : '📡 3G Neighbor · ' + (count || 0);
-
-  legend.style.display = 'block';
-  legend.innerHTML =
-    '<div class="legend-title">' + title + '</div>' +
-    '<div class="legend-item"><span class="legend-dot" style="background:#DC2626;"></span><span>Source Cell</span></div>' +
-    '<div class="legend-item"><span class="legend-dot" style="background:#16A34A;"></span><span>Added Neighbor</span></div>' +
-    '<div class="legend-item"><span class="legend-dot" style="background:#F97316;"></span><span>Missing Neighbor</span></div>' +
-    '<div class="legend-item"><span class="legend-dot" style="background:#EAB308;"></span><span>Not Found in DB</span></div>' +
-    '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #E9EEF6;font-size:10.5px;color:#5A6B87;line-height:1.5;">' +
-      '🚫 Missing = dashed red line<br>' +
-      '✅ Added = solid green line' +
-    '</div>';
 }
 /* ─────────── Export ─────────── */
 function threeGExportCSV(mode) {
