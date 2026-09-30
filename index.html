@@ -10966,7 +10966,6 @@ function nsRunPlanner() {
   const band3G = document.getElementById('ns_3g_band').value;
   const numSectors = parseInt(document.getElementById('ns_num_sectors').value);
 
-  // Options
   const opts = {
     coSiteRule: document.getElementById('ns_opt_cosite').checked,
     distanceRule: document.getElementById('ns_opt_distance').checked,
@@ -10978,14 +10977,13 @@ function nsRunPlanner() {
     maxNb: parseInt(document.getElementById('ns_max_nb').value) || 20
   };
 
-  // Validation
-  if (!siteName) { toast('أدخل اسم الموقع', 'error'); return; }
-  if (isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0)) { toast('إحداثيات غير صحيحة', 'error'); return; }
-  if (!/^[A-Z0-9]+$/.test(siteName)) { toast('الاسم يحتوي أحرف غير مسموحة', 'error'); return; }
+  if (!siteName) { toast('Enter site name', 'error'); return; }
+  if (isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0)) { toast('Invalid coordinates', 'error'); return; }
+  if (!/^[A-Z0-9]+$/.test(siteName)) { toast('Site name contains invalid characters', 'error'); return; }
 
   const existing = allCells.find(c => c.cell_name.toUpperCase().startsWith(siteName));
   if (existing) {
-    if (!confirm('⚠️ اسم الموقع موجود مسبقاً (' + existing.cell_name + '). متابعة؟')) return;
+    if (!confirm('Site name already exists (' + existing.cell_name + '). Continue?')) return;
   }
 
   const sectors = ['A','B','C','D','E','F'].slice(0, numSectors);
@@ -10994,62 +10992,57 @@ function nsRunPlanner() {
     sectorAz[s] = parseFloat(document.getElementById('ns_az_' + s).value) || 0;
   });
 
-  toast('🔍 تحليل ' + allCells.length + ' خلية...', 'info', 2000);
+  toast('Analyzing ' + allCells.length + ' cells...', 'info', 2000);
 
   setTimeout(() => {
     try {
       const t0 = performance.now();
 
-      // جيران المحيط
       const nearby = allCells.filter(c => {
         if (!c.lat || !c.long) return false;
         return haversineDistance(lat, lng, c.lat, c.long) <= radius;
       });
 
-      console.log('🔍 Nearby cells: ' + nearby.length + ' / ' + allCells.length);
+      console.log('Nearby cells: ' + nearby.length + ' / ' + allCells.length);
 
       const plan = nsPlanAll(siteName, lat, lng, height, sectors, sectorAz,
                              siteType, band2G, band3G, nearby, radius, opts);
 
       const t1 = performance.now();
-      console.log('⚡ Plan generated in ' + (t1 - t0).toFixed(0) + ' ms');
+      console.log('Plan generated in ' + (t1 - t0).toFixed(0) + ' ms');
 
       nsLastPlan = plan;
       nsRenderPlan(plan);
       document.getElementById('nsResults').style.display = 'block';
       nsSwitchTab('cells');
 
-      // Populate save project select
       const saveSel = document.getElementById('ns_save_project');
-      saveSel.innerHTML = '<option value="">— اختر مشروع —</option>' +
+      saveSel.innerHTML = '<option value="">— Select Project —</option>' +
         allProjects.map(p => '<option value="' + p.id + '"' + (p.id === currentProjectId ? ' selected' : '') + '>' + escapeHtml(p.name) + '</option>').join('');
 
-      toast('✅ التخطيط جاهز — ' + plan.cells.length + ' خلية · ' + plan.neighbors.length + ' جار', 'success', 5000);
+      toast('Plan ready — ' + plan.cells.length + ' cells, ' + plan.neighbors.length + ' neighbors', 'success', 5000);
       setTimeout(() => document.getElementById('nsResults').scrollIntoView({ behavior: 'smooth' }), 200);
     } catch (e) {
       console.error(e);
-      toast('خطأ: ' + e.message, 'error', 6000);
+      toast('Error: ' + e.message, 'error', 6000);
     }
   }, 100);
 }
-
 /* =========================================================
    CORE PLANNING ENGINE
    ========================================================= */
 function nsPlan2GCell(cellName, lat, lng, az, height, band, nearby2G, siteUsedBcch, siteUsedBsic, siteUsedBcchBsic, opts) {
   const range = GSM_BAND_ARFCN[band] || { from: 34, to: 46 };
 
-  // ═══ BCCH Selection ═══
+  // BCCH Selection
   const candidates = [];
   for (let f = range.from; f <= range.to; f++) candidates.push(f);
 
   const scores = candidates.map(freq => {
     let score = 10000;
 
-    // Co-site rule
     if (opts.coSiteRule && siteUsedBcch.has(freq)) score -= 100000;
 
-    // Analyze neighbors
     nearby2G.forEach(c => {
       if (c.gsmBand !== band) return;
       if (c.bcch == null) return;
@@ -11060,10 +11053,8 @@ function nsPlan2GCell(cellName, lat, lng, az, height, band, nearby2G, siteUsedBc
       const bearing = calculateBearing(lat, lng, c.lat, c.long);
       const angleDiff = boreDifference(az, bearing);
 
-      // Distance weight (exponential decay)
       const distWeight = Math.exp(-d / 800) * 50000;
 
-      // Angle weight
       let angleWeight = 1.0;
       if (angleDiff <= 30) angleWeight = 2.0;
       else if (angleDiff <= 60) angleWeight = 1.5;
@@ -11073,7 +11064,6 @@ function nsPlan2GCell(cellName, lat, lng, az, height, band, nearby2G, siteUsedBc
 
       const weight = distWeight * angleWeight;
 
-      // Conflict type
       if (c.bcch === freq) {
         let penalty = weight;
         if (d < 300) penalty *= 5;
@@ -11095,7 +11085,7 @@ function nsPlan2GCell(cellName, lat, lng, az, height, band, nearby2G, siteUsedBc
   const topCandidates = scores.slice(0, Math.min(5, scores.length));
   const chosenBCCH = topCandidates[Math.floor(Math.random() * Math.min(3, topCandidates.length))].freq;
 
-  // ═══ BSIC Selection ═══
+  // BSIC Selection
   const allBsics = [];
   for (let ncc = 0; ncc < 8; ncc++) {
     for (let bcc = 0; bcc < 8; bcc++) {
@@ -11288,6 +11278,26 @@ function nsFindNearestSameBsic(lat, lng, bcch, bsic, band, nearby2G) {
   return best ? { cell: best, dist: bestDist } : null;
 }
 
+function nsFindNearestSamePsc(lat, lng, psc, band, nearby3G) {
+  let best = null, bestDist = Infinity;
+  nearby3G.forEach(c => {
+    if (c.gsmBand !== band || c.psc !== psc) return;
+    const d = haversineDistance(lat, lng, c.lat, c.long);
+    if (d < bestDist) { bestDist = d; best = c.cell_name; }
+  });
+  return best ? { cell: best, dist: bestDist } : null;
+}
+
+function nsFindNearestSamePci(lat, lng, pci, nearby4G) {
+  let best = null, bestDist = Infinity;
+  nearby4G.forEach(c => {
+    if (c.pci !== pci) return;
+    const d = haversineDistance(lat, lng, c.lat, c.long);
+    if (d < bestDist) { bestDist = d; best = c.cell_name; }
+  });
+  return best ? { cell: best, dist: bestDist } : null;
+}
+
 /* =========================================================
    3G Planning
    ========================================================= */
@@ -11376,7 +11386,7 @@ function nsFindNearestSamePsc(lat, lng, psc, band, nearby3G) {
    4G Planning
    ========================================================= */
 function nsPlan4GCell(cellName, lat, lng, az, height, nearby4G, siteUsedPci, siteUsedRsi, opts) {
-  // ═══ PCI Selection ═══
+  // PCI
   const scores = [];
   for (let p = 0; p <= 503; p++) {
     let score = 10000;
@@ -11400,7 +11410,6 @@ function nsPlan4GCell(cellName, lat, lng, az, height, nearby4G, siteUsedPci, sit
       else if (angleDiff <= 90) angleWeight = 1.0;
       else angleWeight = 0.3;
 
-      // Same PCI
       if (c.pci === p) {
         let penalty = distWeight * angleWeight;
         if (d < 300) penalty *= 5;
@@ -11408,14 +11417,12 @@ function nsPlan4GCell(cellName, lat, lng, az, height, nearby4G, siteUsedPci, sit
         score -= penalty;
       }
 
-      // Same MOD3
       if (c.pci % 3 === p % 3 && d < 3000) {
         const mod3Weight = Math.exp(-d / 1500) * 10000;
         let angleMod3 = angleDiff <= 60 ? 1.5 : 1.0;
         score -= mod3Weight * angleMod3;
       }
 
-      // Same MOD6
       if (c.pci % 6 === p % 6 && d < 1000) {
         const mod6Weight = Math.exp(-d / 800) * 3000;
         score -= mod6Weight;
@@ -11434,7 +11441,7 @@ function nsPlan4GCell(cellName, lat, lng, az, height, nearby4G, siteUsedPci, sit
   const top5 = scores.slice(0, 5);
   const pci = top5[Math.floor(Math.random() * Math.min(3, top5.length))].p;
 
-  // ═══ RSI Selection ═══
+  // RSI
   const usedRsis = new Set();
   nearby4G.forEach(c => {
     if (c.rsi != null && c.rsi > 0) {
@@ -11461,7 +11468,6 @@ function nsPlan4GCell(cellName, lat, lng, az, height, nearby4G, siteUsedPci, sit
     nearestSamePci: nsFindNearestSamePci(lat, lng, pci, nearby4G)
   };
 }
-
 /* =========================================================
    NEIGHBOR PLANNING
    ========================================================= */
