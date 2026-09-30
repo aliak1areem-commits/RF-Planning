@@ -11650,6 +11650,187 @@ function nsClearAll() {
 setTimeout(() => {
   if (document.getElementById('ns_num_sectors')) nsUpdateSectors();
 }, 1000);
+  /* =========================================================
+   🌐 AUTO-TRANSLATOR — Arabic UI → English
+   ========================================================= */
+function applyEnglishUI() {
+  // Dictionary: Arabic → English (only user-visible text)
+  const DICT = {
+    // ═══ Common Toasts ═══
+    'تم المسح': 'Cleared',
+    'شغّل التحليل أولاً': 'Run analysis first',
+    'شغّل التحليل أولاً ': 'Run analysis first',
+    'تم إلغاء البحث': 'Search cleared',
+    'جاري البحث...': 'Searching...',
+    'جاري تجهيز الصورة...': 'Preparing image...',
+    'تم حفظ الصورة': 'Image saved',
+    'فشل التصوير — جرب مرة ثانية': 'Screenshot failed — try again',
+    'فشل الاتصال': 'Connection failed',
+    'تم الحذف': 'Deleted',
+    'تم نسخ': 'Copied',
+    'تم نسخ الإحداثيات': 'Coordinates copied',
+    'اكتب ملاحظتك...': 'Write your comment...',
+    'سيظهر التعليق لكل الفريق · يدعم النص العادي والروابط': 'Comment visible to team · supports text and links',
+    'ما فيه Bookmarks بعد': 'No bookmarks yet',
+    'اسم الموقع:': 'Bookmark name:',
+    'تم حفظ': 'Saved',
+    'تم تحميل': 'Loaded',
+
+    // ═══ Map Actions ═══
+    '⚠️ ارسم مضلع أولاً': '⚠️ Draw a polygon first',
+    '✅ تم نسخ': '✅ Copied',
+    '📥 تم تنزيل CSV': '📥 CSV downloaded',
+    '🗑️ تم مسح الرسومات': '🗑️ Drawings cleared',
+    '🗺️ تم إعادة عرض الخلايا': '🗺️ Cells re-displayed',
+    '📍 تم نسخ الإحداثيات': '📍 Coordinates copied',
+    '📋 تم النسخ': '📋 Copied',
+    '🗑️ تم الحذف': '🗑️ Deleted',
+    '👆 اختر خلية من الماب لعرض جيرانها': '👆 Select a cell on the map to view neighbors',
+    '❌ ما لقيت': '❌ Not found',
+    '❌ إحداثيات غير صحيحة': '❌ Invalid coordinates',
+    '❌ خارج النطاق المسموح': '❌ Out of allowed range',
+    '⚠️ لا توجد خلايا في باند': '⚠️ No cells in band',
+    '⚡ فلتر:': '⚡ Filter:',
+
+    // ═══ 3G/IRAT ═══
+    '— اختر مشروع —': '— Select Project —',
+    'لم يُرفع': 'Not uploaded',
+    '⏳ جاري القراءة...': '⏳ Reading...',
+    'الملف فارغ': 'File is empty',
+    'لم أجد أعمدة Source/Neighbor في CSV': 'Source/Neighbor columns not found in CSV',
+    'علاقة (': ' relations (',
+    'تم تحميل': 'Loaded',
+    'لا توجد بيانات للحفظ': 'No data to save',
+    'أدخل اسم خلية': 'Enter cell name',
+    'الخلية': 'Cell',
+    'غير موجودة في rf_cells': ' not found in rf_cells',
+    'الأداة للخلايا 3G فقط (تبدأ بـ U)': 'Tool works on 3G cells only (start with U)',
+    'أدخل اسم خلية 3G': 'Enter 3G cell name',
+    'الخلية غير موجودة': 'Cell not found',
+    'يجب أن تبدأ بـ U (3G)': 'Must start with U (3G)',
+    'أدخل خلايا': 'Enter cells',
+    'علاقة في Supabase': ' relations in Supabase',
+    'لا توجد تكرارات': 'No duplicates',
+    'عرض الموقع الجديد على الماب': 'New site displayed on map',
+
+    // ═══ 3G Neighbor Lines ═══
+    'اختر خلية من الماب لعرض جيرانها': 'Select a cell on the map to show its neighbors',
+
+    // ═══ PSC Checker ═══
+    '❌ لا توجد خلايا 3G بـ PSC. تأكد من رفع بيانات 3G أولاً.': 'No 3G cells with PSC. Upload 3G data first.',
+    '❌ نطاق PSC غير صحيح (0-511)': 'Invalid PSC range (0-511)',
+    '❌ لا توجد خلايا PSC في النطاق': 'No PSC cells in range',
+    'خلية 3G': '3G cells',
+    'تعارض موجود': 'conflicts found',
+    'تعارض ·': ' conflicts · ',
+    'اقتراح': 'suggestions',
+    '❌ لا توجد تعارضات — كل الخلايا نظيفة': 'No conflicts — all cells clean',
+    '✅ لا توجد تعارضات — كل PSCs سليمة': '✅ No conflicts — all PSCs clean',
+    'لا توجد تغييرات': 'No changes',
+    'تطبيق': 'Apply ',
+    'تغيير PSC في Supabase؟': ' PSC changes in Supabase?',
+    '✅ تم تطبيق': '✅ Applied ',
+    'تغيير': ' changes',
+    'فشل)': ' failed)',
+    'خطأ:': 'Error:',
+    '✅ تم تصدير CSV': '✅ CSV exported',
+    'خلية متعارضة على الماب': ' conflict cells on map',
+
+    // ═══ PSC Details ═══
+    '— خطيرة (تؤثر على handover)': '— critical (affects handover)',
+
+    // ═══ BSIC Analyzer ═══
+    '<b>Clash Finder:</b> ابحث عن خلايا لها نفس BCCH + BSIC ضمن مسافة محددة (تحليل مركّز على BCCH محدد).': '<b>Clash Finder:</b> Find cells with same BCCH + BSIC within a specified distance.',
+    '<b>Full Optimizer:</b> تحليل كل خلايا GSM — كشف كل تعارضات BSIC وإعادة توزيع كامل.': '<b>Full Optimizer:</b> Analyze all GSM cells — detect and reassign all BSIC conflicts.',
+    'خلية تحتاج تغيير BSIC': ' cells need BSIC change',
+    '✅ لا توجد تعارضات — كل BSICs سليمة': '✅ No conflicts — all BSICs clean',
+    'Apply BSIC changes to': 'Apply BSIC changes to ',
+    'cells?\n\nهذا سيحدّث قاعدة البيانات.': ' cells?\n\nThis will update the database.',
+
+    // ═══ Symmetry ═══
+    '✅ كل العلاقات متماثلة!': '✅ All relations are symmetric!',
+    'عنده علاقة غير متماثلة': 'has asymmetric relation',
+
+    // ═══ Azimuth Opt ═══
+    '✅ كل الخلايا محسّنة — لا تغيير مطلوب': '✅ All cells optimized — no changes needed',
+
+    // ═══ New Site Planner ═══
+    'اختر الحقل أولاً': 'Select field first',
+    '❌ لا توجد خلية بـ': '❌ No cell with',
+    '⚠️ اسم الموقع موجود مسبقاً': '⚠️ Site name already exists',
+    '✅ التخطيط جاهز': '✅ Plan ready',
+    'التخطيط نظيف': 'Plan is clean',
+    'تحليل': 'Analyzing ',
+    'خلية': ' cells',
+    'خلية بـ': ' cells with ',
+    'خلية داخل المضلع — اضغط': ' cells inside polygon — click',
+    'خلية — الصق في Excel': ' cells — paste in Excel',
+
+    // ═══ HSN ═══
+    '— خلايا نفس الموقع لها نفس HSN': '— same-site cells with same HSN',
+    '— خلايا متجاورة لها نفس HSN': '— neighboring cells with same HSN',
+    'هذا سيحدّث': 'This will update',
+    'خلية.': ' cells.',
+
+    // ═══ Buttons / Labels (in HTML) ═══
+    'حفظ': 'Save',
+    'مسح': 'Clear',
+    'اختر': 'Select',
+    'مشروع': 'Project',
+    'ملف': 'File',
+    'سطر لكل خلية': 'one per line'
+  };
+
+  // ─── Replace text in elements ───
+  function replaceText(str) {
+    if (!str) return str;
+    let result = str;
+    Object.entries(DICT).forEach(([ar, en]) => {
+      result = result.split(ar).join(en);
+    });
+    return result;
+  }
+
+  // Walk all text nodes
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+  let node;
+  const textNodes = [];
+  while (node = walker.nextNode()) textNodes.push(node);
+  textNodes.forEach(n => {
+    if (/[\u0600-\u06FF]/.test(n.textContent)) {
+      n.textContent = replaceText(n.textContent);
+    }
+  });
+
+  // Replace in attributes
+  ['placeholder', 'title', 'value', 'alt'].forEach(attr => {
+    document.querySelectorAll('[' + attr + ']').forEach(el => {
+      const v = el.getAttribute(attr);
+      if (v && /[\u0600-\u06FF]/.test(v)) el.setAttribute(attr, replaceText(v));
+    });
+  });
+
+  // Override toast + confirm + alert
+  const originalToast = window.toast;
+  window.toast = function(msg, type, duration) {
+    return originalToast(replaceText(msg), type, duration);
+  };
+
+  const originalConfirm = window.confirm;
+  window.confirm = function(msg) {
+    return originalConfirm(replaceText(msg));
+  };
+
+  const originalAlert = window.alert;
+  window.alert = function(msg) {
+    return originalAlert(replaceText(msg));
+  };
+
+  console.log('%c🌐 English UI applied', 'color:#1F9D55;font-weight:bold;');
+}
+
+// Apply on load
+setTimeout(applyEnglishUI, 500);
 console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
 console.log('%cTools: PCI · GSM · NB · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
 </script>
