@@ -2739,6 +2739,232 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
 
       </div>
     </section>
+    <section class="page" id="page-tool-new-site">
+  <div class="tool-page" style="max-width:1600px;">
+    <div class="tool-page-header">
+      <button class="back-btn" onclick="switchView('tools')">←</button>
+      <div>
+        <div class="tool-page-title">🏗️ New Site Planner PRO</div>
+        <div class="tool-page-sub">Auto-plan BCCH/BSIC/PSC/PCI/RSI + Smart Neighbors + Co-site validation</div>
+      </div>
+    </div>
+
+    <!-- STEP 1: Site Info -->
+    <div class="tool-section">
+      <h3>📍 1. Site Information</h3>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Site Name</label>
+          <input type="text" id="ns_site_name" placeholder="AN1234" style="text-transform:uppercase;">
+          <div class="hint">Sector A/B/C يُضاف تلقائياً</div>
+        </div>
+        <div class="form-field">
+          <label>Latitude</label>
+          <input type="number" id="ns_lat" step="0.000001" value="33.3">
+        </div>
+        <div class="form-field">
+          <label>Longitude</label>
+          <input type="number" id="ns_long" step="0.000001" value="44.4">
+        </div>
+        <div class="form-field">
+          <label>Antenna Height (m)</label>
+          <input type="number" id="ns_height" value="30" min="5" max="200">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Site Type</label>
+          <select id="ns_site_type">
+            <option value="macro">🏢 Macro (Greenfield / Rooftop)</option>
+            <option value="micro">📡 Micro / Small Cell</option>
+            <option value="indoor">🏬 Indoor (DAS)</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Technologies</label>
+          <select id="ns_type">
+            <option value="2G">2G Only</option>
+            <option value="3G">3G Only</option>
+            <option value="4G">4G Only</option>
+            <option value="2G+3G">2G + 3G</option>
+            <option value="2G+4G">2G + 4G</option>
+            <option value="3G+4G">3G + 4G</option>
+            <option value="2G+3G+4G" selected>2G + 3G + 4G</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Analysis Radius (m)</label>
+          <input type="number" id="ns_radius" value="5000" step="500" min="500" max="30000">
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Sectors -->
+    <div class="tool-section">
+      <h3>🧭 2. Sectors Configuration</h3>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Number of Sectors</label>
+          <select id="ns_num_sectors" onchange="nsUpdateSectors()">
+            <option value="1">1 Sector (Omni)</option>
+            <option value="2">2 Sectors</option>
+            <option value="3" selected>3 Sectors</option>
+            <option value="4">4 Sectors</option>
+            <option value="6">6 Sectors</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>2G Band</label>
+          <select id="ns_2g_band">
+            <option value="900">900 MHz only</option>
+            <option value="1800">1800 MHz only</option>
+            <option value="both" selected>Dual Band (900+1800)</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>3G Band</label>
+          <select id="ns_3g_band">
+            <option value="2100" selected>2100 MHz only</option>
+            <option value="900">900 MHz only</option>
+            <option value="both">Dual Band (900+2100)</option>
+          </select>
+        </div>
+      </div>
+      <div id="ns_sectors_container" style="margin-top:14px;"></div>
+      <div class="action-row" style="margin-top:14px;">
+        <button class="btn btn-secondary" onclick="nsSuggestAzimuths()">🎯 اقتراح Azimuths تلقائي</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Advanced Options -->
+    <div class="tool-section">
+      <h3>⚙️ 3. Advanced Planning Options</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;">
+        <label class="filter-checkbox">
+          <input type="checkbox" id="ns_opt_cosite" checked>
+          <span>🔒 منع تكرار BCCH/PSC/PCI على نفس الموقع (Co-site Rules)</span>
+        </label>
+        <label class="filter-checkbox">
+          <input type="checkbox" id="ns_opt_distance" checked>
+          <span>📏 إعادة استخدام القيم فقط على مسافة آمنة</span>
+        </label>
+        <label class="filter-checkbox">
+          <input type="checkbox" id="ns_opt_facing" checked>
+          <span>🎯 تجنب التعارض الأمامي (Face-to-Face)</span>
+        </label>
+        <label class="filter-checkbox">
+          <input type="checkbox" id="ns_opt_autoNb" checked>
+          <span>🔗 اقتراح الجيران تلقائياً</span>
+        </label>
+        <label class="filter-checkbox">
+          <input type="checkbox" id="ns_opt_bidir" checked>
+          <span>↔️ جيران ثنائي الاتجاه (Bidirectional)</span>
+        </label>
+      </div>
+      <div class="form-row" style="margin-top:14px;">
+        <div class="form-field">
+          <label>Front Threshold (°)</label>
+          <input type="number" id="ns_front_threshold" value="45" min="10" max="180">
+        </div>
+        <div class="form-field">
+          <label>IRAT Threshold (°)</label>
+          <input type="number" id="ns_irat_threshold" value="70" min="10" max="180">
+        </div>
+        <div class="form-field">
+          <label>Max Neighbors per Cell</label>
+          <input type="number" id="ns_max_nb" value="20" min="5" max="50">
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: Run -->
+    <div class="tool-section">
+      <h3>🚀 4. Generate Plan</h3>
+      <div class="action-row">
+        <button class="btn btn-primary" onclick="nsRunPlanner()" style="font-size:14px;padding:12px 24px;">
+          🚀 Plan Site with Smart Assignment
+        </button>
+        <button class="btn btn-ghost" onclick="nsClearAll()">🗑️ Clear All</button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="nsResults" style="display:none;">
+
+      <!-- Summary -->
+      <div class="tool-section">
+        <h3>📊 Summary</h3>
+        <div id="nsSummary" class="kpi-grid"></div>
+        <div id="nsWarnings" style="margin-top:14px;"></div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="nb-tabs" style="margin-bottom:16px;">
+        <button class="nb-tab active" data-nstab="cells" onclick="nsSwitchTab('cells')">🎯 Cell Plan</button>
+        <button class="nb-tab" data-nstab="neighbors" onclick="nsSwitchTab('neighbors')">🔗 Neighbors</button>
+        <button class="nb-tab" data-nstab="conflicts" onclick="nsSwitchTab('conflicts')">⚠️ Conflicts</button>
+        <button class="nb-tab" data-nstab="save" onclick="nsSwitchTab('save')">💾 Save</button>
+      </div>
+
+      <!-- Tab: Cells -->
+      <div class="nb-tab-content active" id="ns_tab_cells">
+        <div class="tool-section">
+          <h3>🎯 Planned Cells</h3>
+          <div style="overflow:auto;max-height:600px;border:1px solid #E9EEF6;border-radius:10px;">
+            <table class="data-table" id="nsCellsTable">
+              <thead>
+                <tr>
+                  <th>Cell</th><th>Tech</th><th>Band</th><th>Az</th>
+                  <th>BCCH</th><th>TCH</th><th>BSIC</th>
+                  <th>PSC</th><th>UARFCN DL/UL</th>
+                  <th>PCI</th><th>RSI</th><th>Nearest Same-Value</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Neighbors -->
+      <div class="nb-tab-content" id="ns_tab_neighbors">
+        <div class="tool-section">
+          <h3>🔗 Suggested Neighbors</h3>
+          <div id="nsNeighborsPreview"></div>
+        </div>
+      </div>
+
+      <!-- Tab: Conflicts -->
+      <div class="nb-tab-content" id="ns_tab_conflicts">
+        <div class="tool-section">
+          <h3>⚠️ Conflict Analysis</h3>
+          <div id="nsConflictsReport"></div>
+        </div>
+      </div>
+
+      <!-- Tab: Save -->
+      <div class="nb-tab-content" id="ns_tab_save">
+        <div class="tool-section">
+          <h3>💾 Save to Database</h3>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Project</label>
+              <select id="ns_save_project" class="filter-search"></select>
+            </div>
+          </div>
+          <div id="nsSaveSummary" style="background:#EAF2FB;border-radius:10px;padding:16px;margin-bottom:16px;"></div>
+          <div class="action-row">
+            <button class="btn btn-success" onclick="nsSaveToDatabase()" style="font-size:14px;padding:12px 24px;">💾 Save All to Supabase</button>
+            <button class="btn btn-secondary" onclick="nsShowOnMap()">🗺️ Show on Map</button>
+            <button class="btn btn-gold" onclick="nsExportCSV()">📥 Export CSV</button>
+            <button class="btn btn-ghost" onclick="nsExportKML()">🗺️ Export KML</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
   </main>
 </div>
 
@@ -10622,7 +10848,1126 @@ function clearIRAT() {
   threeGNbCurrent = null;
   toast('Cleared', 'info');
 }
+/* =========================================================
+   🏗️ NEW SITE PLANNER PRO v2.0
+   ========================================================= */
+let nsLastPlan = null;
 
+/* =========================================================
+   WIZARD UI
+   ========================================================= */
+function nsSwitchTab(name) {
+  document.querySelectorAll('#page-tool-new-site .nb-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#page-tool-new-site .nb-tab-content').forEach(c => c.classList.remove('active'));
+  const btn = document.querySelector('#page-tool-new-site .nb-tab[data-nstab="' + name + '"]');
+  if (btn) btn.classList.add('active');
+  const content = document.getElementById('ns_tab_' + name);
+  if (content) content.classList.add('active');
+}
+
+/* =========================================================
+   SECTORS UI
+   ========================================================= */
+function nsUpdateSectors() {
+  const n = parseInt(document.getElementById('ns_num_sectors').value);
+  const container = document.getElementById('ns_sectors_container');
+  const defaultAz = { 1:[0], 2:[0,180], 3:[0,120,240], 4:[0,90,180,270], 6:[0,60,120,180,240,300] };
+  const sectors = ['A','B','C','D','E','F'].slice(0, n);
+  const azimuths = defaultAz[n] || [0, 120, 240];
+
+  let html = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">';
+  sectors.forEach((s, i) => {
+    html += '<div style="background:#F9FBFE;padding:14px;border-radius:10px;border:1px solid #E9EEF6;">' +
+      '<div style="font-size:13px;font-weight:800;color:#124191;margin-bottom:8px;">Sector ' + s + '</div>' +
+      '<label style="font-size:11px;color:#5A6B87;font-weight:700;display:block;margin-bottom:4px;">Azimuth (°)</label>' +
+      '<input type="number" id="ns_az_' + s + '" value="' + azimuths[i] + '" min="0" max="360" style="width:100%;padding:8px;border:1.5px solid #D7DEEA;border-radius:8px;font-family:monospace;font-size:14px;font-weight:700;">' +
+      '<div id="ns_az_suggest_' + s + '" style="font-size:11px;color:#94A3B8;margin-top:6px;"></div>' +
+    '</div>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+/* =========================================================
+   AUTO AZIMUTH SUGGESTION
+   ========================================================= */
+function nsSuggestAzimuths() {
+  const lat = parseFloat(document.getElementById('ns_lat').value);
+  const lng = parseFloat(document.getElementById('ns_long').value);
+  const radius = parseInt(document.getElementById('ns_radius').value) || 5000;
+  const n = parseInt(document.getElementById('ns_num_sectors').value);
+
+  if (isNaN(lat) || isNaN(lng)) { toast('أدخل إحداثيات أولاً', 'error'); return; }
+
+  // جيران حول الموقع
+  const nearby = allCells.filter(c => {
+    if (!c.lat || !c.long) return false;
+    return haversineDistance(lat, lng, c.lat, c.long) <= radius;
+  });
+
+  if (nearby.length < 5) { toast('عدد الجيران قليل للاقتراح', 'error'); return; }
+
+  // توزيع الجيران على 360 درجة
+  const buckets = new Array(36).fill(0); // 10° per bucket
+  nearby.forEach(c => {
+    const bearing = calculateBearing(lat, lng, c.lat, c.long);
+    const d = haversineDistance(lat, lng, c.lat, c.long);
+    const weight = 1 / (1 + d / 1000); // أقرب = وزن أعلى
+    buckets[Math.floor(bearing / 10) % 36] += weight;
+  });
+
+  // اختيار أفضل N قطاعات
+  const suggested = [];
+  for (let i = 0; i < n; i++) {
+    let bestIdx = 0, bestScore = -1;
+    for (let j = 0; j < 36; j++) {
+      if (buckets[j] > bestScore) {
+        bestScore = buckets[j];
+        bestIdx = j;
+      }
+    }
+    suggested.push(bestIdx * 10 + 5);
+    // أفرغ المجاورات (تجنب التكرار)
+    for (let k = -8; k <= 8; k++) {
+      buckets[(bestIdx + k + 36) % 36] *= 0.1;
+    }
+  }
+
+  // ترتيب تنازلي
+  suggested.sort((a, b) => a - b);
+
+  // تحديث الـ inputs
+  const sectors = ['A','B','C','D','E','F'].slice(0, n);
+  sectors.forEach((s, i) => {
+    const el = document.getElementById('ns_az_' + s);
+    if (el) el.value = suggested[i];
+    const hint = document.getElementById('ns_az_suggest_' + s);
+    if (hint) hint.innerHTML = '<span style="color:#1F9D55;">✓ مقترح ذكي</span>';
+  });
+
+  toast('🎯 تم اقتراح Azimuths بناءً على ' + nearby.length + ' جار', 'success', 4000);
+}
+
+/* =========================================================
+   MAIN PLANNER
+   ========================================================= */
+function nsRunPlanner() {
+  const siteName = (document.getElementById('ns_site_name').value || '').trim().toUpperCase();
+  const lat = parseFloat(document.getElementById('ns_lat').value);
+  const lng = parseFloat(document.getElementById('ns_long').value);
+  const height = parseFloat(document.getElementById('ns_height').value) || 30;
+  const radius = parseInt(document.getElementById('ns_radius').value) || 5000;
+  const siteType = document.getElementById('ns_type').value;
+  const band2G = document.getElementById('ns_2g_band').value;
+  const band3G = document.getElementById('ns_3g_band').value;
+  const numSectors = parseInt(document.getElementById('ns_num_sectors').value);
+
+  // Options
+  const opts = {
+    coSiteRule: document.getElementById('ns_opt_cosite').checked,
+    distanceRule: document.getElementById('ns_opt_distance').checked,
+    facingRule: document.getElementById('ns_opt_facing').checked,
+    autoNb: document.getElementById('ns_opt_autoNb').checked,
+    bidir: document.getElementById('ns_opt_bidir').checked,
+    frontThr: parseInt(document.getElementById('ns_front_threshold').value) || 45,
+    iratThr: parseInt(document.getElementById('ns_irat_threshold').value) || 70,
+    maxNb: parseInt(document.getElementById('ns_max_nb').value) || 20
+  };
+
+  // Validation
+  if (!siteName) { toast('أدخل اسم الموقع', 'error'); return; }
+  if (isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0)) { toast('إحداثيات غير صحيحة', 'error'); return; }
+  if (!/^[A-Z0-9]+$/.test(siteName)) { toast('الاسم يحتوي أحرف غير مسموحة', 'error'); return; }
+
+  const existing = allCells.find(c => c.cell_name.toUpperCase().startsWith(siteName));
+  if (existing) {
+    if (!confirm('⚠️ اسم الموقع موجود مسبقاً (' + existing.cell_name + '). متابعة؟')) return;
+  }
+
+  const sectors = ['A','B','C','D','E','F'].slice(0, numSectors);
+  const sectorAz = {};
+  sectors.forEach(s => {
+    sectorAz[s] = parseFloat(document.getElementById('ns_az_' + s).value) || 0;
+  });
+
+  toast('🔍 تحليل ' + allCells.length + ' خلية...', 'info', 2000);
+
+  setTimeout(() => {
+    try {
+      const t0 = performance.now();
+
+      // جيران المحيط
+      const nearby = allCells.filter(c => {
+        if (!c.lat || !c.long) return false;
+        return haversineDistance(lat, lng, c.lat, c.long) <= radius;
+      });
+
+      console.log('🔍 Nearby cells: ' + nearby.length + ' / ' + allCells.length);
+
+      const plan = nsPlanAll(siteName, lat, lng, height, sectors, sectorAz,
+                             siteType, band2G, band3G, nearby, radius, opts);
+
+      const t1 = performance.now();
+      console.log('⚡ Plan generated in ' + (t1 - t0).toFixed(0) + ' ms');
+
+      nsLastPlan = plan;
+      nsRenderPlan(plan);
+      document.getElementById('nsResults').style.display = 'block';
+      nsSwitchTab('cells');
+
+      // Populate save project select
+      const saveSel = document.getElementById('ns_save_project');
+      saveSel.innerHTML = '<option value="">— اختر مشروع —</option>' +
+        allProjects.map(p => '<option value="' + p.id + '"' + (p.id === currentProjectId ? ' selected' : '') + '>' + escapeHtml(p.name) + '</option>').join('');
+
+      toast('✅ التخطيط جاهز — ' + plan.cells.length + ' خلية · ' + plan.neighbors.length + ' جار', 'success', 5000);
+      setTimeout(() => document.getElementById('nsResults').scrollIntoView({ behavior: 'smooth' }), 200);
+    } catch (e) {
+      console.error(e);
+      toast('خطأ: ' + e.message, 'error', 6000);
+    }
+  }, 100);
+}
+
+/* =========================================================
+   CORE PLANNING ENGINE
+   ========================================================= */
+function nsPlanAll(siteName, lat, lng, height, sectors, sectorAz, siteType, band2G, band3G, nearby, radius, opts) {
+  const plan = {
+    siteName, lat, lng, height, radius, opts,
+    cells: [], neighbors: [], conflicts: [], warnings: []
+  };
+
+  const has2G = siteType.includes('2G');
+  const has3G = siteType.includes('3G');
+  const has4G = siteType.includes('4G');
+
+  const nearby2G = nearby.filter(c => c.tech === 'GSM');
+  const nearby3G = nearby.filter(c => c.tech === '3G');
+  const nearby4G = nearby.filter(c => c.tech === 'LTE');
+
+  const bands2G = band2G === 'both' ? ['900', '1800'] : [band2G];
+  const bands3G = band3G === 'both' ? ['2100', '900'] : [band3G];
+
+  // ═══ Co-site pools (لما نخطط داخل نفس الموقع) ═══
+  const coSiteBcch = new Set();
+  const coSiteBcic = new Set(); // BCCH+BSIC
+  const coSitePsc = new Set();
+  const coSitePci = new Set();
+
+  // ═══ خطط القطاعات ═══
+  sectors.forEach((sec) => {
+    const az = sectorAz[sec];
+
+    // 2G
+    if (has2G) {
+      bands2G.forEach(b => {
+        const letter = nsGet2GLetter(sec, b);
+        const cellName = siteName + letter;
+
+        const cell = nsPlan2GCell(cellName, lat, lng, az, height, b, nearby2G, coSiteBcch, coSiteBcic, opts);
+        cell.coSiteBcch = new Set(coSiteBcch);
+        cell.coSiteBsic = new Set(coSiteBcic);
+        plan.cells.push(cell);
+
+        coSiteBcch.add(cell.bcch);
+        coSiteBcic.add(cell.bcch + '_' + cell.bsic);
+      });
+    }
+
+    // 3G
+    if (has3G) {
+      bands3G.forEach(b => {
+        const cellName = 'U' + siteName + sec;
+        const cell = nsPlan3GCell(cellName, lat, lng, az, height, b, nearby3G, coSitePsc, opts);
+        plan.cells.push(cell);
+        coSitePsc.add(cell.psc);
+      });
+    }
+
+    // 4G
+    if (has4G) {
+      const cellName = 'L' + siteName + sec;
+      const cell = nsPlan4GCell(cellName, lat, lng, az, height, nearby4G, coSitePci, opts);
+      plan.cells.push(cell);
+      coSitePci.add(cell.pci);
+    }
+  });
+
+  // ═══ الجيران ═══
+  if (opts.autoNb) {
+    plan.neighbors = nsPlanNeighbors(plan.cells, nearby, radius, opts);
+  }
+
+  // ═══ فحص التعارضات ═══
+  plan.conflicts = nsCheckConflicts(plan.cells, nearby, opts);
+
+  return plan;
+}
+
+/* =========================================================
+   2G Letter Mapping
+   ========================================================= */
+function nsGet2GLetter(sector, band) {
+  if (band === '900') {
+    const idx = ['A','B','C','G','H','I'].indexOf(sector);
+    return ['A','B','C','G','H','I'][idx] || sector;
+  } else {
+    // 1800 → D/E/F
+    const idx = ['A','B','C','D','E','F'].indexOf(sector);
+    return ['D','E','F','J','K','L'][idx] || sector;
+  }
+}
+
+/* =========================================================
+   2G Planning (Advanced)
+   ========================================================= */
+function nsPlan2GCell(cellName, lat, lng, az, height, band, nearby2G, coSiteBcch, coSiteBcic, opts) {
+  const range = GSM_BAND_ARFCN[band] || { from: 34, to: 46 };
+
+  // مرشحون
+  const candidates = [];
+  for (let f = range.from; f <= range.to; f++) candidates.push(f);
+
+  // حساب score لكل BCCH
+  const scores = candidates.map(freq => {
+    let score = 10000;
+
+    // Co-site rule
+    if (opts.coSiteRule && coSiteBcch.has(freq)) score -= 50000;
+
+    // فحص الجيران
+    nearby2G.forEach(c => {
+      if (c.gsmBand !== band) return;
+      if (c.bcch !== freq) return;
+      const d = haversineDistance(lat, lng, c.lat, c.long);
+
+      if (d < 200) { score -= 30000; return; }  // co-located
+      if (d < 500) score -= 5000;               // قريب جداً
+
+      const bearing = calculateBearing(lat, lng, c.lat, c.long);
+      const angleDiff = boreDifference(az, bearing);
+
+      if (opts.facingRule && angleDiff <= opts.frontThr) score -= 8000;
+      else if (angleDiff <= 90) score -= 2000;
+      else if (angleDiff > 150) score -= 200;  // back-to-back مقبول
+
+      const distK = Math.exp(-d / 2000);
+      score -= 1000 * distK;
+    });
+
+    return { freq, score };
+  });
+
+  scores.sort((a, b) => b.score - a.score);
+  const bcch = scores[0].freq;
+
+  // BSIC
+  const allBsics = [];
+  for (let ncc = 0; ncc < 8; ncc++) for (let bcc = 0; bcc < 8; bcc++) allBsics.push(String(ncc) + String(bcc));
+
+  const bsicScores = allBsics.map(b => {
+    let score = 10000;
+
+    if (opts.coSiteRule && coSiteBcic.has(bcch + '_' + b)) score -= 50000;
+
+    nearby2G.forEach(c => {
+      if (c.gsmBand !== band) return;
+      if (c.bcch !== bcch || c.bsic !== b) return;
+      const d = haversineDistance(lat, lng, c.lat, c.long);
+      if (d < 200) score -= 30000;
+      else if (d < 1000) score -= 5000;
+
+      const bearing = calculateBearing(lat, lng, c.lat, c.long);
+      const angleDiff = boreDifference(az, bearing);
+      if (opts.facingRule && angleDiff <= opts.frontThr) score -= 8000;
+    });
+
+    // تفضيل التوزيع
+    const usage = nearby2G.filter(c => c.bsic === b).length;
+    score -= usage * 50;
+
+    return { b, score };
+  });
+
+  bsicScores.sort((a, b) => b.score - a.score);
+
+  return {
+    cell_name: cellName,
+    tech: 'GSM',
+    band: band,
+    lat, long: lng, bore: az, height,
+    cell_radius: 5000,
+    bcch: bcch,
+    tch: bcch,
+    bsic: bsicScores[0].b,
+    status: 'planned',
+    nearestSameBcch: nsFindNearestSameBcch(lat, lng, bcch, band, nearby2G),
+    nearestSameBsic: nsFindNearestSameBsic(lat, lng, bcch, bsicScores[0].b, band, nearby2G)
+  };
+}
+
+function nsFindNearestSameBcch(lat, lng, bcch, band, nearby2G) {
+  let best = null, bestDist = Infinity;
+  nearby2G.forEach(c => {
+    if (c.gsmBand !== band || c.bcch !== bcch) return;
+    const d = haversineDistance(lat, lng, c.lat, c.long);
+    if (d < bestDist) { bestDist = d; best = c.cell_name; }
+  });
+  return best ? { cell: best, dist: bestDist } : null;
+}
+
+function nsFindNearestSameBsic(lat, lng, bcch, bsic, band, nearby2G) {
+  let best = null, bestDist = Infinity;
+  nearby2G.forEach(c => {
+    if (c.gsmBand !== band || c.bcch !== bcch || c.bsic !== bsic) return;
+    const d = haversineDistance(lat, lng, c.lat, c.long);
+    if (d < bestDist) { bestDist = d; best = c.cell_name; }
+  });
+  return best ? { cell: best, dist: bestDist } : null;
+}
+
+/* =========================================================
+   3G Planning
+   ========================================================= */
+function nsPlan3GCell(cellName, lat, lng, az, height, band, nearby3G, coSitePsc, opts) {
+  // UARFCN حسب الباند
+  const uarfcn = band === '900' ? { dl: 3012, ul: 9372 } : { dl: 10700, ul: 9700 };
+
+  // PSC candidates
+  const candidates = [];
+  for (let p = 0; p <= 511; p++) candidates.push(p);
+
+  const scores = candidates.map(p => {
+    let score = 10000;
+
+    // Co-site
+    if (opts.coSiteRule && coSitePsc.has(p)) score -= 50000;
+
+    // الجيران
+    nearby3G.forEach(c => {
+      if (c.gsmBand !== band) return;
+      if (c.psc !== p) return;
+      const d = haversineDistance(lat, lng, c.lat, c.long);
+      if (d < 200) score -= 30000;
+      else if (d < 500) score -= 5000;
+
+      const bearing = calculateBearing(lat, lng, c.lat, c.long);
+      const angleDiff = boreDifference(az, bearing);
+      if (opts.facingRule && angleDiff <= opts.frontThr) score -= 8000;
+      else if (angleDiff <= 90) score -= 2000;
+
+      score -= 1000 * Math.exp(-d / 2000);
+    });
+
+    // تفضيل التوزيع عبر النطاق
+    const usage = nearby3G.filter(c => c.psc === p).length;
+    score -= usage * 20;
+
+    return { p, score };
+  });
+
+  scores.sort((a, b) => b.score - a.score);
+
+  const psc = scores[0].p;
+
+  // RNC — من أقرب خلية 3G
+  const nearest3G = nearby3G.length ? nearby3G.reduce((a, b) => {
+    return haversineDistance(lat, lng, a.lat, a.long) < haversineDistance(lat, lng, b.lat, b.long) ? a : b;
+  }) : null;
+
+  return {
+    cell_name: cellName,
+    tech: '3G',
+    band: band,
+    lat, long: lng, bore: az, height,
+    cell_radius: 5000,
+    psc: psc,
+    uarfcn_dl: uarfcn.dl,
+    uarfcn_ul: uarfcn.ul,
+    rnc_id: nearest3G ? nearest3G.rnc_id : 7,
+    status: 'planned',
+    nearestSamePsc: nsFindNearestSamePsc(lat, lng, psc, band, nearby3G)
+  };
+}
+
+function nsFindNearestSamePsc(lat, lng, psc, band, nearby3G) {
+  let best = null, bestDist = Infinity;
+  nearby3G.forEach(c => {
+    if (c.gsmBand !== band || c.psc !== psc) return;
+    const d = haversineDistance(lat, lng, c.lat, c.long);
+    if (d < bestDist) { bestDist = d; best = c.cell_name; }
+  });
+  return best ? { cell: best, dist: bestDist } : null;
+}
+
+/* =========================================================
+   4G Planning
+   ========================================================= */
+function nsPlan4GCell(cellName, lat, lng, az, height, nearby4G, coSitePci, opts) {
+  // PCI 0-503
+  const scores = [];
+  for (let p = 0; p <= 503; p++) {
+    let score = 10000;
+
+    if (opts.coSiteRule && coSitePci.has(p)) score -= 50000;
+
+    nearby4G.forEach(c => {
+      if (c.pci == null) return;
+      const d = haversineDistance(lat, lng, c.lat, c.long);
+
+      // Same PCI
+      if (c.pci === p) {
+        if (d < 200) score -= 30000;
+        else if (d < 5000) score -= 5000 * Math.exp(-d / 5000);
+      }
+
+      // Same MOD3
+      if (c.pci % 3 === p % 3 && d < 1000) {
+        score -= 2000 * Math.exp(-d / 1000);
+      }
+
+      // Same MOD6
+      if (c.pci % 6 === p % 6 && d < 500) {
+        score -= 1000 * Math.exp(-d / 500);
+      }
+
+      // Face-to-face
+      if (opts.facingRule) {
+        const bearing = calculateBearing(lat, lng, c.lat, c.long);
+        const angleDiff = boreDifference(az, bearing);
+        if (angleDiff <= opts.frontThr) score -= 300;
+      }
+    });
+
+    // توزيع MOD3 متساوي
+    const mod3Count = nearby4G.filter(c => c.pci != null && c.pci % 3 === p % 3).length;
+    score -= mod3Count * 30;
+
+    scores.push({ p, score });
+  }
+
+  scores.sort((a, b) => b.score - a.score);
+  const pci = scores[0].p;
+
+  // RSI (Root Sequence Index)
+  const usedRsis = new Set(nearby4G.map(c => c.rsi).filter(r => r != null && r > 0));
+  let rsi = 0;
+  for (let r = 0; r <= 838; r++) {
+    if (!usedRsis.has(r)) { rsi = r; break; }
+  }
+
+  return {
+    cell_name: cellName,
+    tech: 'LTE',
+    band: '4G',
+    lat, long: lng, bore: az, height,
+    cell_radius: 5000,
+    pci: pci,
+    rsi: rsi,
+    status: 'planned',
+    nearestSamePci: nsFindNearestSamePci(lat, lng, pci, nearby4G)
+  };
+}
+
+function nsFindNearestSamePci(lat, lng, pci, nearby4G) {
+  let best = null, bestDist = Infinity;
+  nearby4G.forEach(c => {
+    if (c.pci !== pci) return;
+    const d = haversineDistance(lat, lng, c.lat, c.long);
+    if (d < bestDist) { bestDist = d; best = c.cell_name; }
+  });
+  return best ? { cell: best, dist: bestDist } : null;
+}
+
+/* =========================================================
+   NEIGHBOR PLANNING
+   ========================================================= */
+function nsPlanNeighbors(newCells, nearby, radius, opts) {
+  const neighbors = [];
+  const seen = new Set();
+
+  newCells.forEach(newCell => {
+    // جيران حسب التقنية
+    const sameTech = nearby.filter(c => {
+      if (newCell.tech === 'GSM') return c.tech === 'GSM';
+      if (newCell.tech === '3G') return c.tech === '3G';
+      if (newCell.tech === 'LTE') return c.tech === 'LTE';
+      return false;
+    });
+
+    const scored = sameTech.map(c => {
+      const d = haversineDistance(newCell.lat, newCell.long, c.lat, c.long);
+      const bearing = calculateBearing(newCell.lat, newCell.long, c.lat, c.long);
+      const angleDiff = boreDifference(newCell.bore, bearing);
+
+      const distScore = Math.max(0, 1 - d / radius);
+      const angleScore = angleDiff <= opts.frontThr ? 1 : (angleDiff <= 120 ? 0.5 : 0.1);
+      const score = distScore * 0.6 + angleScore * 0.4;
+
+      return { cell: c, dist: d, angleDiff, score };
+    }).sort((a, b) => b.score - a.score);
+
+    // Max NNs
+    const top = scored.slice(0, opts.maxNb);
+
+    top.forEach(x => {
+      const key = newCell.cell_name + '→' + x.cell.cell_name;
+      if (seen.has(key)) return;
+      seen.add(key);
+
+      let relType = 'inter';
+      if (newCell.tech === '3G') {
+        relType = newCell.band === x.cell.gsmBand ? 'intra' : 'inter';
+      }
+
+      neighbors.push({
+        source_cell: newCell.cell_name,
+        neighbor_cell: x.cell.cell_name,
+        relation_type: relType,
+        distance: x.dist,
+        direction: x.angleDiff <= opts.frontThr ? 'Front' : (x.angleDiff <= 120 ? 'Side' : 'Back'),
+        score: x.score,
+        isNew: false
+      });
+
+      // Bidirectional
+      if (opts.bidir) {
+        const revKey = x.cell.cell_name + '→' + newCell.cell_name;
+        if (!seen.has(revKey)) {
+          seen.add(revKey);
+          neighbors.push({
+            source_cell: x.cell.cell_name,
+            neighbor_cell: newCell.cell_name,
+            relation_type: relType,
+            distance: x.dist,
+            direction: 'Reverse',
+            score: x.score,
+            isNew: true
+          });
+        }
+      }
+    });
+  });
+
+  // IRAT (3G → 2G)
+  const new3G = newCells.filter(c => c.tech === '3G');
+  new3G.forEach(newCell => {
+    const gsmNearby = nearby.filter(c => c.tech === 'GSM');
+    const scored = gsmNearby.map(c => {
+      const d = haversineDistance(newCell.lat, newCell.long, c.lat, c.long);
+      const bearing = calculateBearing(newCell.lat, newCell.long, c.lat, c.long);
+      const angleDiff = boreDifference(newCell.bore, bearing);
+      const score = Math.max(0, 1 - d / radius) * (angleDiff <= opts.iratThr ? 1 : 0.3);
+      return { cell: c, dist: d, angleDiff, score };
+    }).sort((a, b) => b.score - a.score).slice(0, 10);
+
+    scored.forEach(x => {
+      const key = newCell.cell_name + '→irat→' + x.cell.cell_name;
+      if (seen.has(key)) return;
+      seen.add(key);
+
+      neighbors.push({
+        source_cell: newCell.cell_name,
+        neighbor_cell: x.cell.cell_name,
+        relation_type: 'irat',
+        distance: x.dist,
+        direction: x.angleDiff <= opts.iratThr ? 'Front' : 'Side',
+        score: x.score,
+        isNew: false
+      });
+    });
+  });
+
+  return neighbors;
+}
+
+/* =========================================================
+   CONFLICT CHECK
+   ========================================================= */
+function nsCheckConflicts(cells, nearby, opts) {
+  const conflicts = [];
+
+  cells.forEach(cell => {
+    if (cell.tech === 'GSM') {
+      // Same BCCH
+      if (cell.nearestSameBcch && cell.nearestSameBcch.dist < 500) {
+        conflicts.push({
+          level: 'HIGH', cell: cell.cell_name, type: 'BCCH',
+          value: cell.bcch, conflictCell: cell.nearestSameBcch.cell,
+          distance: cell.nearestSameBcch.dist,
+          message: 'Same BCCH (' + cell.bcch + ') على مسافة ' + cell.nearestSameBcch.dist.toFixed(0) + 'م من ' + cell.nearestSameBcch.cell
+        });
+      } else if (cell.nearestSameBcch && cell.nearestSameBcch.dist < 2000) {
+        conflicts.push({
+          level: 'MEDIUM', cell: cell.cell_name, type: 'BCCH',
+          value: cell.bcch, conflictCell: cell.nearestSameBcch.cell,
+          distance: cell.nearestSameBcch.dist,
+          message: 'Same BCCH على مسافة ' + cell.nearestSameBcch.dist.toFixed(0) + 'م'
+        });
+      }
+
+      // Same BSIC
+      if (cell.nearestSameBsic && cell.nearestSameBsic.dist < 1000) {
+        conflicts.push({
+          level: 'HIGH', cell: cell.cell_name, type: 'BSIC',
+          value: cell.bsic, conflictCell: cell.nearestSameBsic.cell,
+          distance: cell.nearestSameBsic.dist,
+          message: 'Same BCCH+BSIC على مسافة ' + cell.nearestSameBsic.dist.toFixed(0) + 'م'
+        });
+      }
+    }
+
+    if (cell.tech === '3G') {
+      if (cell.nearestSamePsc && cell.nearestSamePsc.dist < 500) {
+        conflicts.push({
+          level: 'HIGH', cell: cell.cell_name, type: 'PSC',
+          value: cell.psc, conflictCell: cell.nearestSamePsc.cell,
+          distance: cell.nearestSamePsc.dist,
+          message: 'Same PSC (' + cell.psc + ') على مسافة ' + cell.nearestSamePsc.dist.toFixed(0) + 'م'
+        });
+      } else if (cell.nearestSamePsc && cell.nearestSamePsc.dist < 2000) {
+        conflicts.push({
+          level: 'MEDIUM', cell: cell.cell_name, type: 'PSC',
+          value: cell.psc, conflictCell: cell.nearestSamePsc.cell,
+          distance: cell.nearestSamePsc.dist,
+          message: 'Same PSC على مسافة ' + cell.nearestSamePsc.dist.toFixed(0) + 'م'
+        });
+      }
+    }
+
+    if (cell.tech === 'LTE') {
+      if (cell.nearestSamePci && cell.nearestSamePci.dist < 1000) {
+        conflicts.push({
+          level: 'HIGH', cell: cell.cell_name, type: 'PCI',
+          value: cell.pci, conflictCell: cell.nearestSamePci.cell,
+          distance: cell.nearestSamePci.dist,
+          message: 'Same PCI (' + cell.pci + ') على مسافة ' + cell.nearestSamePci.dist.toFixed(0) + 'م'
+        });
+      } else if (cell.nearestSamePci && cell.nearestSamePci.dist < 5000) {
+        conflicts.push({
+          level: 'MEDIUM', cell: cell.cell_name, type: 'PCI',
+          value: cell.pci, conflictCell: cell.nearestSamePci.cell,
+          distance: cell.nearestSamePci.dist,
+          message: 'Same PCI على مسافة ' + cell.nearestSamePci.dist.toFixed(0) + 'م'
+        });
+      }
+    }
+  });
+
+  return conflicts;
+}
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+function nsRenderPlan(plan) {
+  // Summary KPI
+  const nCells = plan.cells.length;
+  const n2G = plan.cells.filter(c => c.tech === 'GSM').length;
+  const n3G = plan.cells.filter(c => c.tech === '3G').length;
+  const n4G = plan.cells.filter(c => c.tech === 'LTE').length;
+  const nNb = plan.neighbors.length;
+  const nIntra = plan.neighbors.filter(n => n.relation_type === 'intra').length;
+  const nInter = plan.neighbors.filter(n => n.relation_type === 'inter').length;
+  const nIrat = plan.neighbors.filter(n => n.relation_type === 'irat').length;
+  const nConfH = plan.conflicts.filter(c => c.level === 'HIGH').length;
+  const nConfM = plan.conflicts.filter(c => c.level === 'MEDIUM').length;
+
+  document.getElementById('nsSummary').innerHTML =
+    nsKpiCard('🏗️', 'New Cells', nCells, '#124191') +
+    nsKpiCard('📡', '2G', n2G, '#D97706') +
+    nsKpiCard('📶', '3G', n3G, '#14B8A6') +
+    nsKpiCard('📡', '4G', n4G, '#124191') +
+    nsKpiCard('🔗', 'Total NBs', nNb, '#7C3AED') +
+    nsKpiCard('🔄', 'Intra', nIntra, '#0EA5E9') +
+    nsKpiCard('↔️', 'Inter', nInter, '#F59E0B') +
+    nsKpiCard('📞', 'IRAT', nIrat, '#8B5CF6') +
+    nsKpiCard('🔴', 'HIGH Conf', nConfH, nConfH > 0 ? '#B91C1C' : '#1F9D55') +
+    nsKpiCard('🟡', 'MED Conf', nConfM, nConfM > 0 ? '#F2A900' : '#1F9D55');
+
+  // Warnings
+  let warnHtml = '';
+  if (nConfH === 0 && nConfM === 0) {
+    warnHtml = '<div style="background:#E7F7EE;color:#1F9D55;padding:14px 18px;border-radius:10px;font-size:13px;">' +
+      '<b>✅ التخطيط نظيف!</b> لا توجد تعارضات خطيرة. يمكنك الحفظ بأمان.' +
+    '</div>';
+  } else {
+    warnHtml = '<div style="background:#FDF1DC;color:#8A5A00;padding:14px 18px;border-radius:10px;font-size:13px;">' +
+      '<b>⚠️ ' + nConfH + ' تعارض خطير و ' + nConfM + ' تعارض متوسط.</b> راجع تبويب "Conflicts" قبل الحفظ.' +
+    '</div>';
+  }
+  document.getElementById('nsWarnings').innerHTML = warnHtml;
+
+  // Cells table
+  const tbody = document.querySelector('#nsCellsTable tbody');
+  tbody.innerHTML = plan.cells.map(c => {
+    const techBadge = c.tech === 'GSM' ? '#D97706' : c.tech === '3G' ? '#14B8A6' : '#124191';
+    let nearestInfo = '';
+    if (c.nearestSameBcch) {
+      const distColor = c.nearestSameBcch.dist < 500 ? '#B91C1C' : (c.nearestSameBcch.dist < 2000 ? '#F2A900' : '#1F9D55');
+      nearestInfo = '<span style="color:' + distColor + ';">BCCH: ' + c.nearestSameBcch.dist.toFixed(0) + 'm</span>';
+    } else if (c.nearestSamePsc) {
+      const distColor = c.nearestSamePsc.dist < 500 ? '#B91C1C' : '#1F9D55';
+      nearestInfo = '<span style="color:' + distColor + ';">PSC: ' + c.nearestSamePsc.dist.toFixed(0) + 'm</span>';
+    } else if (c.nearestSamePci) {
+      const distColor = c.nearestSamePci.dist < 1000 ? '#B91C1C' : '#1F9D55';
+      nearestInfo = '<span style="color:' + distColor + ';">PCI: ' + c.nearestSamePci.dist.toFixed(0) + 'm</span>';
+    }
+
+    return '<tr>' +
+      '<td><b>' + escapeHtml(c.cell_name) + '</b></td>' +
+      '<td><span style="padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;background:' + techBadge + ';color:#fff;">' + c.tech + '</span></td>' +
+      '<td>' + (c.band || '—') + '</td>' +
+      '<td>' + c.bore + '°</td>' +
+      '<td style="font-family:monospace;font-weight:700;color:#D97706;">' + (c.bcch || '—') + '</td>' +
+      '<td style="font-family:monospace;">' + (c.tch || '—') + '</td>' +
+      '<td style="font-family:monospace;font-weight:700;color:#8B5CF6;">' + (c.bsic || '—') + '</td>' +
+      '<td style="font-family:monospace;font-weight:700;color:#14B8A6;">' + (c.psc != null ? c.psc : '—') + '</td>' +
+      '<td style="font-family:monospace;font-size:11px;">' + (c.uarfcn_dl ? c.uarfcn_dl + ' / ' + c.uarfcn_ul : '—') + '</td>' +
+      '<td style="font-family:monospace;font-weight:700;color:#124191;">' + (c.pci != null ? c.pci : '—') + '</td>' +
+      '<td style="font-family:monospace;">' + (c.rsi != null ? c.rsi : '—') + '</td>' +
+      '<td style="font-size:11px;">' + nearestInfo + '</td>' +
+    '</tr>';
+  }).join('');
+
+  // Neighbors preview
+  nsRenderNeighbors(plan.neighbors);
+
+  // Conflicts
+  nsRenderConflicts(plan.conflicts);
+
+  // Save summary
+  document.getElementById('nsSaveSummary').innerHTML =
+    '<div style="font-size:13px;line-height:1.8;">' +
+      '<b style="color:#124191;">سيتم إضافة:</b><br>' +
+      '🏗️ <b>' + plan.cells.length + '</b> خلية جديدة<br>' +
+      '🔗 <b>' + plan.neighbors.filter(n => !n.isNew).length + '</b> علاقة جيران جديدة<br>' +
+      (plan.neighbors.filter(n => n.isNew).length ? '↔️ <b>' + plan.neighbors.filter(n => n.isNew).length + '</b> علاقة عكسية (Bidirectional)<br>' : '') +
+      (nConfH > 0 ? '<span style="color:#B91C1C;">⚠️ ' + nConfH + ' تعارض خطير — يُنصح بمراجعتها أولاً</span>' : '<span style="color:#1F9D55;">✅ لا تعارضات خطيرة</span>') +
+    '</div>';
+}
+
+function nsKpiCard(icon, label, value, color) {
+  return '<div class="kpi-card">' +
+    '<div class="kpi-label">' + icon + ' ' + label + '</div>' +
+    '<div class="kpi-value" style="color:' + color + ';">' + value + '</div>' +
+  '</div>';
+}
+
+function nsRenderNeighbors(neighbors) {
+  const types = {
+    'gsm_2g': { label: '📡 2G ↔ 2G', color: '#D97706', items: [] },
+    'intra':  { label: '🔄 3G Intra-Freq', color: '#0EA5E9', items: [] },
+    'inter':  { label: '↔️ 3G Inter-Freq', color: '#F59E0B', items: [] },
+    'irat':   { label: '📞 3G → 2G (IRAT)', color: '#8B5CF6', items: [] },
+    'lte_4g': { label: '📡 4G ↔ 4G', color: '#124191', items: [] }
+  };
+
+  neighbors.forEach(n => {
+    let key = n.relation_type;
+    if (n.relation_type === 'inter' && n.source_cell.startsWith('L')) key = 'lte_4g';
+    if (n.relation_type === 'inter' && n.source_cell.startsWith('A')) key = 'gsm_2g';
+    if (types[key]) types[key].items.push(n);
+  });
+
+  let html = '';
+  Object.entries(types).forEach(([key, val]) => {
+    if (!val.items.length) return;
+    html += '<div style="margin-bottom:16px;">' +
+      '<div style="font-size:13px;font-weight:800;color:' + val.color + ';margin-bottom:10px;">' +
+        val.label + ' — <span style="color:#124191;">' + val.items.length + '</span> علاقة' +
+      '</div>' +
+      '<div style="background:#F9FBFE;border-radius:10px;padding:12px;font-family:monospace;font-size:11.5px;max-height:300px;overflow-y:auto;">' +
+        val.items.slice(0, 100).map(n =>
+          '<div style="padding:4px 0;border-bottom:1px solid #F0F3F9;display:flex;gap:8px;align-items:center;">' +
+            '<b style="flex:1;">' + escapeHtml(n.source_cell) + '</b>' +
+            '<span style="color:#94A3B8;">→</span>' +
+            '<span style="flex:1;">' + escapeHtml(n.neighbor_cell) + '</span>' +
+            '<span style="color:#5A6B87;">(' + n.distance.toFixed(0) + 'm · ' + n.direction + ')</span>' +
+            (n.isNew ? '<span style="background:#E7F7EE;color:#1F9D55;padding:2px 6px;border-radius:6px;font-size:10px;">NEW</span>' : '') +
+          '</div>'
+        ).join('') +
+        (val.items.length > 100 ? '<div style="text-align:center;padding:8px;color:#5A6B87;">... +' + (val.items.length - 100) + ' more</div>' : '') +
+      '</div>' +
+    '</div>';
+  });
+
+  document.getElementById('nsNeighborsPreview').innerHTML = html || '<div style="text-align:center;color:#5A6B87;padding:20px;">No neighbors suggested</div>';
+}
+
+function nsRenderConflicts(conflicts) {
+  if (!conflicts.length) {
+    document.getElementById('nsConflictsReport').innerHTML =
+      '<div style="background:#E7F7EE;color:#1F9D55;padding:20px;border-radius:10px;text-align:center;font-size:14px;font-weight:700;">' +
+        '✅ لا توجد تعارضات!' +
+      '</div>';
+    return;
+  }
+
+  let html = '';
+  const high = conflicts.filter(c => c.level === 'HIGH');
+  const medium = conflicts.filter(c => c.level === 'MEDIUM');
+
+  if (high.length) {
+    html += '<div style="margin-bottom:16px;">' +
+      '<div style="font-size:13px;font-weight:800;color:#B91C1C;margin-bottom:10px;">🔴 HIGH — ' + high.length + ' تعارض</div>' +
+      high.map(c =>
+        '<div style="background:#FCEAEA;border-left:4px solid #B91C1C;padding:12px 14px;border-radius:8px;margin-bottom:8px;font-size:12.5px;">' +
+          '<b>' + escapeHtml(c.cell) + '</b> · ' + c.type + '=' + c.value + '<br>' +
+          '<span style="color:#5A6B87;">' + escapeHtml(c.message) + '</span>' +
+        '</div>'
+      ).join('') +
+    '</div>';
+  }
+
+  if (medium.length) {
+    html += '<div>' +
+      '<div style="font-size:13px;font-weight:800;color:#F2A900;margin-bottom:10px;">🟡 MEDIUM — ' + medium.length + ' تعارض</div>' +
+      medium.map(c =>
+        '<div style="background:#FDF1DC;border-left:4px solid #F2A900;padding:12px 14px;border-radius:8px;margin-bottom:8px;font-size:12.5px;">' +
+          '<b>' + escapeHtml(c.cell) + '</b> · ' + c.type + '=' + c.value + '<br>' +
+          '<span style="color:#5A6B87;">' + escapeHtml(c.message) + '</span>' +
+        '</div>'
+      ).join('') +
+    '</div>';
+  }
+
+  document.getElementById('nsConflictsReport').innerHTML = html;
+}
+
+/* =========================================================
+   SAVE
+   ========================================================= */
+async function nsSaveToDatabase() {
+  if (!nsLastPlan) { toast('شغّل التخطيط أولاً', 'error'); return; }
+
+  const projId = document.getElementById('ns_save_project').value;
+  if (!projId) { toast('اختر مشروع', 'error'); return; }
+
+  const pid = parseInt(projId);
+
+  const highConf = nsLastPlan.conflicts.filter(c => c.level === 'HIGH').length;
+  const msg = 'سيتم إضافة:\n' +
+    '🏗️ ' + nsLastPlan.cells.length + ' خلية جديدة\n' +
+    '🔗 ' + nsLastPlan.neighbors.filter(n => !n.isNew).length + ' علاقة جيران\n' +
+    (highConf ? '\n⚠️ ' + highConf + ' تعارض خطير موجود\n' : '') +
+    '\nمتابعة؟';
+
+  if (!confirm(msg)) return;
+
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = '⏳ Saving...';
+
+  try {
+    // 1. رفع الخلايا
+    const cellsPayload = nsLastPlan.cells.map(c => {
+      const obj = { project_id: pid };
+      ['cell_name', 'lat', 'long', 'bore', 'height', 'cell_radius', 'bcch', 'tch', 'bsic', 'psc', 'uarfcn_dl', 'uarfcn_ul', 'rnc_id', 'pci', 'rsi'].forEach(k => {
+        if (c[k] != null && c[k] !== '') obj[k] = c[k];
+      });
+      return obj;
+    });
+
+    console.log('📤 Inserting ' + cellsPayload.length + ' cells...');
+    const { error: cellErr } = await db.from('rf_cells').insert(cellsPayload);
+    if (cellErr) throw new Error('Cells: ' + cellErr.message);
+
+    // 2. رفع الجيران (فقط valid types)
+    const validTypes = ['inter', 'intra', 'irat'];
+    const nbPayload = nsLastPlan.neighbors
+      .filter(n => validTypes.includes(n.relation_type))
+      .map(n => ({
+        project_id: pid,
+        source_cell: n.source_cell,
+        neighbor_cell: n.neighbor_cell,
+        relation_type: n.relation_type
+      }));
+
+    let nbSaved = 0;
+    if (nbPayload.length > 0) {
+      console.log('📤 Inserting ' + nbPayload.length + ' neighbors...');
+      const BATCH = 500;
+      for (let i = 0; i < nbPayload.length; i += BATCH) {
+        const batch = nbPayload.slice(i, i + BATCH);
+        const { error: nbErr } = await db.from('rf_neighbors').insert(batch);
+        if (nbErr) throw new Error('Neighbors: ' + nbErr.message);
+        nbSaved += batch.length;
+      }
+    }
+
+    toast('✅ تم إضافة ' + cellsPayload.length + ' خلية و ' + nbSaved + ' جار', 'success', 6000);
+
+    // Reload
+    await loadCells();
+    if (typeof threeGLoadNeighbors === 'function') await threeGLoadNeighbors(pid);
+
+  } catch (e) {
+    console.error(e);
+    toast('❌ ' + e.message, 'error', 8000);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💾 Save All to Supabase';
+  }
+}
+
+/* =========================================================
+   SHOW ON MAP
+   ========================================================= */
+function nsShowOnMap() {
+  if (!nsLastPlan) { toast('شغّل التخطيط أولاً', 'error'); return; }
+
+  window.__nbMode = true;
+  window.__gsmMode = false;
+  switchView('map');
+
+  setTimeout(() => {
+    if (sectorLayer) sectorLayer.clearLayers();
+    if (labelLayer) labelLayer.clearLayers();
+    nbMapLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
+    nbMapLayers = [];
+
+    const { lat, lng } = nsLastPlan;
+
+    // Site marker
+    const circle = L.circleMarker([lat, lng], {
+      radius: 16, color: '#124191', weight: 4,
+      fillColor: '#124191', fillOpacity: 1
+    }).addTo(map);
+    circle.bindTooltip('🏗️ NEW: ' + nsLastPlan.siteName, {
+      permanent: true, direction: 'top', offset: [0, -18], className: 'nb-label-source'
+    });
+    nbMapLayers.push(circle);
+
+    // Cells
+    nsLastPlan.cells.forEach(c => {
+      const coords = makeSectorCoords(c.lat, c.long, c.bore);
+      let color = '#124191';
+      if (c.tech === 'GSM') color = c.band === '1800' ? '#7C3AED' : '#D97706';
+      else if (c.tech === '3G') color = c.band === '900' ? '#14B8A6' : '#0D9488';
+      else color = '#124191';
+
+      const poly = L.polygon(coords, {
+        color: '#fff', weight: 2.5, fillColor: color, fillOpacity: 0.85
+      }).addTo(map);
+      poly.bindTooltip(c.cell_name, { permanent: true, direction: 'center', className: 'nb-label' });
+
+      let popup = '<div style="font-family:Inter,sans-serif;font-size:12px;min-width:200px;">';
+      popup += '<div style="font-weight:800;font-family:monospace;margin-bottom:6px;">' + escapeHtml(c.cell_name) + '</div>';
+      popup += '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Tech:</span><b>' + c.tech + '</b></div>';
+      popup += '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Band:</span><b>' + (c.band || '—') + '</b></div>';
+      popup += '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Azimuth:</span><b>' + c.bore + '°</b></div>';
+      if (c.bcch) popup += '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>BCCH:</span><b>' + c.bcch + '</b></div>';
+      if (c.bsic) popup += '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>BSIC:</span><b>' + c.bsic + '</b></div>';
+      if (c.psc != null) popup += '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>PSC:</span><b>' + c.psc + '</b></div>';
+      if (c.uarfcn_dl) popup += '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>UARFCN:</span><b>' + c.uarfcn_dl + '</b></div>';
+      if (c.pci != null) popup += '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>PCI:</span><b>' + c.pci + '</b></div>';
+      if (c.rsi != null) popup += '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>RSI:</span><b>' + c.rsi + '</b></div>';
+      popup += '</div>';
+      poly.bindPopup(popup);
+      nbMapLayers.push(poly);
+    });
+
+    map.setView([lat, lng], 14);
+
+    // Legend
+    let legend = document.getElementById('nbLegend');
+    if (!legend) {
+      legend = document.createElement('div');
+      legend.id = 'nbLegend';
+      legend.className = 'legend';
+      legend.style.cssText = 'left:20px;bottom:20px;display:block;';
+      document.querySelector('.map-container').appendChild(legend);
+    }
+    legend.style.display = 'block';
+    legend.innerHTML =
+      '<div class="legend-title">🏗️ New Site Plan</div>' +
+      '<div class="legend-item"><span class="legend-dot" style="background:#D97706;"></span><span>2G 900</span></div>' +
+      '<div class="legend-item"><span class="legend-dot" style="background:#7C3AED;"></span><span>2G 1800</span></div>' +
+      '<div class="legend-item"><span class="legend-dot" style="background:#14B8A6;"></span><span>3G 900</span></div>' +
+      '<div class="legend-item"><span class="legend-dot" style="background:#0D9488;"></span><span>3G 2100</span></div>' +
+      '<div class="legend-item"><span class="legend-dot" style="background:#124191;"></span><span>4G LTE</span></div>';
+
+    toast('📍 عرض الموقع الجديد على الماب', 'success');
+  }, 400);
+}
+
+/* =========================================================
+   EXPORT
+   ========================================================= */
+function nsExportCSV() {
+  if (!nsLastPlan) { toast('شغّل التخطيط أولاً', 'error'); return; }
+
+  const rows = [['Cell Name', 'Tech', 'Band', 'Azimuth', 'Height', 'BCCH', 'TCH', 'BSIC', 'PSC', 'UARFCN_DL', 'UARFCN_UL', 'PCI', 'RSI', 'Lat', 'Long', 'RNC']];
+  nsLastPlan.cells.forEach(c => {
+    rows.push([
+      c.cell_name, c.tech, c.band, c.bore, c.height,
+      c.bcch || '', c.tch || '', c.bsic || '',
+      c.psc != null ? c.psc : '', c.uarfcn_dl || '', c.uarfcn_ul || '',
+      c.pci != null ? c.pci : '', c.rsi != null ? c.rsi : '',
+      c.lat, c.long, c.rnc_id || ''
+    ]);
+  });
+
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'NewSite_' + nsLastPlan.siteName + '_' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('✅ CSV exported', 'success');
+}
+
+function nsExportKML() {
+  if (!nsLastPlan) return;
+  const siteName = nsLastPlan.siteName;
+  let kml = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document>\n';
+  kml += '  <name>New Site: ' + siteName + '</name>\n';
+
+  nsLastPlan.cells.forEach(c => {
+    const coords = kmlSectorCoords(c.lat, c.long, c.bore);
+    kml += '  <Placemark>\n';
+    kml += '    <name>' + c.cell_name + '</name>\n';
+    kml += '    <description>' + c.tech + ' · Az: ' + c.bore + '°' +
+           (c.bcch ? ' · BCCH: ' + c.bcch : '') +
+           (c.psc != null ? ' · PSC: ' + c.psc : '') +
+           (c.pci != null ? ' · PCI: ' + c.pci : '') + '</description>\n';
+    kml += '    <Polygon><outerBoundaryIs><LinearRing><coordinates>\n';
+    coords.forEach(p => { kml += '      ' + p[1].toFixed(6) + ',' + p[0].toFixed(6) + ',0\n'; });
+    kml += '    </coordinates></LinearRing></outerBoundaryIs></Polygon>\n';
+    kml += '  </Placemark>\n';
+  });
+
+  kml += '</Document>\n</kml>';
+
+  const blob = new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'NewSite_' + siteName + '.kml';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('✅ KML exported', 'success');
+}
+
+/* =========================================================
+   CLEAR
+   ========================================================= */
+function nsClearAll() {
+  if (nsLastPlan && !confirm('هل أنت متأكد؟ سيتم مسح التخطيط.')) return;
+  nsLastPlan = null;
+  document.getElementById('nsResults').style.display = 'none';
+  document.getElementById('ns_site_name').value = '';
+  toast('تم المسح', 'info');
+}
+
+// Init
+setTimeout(() => {
+  if (document.getElementById('ns_num_sectors')) nsUpdateSectors();
+}, 1000);
 
 console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
 console.log('%cTools: PCI · GSM · NB · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
