@@ -3083,7 +3083,6 @@ let lastPCIResults = null;
    PAGE TITLES
    ========================================================= */
   const debouncedApplyFilters = debounce(applyFilters, 200);
-const debouncedRenderCells = debounce(() => renderCellsPage(1), 250);
 const PAGE_TITLES = {
   'map':              { icon: '🗺️', title: 'Cell Map',                sub: 'Visualize cells on the map' },
   'dashboard':        { icon: '📊', title: 'Dashboard',               sub: 'Overview and statistics' },
