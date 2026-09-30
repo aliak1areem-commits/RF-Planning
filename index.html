@@ -7251,6 +7251,19 @@ try {
   const saved = JSON.parse(localStorage.getItem('rf_cells_columns') || 'null');
   if (saved && Array.isArray(saved)) cellsPageState.visibleColumns = saved;
 } catch(e) {}
+
+function flyToCell(id) {
+  const cell = allCells.find(c => c.id === id);
+  if (!cell) { toast('Cell not found', 'error'); return; }
+  window.__gsmMode = false;
+  window.__nbMode = false;
+  switchView('map');
+  setTimeout(() => {
+    if (typeof renderMap === 'function') renderMap();
+    map.flyTo([cell.lat, cell.long], 16, { duration: 1 });
+    setTimeout(() => showSiteInfo(cell), 1200);
+  }, 200);
+}
   /* =========================================================
    FIND CELL BY FIELD
    ========================================================= */
