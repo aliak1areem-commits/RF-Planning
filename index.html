@@ -10907,6 +10907,7 @@ function nsSuggestAzimuths() {
 
   if (nearby.length < 5) { toast('Not enough neighbors to suggest', 'error'); return; }
 
+  // ═══ 1. Build weight buckets (10° each, 36 buckets) ═══
   const buckets = new Array(36).fill(0);
   nearby.forEach(c => {
     const bearing = calculateBearing(lat, lng, c.lat, c.long);
@@ -10915,19 +10916,48 @@ function nsSuggestAzimuths() {
     buckets[Math.floor(bearing / 10) % 36] += weight;
   });
 
-  const suggested = [];
-  for (let i = 0; i < n; i++) {
-    let bestIdx = 0, bestScore = -1;
-    for (let j = 0; j < 36; j++) {
-      if (buckets[j] > bestScore) { bestScore = buckets[j]; bestIdx = j; }
+  // ═══ 2. Rank buckets by score (highest first) ═══
+  const ranked = buckets
+    .map((score, idx) => ({ idx, score }))
+    .sort((a, b) => b.score - a.score);
+
+  // ═══ 3. Minimum separation between sectors ═══
+  // 3 sectors → 120° apart → 12 buckets
+  // 4 sectors → 90°  apart → 9  buckets
+  // 6 sectors → 60°  apart → 6  buckets
+  const minSepDeg = 360 / n;
+  const minSepBuckets = Math.floor(minSepDeg / 10);
+
+  // ═══ 4. Greedy pick with separation constraint ═══
+  const picked = [];
+
+  for (const cand of ranked) {
+    // Check distance to already-picked
+    let tooClose = false;
+    for (const p of picked) {
+      let diff = Math.abs(cand.idx - p.idx);
+      if (diff > 18) diff = 36 - diff;  // wrap-around
+      if (diff < minSepBuckets) { tooClose = true; break; }
     }
-    suggested.push(bestIdx * 10 + 5);
-    for (let k = -8; k <= 8; k++) {
-      buckets[(bestIdx + k + 36) % 36] *= 0.1;
+    if (tooClose) continue;
+
+    picked.push(cand);
+    if (picked.length >= n) break;
+  }
+
+  // ═══ 5. Fallback: fill remaining slots if needed ═══
+  if (picked.length < n) {
+    for (const cand of ranked) {
+      if (picked.find(p => p.idx === cand.idx)) continue;
+      picked.push(cand);
+      if (picked.length >= n) break;
     }
   }
-  suggested.sort((a, b) => a - b);
 
+  // ═══ 6. Extract suggested azimuths (sorted) ═══
+  const suggested = picked.map(p => p.idx * 10 + 5).sort((a, b) => a - b);
+
+  // ═══ 7. Apply to inputs ═══
   const sectors = ['A','B','C','D','E','F'].slice(0, n);
   sectors.forEach((s, i) => {
     const el = document.getElementById('ns_az_' + s);
@@ -10935,6 +10965,7 @@ function nsSuggestAzimuths() {
     const hint = document.getElementById('ns_az_suggest_' + s);
     if (hint) hint.innerHTML = '<span style="color:#1F9D55;">✓ Smart suggestion</span>';
   });
+
   toast('Suggested azimuths based on ' + nearby.length + ' neighbors', 'success', 4000);
 }
 
