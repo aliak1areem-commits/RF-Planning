@@ -11036,77 +11036,134 @@ function nsRunPlanner() {
 /* =========================================================
    CORE PLANNING ENGINE
    ========================================================= */
-function nsPlanAll(siteName, lat, lng, height, sectors, sectorAz, siteType, band2G, band3G, nearby, radius, opts) {
-  const plan = {
-    siteName, lat, lng, height, radius, opts,
-    cells: [], neighbors: [], conflicts: [], warnings: []
-  };
+function nsPlan2GCell(cellName, lat, lng, az, height, band, nearby2G, siteUsedBcch, siteUsedBsic, siteUsedBcchBsic, opts) {
+  const range = GSM_BAND_ARFCN[band] || { from: 34, to: 46 };
 
-  const has2G = siteType.includes('2G');
-  const has3G = siteType.includes('3G');
-  const has4G = siteType.includes('4G');
+  // ═══ BCCH Selection ═══
+  const candidates = [];
+  for (let f = range.from; f <= range.to; f++) candidates.push(f);
 
-  const nearby2G = nearby.filter(c => c.tech === 'GSM');
-  const nearby3G = nearby.filter(c => c.tech === '3G');
-  const nearby4G = nearby.filter(c => c.tech === 'LTE');
+  const scores = candidates.map(freq => {
+    let score = 10000;
 
-  const bands2G = band2G === 'both' ? ['900', '1800'] : [band2G];
-  const bands3G = band3G === 'both' ? ['2100', '900'] : [band3G];
+    // Co-site rule
+    if (opts.coSiteRule && siteUsedBcch.has(freq)) score -= 100000;
 
-  // ═══ Co-site pools (لما نخطط داخل نفس الموقع) ═══
-  const coSiteBcch = new Set();
-  const coSiteBcic = new Set(); // BCCH+BSIC
-  const coSitePsc = new Set();
-  const coSitePci = new Set();
+    // Analyze neighbors
+    nearby2G.forEach(c => {
+      if (c.gsmBand !== band) return;
+      if (c.bcch == null) return;
 
-  // ═══ خطط القطاعات ═══
-  sectors.forEach((sec) => {
-    const az = sectorAz[sec];
+      const d = haversineDistance(lat, lng, c.lat, c.long);
+      if (d > 15000) return;
 
-    // 2G
-    if (has2G) {
-      bands2G.forEach(b => {
-        const letter = nsGet2GLetter(sec, b);
-        const cellName = siteName + letter;
+      const bearing = calculateBearing(lat, lng, c.lat, c.long);
+      const angleDiff = boreDifference(az, bearing);
 
-        const cell = nsPlan2GCell(cellName, lat, lng, az, height, b, nearby2G, coSiteBcch, coSiteBcic, opts);
-        cell.coSiteBcch = new Set(coSiteBcch);
-        cell.coSiteBsic = new Set(coSiteBcic);
-        plan.cells.push(cell);
+      // Distance weight (exponential decay)
+      const distWeight = Math.exp(-d / 800) * 50000;
 
-        coSiteBcch.add(cell.bcch);
-        coSiteBcic.add(cell.bcch + '_' + cell.bsic);
-      });
-    }
+      // Angle weight
+      let angleWeight = 1.0;
+      if (angleDiff <= 30) angleWeight = 2.0;
+      else if (angleDiff <= 60) angleWeight = 1.5;
+      else if (angleDiff <= 90) angleWeight = 1.0;
+      else if (angleDiff <= 150) angleWeight = 0.4;
+      else angleWeight = 0.15;
 
-    // 3G
-    if (has3G) {
-      bands3G.forEach(b => {
-        const cellName = 'U' + siteName + sec;
-        const cell = nsPlan3GCell(cellName, lat, lng, az, height, b, nearby3G, coSitePsc, opts);
-        plan.cells.push(cell);
-        coSitePsc.add(cell.psc);
-      });
-    }
+      const weight = distWeight * angleWeight;
 
-    // 4G
-    if (has4G) {
-      const cellName = 'L' + siteName + sec;
-      const cell = nsPlan4GCell(cellName, lat, lng, az, height, nearby4G, coSitePci, opts);
-      plan.cells.push(cell);
-      coSitePci.add(cell.pci);
-    }
+      // Conflict type
+      if (c.bcch === freq) {
+        let penalty = weight;
+        if (d < 300) penalty *= 5;
+        else if (d < 1000) penalty *= 2;
+        score -= penalty;
+      } else if (Math.abs(c.bcch - freq) === 1) {
+        score -= weight * 0.3;
+      } else if (Math.abs(c.bcch - freq) === 2) {
+        if (d < 1000) score -= weight * 0.1;
+      }
+    });
+
+    score += Math.random() * 100;
+
+    return { freq, score };
   });
 
-  // ═══ الجيران ═══
-  if (opts.autoNb) {
-    plan.neighbors = nsPlanNeighbors(plan.cells, nearby, radius, opts);
+  scores.sort((a, b) => b.score - a.score);
+  const topCandidates = scores.slice(0, Math.min(5, scores.length));
+  const chosenBCCH = topCandidates[Math.floor(Math.random() * Math.min(3, topCandidates.length))].freq;
+
+  // ═══ BSIC Selection ═══
+  const allBsics = [];
+  for (let ncc = 0; ncc < 8; ncc++) {
+    for (let bcc = 0; bcc < 8; bcc++) {
+      allBsics.push(String(ncc) + String(bcc));
+    }
   }
 
-  // ═══ فحص التعارضات ═══
-  plan.conflicts = nsCheckConflicts(plan.cells, nearby, opts);
+  const bsicScores = allBsics.map(b => {
+    let score = 10000;
 
-  return plan;
+    if (opts.coSiteRule) {
+      if (siteUsedBsic.has(b)) score -= 80000;
+      if (siteUsedBcchBsic.has(chosenBCCH + '_' + b)) score -= 200000;
+    }
+
+    nearby2G.forEach(c => {
+      if (c.gsmBand !== band) return;
+      if (c.bcch !== chosenBCCH || c.bsic !== b) return;
+
+      const d = haversineDistance(lat, lng, c.lat, c.long);
+      const bearing = calculateBearing(lat, lng, c.lat, c.long);
+      const angleDiff = boreDifference(az, bearing);
+
+      const distWeight = Math.exp(-d / 800) * 60000;
+      let angleWeight = 1.0;
+      if (angleDiff <= 30) angleWeight = 2.5;
+      else if (angleDiff <= 60) angleWeight = 1.8;
+      else if (angleDiff <= 90) angleWeight = 1.0;
+      else angleWeight = 0.2;
+
+      score -= distWeight * angleWeight;
+    });
+
+    const usage = nearby2G.filter(c => c.bsic === b && c.bcch === chosenBCCH).length;
+    score -= usage * 200;
+
+    score += Math.random() * 300;
+
+    return { b, score };
+  });
+
+  bsicScores.sort((a, b) => b.score - a.score);
+  const top3Bsic = bsicScores.slice(0, 3);
+  const chosenBSIC = top3Bsic[Math.floor(Math.random() * top3Bsic.length)].b;
+
+  const nearest = nsFindNearestSameBcch(lat, lng, chosenBCCH, band, nearby2G);
+  const nearestBsic = nsFindNearestSameBsic(lat, lng, chosenBCCH, chosenBSIC, band, nearby2G);
+
+  const frontNeighbors = nearby2G.filter(c => {
+    if (c.gsmBand !== band) return false;
+    const bearing = calculateBearing(lat, lng, c.lat, c.long);
+    return boreDifference(az, bearing) <= opts.frontThr;
+  }).length;
+
+  return {
+    cell_name: cellName,
+    tech: 'GSM',
+    band: band,
+    lat, long: lng, bore: az, height,
+    cell_radius: 5000,
+    bcch: chosenBCCH,
+    tch: chosenBCCH,
+    bsic: chosenBSIC,
+    status: 'planned',
+    nearestSameBcch: nearest,
+    nearestSameBsic: nearestBsic,
+    frontNeighborsCount: frontNeighbors
+  };
 }
 
 /* =========================================================
@@ -11234,48 +11291,59 @@ function nsFindNearestSameBsic(lat, lng, bcch, bsic, band, nearby2G) {
 /* =========================================================
    3G Planning
    ========================================================= */
-function nsPlan3GCell(cellName, lat, lng, az, height, band, nearby3G, coSitePsc, opts) {
-  // UARFCN حسب الباند
+function nsPlan3GCell(cellName, lat, lng, az, height, band, nearby3G, siteUsedPsc, opts) {
   const uarfcn = band === '900' ? { dl: 3012, ul: 9372 } : { dl: 10700, ul: 9700 };
 
-  // PSC candidates
   const candidates = [];
   for (let p = 0; p <= 511; p++) candidates.push(p);
 
   const scores = candidates.map(p => {
     let score = 10000;
 
-    // Co-site
-    if (opts.coSiteRule && coSitePsc.has(p)) score -= 50000;
+    // Co-site rule
+    if (opts.coSiteRule && siteUsedPsc.has(p)) score -= 100000;
 
-    // الجيران
     nearby3G.forEach(c => {
       if (c.gsmBand !== band) return;
-      if (c.psc !== p) return;
+      if (c.psc == null) return;
+
       const d = haversineDistance(lat, lng, c.lat, c.long);
-      if (d < 200) score -= 30000;
-      else if (d < 500) score -= 5000;
+      if (d > 15000) return;
+
+      if (c.psc !== p) return;
 
       const bearing = calculateBearing(lat, lng, c.lat, c.long);
       const angleDiff = boreDifference(az, bearing);
-      if (opts.facingRule && angleDiff <= opts.frontThr) score -= 8000;
-      else if (angleDiff <= 90) score -= 2000;
 
-      score -= 1000 * Math.exp(-d / 2000);
+      const distWeight = Math.exp(-d / 800) * 50000;
+
+      let angleWeight = 1.0;
+      if (angleDiff <= 30) angleWeight = 2.0;
+      else if (angleDiff <= 60) angleWeight = 1.5;
+      else if (angleDiff <= 90) angleWeight = 1.0;
+      else if (angleDiff <= 150) angleWeight = 0.4;
+      else angleWeight = 0.15;
+
+      let penalty = distWeight * angleWeight;
+
+      if (d < 300) penalty *= 5;
+      else if (d < 1000) penalty *= 2;
+
+      score -= penalty;
     });
 
-    // تفضيل التوزيع عبر النطاق
     const usage = nearby3G.filter(c => c.psc === p).length;
-    score -= usage * 20;
+    score -= usage * 15;
+
+    score += Math.random() * 100;
 
     return { p, score };
   });
 
   scores.sort((a, b) => b.score - a.score);
+  const top5 = scores.slice(0, 5);
+  const psc = top5[Math.floor(Math.random() * Math.min(3, top5.length))].p;
 
-  const psc = scores[0].p;
-
-  // RNC — من أقرب خلية 3G
   const nearest3G = nearby3G.length ? nearby3G.reduce((a, b) => {
     return haversineDistance(lat, lng, a.lat, a.long) < haversineDistance(lat, lng, b.lat, b.long) ? a : b;
   }) : null;
@@ -11294,7 +11362,6 @@ function nsPlan3GCell(cellName, lat, lng, az, height, band, nearby3G, coSitePsc,
     nearestSamePsc: nsFindNearestSamePsc(lat, lng, psc, band, nearby3G)
   };
 }
-
 function nsFindNearestSamePsc(lat, lng, psc, band, nearby3G) {
   let best = null, bestDist = Infinity;
   nearby3G.forEach(c => {
@@ -11308,56 +11375,77 @@ function nsFindNearestSamePsc(lat, lng, psc, band, nearby3G) {
 /* =========================================================
    4G Planning
    ========================================================= */
-function nsPlan4GCell(cellName, lat, lng, az, height, nearby4G, coSitePci, opts) {
-  // PCI 0-503
+function nsPlan4GCell(cellName, lat, lng, az, height, nearby4G, siteUsedPci, siteUsedRsi, opts) {
+  // ═══ PCI Selection ═══
   const scores = [];
   for (let p = 0; p <= 503; p++) {
     let score = 10000;
 
-    if (opts.coSiteRule && coSitePci.has(p)) score -= 50000;
+    if (opts.coSiteRule && siteUsedPci.has(p)) score -= 100000;
 
     nearby4G.forEach(c => {
       if (c.pci == null) return;
+
       const d = haversineDistance(lat, lng, c.lat, c.long);
+      if (d > 15000) return;
+
+      const bearing = calculateBearing(lat, lng, c.lat, c.long);
+      const angleDiff = boreDifference(az, bearing);
+
+      const distWeight = Math.exp(-d / 800) * 50000;
+
+      let angleWeight = 1.0;
+      if (angleDiff <= 30) angleWeight = 2.0;
+      else if (angleDiff <= 60) angleWeight = 1.5;
+      else if (angleDiff <= 90) angleWeight = 1.0;
+      else angleWeight = 0.3;
 
       // Same PCI
       if (c.pci === p) {
-        if (d < 200) score -= 30000;
-        else if (d < 5000) score -= 5000 * Math.exp(-d / 5000);
+        let penalty = distWeight * angleWeight;
+        if (d < 300) penalty *= 5;
+        else if (d < 1000) penalty *= 2;
+        score -= penalty;
       }
 
       // Same MOD3
-      if (c.pci % 3 === p % 3 && d < 1000) {
-        score -= 2000 * Math.exp(-d / 1000);
+      if (c.pci % 3 === p % 3 && d < 3000) {
+        const mod3Weight = Math.exp(-d / 1500) * 10000;
+        let angleMod3 = angleDiff <= 60 ? 1.5 : 1.0;
+        score -= mod3Weight * angleMod3;
       }
 
       // Same MOD6
-      if (c.pci % 6 === p % 6 && d < 500) {
-        score -= 1000 * Math.exp(-d / 500);
-      }
-
-      // Face-to-face
-      if (opts.facingRule) {
-        const bearing = calculateBearing(lat, lng, c.lat, c.long);
-        const angleDiff = boreDifference(az, bearing);
-        if (angleDiff <= opts.frontThr) score -= 300;
+      if (c.pci % 6 === p % 6 && d < 1000) {
+        const mod6Weight = Math.exp(-d / 800) * 3000;
+        score -= mod6Weight;
       }
     });
 
-    // توزيع MOD3 متساوي
     const mod3Count = nearby4G.filter(c => c.pci != null && c.pci % 3 === p % 3).length;
-    score -= mod3Count * 30;
+    score -= mod3Count * 40;
+
+    score += Math.random() * 150;
 
     scores.push({ p, score });
   }
 
   scores.sort((a, b) => b.score - a.score);
-  const pci = scores[0].p;
+  const top5 = scores.slice(0, 5);
+  const pci = top5[Math.floor(Math.random() * Math.min(3, top5.length))].p;
 
-  // RSI (Root Sequence Index)
-  const usedRsis = new Set(nearby4G.map(c => c.rsi).filter(r => r != null && r > 0));
-  let rsi = 0;
-  for (let r = 0; r <= 838; r++) {
+  // ═══ RSI Selection ═══
+  const usedRsis = new Set();
+  nearby4G.forEach(c => {
+    if (c.rsi != null && c.rsi > 0) {
+      const d = haversineDistance(lat, lng, c.lat, c.long);
+      if (d < 3000) usedRsis.add(c.rsi);
+    }
+  });
+  siteUsedRsi.forEach(r => { if (r > 0) usedRsis.add(r); });
+
+  let rsi = 1;
+  for (let r = 1; r <= 838; r++) {
     if (!usedRsis.has(r)) { rsi = r; break; }
   }
 
@@ -11372,16 +11460,6 @@ function nsPlan4GCell(cellName, lat, lng, az, height, nearby4G, coSitePci, opts)
     status: 'planned',
     nearestSamePci: nsFindNearestSamePci(lat, lng, pci, nearby4G)
   };
-}
-
-function nsFindNearestSamePci(lat, lng, pci, nearby4G) {
-  let best = null, bestDist = Infinity;
-  nearby4G.forEach(c => {
-    if (c.pci !== pci) return;
-    const d = haversineDistance(lat, lng, c.lat, c.long);
-    if (d < bestDist) { bestDist = d; best = c.cell_name; }
-  });
-  return best ? { cell: best, dist: bestDist } : null;
 }
 
 /* =========================================================
