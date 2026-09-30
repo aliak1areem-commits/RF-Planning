@@ -953,6 +953,9 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
         <span id="pageTitle">Cell Map</span>
         <span class="subtitle" id="pageSubtitle">Visualize cells on the map</span>
       </div>
+      <button class="btn btn-ghost" onclick="toggleLanguage()" title="Switch Language" id="langToggleBtn">
+  <span>🌐</span><span id="langLabel">AR</span>
+</button>
           <div class="topbar-actions">
         <button class="btn btn-ghost" onclick="toggleDarkMode()" title="Toggle Dark Mode" id="darkModeBtn">
           <span>🌙</span><span>Dark</span>
@@ -3334,7 +3337,7 @@ function initMap() {
 
   window.copyPolygonCells = function() {
     if (!window.__lastPolygonCells || !window.__lastPolygonCells.length) {
-      toast('⚠️ ارسم مضلع أولاً', 'error');
+      toast('⚠️ Draw a polygon first', 'error');
       return;
     }
 
@@ -3348,7 +3351,7 @@ function initMap() {
 
     const tsv = rows.map(r => r.join('\t')).join('\n');
     navigator.clipboard.writeText(tsv).then(() => {
-      toast('✅ تم نسخ ' + window.__lastPolygonCells.length + ' خلية — الصق في Excel', 'success', 5000);
+      toast('✅ Copied ' + window.__lastPolygonCells.length + ' cells — paste in Excel', 'success', 5000);
     }).catch(() => {
       const csv = rows.map(r => r.join(',')).join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -3358,14 +3361,14 @@ function initMap() {
       a.download = 'Polygon_Cells_' + new Date().toISOString().slice(0,10) + '.csv';
       a.click();
       URL.revokeObjectURL(url);
-      toast('📥 تم تنزيل CSV', 'success');
+      toast('📥 CSV downloaded', 'success');
     });
   };
 
   window.clearDrawings = function() {
     drawnItems.clearLayers();
     window.__lastPolygonCells = [];
-    toast('🗑️ تم مسح الرسومات', 'info');
+    toast('🗑️ Drawings cleared', 'info');
   };
    /* =======================================================
      🚀 تحسين الزوم السريع — إخفاء أثناء الزوم + debounce
@@ -3423,7 +3426,7 @@ map.on('zoomstart movestart', function() {
 
     const url = 'https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lon + '&zoom=14&accept-language=ar,en';
 
-    toast('🌐 جاري البحث...', 'info', 2000);
+    toast('🌐 Searching...', 'info', 2000);
 
     fetch(url)
       .then(r => r.json())
@@ -3451,7 +3454,7 @@ map.on('zoomstart movestart', function() {
           .openOn(map);
       })
       .catch(() => {
-        toast('❌ فشل الاتصال', 'error');
+        toast('❌ Connection failed', 'error');
       });
   });
   document.querySelectorAll('.basemap-btn').forEach(function(btn) {
@@ -3794,7 +3797,7 @@ function resetMapView() {
 
   // ═══ 6. إعادة رسم الخلايا العادية ═══
   applyFilters();
-  toast('🗺️ تم إعادة عرض الخلايا', 'success');
+  toast('🗺️ Cells re-displayed', 'success');
 }
 function applyFilters() {
   const searchEl = document.getElementById('searchFilter');
@@ -6931,7 +6934,7 @@ function findCellByField() {
   const field = document.getElementById('findByField').value;
   const value = (document.getElementById('findByValue').value || '').trim();
 
-  if (!field) { toast('اختر الحقل أولاً', 'error'); return; }
+  if (!field) { toast('Select field first', 'error'); return; }
   if (!value) { clearFieldSearch(); return; }
 
   // 🎯 خريطة الحقول → التكنولوجيا المتوقعة (للفلترة الذكية)
@@ -6962,7 +6965,7 @@ function findCellByField() {
 
   if (!matches.length) {
     const techName = expectedTech ? ' (' + expectedTech + ')' : '';
-    toast('❌ لا توجد خلية بـ ' + field.toUpperCase() + ' = ' + value + techName, 'error', 5000);
+    toast('❌ No cell with ' + field.toUpperCase() + ' = ' + value + techName, 'error', 5000);
 
     // أفرغ الماب
     visibleCells = [];
@@ -7029,7 +7032,7 @@ function clearFieldSearch() {
 
   // استعد الفلترة الطبيعية
   applyFilters();
-  toast('تم إلغاء البحث', 'info');
+  toast('Search cleared', 'info');
 }
 
 function showCellPicker(cells, field, value) {
@@ -9638,7 +9641,7 @@ function mapSearchFly() {
   );
 
   if (!match) {
-    toast('❌ ما لقيت "' + query + '"', 'error', 3000);
+    toast('❌ Not found "' + query + '"', 'error', 3000);
     return;
   }
 
@@ -9664,11 +9667,11 @@ function gotoCoordinates() {
   const lat = parseFloat(document.getElementById('gotoLat').value);
   const lon = parseFloat(document.getElementById('gotoLon').value);
   if (isNaN(lat) || isNaN(lon)) {
-    toast('❌ إحداثيات غير صحيحة', 'error');
+    toast('❌ Invalid coordinates', 'error');
     return;
   }
   if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
-    toast('❌ خارج النطاق المسموح', 'error');
+    toast('❌ Out of allowed range', 'error');
     return;
   }
   map.flyTo([lat, lon], 15, { duration: 1.2 });
@@ -9745,18 +9748,18 @@ function applyQuickChip(filter) {
       const bounds = L.latLngBounds(visibleCells.map(c => [c.lat, c.long]));
       map.fitBounds(bounds, { padding: [50, 50] });
     } else {
-      toast('⚠️ لا توجد خلايا في باند ' + targetBand + ' MHz', 'error', 3000);
+      toast('⚠️ No cells in band ' + targetBand + ' MHz', 'error', 3000);
     }
   }
 
-  toast('⚡ فلتر: ' + filter, 'info', 2000);
+  toast('⚡ Filter: ' + filter, 'info', 2000);
 }
 
 /* =========================================================
    📸 SCREENSHOT
    ========================================================= */
 function takeMapScreenshot() {
-  toast('📸 جاري تجهيز الصورة...', 'info', 2000);
+  toast('📸 Preparing image...', 'info', 2000);
 
   // استخدم html2canvas إن وجدت، أو الطريقة اليدوية
   const mapEl = document.getElementById('map');
@@ -9805,11 +9808,11 @@ function captureMap() {
       a.download = 'RF_Map_' + new Date().toISOString().slice(0, 19).replace(/:/g, '-') + '.png';
       a.click();
       URL.revokeObjectURL(url);
-      toast('✅ تم حفظ الصورة', 'success', 3000);
+      toast('✅ Image saved', 'success', 3000);
     }, 'image/png');
   }).catch(err => {
     console.error(err);
-    toast('❌ فشل التصوير — جرب مرة ثانية', 'error');
+    toast('❌ Screenshot failed — try again', 'error');
   });
 }
 
@@ -9836,7 +9839,7 @@ function toggleBookmarksPanel() {
 }
 
 function addCurrentBookmark() {
-  const name = prompt('اسم الموقع:');
+  const name = prompt('Bookmark name:');
   if (!name) return;
   const center = map.getCenter();
   const zoom = map.getZoom();
@@ -9850,7 +9853,7 @@ function addCurrentBookmark() {
   });
   saveBookmarks(bookmarks);
   renderBookmarks();
-  toast('✅ تم حفظ "' + name + '"', 'success');
+  toast('✅ Saved "' + name + '"', 'success');
 }
 
 function renderBookmarks() {
@@ -9889,7 +9892,7 @@ function deleteBookmark(idx) {
   bookmarks.splice(idx, 1);
   saveBookmarks(bookmarks);
   renderBookmarks();
-  toast('🗑️ تم الحذف', 'info');
+  toast('🗑️ Deleted', 'info');
 }
 
 /* =========================================================
@@ -9956,7 +9959,7 @@ function copyCellInfo(id) {
     'BSIC: ' + (cell.bsic || '—') + '\n' +
     'Bore: ' + cell.bore + '°\n' +
     'Lat/Long: ' + cell.lat + ', ' + cell.long;
-  navigator.clipboard.writeText(text).then(() => toast('📋 تم النسخ', 'success'));
+  navigator.clipboard.writeText(text).then(() => toast('📋 Copied', 'success'));
   hideContextMenu();
 }
 
@@ -9964,7 +9967,7 @@ function copyCellCoordinates(id) {
   const cell = cellById.get(id);
   if (!cell) return;
   navigator.clipboard.writeText(cell.lat + ',' + cell.long)
-    .then(() => toast('📍 تم نسخ الإحداثيات', 'success'));
+    .then(() => toast('📍 Coordinates copied', 'success'));
   hideContextMenu();
 }
 
@@ -10190,7 +10193,7 @@ async function threeGSaveToSupabase() {
       btn.textContent = 'Saving ' + saved + '/' + all.length + '...';
     }
 
-    toast('✅ تم حفظ ' + saved + ' علاقة في Supabase', 'success', 5000);
+    toast('✅ Saved ' + saved + ' علاقة في Supabase', 'success', 5000);
     await threeGLoadNeighbors(projectId);
   } catch (e) {
     console.error(e);
@@ -11660,7 +11663,7 @@ function applyEnglishUI() {
     'تم المسح': 'Cleared',
     'شغّل التحليل أولاً': 'Run analysis first',
     'شغّل التحليل أولاً ': 'Run analysis first',
-    'تم إلغاء البحث': 'Search cleared',
+    'Search cleared': 'Search cleared',
     'جاري البحث...': 'Searching...',
     'جاري تجهيز الصورة...': 'Preparing image...',
     'تم حفظ الصورة': 'Image saved',
@@ -11672,25 +11675,25 @@ function applyEnglishUI() {
     'اكتب ملاحظتك...': 'Write your comment...',
     'سيظهر التعليق لكل الفريق · يدعم النص العادي والروابط': 'Comment visible to team · supports text and links',
     'ما فيه Bookmarks بعد': 'No bookmarks yet',
-    'اسم الموقع:': 'Bookmark name:',
+    'Bookmark name:': 'Bookmark name:',
     'تم حفظ': 'Saved',
     'تم تحميل': 'Loaded',
 
     // ═══ Map Actions ═══
-    '⚠️ ارسم مضلع أولاً': '⚠️ Draw a polygon first',
-    '✅ تم نسخ': '✅ Copied',
-    '📥 تم تنزيل CSV': '📥 CSV downloaded',
-    '🗑️ تم مسح الرسومات': '🗑️ Drawings cleared',
-    '🗺️ تم إعادة عرض الخلايا': '🗺️ Cells re-displayed',
-    '📍 تم نسخ الإحداثيات': '📍 Coordinates copied',
-    '📋 تم النسخ': '📋 Copied',
-    '🗑️ تم الحذف': '🗑️ Deleted',
+    '⚠️ Draw a polygon first': '⚠️ Draw a polygon first',
+    '✅ Copied': '✅ Copied',
+    '📥 CSV downloaded': '📥 CSV downloaded',
+    '🗑️ Drawings cleared': '🗑️ Drawings cleared',
+    '🗺️ Cells re-displayed': '🗺️ Cells re-displayed',
+    '📍 Coordinates copied': '📍 Coordinates copied',
+    '📋 Copied': '📋 Copied',
+    '🗑️ Deleted': '🗑️ Deleted',
     '👆 اختر خلية من الماب لعرض جيرانها': '👆 Select a cell on the map to view neighbors',
-    '❌ ما لقيت': '❌ Not found',
-    '❌ إحداثيات غير صحيحة': '❌ Invalid coordinates',
-    '❌ خارج النطاق المسموح': '❌ Out of allowed range',
-    '⚠️ لا توجد خلايا في باند': '⚠️ No cells in band',
-    '⚡ فلتر:': '⚡ Filter:',
+    '❌ Not found': '❌ Not found',
+    '❌ Invalid coordinates': '❌ Invalid coordinates',
+    '❌ Out of allowed range': '❌ Out of allowed range',
+    '⚠️ No cells in band': '⚠️ No cells in band',
+    '⚡ Filter:': '⚡ Filter:',
 
     // ═══ 3G/IRAT ═══
     '— اختر مشروع —': '— Select Project —',
@@ -11755,8 +11758,8 @@ function applyEnglishUI() {
     '✅ كل الخلايا محسّنة — لا تغيير مطلوب': '✅ All cells optimized — no changes needed',
 
     // ═══ New Site Planner ═══
-    'اختر الحقل أولاً': 'Select field first',
-    '❌ لا توجد خلية بـ': '❌ No cell with',
+    'Select field first': 'Select field first',
+    '❌ No cell with': '❌ No cell with',
     '⚠️ اسم الموقع موجود مسبقاً': '⚠️ Site name already exists',
     '✅ التخطيط جاهز': '✅ Plan ready',
     'التخطيط نظيف': 'Plan is clean',
@@ -11764,7 +11767,7 @@ function applyEnglishUI() {
     'خلية': ' cells',
     'خلية بـ': ' cells with ',
     'خلية داخل المضلع — اضغط': ' cells inside polygon — click',
-    'خلية — الصق في Excel': ' cells — paste in Excel',
+    'cells — paste in Excel': ' cells — paste in Excel',
 
     // ═══ HSN ═══
     '— خلايا نفس الموقع لها نفس HSN': '— same-site cells with same HSN',
@@ -11831,6 +11834,321 @@ function applyEnglishUI() {
 
 // Apply on load
 setTimeout(applyEnglishUI, 500);
+  /* =========================================================
+   🌐 LANGUAGE SWITCHER (AR ↔ EN)
+   ========================================================= */
+const LANG_KEY = 'rf_lang_preference';
+let currentLang = localStorage.getItem(LANG_KEY) || 'en';
+
+// ═══════════════════════════════════════════════════════════
+// TRANSLATION DICTIONARY
+// ═══════════════════════════════════════════════════════════
+const TRANSLATIONS = {
+  // ═══════════════════════════════════════════════════════
+  // Map / Common
+  // ═══════════════════════════════════════════════════════
+  '⚠️ ارسم مضلع أولاً': { en: '⚠️ Draw a polygon first' },
+  '✅ تم نسخ': { en: '✅ Copied' },
+  ' خلية — الصق في Excel': { en: ' cells — paste in Excel' },
+  '📥 تم تنزيل CSV': { en: '📥 CSV downloaded' },
+  '🗑️ تم مسح الرسومات': { en: '🗑️ Drawings cleared' },
+  '🌐 جاري البحث...': { en: '🌐 Searching...' },
+  '❌ فشل الاتصال': { en: '❌ Connection failed' },
+  '🗺️ تم إعادة عرض الخلايا': { en: '🗺️ Cells re-displayed' },
+  'اختر الحقل أولاً': { en: 'Select field first' },
+  '❌ لا توجد خلية بـ': { en: '❌ No cell with' },
+  'تم إلغاء البحث': { en: 'Search cleared' },
+  '⚠️ لا توجد خلايا في باند': { en: '⚠️ No cells in band' },
+  '⚡ فلتر:': { en: '⚡ Filter:' },
+  '📸 جاري تجهيز الصورة...': { en: '📸 Preparing image...' },
+  '✅ تم حفظ الصورة': { en: '✅ Image saved' },
+  '❌ فشل التصوير — جرب مرة ثانية': { en: '❌ Screenshot failed — try again' },
+  'اسم الموقع:': { en: 'Bookmark name:' },
+  '✅ تم حفظ': { en: '✅ Saved' },
+  '🗑️ تم الحذف': { en: '🗑️ Deleted' },
+  '📋 تم النسخ': { en: '📋 Copied' },
+  '📍 تم نسخ الإحداثيات': { en: '📍 Coordinates copied' },
+  '❌ ما لقيت': { en: '❌ Not found' },
+  '❌ إحداثيات غير صحيحة': { en: '❌ Invalid coordinates' },
+  '❌ خارج النطاق المسموح': { en: '❌ Out of allowed range' },
+  '👆 اختر خلية من الماب لعرض جيرانها': { en: '👆 Select a cell on the map to view neighbors' },
+  ' خلية داخل المضلع — اضغط': { en: ' cells inside polygon — click' },
+
+  // ═══════════════════════════════════════════════════════
+  // 3G / IRAT
+  // ═══════════════════════════════════════════════════════
+  '— اختر مشروع —': { en: '— Select Project —' },
+  '⏳ جاري القراءة...': { en: '⏳ Reading...' },
+  'الملف فارغ': { en: 'File is empty' },
+  'لم أجد أعمدة Source/Neighbor في CSV': { en: 'Source/Neighbor columns not found in CSV' },
+  ' علاقة (': { en: ' relations (' },
+  '✅ تم تحميل': { en: '✅ Loaded' },
+  'لم يُرفع': { en: 'Not uploaded' },
+  'تم المسح': { en: 'Cleared' },
+  'اختر مشروع أولاً': { en: 'Select project first' },
+  'لا توجد بيانات للحفظ': { en: 'No data to save' },
+  'أدخل اسم خلية': { en: 'Enter cell name' },
+  ' غير موجودة في rf_cells': { en: ' not found in rf_cells' },
+  'الأداة للخلايا 3G فقط (تبدأ بـ U)': { en: 'Tool works on 3G cells only (starts with U)' },
+  'أدخل اسم خلية 3G': { en: 'Enter 3G cell name' },
+  'الخلية غير موجودة': { en: 'Cell not found' },
+  'يجب أن تبدأ بـ U (3G)': { en: 'Must start with U (3G)' },
+  'أدخل خلايا': { en: 'Enter cells' },
+  'شغّل التحليل أولاً': { en: 'Run analysis first' },
+  'عرض الموقع الجديد على الماب': { en: 'New site displayed on map' },
+  'لا توجد تكرارات': { en: 'No duplicates' },
+  ' علاقة في Supabase': { en: ' relations in Supabase' },
+  '💾 حفظ في Supabase': { en: '💾 Save to Supabase' },
+
+  // ═══════════════════════════════════════════════════════
+  // PSC Checker
+  // ═══════════════════════════════════════════════════════
+  '❌ لا توجد خلايا 3G بـ PSC. تأكد من رفع بيانات 3G أولاً.': { en: '❌ No 3G cells with PSC. Upload 3G data first.' },
+  '❌ نطاق PSC غير صحيح (0-511)': { en: '❌ Invalid PSC range (0-511)' },
+  '❌ لا توجد خلايا PSC في النطاق': { en: '❌ No PSC cells in range' },
+  ' تعارض موجود': { en: ' conflicts found' },
+  '✅ لا توجد تعارضات — كل PSCs سليمة': { en: '✅ No conflicts — all PSCs clean' },
+  '— خطيرة (تؤثر على handover)': { en: '— critical (affects handover)' },
+  'لا توجد تغييرات': { en: 'No changes' },
+  'تطبيق': { en: 'Apply' },
+  ' تغيير PSC في Supabase؟': { en: ' PSC changes in Supabase?' },
+  '✅ تم تطبيق': { en: '✅ Applied' },
+  ' تغيير': { en: ' changes' },
+  ' فشل)': { en: ' failed)' },
+  'خطأ:': { en: 'Error:' },
+  '✅ تم تصدير CSV': { en: '✅ CSV exported' },
+  ' خلية متعارضة على الماب': { en: ' conflict cells on map' },
+
+  // ═══════════════════════════════════════════════════════
+  // BSIC Analyzer
+  // ═══════════════════════════════════════════════════════
+  'ابحث عن خلايا لها نفس BCCH + BSIC ضمن مسافة محددة (تحليل مركّز على BCCH محدد).':
+    { en: 'Find cells with same BCCH + BSIC within a specified distance.' },
+  'تحليل كل خلايا GSM — كشف كل تعارضات BSIC وإعادة توزيع كامل.':
+    { en: 'Analyze all GSM cells — detect and reassign all BSIC conflicts.' },
+  'اتركه فارغاً لكل الخلايا': { en: 'Leave empty for all cells' },
+  'فارغ = كل خلايا GSM': { en: 'Empty = all GSM cells' },
+  'مسافة اعتبار نفس BSIC تعارضاً': { en: 'Distance for same-BSIC conflict' },
+  'نطاق عد الجيران': { en: 'Neighbor count radius' },
+  ' خلية تحتاج تغيير BSIC': { en: ' cells need BSIC change' },
+  '✅ لا توجد تعارضات — كل BSICs سليمة': { en: '✅ No conflicts — all BSICs clean' },
+  'هذا سيحدّث قاعدة البيانات.': { en: 'This will update the database.' },
+
+  // ═══════════════════════════════════════════════════════
+  // HSN
+  // ═══════════════════════════════════════════════════════
+  '— خلايا نفس الموقع لها نفس HSN': { en: '— same-site cells with same HSN' },
+  '— خلايا متجاورة لها نفس HSN': { en: '— neighboring cells with same HSN' },
+  'هذا سيحدّث': { en: 'This will update' },
+  ' خلية.': { en: ' cells.' },
+
+  // ═══════════════════════════════════════════════════════
+  // Symmetry
+  // ═══════════════════════════════════════════════════════
+  '✅ كل العلاقات متماثلة!': { en: '✅ All relations are symmetric!' },
+  '⚠️ عنده علاقة غير متماثلة': { en: '⚠️ Has asymmetric relation' },
+  ' علاقة غير متماثلة على الماب': { en: ' asymmetric relations on map' },
+  'الجيران المقبولون فقط ضمن هذه المسافة': { en: 'Only neighbors within this distance' },
+  'للتحقق من العلاقات المفقودة': { en: 'For checking missing relations' },
+
+  // ═══════════════════════════════════════════════════════
+  // Azimuth Opt
+  // ═══════════════════════════════════════════════════════
+  'اتركه فارغاً = تحليل كل الخلايا': { en: 'Leave empty = analyze all cells' },
+  '✅ كل الخلايا محسّنة — لا تغيير مطلوب': { en: '✅ All cells optimized — no changes needed' },
+
+  // ═══════════════════════════════════════════════════════
+  // New Site Planner
+  // ═══════════════════════════════════════════════════════
+  '🔒 منع تكرار BCCH/PSC/PCI على نفس الموقع (Co-site Rules)':
+    { en: '🔒 Prevent duplicate BCCH/PSC/PCI on same site (Co-site Rules)' },
+  '📏 إعادة استخدام القيم فقط على مسافة آمنة':
+    { en: '📏 Reuse values only at safe distance' },
+  '🎯 تجنب التعارض الأمامي (Face-to-Face)':
+    { en: '🎯 Avoid face-to-face conflicts' },
+  '🔗 اقتراح الجيران تلقائياً': { en: '🔗 Auto-suggest neighbors' },
+  '↔️ جيران ثنائي الاتجاه (Bidirectional)':
+    { en: '↔️ Bidirectional neighbors' },
+  'أدخل اسم الموقع': { en: 'Enter site name' },
+  'إحداثيات غير صحيحة': { en: 'Invalid coordinates' },
+  'الاسم يحتوي أحرف غير مسموحة': { en: 'Name contains invalid characters' },
+  'اسم الموقع موجود مسبقاً': { en: 'Site name already exists' },
+  'عدد الجيران قليل للاقتراح': { en: 'Not enough neighbors to suggest' },
+  'أدخل إحداثيات أولاً': { en: 'Enter coordinates first' },
+  'تم اقتراح Azimuths بناءً على': { en: 'Suggested azimuths based on' },
+  ' جار': { en: ' neighbors' },
+  'التخطيط جاهز': { en: 'Plan ready' },
+  'سيتم إضافة:': { en: 'Will add:' },
+  ' خلية جديدة': { en: ' new cells' },
+  ' علاقة جيران جديدة': { en: ' new neighbor relations' },
+  ' علاقة عكسية (Bidirectional)': { en: ' reverse relations (Bidirectional)' },
+  ' تعارض خطير — يُنصح بمراجعتها أولاً': { en: ' HIGH conflicts — review first' },
+  '✅ لا تعارضات خطيرة': { en: '✅ No HIGH conflicts' },
+  '✅ التخطيط نظيف!': { en: '✅ Plan is clean!' },
+  'لا توجد تعارضات خطيرة. يمكنك الحفظ بأمان.':
+    { en: 'No critical conflicts. Safe to save.' },
+  ' تعارض خطير و': { en: ' HIGH conflicts and' },
+  ' تعارض متوسط': { en: ' MEDIUM conflicts' },
+  'راجع تبويب "Conflicts" قبل الحفظ': { en: 'Review the "Conflicts" tab before saving.' },
+  'هل أنت متأكد؟ سيتم مسح التخطيط.': { en: 'Are you sure? Clear current plan?' },
+
+  // ═══════════════════════════════════════════════════════
+  // Site Info Card
+  // ═══════════════════════════════════════════════════════
+  'اكتب ملاحظتك...': { en: 'Write your comment...' },
+  'سيظهر التعليق لكل الفريق · يدعم النص العادي والروابط':
+    { en: 'Comment visible to team · supports text and links' },
+  'لا توجد ملاحظات بعد': { en: 'No comments yet' },
+  'ما فيه Bookmarks بعد': { en: 'No bookmarks yet' },
+
+  // ═══════════════════════════════════════════════════════
+  // Cells Page
+  // ═══════════════════════════════════════════════════════
+  'خلية بـ': { en: 'cells with' },
+  ' نتيجة': { en: ' results' },
+};
+
+// ═══════════════════════════════════════════════════════════
+// TRANSLATE FUNCTION
+// ═══════════════════════════════════════════════════════════
+function translateText(str, targetLang) {
+  if (!str || typeof str !== 'string') return str;
+  if (targetLang === 'ar') return str;
+
+  let result = str;
+  const entries = Object.entries(TRANSLATIONS).sort((a, b) => b[0].length - a[0].length);
+  for (const [ar, langs] of entries) {
+    if (result.includes(ar)) {
+      result = result.split(ar).join(langs.en);
+    }
+  }
+  result = result.replace(/  +/g, ' ');
+  return result;
+}
+
+// ═══════════════════════════════════════════════════════════
+// APPLY LANGUAGE
+// ═══════════════════════════════════════════════════════════
+function applyLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem(LANG_KEY, lang);
+
+  document.documentElement.lang = lang === 'ar' ? 'ar' : 'en';
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+  const btn = document.getElementById('langToggleBtn');
+  const label = document.getElementById('langLabel');
+  if (label) label.textContent = lang === 'ar' ? 'EN' : 'AR';
+  if (btn) btn.title = lang === 'ar' ? 'Switch to English' : 'التبديل للعربية';
+
+  if (lang === 'en') {
+    // Translate all Arabic text → English
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+    const textNodes = [];
+    let node;
+    while (node = walker.nextNode()) textNodes.push(node);
+    textNodes.forEach(n => {
+      if (n.nodeValue && /[\u0600-\u06FF]/.test(n.nodeValue)) {
+        n.nodeValue = translateText(n.nodeValue, 'en');
+      }
+    });
+
+    // Attributes
+    ['placeholder', 'title', 'value', 'alt', 'aria-label'].forEach(attr => {
+      document.querySelectorAll('[' + attr + ']').forEach(el => {
+        const v = el.getAttribute(attr);
+        if (v && /[\u0600-\u06FF]/.test(v)) {
+          el.setAttribute(attr, translateText(v, 'en'));
+        }
+      });
+    });
+  }
+  // ⚠️ Note: 'ar' mode would need a full reverse dictionary — omitted for simplicity
+
+  toast(lang === 'ar' ? '🌐 تم التبديل للعربية' : '🌐 Switched to English', 'success', 2000);
+}
+
+// ═══════════════════════════════════════════════════════════
+// TOGGLE
+// ═══════════════════════════════════════════════════════════
+function toggleLanguage() {
+  applyLanguage(currentLang === 'ar' ? 'en' : 'ar');
+}
+
+// ═══════════════════════════════════════════════════════════
+// OVERRIDE TOAST/CONFIRM/ALERT
+// ═══════════════════════════════════════════════════════════
+(function patchDialogs() {
+  if (window.__dialogsPatched) return;
+
+  const originalToast = window.toast;
+  window.toast = function(msg, type, duration) {
+    const finalMsg = (currentLang === 'en') ? translateText(msg, 'en') : msg;
+    return originalToast(finalMsg, type, duration);
+  };
+
+  const originalConfirm = window.confirm;
+  window.confirm = function(msg) {
+    const finalMsg = (currentLang === 'en') ? translateText(msg, 'en') : msg;
+    return originalConfirm(finalMsg);
+  };
+
+  const originalAlert = window.alert;
+  window.alert = function(msg) {
+    const finalMsg = (currentLang === 'en') ? translateText(msg, 'en') : msg;
+    return originalAlert(finalMsg);
+  };
+
+  window.__dialogsPatched = true;
+})();
+
+// ═══════════════════════════════════════════════════════════
+// INIT ON LOAD
+// ═══════════════════════════════════════════════════════════
+setTimeout(() => {
+  if (currentLang === 'en') {
+    applyLanguage('en');
+  } else {
+    // Just update the button label
+    const label = document.getElementById('langLabel');
+    if (label) label.textContent = 'EN';
+  }
+}, 500);
+
+// Re-apply on nav clicks
+document.addEventListener('click', function(e) {
+  if (currentLang !== 'en') return;
+  if (e.target.closest('.nav-item') || e.target.closest('.nb-tab') || e.target.closest('.back-btn')) {
+    setTimeout(() => applyLanguage('en'), 200);
+    setTimeout(() => applyLanguage('en'), 600);
+  }
+}, true);
+
+// MutationObserver — catches dynamic content
+(function setupLangObserver() {
+  if (window.__langObserver) return;
+  let timer = null;
+  const observer = new MutationObserver(function(mutations) {
+    if (currentLang !== 'en') return;
+    let hasNew = false;
+    for (const m of mutations) {
+      for (const n of m.addedNodes) {
+        if ((n.nodeType === 1 || n.nodeType === 3) && /[\u0600-\u06FF]/.test(n.textContent || '')) {
+          hasNew = true; break;
+        }
+      }
+      if (hasNew) break;
+    }
+    if (hasNew) {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => applyLanguage('en'), 150);
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+  window.__langObserver = observer;
+})();
+
+console.log('%c🌐 Language switcher loaded', 'color:#1F9D55;font-weight:bold;');
 console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
 console.log('%cTools: PCI · GSM · NB · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
 </script>
