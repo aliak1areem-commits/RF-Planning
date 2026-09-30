@@ -904,6 +904,9 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
       <button class="nav-item" data-page="tool-neighbor">
         <span class="icon">🔗</span><span>2G-Neighbor Analysis</span>
       </button>
+      <button class="nav-item" data-page="tool-3g-nb">
+  <span class="icon">📶</span><span>3G / IRAT Analyzer</span>
+</button>
             <button class="nav-item" data-page="tool-hsn">
         <span class="icon">🎵</span><span>HSN Analysis</span>
       </button>
@@ -2551,7 +2554,191 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
         </div>
       </div>
     </section>
+    <!-- ============ PAGE: 3G / IRAT ANALYZER ============ -->
+    <section class="page" id="page-tool-3g-nb">
+      <div class="tool-page" style="max-width:1500px;">
+        <div class="tool-page-header">
+          <button class="back-btn" onclick="switchView('tools')">←</button>
+          <div>
+            <div class="tool-page-title">📶 3G / IRAT Analyzer</div>
+            <div class="tool-page-sub">3G Intra/Inter Neighbor + 3G→2G IRAT</div>
+          </div>
+        </div>
 
+        <div class="nb-tabs" style="margin-bottom:16px;">
+          <button class="nb-tab active" data-tab="3gimport" onclick="threeGSwitchTab('3gimport')">📥 Import Neighbors</button>
+          <button class="nb-tab" data-tab="3gnb"    onclick="threeGSwitchTab('3gnb')">📡 3G NB Analysis</button>
+          <button class="nb-tab" data-tab="irat"    onclick="threeGSwitchTab('irat')">🔗 IRAT (3G→2G)</button>
+          <button class="nb-tab" data-tab="3gbatch" onclick="threeGSwitchTab('3gbatch')">⚡ Batch</button>
+          <button class="nb-tab" data-tab="3gdup"   onclick="threeGSwitchTab('3gdup')">🔍 Duplicates</button>
+        </div>
+
+        <div class="nb-tab-content active" id="tab_3gimport">
+          <div class="tool-section">
+            <h3>🎯 Project</h3>
+            <select id="3g_project" class="filter-search" style="max-width:400px;">
+              <option value="">— اختر مشروع —</option>
+            </select>
+          </div>
+
+          <div class="tool-section">
+            <h3>📥 Load Neighbor Files (CSV)</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;">
+              <div style="border:2px dashed #C9D4E4;border-radius:10px;padding:18px;text-align:center;">
+                <div style="font-size:26px;margin-bottom:6px;">🔷</div>
+                <div style="font-weight:700;font-size:13px;color:#0C1B3D;margin-bottom:4px;">Inter-Freq 3G</div>
+                <input type="file" id="3g_file_inter" accept=".csv" style="display:none;" onchange="threeGFileSelected(this,'inter')">
+                <button class="btn btn-secondary" style="width:100%;justify-content:center;" onclick="document.getElementById('3g_file_inter').click()">📁 اختر ملف</button>
+                <div id="3g_status_inter" style="font-size:11px;color:#94A3B8;margin-top:8px;">لم يُرفع</div>
+              </div>
+              <div style="border:2px dashed #C9D4E4;border-radius:10px;padding:18px;text-align:center;">
+                <div style="font-size:26px;margin-bottom:6px;">🟣</div>
+                <div style="font-weight:700;font-size:13px;color:#0C1B3D;margin-bottom:4px;">IRAT (3G→2G)</div>
+                <input type="file" id="3g_file_irat" accept=".csv" style="display:none;" onchange="threeGFileSelected(this,'irat')">
+                <button class="btn btn-secondary" style="width:100%;justify-content:center;" onclick="document.getElementById('3g_file_irat').click()">📁 اختر ملف</button>
+                <div id="3g_status_irat" style="font-size:11px;color:#94A3B8;margin-top:8px;">لم يُرفع</div>
+              </div>
+              <div style="border:2px dashed #C9D4E4;border-radius:10px;padding:18px;text-align:center;">
+                <div style="font-size:26px;margin-bottom:6px;">🟢</div>
+                <div style="font-weight:700;font-size:13px;color:#0C1B3D;margin-bottom:4px;">Intra-Freq 3G</div>
+                <input type="file" id="3g_file_intra" accept=".csv" style="display:none;" onchange="threeGFileSelected(this,'intra')">
+                <button class="btn btn-secondary" style="width:100%;justify-content:center;" onclick="document.getElementById('3g_file_intra').click()">📁 اختر ملف</button>
+                <div id="3g_status_intra" style="font-size:11px;color:#94A3B8;margin-top:8px;">لم يُرفع</div>
+              </div>
+            </div>
+            <div class="action-row" style="margin-top:16px;">
+              <button class="btn btn-gold" onclick="threeGSaveToSupabase()">💾 حفظ في Supabase</button>
+              <button class="btn btn-ghost" onclick="threeGClearImport()">🗑️ مسح</button>
+            </div>
+            <div id="3g_preview" style="margin-top:14px;"></div>
+          </div>
+        </div>
+
+        <div class="nb-tab-content" id="tab_3gnb">
+          <div class="tool-section">
+            <h3>🎯 Source Cell</h3>
+            <div class="form-row">
+              <div class="form-field">
+                <label>Cell Name</label>
+                <input type="text" id="3gnb_cell" placeholder="UAN0930A" style="text-transform:uppercase;">
+              </div>
+              <div class="form-field">
+                <label>Radius (m)</label>
+                <input type="number" id="3gnb_radius" value="1200" step="100">
+              </div>
+              <div class="form-field">
+                <label>Front Threshold (°)</label>
+                <input type="number" id="3gnb_thr" value="45">
+              </div>
+            </div>
+            <div class="action-row">
+              <button class="btn btn-primary" onclick="run3GNBAnalysis()">🚀 Analyze</button>
+              <button class="btn btn-ghost" onclick="clear3GNB()">🗑️ Clear</button>
+            </div>
+          </div>
+          <div id="3gnb_stats" style="display:none;background:#EAF2FB;border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:12.5px;font-family:'JetBrains Mono',monospace;line-height:1.8;color:#0C1B3D;"></div>
+          <div id="3gnb_main" style="display:none;">
+            <div class="tool-section">
+              <h3>📋 Neighbors</h3>
+              <div style="overflow:auto;max-height:500px;border:1px solid #E9EEF6;border-radius:10px;">
+                <table class="data-table" id="3gnb_table">
+                  <thead><tr><th>Source</th><th>Neighbor</th><th>Distance</th><th>Bearing</th><th>Direction</th><th>Type</th><th>Status</th><th>RNC</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+              <div class="action-row">
+                <button class="btn btn-secondary" onclick="threeGShowOnMap('3gnb')">🗺️ Show on Map</button>
+                <button class="btn btn-success" onclick="threeGExportCSV('3gnb')">📥 Export CSV</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nb-tab-content" id="tab_irat">
+          <div class="tool-section">
+            <h3>🎯 Source 3G Cell</h3>
+            <div class="form-row">
+              <div class="form-field"><label>3G Cell Name</label><input type="text" id="irat_cell" placeholder="UAN0930A" style="text-transform:uppercase;"></div>
+              <div class="form-field"><label>Radius (m)</label><input type="number" id="irat_radius" value="1500" step="100"></div>
+              <div class="form-field"><label>Front Threshold (°)</label><input type="number" id="irat_thr" value="70"></div>
+            </div>
+            <div class="action-row">
+              <button class="btn btn-primary" onclick="runIRATAnalysis()">🚀 Analyze IRAT</button>
+              <button class="btn btn-ghost" onclick="clearIRAT()">🗑️ Clear</button>
+            </div>
+          </div>
+          <div id="irat_stats" style="display:none;background:#FDF1DC;border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:12.5px;font-family:'JetBrains Mono',monospace;line-height:1.8;"></div>
+          <div id="irat_main" style="display:none;">
+            <div class="tool-section">
+              <h3>📋 IRAT Neighbors (3G → 2G)</h3>
+              <div style="overflow:auto;max-height:500px;border:1px solid #E9EEF6;border-radius:10px;">
+                <table class="data-table" id="irat_table">
+                  <thead><tr><th>3G Cell</th><th>2G Neighbor</th><th>Dist</th><th>Direction</th><th>Status</th><th>2G Site</th><th>BSC</th><th>BCCH</th><th>BSIC</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+              <div class="action-row">
+                <button class="btn btn-secondary" onclick="threeGShowOnMap('irat')">🗺️ Show on Map</button>
+                <button class="btn btn-success" onclick="threeGExportCSV('irat')">📥 Export CSV</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nb-tab-content" id="tab_3gbatch">
+          <div class="tool-section">
+            <h3>⚡ Batch Analysis</h3>
+            <div class="form-row">
+              <div class="form-field" style="grid-column:span 2;">
+                <label>Cell Names (سطر لكل خلية)</label>
+                <textarea id="3gbatch_input" rows="6" style="width:100%;padding:10px 14px;border:1.5px solid #D7DEEA;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;resize:vertical;background:#FBFCFE;" placeholder="UAN0930A&#10;UAN0930B"></textarea>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field"><label>Radius</label><input type="number" id="3gbatch_radius" value="1200"></div>
+              <div class="form-field"><label>Mode</label>
+                <select id="3gbatch_mode">
+                  <option value="3gnb">3G NB</option>
+                  <option value="irat">IRAT</option>
+                  <option value="both">Both</option>
+                </select>
+              </div>
+            </div>
+            <div class="action-row">
+              <button class="btn btn-primary" onclick="run3GBatch()">⚡ Run Batch</button>
+            </div>
+          </div>
+          <div class="tool-section">
+            <h3>📊 Batch Results</h3>
+            <div style="overflow:auto;max-height:400px;border:1px solid #E9EEF6;border-radius:10px;">
+              <table class="data-table" id="3gbatch_table">
+                <thead><tr><th>Cell</th><th>Total</th><th>Added</th><th>Missing</th><th>Miss Front</th><th>Intra</th><th>Inter</th><th>IRAT Added</th><th>IRAT Missing</th><th>Avg Dist</th></tr></thead>
+                <tbody><tr><td colspan="10" style="text-align:center;padding:20px;color:#5A6B87;">No batch results yet</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="nb-tab-content" id="tab_3gdup">
+          <div class="tool-section">
+            <h3>🔍 Duplicate Detection</h3>
+            <div class="action-row">
+              <button class="btn btn-primary" onclick="run3GDuplicateCheck()">🔍 Detect</button>
+            </div>
+          </div>
+          <div class="tool-section">
+            <h3>📋 Duplicates</h3>
+            <div style="overflow:auto;max-height:500px;border:1px solid #E9EEF6;border-radius:10px;">
+              <table class="data-table" id="3gdup_table">
+                <thead><tr><th>Cell</th><th>Duplicate NB</th><th>In Intra?</th><th>In Inter?</th><th>In IRAT?</th></tr></thead>
+                <tbody><tr><td colspan="5" style="text-align:center;padding:20px;color:#5A6B87;">No results yet</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
   </main>
 </div>
 
@@ -2654,6 +2841,7 @@ const PAGE_TITLES = {
   'tool-pci-checker': { icon: '🧮', title: 'PCI Conflict Checker',    sub: 'Detect & fix PCI conflicts' },
   'tool-gsm-planner': { icon: '📡', title: 'GSM BCCH/BSIC Planner',   sub: 'Suggest conflict-free BCCH and BSIC' },
   'tool-neighbor':    { icon: '🔗', title: 'Neighbor Analysis',       sub: 'Audit missing neighbor relations' },
+    'tool-3g-nb':       { icon: '📶', title: '3G / IRAT Analyzer',     sub: '3G Neighbor + 3G→2G IRAT' },
     'tool-hsn':         { icon: '🎵', title: 'HSN Conflict Analyzer',   sub: 'Detect & fix HSN conflicts in GSM' },
   'tool-psc-checker': { icon: '📶', title: 'PSC Conflict Checker (3G)', sub: 'Detect & fix PSC conflicts in 3G UMTS' },
     'tool-bsic':        { icon: '🎨', title: 'BSIC Analyzer',            sub: 'Detect & fix BSIC conflicts with strict separation' },
@@ -9546,21 +9734,742 @@ function showNeighborLinesForCell(id) {
   drawNeighborLines(cell);
   hideContextMenu();
 }
+/* =========================================================
+   3G / IRAT ANALYZER
+   ========================================================= */
+let threeGImportedData = { inter: [], intra: [], irat: [] };
+let threeGAllNeighbors = [];
+let threeGNbCurrent = null;
+let threeGMapLayers = [];
+
+const THREE_G_DEFAULT_RADIUS = 1200;
+const THREE_G_FRONT_THRESHOLD = 45;
+
+function threeGSwitchTab(name) {
+  document.querySelectorAll('#page-tool-3g-nb .nb-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#page-tool-3g-nb .nb-tab-content').forEach(c => c.classList.remove('active'));
+  const btn = document.querySelector('#page-tool-3g-nb .nb-tab[data-tab="' + name + '"]');
+  if (btn) btn.classList.add('active');
+  const content = document.getElementById('tab_' + name);
+  if (content) content.classList.add('active');
+  if (name === '3gimport') threeGPopulateProjects();
+}
+
+function threeGPopulateProjects() {
+  const sel = document.getElementById('3g_project');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— اختر مشروع —</option>' +
+    allProjects.map(p => '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>').join('');
+}
+
+function threeGFileSelected(input, type) {
+  const file = input.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('3g_status_' + type);
+  statusEl.textContent = '⏳ جاري القراءة...';
+  statusEl.style.color = '#F2A900';
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const text = e.target.result;
+      const rows = threeGParseCSV(text);
+      if (!rows.length) throw new Error('الملف فارغ');
+
+      const headers = Object.keys(rows[0]).map(h => h.toLowerCase());
+      const hasGsmCol = headers.some(h => h.includes('gsm') && h.includes('name'));
+      const hasNeighCol = headers.some(h => h.includes('neighboring') && h.includes('cell') && h.includes('name'));
+
+      let detectedType = type;
+      if (hasGsmCol) detectedType = 'irat';
+      else if (hasNeighCol) detectedType = type === 'intra' ? 'intra' : 'inter';
+
+      const srcCol = threeGFindCol(rows[0], ['cell name'], ['gsm', 'neighbor', 'neighboring']);
+      const dstCol = threeGFindCol(rows[0], ['neighboring cell name']) ||
+                     threeGFindCol(rows[0], ['gsm cell name']);
+      const rncCol = threeGFindCol(rows[0], ['rnc id'], ['neighbor']);
+      const nbRncCol = threeGFindCol(rows[0], ['rnc id of']);
+      const cellIdCol = threeGFindCol(rows[0], ['cell id'], ['neighbor', 'gsm']);
+      const nbCellIdCol = threeGFindCol(rows[0], ['neighboring cell id']) ||
+                          threeGFindCol(rows[0], ['gsm cell index']);
+      const bscCol = threeGFindCol(rows[0], ['bsc']);
+
+      if (!srcCol || !dstCol) throw new Error('لم أجد أعمدة Source/Neighbor في CSV');
+
+      const parsed = [];
+      rows.forEach(r => {
+        const src = String(r[srcCol] || '').trim().toUpperCase();
+        const dst = String(r[dstCol] || '').trim().toUpperCase();
+        if (!src || !dst) return;
+        parsed.push({
+          source_cell: src,
+          neighbor_cell: dst,
+          relation_type: detectedType,
+          source_rnc: r[rncCol] ? parseInt(r[rncCol]) : null,
+          source_cell_id: r[cellIdCol] ? parseInt(r[cellIdCol]) : null,
+          neighbor_rnc: r[nbRncCol] ? parseInt(r[nbRncCol]) : null,
+          neighbor_cell_id: r[nbCellIdCol] ? parseInt(r[nbCellIdCol]) : null,
+          bsc_name: r[bscCol] || null,
+          bidirectional: false
+        });
+      });
+
+      threeGImportedData[detectedType] = parsed;
+      const icon = detectedType === 'irat' ? '🟣' : (detectedType === 'intra' ? '🟢' : '🔷');
+      statusEl.textContent = icon + ' ' + parsed.length + ' relations (' + detectedType + ')';
+      statusEl.style.color = '#1F9D55';
+
+      threeGRenderPreview();
+      toast('✅ تم تحميل ' + parsed.length + ' علاقة (' + detectedType + ')', 'success');
+    } catch (err) {
+      statusEl.textContent = '❌ ' + err.message;
+      statusEl.style.color = '#D64545';
+      toast('خطأ: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function threeGParseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const delim = lines[0].includes('\t') ? '\t' : ',';
+  const headers = lines[0].split(delim).map(h => h.trim().replace(/^"|"$/g, ''));
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const vals = lines[i].split(delim).map(v => v.trim().replace(/^"|"$/g, ''));
+    if (vals.length < headers.length) continue;
+    const obj = {};
+    headers.forEach((h, idx) => { obj[h] = vals[idx]; });
+    rows.push(obj);
+  }
+  return rows;
+}
+
+function threeGFindCol(sampleRow, keywords, exclude) {
+  exclude = exclude || [];
+  const keys = Object.keys(sampleRow);
+  for (const k of keys) {
+    const kl = k.toLowerCase();
+    if (keywords.every(w => kl.includes(w)) && !exclude.some(e => kl.includes(e))) return k;
+  }
+  return null;
+}
+
+function threeGRenderPreview() {
+  const total = threeGImportedData.inter.length +
+                threeGImportedData.intra.length +
+                threeGImportedData.irat.length;
+  const el = document.getElementById('3g_preview');
+  if (!el) return;
+  if (!total) { el.innerHTML = ''; return; }
+
+  el.innerHTML =
+    '<div style="background:#EAF2FB;border-radius:10px;padding:14px 18px;font-size:13px;">' +
+      '<b style="color:#0C1B3D;">📊 Total loaded: ' + total + ' relations</b>' +
+      '<div style="margin-top:8px;font-family:JetBrains Mono,monospace;font-size:12px;line-height:1.8;">' +
+        '🔷 Inter-Freq: <b>' + threeGImportedData.inter.length + '</b><br>' +
+        '🟢 Intra-Freq: <b>' + threeGImportedData.intra.length + '</b><br>' +
+        '🟣 IRAT (3G→2G): <b>' + threeGImportedData.irat.length + '</b>' +
+      '</div>' +
+    '</div>';
+}
+
+function threeGClearImport() {
+  threeGImportedData = { inter: [], intra: [], irat: [] };
+  ['inter', 'intra', 'irat'].forEach(t => {
+    const f = document.getElementById('3g_file_' + t);
+    const s = document.getElementById('3g_status_' + t);
+    if (f) f.value = '';
+    if (s) { s.textContent = 'لم يُرفع'; s.style.color = '#94A3B8'; }
+  });
+  const p = document.getElementById('3g_preview');
+  if (p) p.innerHTML = '';
+  toast('تم المسح', 'info');
+}
+
+async function threeGSaveToSupabase() {
+  const projectId = document.getElementById('3g_project').value;
+  if (!projectId) { toast('اختر مشروع أولاً', 'error'); return; }
+
+  const all = [].concat(
+    threeGImportedData.inter.map(r => Object.assign({}, r, { project_id: parseInt(projectId) })),
+    threeGImportedData.intra.map(r => Object.assign({}, r, { project_id: parseInt(projectId) })),
+    threeGImportedData.irat.map(r =>  Object.assign({}, r, { project_id: parseInt(projectId) }))
+  );
+
+  if (!all.length) { toast('لا توجد بيانات للحفظ', 'error'); return; }
+
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  try {
+    const types = [...new Set(all.map(r => r.relation_type))];
+    for (const t of types) {
+      await db.from('rf_neighbors').delete()
+        .eq('project_id', parseInt(projectId))
+        .eq('relation_type', t);
+    }
+
+    const BATCH = 500;
+    let saved = 0;
+    for (let i = 0; i < all.length; i += BATCH) {
+      const batch = all.slice(i, i + BATCH);
+      const { error } = await db.from('rf_neighbors').insert(batch);
+      if (error) throw error;
+      saved += batch.length;
+      btn.textContent = 'Saving ' + saved + '/' + all.length + '...';
+    }
+
+    toast('✅ تم حفظ ' + saved + ' علاقة في Supabase', 'success', 5000);
+    await threeGLoadNeighbors(projectId);
+  } catch (e) {
+    console.error(e);
+    toast('خطأ: ' + e.message, 'error', 6000);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💾 حفظ في Supabase';
+  }
+}
+
+async function threeGLoadNeighbors(projectId) {
+  try {
+    let q = db.from('rf_neighbors').select('*');
+    if (projectId) q = q.eq('project_id', parseInt(projectId));
+    const { data, error } = await q;
+    if (error) throw error;
+    threeGAllNeighbors = data || [];
+    console.log('✅ Loaded ' + threeGAllNeighbors.length + ' neighbor relations from DB');
+    return threeGAllNeighbors;
+  } catch (e) {
+    console.warn('Failed to load neighbors:', e);
+    return [];
+  }
+}
+
+function threeGGetBand(cellName) {
+  const n = (cellName || '').toUpperCase();
+  if (n.startsWith('U')) {
+    const c = cellByName.get(n);
+    if (c && c.uarfcn_dl) {
+      const dl = c.uarfcn_dl;
+      if (dl >= 2937 && dl <= 3088) return '900';
+      if (dl >= 10562 && dl <= 10838) return '2100';
+    }
+    return '2100';
+  }
+  const suffix = n.slice(-1);
+  const map = { 'A':'900','B':'900','C':'900','D':'1800','E':'1800','F':'1800','G':'900','H':'1800' };
+  return map[suffix] || '900';
+}
+
+function threeGGetListedNbs(cellName, type) {
+  const src = cellName.toUpperCase();
+  return threeGAllNeighbors
+    .filter(n => n.source_cell === src && n.relation_type === type)
+    .map(n => n.neighbor_cell);
+}
+  
+/* ─────────── 3G NB Analysis ─────────── */
+function run3GNBAnalysis() {
+  const cellName = (document.getElementById('3gnb_cell').value || '').trim().toUpperCase();
+  const radius = parseInt(document.getElementById('3gnb_radius').value) || THREE_G_DEFAULT_RADIUS;
+  const thr = parseInt(document.getElementById('3gnb_thr').value) || THREE_G_FRONT_THRESHOLD;
+
+  if (!cellName) { toast('أدخل اسم خلية', 'error'); return; }
+  const source = cellByName.get(cellName);
+  if (!source) { toast('الخلية "' + cellName + '" غير موجودة في rf_cells', 'error'); return; }
+  if (source.tech !== '3G') { toast('الأداة للخلايا 3G فقط (تبدأ بـ U)', 'error'); return; }
+
+  const listedInter = new Set(threeGGetListedNbs(cellName, 'inter'));
+  const listedIntra = new Set(threeGGetListedNbs(cellName, 'intra'));
+  const allListed = new Set([...listedInter, ...listedIntra]);
+
+  const neighbors = [];
+  const seen = new Set();
+
+  allListed.forEach(nbName => {
+    seen.add(nbName);
+    const nbCell = cellByName.get(nbName);
+    if (!nbCell || nbCell.tech !== '3G') {
+      neighbors.push({
+        source: cellName, name: nbName, cell: null,
+        distance: null, isFront: false, direction: '—',
+        status: 'Added (Not Found)', type: '?'
+      });
+      return;
+    }
+    const dist = haversineDistance(source.lat, source.long, nbCell.lat, nbCell.long);
+    const bearing = calculateBearing(source.lat, source.long, nbCell.lat, nbCell.long);
+    const angleDiff = boreDifference(source.bore, bearing);
+    const isFront = angleDiff <= thr;
+    const sourceBand = threeGGetBand(cellName);
+    const nbBand = threeGGetBand(nbName);
+    const nbType = sourceBand === nbBand ? 'Intra-Freq' : 'Inter-Freq';
+
+    neighbors.push({
+      source: cellName, name: nbName, cell: nbCell,
+      distance: dist, bearing, isFront, angleDiff,
+      direction: isFront ? 'Front' : (angleDiff <= 120 ? 'Side' : 'Back'),
+      status: 'Added', type: nbType, nbBand
+    });
+  });
+
+  allCells.filter(c => c.tech === '3G' && c.cell_name !== cellName && /[A-Z]$/.test(c.cell_name))
+    .forEach(nbCell => {
+      if (seen.has(nbCell.cell_name)) return;
+      const dist = haversineDistance(source.lat, source.long, nbCell.lat, nbCell.long);
+      if (dist > radius) return;
+      const bearing = calculateBearing(source.lat, source.long, nbCell.lat, nbCell.long);
+      const angleDiff = boreDifference(source.bore, bearing);
+      const isFront = angleDiff <= thr;
+      const sourceBand = threeGGetBand(cellName);
+      const nbBand = threeGGetBand(nbCell.cell_name);
+      const nbType = sourceBand === nbBand ? 'Intra-Freq' : 'Inter-Freq';
+
+      neighbors.push({
+        source: cellName, name: nbCell.cell_name, cell: nbCell,
+        distance: dist, bearing, isFront, angleDiff,
+        direction: isFront ? 'Front' : (angleDiff <= 120 ? 'Side' : 'Back'),
+        status: 'Missing', type: nbType, nbBand
+      });
+    });
+
+  neighbors.sort((a, b) => {
+    if (a.isFront !== b.isFront) return a.isFront ? -1 : 1;
+    if (a.status !== b.status) return a.status === 'Added' ? -1 : 1;
+    return (a.distance || 99999) - (b.distance || 99999);
+  });
+
+  threeGNbCurrent = { mode: '3gnb', source, neighbors, radius };
+
+  const total = neighbors.length;
+  const added = neighbors.filter(n => n.status === 'Added').length;
+  const missing = neighbors.filter(n => n.status === 'Missing').length;
+  const missFront = neighbors.filter(n => n.status === 'Missing' && n.isFront).length;
+  const intra = neighbors.filter(n => n.type === 'Intra-Freq').length;
+  const inter = neighbors.filter(n => n.type === 'Inter-Freq').length;
+  const dists = neighbors.filter(n => n.distance != null).map(n => n.distance);
+  const avgDist = dists.length ? dists.reduce((a, b) => a + b, 0) / dists.length : 0;
+
+  document.getElementById('3gnb_stats').innerHTML =
+    '📍 <b>' + escapeHtml(cellName) + '</b> | Total: <b>' + total + '</b> | ' +
+    '<span style="color:#1F9D55;">✅Added: <b>' + added + '</b></span> | ' +
+    '<span style="color:#B91C1C;">❌Missing: <b>' + missing + '</b></span> | ' +
+    '<span style="color:#D97706;">⚡Miss-Front: <b>' + missFront + '</b></span> | ' +
+    '🔵Intra: <b>' + intra + '</b> | 🟣Inter: <b>' + inter + '</b> | ' +
+    '📏Avg: <b>' + avgDist.toFixed(0) + 'm</b>';
+
+  const tbody = document.querySelector('#3gnb_table tbody');
+  tbody.innerHTML = neighbors.map(nb => {
+    const distStr = nb.distance != null ? nb.distance.toFixed(0) : '—';
+    let bg, sc;
+    if (nb.status === 'Missing') { bg = nb.isFront ? '#FFCDD2' : '#FFEBEE'; sc = '#B91C1C'; }
+    else if (nb.status === 'Added') { bg = '#E8F5E9'; sc = '#1F9D55'; }
+    else { bg = '#FFF3E0'; sc = '#8A5A00'; }
+    const tc = nb.type === 'Intra-Freq' ? '#EAF2FB' : '#F3E8FF';
+    const tcol = nb.type === 'Intra-Freq' ? '#124191' : '#7C3AED';
+
+    return '<tr style="background:' + bg + ';">' +
+      '<td>' + escapeHtml(nb.source) + '</td>' +
+      '<td><b>' + escapeHtml(nb.name) + '</b></td>' +
+      '<td>' + distStr + '</td>' +
+      '<td>' + (nb.bearing != null ? nb.bearing.toFixed(0) + '°' : '—') + '</td>' +
+      '<td>' + nb.direction + '</td>' +
+      '<td><span style="padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;background:' + tc + ';color:' + tcol + ';">' + nb.type + '</span></td>' +
+      '<td style="color:' + sc + ';font-weight:700;">' + nb.status + '</td>' +
+      '<td>' + (nb.cell && nb.cell.rnc_id ? nb.cell.rnc_id : '—') + '</td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan="8" style="text-align:center;padding:20px;">No neighbors</td></tr>';
+
+  document.getElementById('3gnb_stats').style.display = 'block';
+  document.getElementById('3gnb_main').style.display = 'block';
+  toast('✅ ' + neighbors.length + ' neighbors', 'success');
+}
+
+/* ─────────── IRAT Analysis ─────────── */
+function runIRATAnalysis() {
+  const cellName = (document.getElementById('irat_cell').value || '').trim().toUpperCase();
+  const radius = parseInt(document.getElementById('irat_radius').value) || 1500;
+  const thr = parseInt(document.getElementById('irat_thr').value) || 70;
+
+  if (!cellName) { toast('أدخل اسم خلية 3G', 'error'); return; }
+  const source = cellByName.get(cellName);
+  if (!source) { toast('الخلية غير موجودة', 'error'); return; }
+  if (source.tech !== '3G') { toast('يجب أن تبدأ بـ U (3G)', 'error'); return; }
+
+  const listedIrat = new Set(threeGGetListedNbs(cellName, 'irat'));
+  const neighbors = [];
+  const seen = new Set();
+
+  listedIrat.forEach(nbName => {
+    seen.add(nbName);
+    const nbCell = cellByName.get(nbName);
+    if (!nbCell) {
+      neighbors.push({ source: cellName, name: nbName, cell: null, distance: null, isFront: false, status: 'Added (Not Found)', direction: '—' });
+      return;
+    }
+    const dist = haversineDistance(source.lat, source.long, nbCell.lat, nbCell.long);
+    const bearing = calculateBearing(source.lat, source.long, nbCell.lat, nbCell.long);
+    const angleDiff = boreDifference(source.bore, bearing);
+    const isFront = angleDiff <= thr;
+
+    neighbors.push({
+      source: cellName, name: nbName, cell: nbCell,
+      distance: dist, bearing, isFront, angleDiff,
+      direction: isFront ? 'Front' : (angleDiff <= 120 ? 'Side' : 'Back'),
+      status: 'Added'
+    });
+  });
+
+  allCells.filter(c => c.tech === 'GSM' && /[A-Z]$/.test(c.cell_name))
+    .forEach(nbCell => {
+      if (seen.has(nbCell.cell_name)) return;
+      const dist = haversineDistance(source.lat, source.long, nbCell.lat, nbCell.long);
+      if (dist > radius) return;
+      const bearing = calculateBearing(source.lat, source.long, nbCell.lat, nbCell.long);
+      const angleDiff = boreDifference(source.bore, bearing);
+      const isFront = angleDiff <= thr;
+
+      neighbors.push({
+        source: cellName, name: nbCell.cell_name, cell: nbCell,
+        distance: dist, bearing, isFront, angleDiff,
+        direction: isFront ? 'Front' : (angleDiff <= 120 ? 'Side' : 'Back'),
+        status: 'Missing'
+      });
+      seen.add(nbCell.cell_name);
+    });
+
+  neighbors.sort((a, b) => {
+    if (a.isFront !== b.isFront) return a.isFront ? -1 : 1;
+    if (a.status !== b.status) return a.status === 'Added' ? -1 : 1;
+    return (a.distance || 99999) - (b.distance || 99999);
+  });
+
+  threeGNbCurrent = { mode: 'irat', source, neighbors, radius };
+
+  const total = neighbors.length;
+  const added = neighbors.filter(n => n.status === 'Added').length;
+  const missing = neighbors.filter(n => n.status === 'Missing').length;
+  const missFront = neighbors.filter(n => n.status === 'Missing' && n.isFront).length;
+
+  document.getElementById('irat_stats').innerHTML =
+    '📍 <b>' + escapeHtml(cellName) + '</b> | Total: <b>' + total + '</b> | ' +
+    '<span style="color:#1F9D55;">✅Added: <b>' + added + '</b></span> | ' +
+    '<span style="color:#B91C1C;">❌Missing: <b>' + missing + '</b></span> | ' +
+    '<span style="color:#D97706;">⚡Miss-Front: <b>' + missFront + '</b></span>';
+
+  const tbody = document.querySelector('#irat_table tbody');
+  tbody.innerHTML = neighbors.map(nb => {
+    const distStr = nb.distance != null ? nb.distance.toFixed(0) : '—';
+    let bg, sc;
+    if (nb.status === 'Missing') { bg = nb.isFront ? '#FFCDD2' : '#FFEBEE'; sc = '#B91C1C'; }
+    else if (nb.status === 'Added') { bg = '#E8F5E9'; sc = '#1F9D55'; }
+    else { bg = '#FFF3E0'; sc = '#8A5A00'; }
+
+    return '<tr style="background:' + bg + ';">' +
+      '<td>' + escapeHtml(nb.source) + '</td>' +
+      '<td><b>' + escapeHtml(nb.name) + '</b></td>' +
+      '<td>' + distStr + '</td>' +
+      '<td>' + nb.direction + '</td>' +
+      '<td style="color:' + sc + ';font-weight:700;">' + nb.status + '</td>' +
+      '<td>' + (nb.cell ? escapeHtml(nb.cell.site) : '—') + '</td>' +
+      '<td>' + (nb.cell && nb.cell.bsc ? escapeHtml(nb.cell.bsc) : '—') + '</td>' +
+      '<td>' + (nb.cell && nb.cell.bcch ? nb.cell.bcch : '—') + '</td>' +
+      '<td>' + (nb.cell && nb.cell.bsic ? nb.cell.bsic : '—') + '</td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan="9" style="text-align:center;padding:20px;">No IRAT neighbors</td></tr>';
+
+  document.getElementById('irat_stats').style.display = 'block';
+  document.getElementById('irat_main').style.display = 'block';
+  toast('✅ ' + neighbors.length + ' IRAT neighbors', 'success');
+}
+  /* ─────────── Batch ─────────── */
+async function run3GBatch() {
+  const input = document.getElementById('3gbatch_input').value.trim();
+  const radius = parseInt(document.getElementById('3gbatch_radius').value) || 1200;
+  const mode = document.getElementById('3gbatch_mode').value;
+  if (!input) { toast('أدخل خلايا', 'error'); return; }
+
+  const cells = input.split('\n').map(s => s.trim().toUpperCase()).filter(Boolean);
+  const tbody = document.querySelector('#3gbatch_table tbody');
+  let html = '';
+
+  for (const cellName of cells) {
+    const source = cellByName.get(cellName);
+    if (!source || source.tech !== '3G') {
+      html += '<tr style="background:#FFEBEE;"><td><b>' + escapeHtml(cellName) + '</b></td><td colspan="9" style="text-align:center;color:#B91C1C;">Not found / Not 3G</td></tr>';
+      continue;
+    }
+
+    let s3g = { total: 0, added: 0, missing: 0, missFront: 0, intra: 0, inter: 0, avgDist: 0 };
+    if (mode === '3gnb' || mode === 'both') {
+      const nbs = compute3GNBForCell(source, radius, THREE_G_FRONT_THRESHOLD);
+      s3g = summarize3GNB(nbs);
+    }
+
+    let sIrat = { added: 0, missing: 0 };
+    if (mode === 'irat' || mode === 'both') {
+      const irat = computeIRATForCell(source, radius, 70);
+      sIrat = { added: irat.filter(x => x.status === 'Added').length, missing: irat.filter(x => x.status === 'Missing').length };
+    }
+
+    html += '<tr>' +
+      '<td><b>' + escapeHtml(cellName) + '</b></td>' +
+      '<td>' + s3g.total + '</td>' +
+      '<td style="color:#1F9D55;font-weight:700;">' + s3g.added + '</td>' +
+      '<td style="color:#B91C1C;font-weight:700;">' + s3g.missing + '</td>' +
+      '<td>' + s3g.missFront + '</td>' +
+      '<td>' + s3g.intra + '</td>' +
+      '<td>' + s3g.inter + '</td>' +
+      '<td style="color:#1F9D55;">' + sIrat.added + '</td>' +
+      '<td style="color:#B91C1C;">' + sIrat.missing + '</td>' +
+      '<td>' + s3g.avgDist.toFixed(0) + '</td>' +
+    '</tr>';
+  }
+
+  tbody.innerHTML = html || '<tr><td colspan="10" style="text-align:center;padding:20px;">No results</td></tr>';
+  toast('✅ Batch done for ' + cells.length + ' cells', 'success');
+}
+
+function compute3GNBForCell(source, radius, thr) {
+  const cellName = source.cell_name;
+  const listed = new Set([...threeGGetListedNbs(cellName, 'inter'), ...threeGGetListedNbs(cellName, 'intra')]);
+  const neighbors = [];
+  const seen = new Set();
+
+  listed.forEach(nbName => {
+    seen.add(nbName);
+    const nb = cellByName.get(nbName);
+    if (!nb || nb.tech !== '3G') return;
+    const dist = haversineDistance(source.lat, source.long, nb.lat, nb.long);
+    const bearing = calculateBearing(source.lat, source.long, nb.lat, nb.long);
+    const isFront = boreDifference(source.bore, bearing) <= thr;
+    const band1 = threeGGetBand(cellName), band2 = threeGGetBand(nbName);
+    neighbors.push({ distance: dist, isFront, status: 'Added', type: band1 === band2 ? 'Intra-Freq' : 'Inter-Freq' });
+  });
+
+  allCells.filter(c => c.tech === '3G' && c.cell_name !== cellName && !seen.has(c.cell_name))
+    .forEach(nb => {
+      const dist = haversineDistance(source.lat, source.long, nb.lat, nb.long);
+      if (dist > radius) return;
+      const bearing = calculateBearing(source.lat, source.long, nb.lat, nb.long);
+      const isFront = boreDifference(source.bore, bearing) <= thr;
+      const band1 = threeGGetBand(cellName), band2 = threeGGetBand(nb.cell_name);
+      neighbors.push({ distance: dist, isFront, status: 'Missing', type: band1 === band2 ? 'Intra-Freq' : 'Inter-Freq' });
+    });
+
+  return neighbors;
+}
+
+function summarize3GNB(nbs) {
+  return {
+    total: nbs.length,
+    added: nbs.filter(n => n.status === 'Added').length,
+    missing: nbs.filter(n => n.status === 'Missing').length,
+    missFront: nbs.filter(n => n.status === 'Missing' && n.isFront).length,
+    intra: nbs.filter(n => n.type === 'Intra-Freq').length,
+    inter: nbs.filter(n => n.type === 'Inter-Freq').length,
+    avgDist: nbs.length ? nbs.reduce((a, n) => a + (n.distance || 0), 0) / nbs.length : 0
+  };
+}
+
+function computeIRATForCell(source, radius, thr) {
+  const cellName = source.cell_name;
+  const listed = new Set(threeGGetListedNbs(cellName, 'irat'));
+  const neighbors = [];
+  const seen = new Set();
+
+  listed.forEach(nbName => {
+    seen.add(nbName);
+    const nb = cellByName.get(nbName);
+    if (!nb) return;
+    const dist = haversineDistance(source.lat, source.long, nb.lat, nb.long);
+    const bearing = calculateBearing(source.lat, source.long, nb.lat, nb.long);
+    const isFront = boreDifference(source.bore, bearing) <= thr;
+    neighbors.push({ distance: dist, isFront, status: 'Added' });
+  });
+
+  allCells.filter(c => c.tech === 'GSM' && !seen.has(c.cell_name))
+    .forEach(nb => {
+      const dist = haversineDistance(source.lat, source.long, nb.lat, nb.long);
+      if (dist > radius) return;
+      const bearing = calculateBearing(source.lat, source.long, nb.lat, nb.long);
+      const isFront = boreDifference(source.bore, bearing) <= thr;
+      neighbors.push({ distance: dist, isFront, status: 'Missing' });
+    });
+
+  return neighbors;
+}
+
+/* ─────────── Duplicates ─────────── */
+function run3GDuplicateCheck() {
+  const map = {};
+  threeGAllNeighbors.forEach(n => {
+    const k = n.source_cell;
+    if (!map[k]) map[k] = { inter: [], intra: [], irat: [] };
+    map[k][n.relation_type].push(n.neighbor_cell);
+  });
+
+  const dups = [];
+  Object.entries(map).forEach(([cell, lists]) => {
+    const seen = {};
+    const all = [
+      ...lists.inter.map(n => ({ n, t: 'inter' })),
+      ...lists.intra.map(n => ({ n, t: 'intra' })),
+      ...lists.irat.map(n =>  ({ n, t: 'irat' }))
+    ];
+    all.forEach(({ n, t }) => {
+      if (seen[n]) {
+        dups.push({
+          cell,
+          nb: n,
+          in_intra: lists.intra.includes(n),
+          in_inter: lists.inter.includes(n),
+          in_irat:  lists.irat.includes(n)
+        });
+      }
+      seen[n] = true;
+    });
+  });
+
+  const tbody = document.querySelector('#3gdup_table tbody');
+  tbody.innerHTML = dups.length
+    ? dups.map(d => '<tr style="background:#FFF3E0;">' +
+        '<td><b>' + escapeHtml(d.cell) + '</b></td>' +
+        '<td>' + escapeHtml(d.nb) + '</td>' +
+        '<td>' + (d.in_intra ? '✔' : '—') + '</td>' +
+        '<td>' + (d.in_inter ? '✔' : '—') + '</td>' +
+        '<td>' + (d.in_irat  ? '✔' : '—') + '</td>' +
+      '</tr>').join('')
+    : '<tr><td colspan="5" style="text-align:center;padding:20px;color:#1F9D55;">✅ لا توجد تكرارات</td></tr>';
+
+  toast('✅ Found ' + dups.length + ' duplicates', 'success');
+}
+
+/* ─────────── Map ─────────── */
+function threeGShowOnMap(mode) {
+  if (!threeGNbCurrent) { toast('شغّل التحليل أولاً', 'error'); return; }
+  window.__gsmMode = true;
+  switchView('map');
+
+  setTimeout(() => {
+    if (sectorLayer) sectorLayer.clearLayers();
+    if (labelLayer) labelLayer.clearLayers();
+    threeGMapLayers.forEach(l => map.removeLayer(l));
+    threeGMapLayers = [];
+
+    const src = threeGNbCurrent.source;
+
+    const srcCoords = makeSectorCoords(src.lat, src.long, src.bore);
+    const srcPoly = L.polygon(srcCoords, { color: '#B91C1C', weight: 2.5, fillColor: '#DC2626', fillOpacity: 0.85 });
+    srcPoly.bindTooltip('🎯 ' + escapeHtml(src.cell_name), { permanent: true, direction: 'top', offset: [0, -10], className: 'nb-label-source' });
+    sectorLayer.addLayer(srcPoly);
+
+    const points = [[src.lat, src.long]];
+    threeGNbCurrent.neighbors.forEach(nb => {
+      if (!nb.cell) return;
+      points.push([nb.cell.lat, nb.cell.long]);
+
+      let fill, stroke, dash;
+      if (nb.status === 'Missing') { fill = '#F97316'; stroke = '#C2410C'; dash = '8,6'; }
+      else if (nb.status === 'Added') { fill = '#16A34A'; stroke = '#15803D'; dash = null; }
+      else { fill = '#EAB308'; stroke = '#A16207'; dash = null; }
+
+      const line = L.polyline([[src.lat, src.long], [nb.cell.lat, nb.cell.long]], {
+        color: nb.status === 'Missing' ? '#DC2626' : '#16A34A',
+        weight: nb.isFront ? 3 : 1.5, opacity: 0.85, dashArray: dash
+      });
+      threeGMapLayers.push(line);
+      map.addLayer(line);
+
+      const nbCoords = makeSectorCoords(nb.cell.lat, nb.cell.long, nb.cell.bore);
+      const nbPoly = L.polygon(nbCoords, { color: stroke, weight: 1.5, fillColor: fill, fillOpacity: 0.7 });
+      nbPoly.bindTooltip(nb.name, { permanent: true, direction: 'center', className: 'nb-label' });
+      threeGMapLayers.push(nbPoly);
+      map.addLayer(nbPoly);
+    });
+
+    if (points.length > 1) {
+      const b = L.latLngBounds(points);
+      const ne = b.getNorthEast(), sw = b.getSouthWest();
+      ne.lat += 0.005; ne.lng += 0.005; sw.lat -= 0.005; sw.lng -= 0.005;
+      map.fitBounds(L.latLngBounds(sw, ne), { padding: [50, 50] });
+    }
+    toast('📍 ' + threeGNbCurrent.neighbors.length + ' neighbors on map', 'success');
+  }, 400);
+}
+
+/* ─────────── Export ─────────── */
+function threeGExportCSV(mode) {
+  if (!threeGNbCurrent) { toast('شغّل التحليل أولاً', 'error'); return; }
+  const headers = mode === '3gnb'
+    ? ['Source','Neighbor','Distance','Bearing','Direction','Type','Status','RNC']
+    : ['3G Cell','2G Neighbor','Distance','Direction','Status','2G Site','BSC','BCCH','BSIC'];
+
+  const rows = [headers];
+  threeGNbCurrent.neighbors.forEach(nb => {
+    if (mode === '3gnb') {
+      rows.push([nb.source, nb.name, nb.distance ? nb.distance.toFixed(1) : '',
+                 nb.bearing != null ? nb.bearing.toFixed(0) : '',
+                 nb.direction, nb.type, nb.status,
+                 nb.cell && nb.cell.rnc_id ? nb.cell.rnc_id : '']);
+    } else {
+      rows.push([nb.source, nb.name, nb.distance ? nb.distance.toFixed(1) : '',
+                 nb.direction, nb.status,
+                 nb.cell ? nb.cell.site : '',
+                 nb.cell && nb.cell.bsc ? nb.cell.bsc : '',
+                 nb.cell && nb.cell.bcch ? nb.cell.bcch : '',
+                 nb.cell && nb.cell.bsic ? nb.cell.bsic : '']);
+    }
+  });
+
+  const csv = rows.map(r => r.map(v => {
+    const s = String(v == null ? '' : v);
+    return s.includes(',') ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }).join(',')).join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (mode === '3gnb' ? '3G_NB_' : 'IRAT_') + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('✅ CSV exported', 'success');
+}
+
+/* ─────────── Clear ─────────── */
+function clear3GNB() {
+  document.getElementById('3gnb_stats').style.display = 'none';
+  document.getElementById('3gnb_main').style.display = 'none';
+  document.querySelector('#3gnb_table tbody').innerHTML = '';
+  threeGNbCurrent = null;
+  toast('Cleared', 'info');
+}
+
+function clearIRAT() {
+  document.getElementById('irat_stats').style.display = 'none';
+  document.getElementById('irat_main').style.display = 'none';
+  document.querySelector('#irat_table tbody').innerHTML = '';
+  threeGNbCurrent = null;
+  toast('Cleared', 'info');
+}
+
+
 console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
 console.log('%cTools: PCI · GSM · NB · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
-
 </script>
- <script>
+
+<script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').then(reg => {
     console.log('✅ SW registered');
-    
-    // 🔄 اكتشف تحديث جديد
     reg.addEventListener('updatefound', () => {
       const newWorker = reg.installing;
       newWorker.addEventListener('statechange', () => {
         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          // فيه نسخة جديدة → حدّث تلقائياً
           console.log('🔄 New version available — updating...');
           newWorker.postMessage('SKIP_WAITING');
           setTimeout(() => window.location.reload(), 500);
@@ -9568,14 +10477,9 @@ if ('serviceWorker' in navigator) {
       });
     });
   }).catch(err => console.log('❌ SW failed:', err));
-  
-  // لما يتغير SW → أعد التحميل
   let refreshing = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!refreshing) {
-      refreshing = true;
-      window.location.reload();
-    }
+    if (!refreshing) { refreshing = true; window.location.reload(); }
   });
 }
 </script>
