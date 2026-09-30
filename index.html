@@ -10564,20 +10564,7 @@ function showThreeGNeighborLegend(neighbors, mode) {
     '<div class="legend-item"><span class="legend-dot" style="background:#2563EB;"></span><span>Added (' + interAdded + ')</span></div>' +
     '<div class="legend-item"><span class="legend-dot" style="background:#F97316;"></span><span>Missing (' + interMissing + ') — dashed</span></div>';
 }
-    // ═══ 4. Zoom للنتائج ═══
-    if (points.length > 1) {
-      const bounds = L.latLngBounds(points);
-      const ne = bounds.getNorthEast(), sw = bounds.getSouthWest();
-      ne.lat += 0.005; ne.lng += 0.005; sw.lat -= 0.005; sw.lng -= 0.005;
-      map.fitBounds(L.latLngBounds(sw, ne), { padding: [40, 40], maxZoom: 15 });
-    }
 
-    // ═══ 5. Legend (نفس 2G) ═══
-    showThreeGNeighborLegend(threeGNbCurrent.neighbors.length, mode);
-
-    toast('📍 ' + threeGNbCurrent.neighbors.length + ' neighbors on map', 'success');
-  }, 400);
-}
 
 // 🎯 Legend خاص بـ 3G/IRAT
 function showThreeGNeighborLegend(count, mode) {
