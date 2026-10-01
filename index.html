@@ -10681,18 +10681,35 @@ function threeGGetListedNbs(cellName, type) {
 }
   
 /* ─────────── 3G NB Analysis ─────────── */
-function run3GNBAnalysis() {
+async function run3GNBAnalysis() {
   const cellName = (document.getElementById('3gnb_cell').value || '').trim().toUpperCase();
   const radius = parseInt(document.getElementById('3gnb_radius').value) || THREE_G_DEFAULT_RADIUS;
   const thr = parseInt(document.getElementById('3gnb_thr').value) || THREE_G_FRONT_THRESHOLD;
 
   if (!cellName) { toast('أدخل اسم خلية', 'error'); return; }
-  const source = cellByName.get(cellName);
-  if (!source) { toast('الخلية "' + cellName + '" غير موجودة في rf_cells', 'error'); return; }
+
+  // ═══ 1. تأكد من وجود الخلية ═══
+  const source = await ensureCellInMemory(cellName);
+  if (!source) { toast('❌ الخلية "' + cellName + '" غير موجودة في rf_cells', 'error', 4000); return; }
   if (source.tech !== '3G') { toast('الأداة للخلايا 3G فقط (تبدأ بـ U)', 'error'); return; }
 
-  const listedInter = new Set(threeGGetListedNbs(cellName, 'inter'));
-  const listedIntra = new Set(threeGGetListedNbs(cellName, 'intra'));
+  toast('⏳ جاري تحميل الجيران...', 'info', 1500);
+
+  // ═══ 2. حمّل جيران هذه الخلية فقط ═══
+  const cellNbs = await loadNeighborsForCell(cellName);
+  
+  // ═══ 3. حمّل الخلايا المشار إليها ═══
+  const refs = new Set();
+  cellNbs.forEach(n => { refs.add(n.source_cell); refs.add(n.neighbor_cell); });
+  await ensureReferencedCells(refs);
+
+  // ═══ 4. احسب القوائم ═══
+  const listedInter = new Set(
+    cellNbs.filter(n => n.source_cell === cellName && n.relation_type === 'inter').map(n => n.neighbor_cell)
+  );
+  const listedIntra = new Set(
+    cellNbs.filter(n => n.source_cell === cellName && n.relation_type === 'intra').map(n => n.neighbor_cell)
+  );
   const allListed = new Set([...listedInter, ...listedIntra]);
 
   const neighbors = [];
@@ -10798,17 +10815,28 @@ function run3GNBAnalysis() {
 }
 
 /* ─────────── IRAT Analysis ─────────── */
-function runIRATAnalysis() {
+async function runIRATAnalysis() {
   const cellName = (document.getElementById('irat_cell').value || '').trim().toUpperCase();
   const radius = parseInt(document.getElementById('irat_radius').value) || 1500;
   const thr = parseInt(document.getElementById('irat_thr').value) || 70;
 
   if (!cellName) { toast('أدخل اسم خلية 3G', 'error'); return; }
-  const source = cellByName.get(cellName);
-  if (!source) { toast('الخلية غير موجودة', 'error'); return; }
+
+  const source = await ensureCellInMemory(cellName);
+  if (!source) { toast('❌ الخلية غير موجودة', 'error'); return; }
   if (source.tech !== '3G') { toast('يجب أن تبدأ بـ U (3G)', 'error'); return; }
 
-  const listedIrat = new Set(threeGGetListedNbs(cellName, 'irat'));
+  toast('⏳ جاري تحميل الجيران...', 'info', 1500);
+
+  const cellNbs = await loadNeighborsForCell(cellName);
+  const refs = new Set();
+  cellNbs.forEach(n => { refs.add(n.source_cell); refs.add(n.neighbor_cell); });
+  await ensureReferencedCells(refs);
+
+  const listedIrat = new Set(
+    cellNbs.filter(n => n.source_cell === cellName && n.relation_type === 'irat').map(n => n.neighbor_cell)
+  );
+
   const neighbors = [];
   const seen = new Set();
 
@@ -10894,7 +10922,7 @@ function runIRATAnalysis() {
   document.getElementById('irat_main').style.display = 'block';
   toast('✅ ' + neighbors.length + ' IRAT neighbors', 'success');
 }
-  /* ─────────── Batch ─────────── */
+/* ─────────── Batch ─────────── */
 async function run3GBatch() {
   const input = document.getElementById('3gbatch_input').value.trim();
   const radius = parseInt(document.getElementById('3gbatch_radius').value) || 1200;
@@ -10905,22 +10933,30 @@ async function run3GBatch() {
   const tbody = document.querySelector('[id="3gbatch_table"] tbody');
   let html = '';
 
+  toast('⏳ تحميل البيانات...', 'info', 1500);
+
   for (const cellName of cells) {
-    const source = cellByName.get(cellName);
+    const source = await ensureCellInMemory(cellName);
     if (!source || source.tech !== '3G') {
       html += '<tr style="background:#FFEBEE;"><td><b>' + escapeHtml(cellName) + '</b></td><td colspan="9" style="text-align:center;color:#B91C1C;">Not found / Not 3G</td></tr>';
       continue;
     }
 
+    // حمّل جيران هذه الخلية
+    const cellNbs = await loadNeighborsForCell(cellName);
+    const refs = new Set();
+    cellNbs.forEach(n => { refs.add(n.source_cell); refs.add(n.neighbor_cell); });
+    await ensureReferencedCells(refs);
+
     let s3g = { total: 0, added: 0, missing: 0, missFront: 0, intra: 0, inter: 0, avgDist: 0 };
     if (mode === '3gnb' || mode === 'both') {
-      const nbs = compute3GNBForCell(source, radius, THREE_G_FRONT_THRESHOLD);
+      const nbs = compute3GNBForCell(source, radius, THREE_G_FRONT_THRESHOLD, cellNbs);
       s3g = summarize3GNB(nbs);
     }
 
     let sIrat = { added: 0, missing: 0 };
     if (mode === 'irat' || mode === 'both') {
-      const irat = computeIRATForCell(source, radius, 70);
+      const irat = computeIRATForCell(source, radius, 70, cellNbs);
       sIrat = { added: irat.filter(x => x.status === 'Added').length, missing: irat.filter(x => x.status === 'Missing').length };
     }
 
@@ -10942,9 +10978,12 @@ async function run3GBatch() {
   toast('✅ Batch done for ' + cells.length + ' cells', 'success');
 }
 
-function compute3GNBForCell(source, radius, thr) {
+function compute3GNBForCell(source, radius, thr, cellNbs) {
   const cellName = source.cell_name;
-  const listed = new Set([...threeGGetListedNbs(cellName, 'inter'), ...threeGGetListedNbs(cellName, 'intra')]);
+  const listed = new Set(
+    cellNbs.filter(n => n.source_cell === cellName && (n.relation_type === 'inter' || n.relation_type === 'intra'))
+      .map(n => n.neighbor_cell)
+  );
   const neighbors = [];
   const seen = new Set();
 
@@ -10984,9 +11023,11 @@ function summarize3GNB(nbs) {
   };
 }
 
-function computeIRATForCell(source, radius, thr) {
+function computeIRATForCell(source, radius, thr, cellNbs) {
   const cellName = source.cell_name;
-  const listed = new Set(threeGGetListedNbs(cellName, 'irat'));
+  const listed = new Set(
+    cellNbs.filter(n => n.source_cell === cellName && n.relation_type === 'irat').map(n => n.neighbor_cell)
+  );
   const neighbors = [];
   const seen = new Set();
 
@@ -11011,50 +11052,77 @@ function computeIRATForCell(source, radius, thr) {
 
   return neighbors;
 }
-
 /* ─────────── Duplicates ─────────── */
-function run3GDuplicateCheck() {
-  const map = {};
-  threeGAllNeighbors.forEach(n => {
-    const k = n.source_cell;
-    if (!map[k]) map[k] = { inter: [], intra: [], irat: [] };
-    map[k][n.relation_type].push(n.neighbor_cell);
-  });
-
+async function run3GDuplicateCheck() {
+  const input = document.getElementById('3gbatch_input');
+  const cellsInput = input && input.value.trim();
+  
+  // إذا ما فيه خلايا في الـ input، استخدم الي في الذاكرة
+  let cellNames = [];
+  if (cellsInput) {
+    cellNames = cellsInput.split('\n').map(s => s.trim().toUpperCase()).filter(Boolean);
+  } else {
+    // استخدم كل الخلايا 3G في الذاكرة
+    cellNames = allCells.filter(c => c.tech === '3G').map(c => c.cell_name);
+  }
+  
+  if (cellNames.length === 0) {
+    toast('⚠️ أدخل خلايا في Batch أو حمّل بيانات أولاً', 'error', 3000);
+    return;
+  }
+  
+  toast('⏳ تحميل جيران ' + cellNames.length + ' خلية...', 'info', 3000);
+  
+  const tbody = document.querySelector('#3gdup_table tbody');
   const dups = [];
-  Object.entries(map).forEach(([cell, lists]) => {
+  
+  for (const cellName of cellNames) {
+    // حمّل جيران هذه الخلية
+    const cellNbs = await loadNeighborsForCell(cellName);
+    
+    // فقط العلاقات الي فيها الخلية هي الـ source
+    const sourced = cellNbs.filter(n => n.source_cell === cellName);
+    
+    // رتّب حسب type
+    const lists = {
+      inter: sourced.filter(n => n.relation_type === 'inter').map(n => n.neighbor_cell),
+      intra: sourced.filter(n => n.relation_type === 'intra').map(n => n.neighbor_cell),
+      irat:  sourced.filter(n => n.relation_type === 'irat').map(n => n.neighbor_cell)
+    };
+    
+    // ابحث عن تكرارات
     const seen = {};
     const all = [
       ...lists.inter.map(n => ({ n, t: 'inter' })),
       ...lists.intra.map(n => ({ n, t: 'intra' })),
-      ...lists.irat.map(n =>  ({ n, t: 'irat' }))
+      ...lists.irat.map(n => ({ n, t: 'irat' }))
     ];
+    
     all.forEach(({ n, t }) => {
       if (seen[n]) {
         dups.push({
-          cell,
+          cell: cellName,
           nb: n,
           in_intra: lists.intra.includes(n),
           in_inter: lists.inter.includes(n),
-          in_irat:  lists.irat.includes(n)
+          in_irat: lists.irat.includes(n)
         });
       }
       seen[n] = true;
     });
-  });
-
-  const tbody = document.querySelector('#3gdup_table tbody');
+  }
+  
   tbody.innerHTML = dups.length
     ? dups.map(d => '<tr style="background:#FFF3E0;">' +
         '<td><b>' + escapeHtml(d.cell) + '</b></td>' +
         '<td>' + escapeHtml(d.nb) + '</td>' +
         '<td>' + (d.in_intra ? '✔' : '—') + '</td>' +
         '<td>' + (d.in_inter ? '✔' : '—') + '</td>' +
-        '<td>' + (d.in_irat  ? '✔' : '—') + '</td>' +
+        '<td>' + (d.in_irat ? '✔' : '—') + '</td>' +
       '</tr>').join('')
     : '<tr><td colspan="5" style="text-align:center;padding:20px;color:#1F9D55;">✅ لا توجد تكرارات</td></tr>';
-
-  toast('✅ Found ' + dups.length + ' duplicates', 'success');
+  
+  toast('✅ Found ' + dups.length + ' duplicates in ' + cellNames.length + ' cells', 'success');
 }
 
 /* ─────────── Map ─────────── */
@@ -13248,7 +13316,69 @@ window.showCacheInfo = async function() {
   alert(`📊 Cache:\n\n• Items: ${info.count}\n• Size: ${info.sizeMB} MB\n\n` +
     info.items.map(i => `• ${i.key}: ${i.sizeMB} MB (${i.savedAt})`).join('\n'));
 };
+// ═══════════════════════════════════════════════════
+// 🎯 Per-Cell Neighbor Loading (الطريقة الصحيحة)
+// ═══════════════════════════════════════════════════
+const cellNeighborsCache = new Map();
 
+async function loadNeighborsForCell(cellName) {
+  if (cellNeighborsCache.has(cellName)) {
+    return cellNeighborsCache.get(cellName);
+  }
+  
+  const columns = 'source_cell,neighbor_cell,relation_type,source_rnc,source_cell_id,neighbor_rnc,neighbor_cell_id,bsc_name,bidirectional,project_id,id';
+  
+  const [asSource, asTarget] = await Promise.all([
+    db.from('rf_neighbors').select(columns).eq('source_cell', cellName).limit(5000),
+    db.from('rf_neighbors').select(columns).eq('neighbor_cell', cellName).limit(5000)
+  ]);
+  
+  const all = [...(asSource.data || []), ...(asTarget.data || [])];
+  const unique = Array.from(new Map(all.map(n => [n.id, n])).values());
+  
+  cellNeighborsCache.set(cellName, unique);
+  console.log(`✅ Loaded ${unique.length} neighbors for ${cellName}`);
+  return unique;
+}
+
+async function ensureReferencedCells(cellNames) {
+  const inMemory = new Set(allCells.map(c => c.cell_name));
+  const missing = [...cellNames].filter(n => n && !inMemory.has(n));
+  if (missing.length === 0) return;
+  
+  console.log(`📥 Loading ${missing.length} referenced cells...`);
+  const BATCH = 500;
+  let added = 0;
+  for (let i = 0; i < missing.length; i += BATCH) {
+    const batch = missing.slice(i, i + BATCH);
+    const { data } = await db.from('rf_cells').select('*').in('cell_name', batch);
+    if (data && data.length) {
+      allCells = allCells.concat(data.map(normalizeCell));
+      added += data.length;
+    }
+  }
+  rebuildLookups();
+  console.log(`✅ Added ${added} cells to memory`);
+}
+
+async function ensureCellInMemory(cellName) {
+  let cell = cellByName.get(cellName);
+  if (cell) return cell;
+  
+  console.log(`🔍 ${cellName} not in memory, fetching from DB...`);
+  const { data } = await db.from('rf_cells').select('*').eq('cell_name', cellName).maybeSingle();
+  if (!data) return null;
+  
+  const normalized = normalizeCell(data);
+  allCells.push(normalized);
+  rebuildLookups();
+  console.log(`✅ Added ${cellName} to memory`);
+  return normalized;
+}
+
+window.loadNeighborsForCell = loadNeighborsForCell;
+window.ensureReferencedCells = ensureReferencedCells;
+window.ensureCellInMemory = ensureCellInMemory;
 // ═══════════════════════════════════════════════════
 // 🚀 Startup — تحميل تلقائي عند الفتح
 // ═══════════════════════════════════════════════════
