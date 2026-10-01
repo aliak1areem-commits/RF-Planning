@@ -10584,9 +10584,10 @@ async function threeGLoadNeighbors(projectId) {
     return threeGAllNeighbors;
   }
 
-  try {
-    console.log('📥 Loading neighbors for project:', projectId || 'ALL');
+  const t0 = performance.now();
+  console.log('📥 Loading neighbors FAST for project:', projectId || 'ALL');
 
+  try {
     // 1. اجلب العدد الكلي
     let countQuery = db.from('rf_neighbors').select('id', { count: 'exact', head: true });
     if (projectId) countQuery = countQuery.eq('project_id', parseInt(projectId));
@@ -10596,31 +10597,24 @@ async function threeGLoadNeighbors(projectId) {
     const total = count || 0;
 
     if (total === 0) {
-      console.log('⚠️ No neighbors to load');
       threeGAllNeighbors = [];
       return [];
     }
 
-    console.log(`📊 Total neighbors: ${total.toLocaleString()}`);
+    console.log(`📊 Total: ${total.toLocaleString()}`);
 
-    // 2. ✅ حد أقصى 200K (حماية)
-    const MAX_LOAD = 20000000;
+    // 2. حد أقصى 500K
+    const MAX_LOAD = 500000;
     const toLoad = Math.min(total, MAX_LOAD);
-    
-    if (total > MAX_LOAD) {
-      console.warn(`⚠️ Loading only ${MAX_LOAD.toLocaleString()}/${total.toLocaleString()}`);
-    }
 
-    // 3. حمّل على دفعات
-    const PAGE_SIZE = 1000;
-    const CONCURRENT = 3;  // ✅ 3 طلبات بالتوازي (آمن)
+    // ✅ تحسينات السرعة:
+    const PAGE_SIZE = 2000;      // ← 2000 بدل 1000 (نص الطلبات)
+    const CONCURRENT = 10;       // ← 10 بدل 3 (أسرع 3x)
+    
     const pages = Math.ceil(toLoad / PAGE_SIZE);
     let allData = [];
 
-    // ✅ حدّث الـ loading overlay
-    const loadingEl = document.getElementById('loadingOverlay');
-    const subtext = document.getElementById('loadingSubtext');
-    const progressBar = document.getElementById('loadingProgressBar');
+    console.log(`⚡ ${pages} pages, ${CONCURRENT} parallel, PAGE_SIZE=${PAGE_SIZE}`);
 
     for (let batchStart = 0; batchStart < pages; batchStart += CONCURRENT) {
       const batchEnd = Math.min(batchStart + CONCURRENT, pages);
@@ -10636,32 +10630,23 @@ async function threeGLoadNeighbors(projectId) {
 
       const results = await Promise.all(batchPromises);
       results.forEach(r => {
-        if (r.error) {
-          console.warn('⚠️ Batch error:', r.error.message);
-        } else if (r.data) {
-          allData = allData.concat(r.data);
-        }
+        if (r.error) console.warn('Batch error:', r.error.message);
+        else if (r.data) allData = allData.concat(r.data);
       });
 
-      // ✅ حدّث التقدم
       const progress = Math.round((allData.length / toLoad) * 100);
-      if (subtext) subtext.textContent = `تحميل الجيران: ${allData.length.toLocaleString()}/${toLoad.toLocaleString()} (${progress}%)`;
-      if (progressBar) progressBar.style.width = progress + '%';
-
       console.log(`   📥 ${allData.length.toLocaleString()}/${toLoad.toLocaleString()} (${progress}%)`);
 
-      // ✅ انتظر 50ms بين الدفعات (حماية من rate limit)
-      if (batchEnd < pages) {
-        await new Promise(r => setTimeout(r, 50));
-      }
+      // ✅ لا انتظار بين الدفعات (لا sleep)
     }
 
     threeGAllNeighbors = allData;
-    console.log(`✅ Loaded ${threeGAllNeighbors.length.toLocaleString()} neighbors`);
+    const dur = ((performance.now() - t0) / 1000).toFixed(1);
+    console.log(`✅ Loaded ${threeGAllNeighbors.length.toLocaleString()} in ${dur}s`);
     return threeGAllNeighbors;
 
   } catch (e) {
-    console.error('❌ Failed to load neighbors:', e);
+    console.error('❌ Failed:', e);
     threeGAllNeighbors = [];
     return [];
   }
@@ -12887,23 +12872,21 @@ async function checkAuthOnLoad() {
     await loadCells();
   }
   
-  // ✅ بعد ما الخلايا تحمّلت → حمّل الجيران في الخلفية
-  setTimeout(async () => {
-    if (typeof threeGLoadNeighbors === 'function' && 
-        typeof threeGAllNeighbors !== 'undefined' && 
-        threeGAllNeighbors.length === 0) {
-      console.log('⏳ Loading neighbors in background...');
-      toast('⏳ جاري تحميل الجيران في الخلفية...', 'info', 3000);
-      
-      await threeGLoadNeighbors(currentProjectId);
-      
-      if (threeGAllNeighbors.length > 0) {
-        toast('✅ تم تحميل ' + threeGAllNeighbors.length.toLocaleString() + ' علاقة جيران', 'success', 3000);
-        console.log('✅ Neighbors ready:', threeGAllNeighbors.length);
-      }
+// ✅ ابدأ تحميل الجيران فورًا بعد الخلايا
+setTimeout(async () => {
+  if (typeof threeGLoadNeighbors === 'function' && 
+      typeof threeGAllNeighbors !== 'undefined' && 
+      threeGAllNeighbors.length === 0) {
+    console.log('⏳ Loading neighbors in background...');
+    
+    // ✅ لا toast منفصل (بيظهر toast عند الانتهاء)
+    const nb = await threeGLoadNeighbors(currentProjectId);
+    
+    if (nb && nb.length > 0) {
+      toast('✅ تم تحميل ' + nb.length.toLocaleString() + ' جار', 'success', 3000);
     }
-  }, 1500);  // انتظر ثانية ونص بعد الخلايا
-}, 500);
+  }
+}, 200);  // ← 200ms بدل 1500ms (يبدأ أسرع)
         
         toast('👋 Welcome back, ' + (profile.full_name || profile.username), 'success', 2000);
         return;
