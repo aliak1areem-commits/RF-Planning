@@ -3641,7 +3641,7 @@ async function loadCells(useCache) {
     }
 
     // ═══ 3. تحميل سريع جداً (PAGE_SIZE كبير + كلهم parallel) ═══
-    const PAGE_SIZE = 5000;   // ← كبير لتقليل عدد الطلبات
+    const PAGE_SIZE = 1000;   // ← كبير لتقليل عدد الطلبات
     const pages = Math.ceil(total / PAGE_SIZE);
     const promises = [];
 
@@ -10624,7 +10624,7 @@ async function threeGLoadNeighbors(projectId) {
     console.log(`📊 Total: ${total.toLocaleString()}`);
 
     // ═══ 3. تحميل موحّد سريع (PAGE كبير + كلهم مرة وحدة) ═══
-    const PAGE_SIZE = 5000;
+    const PAGE_SIZE = 1000;
     const pages = Math.ceil(total / PAGE_SIZE);
     const promises = [];
 
