@@ -10604,7 +10604,7 @@ async function threeGLoadNeighbors(projectId) {
     console.log(`📊 Total neighbors: ${total.toLocaleString()}`);
 
     // 2. ✅ حد أقصى 200K (حماية)
-    const MAX_LOAD = 200000;
+    const MAX_LOAD = 20000000;
     const toLoad = Math.min(total, MAX_LOAD);
     
     if (total > MAX_LOAD) {
