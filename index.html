@@ -3665,9 +3665,7 @@ applyFilters();
       setTimeout(() => fitAllCells(), 200);
     }, 150);
     // ✅ حمّل علاقات الجيران
-    if (typeof threeGLoadNeighbors === 'function') {
-      await threeGLoadNeighbors(currentProjectId);
-    }
+  
 
     toast('Loaded ' + allCells.length + ' cells', 'success');
     toast('Loaded ' + allCells.length + ' cells', 'success');
@@ -4799,8 +4797,6 @@ async function importSaveToSupabase() {
 window.addEventListener('DOMContentLoaded', function() {
   initMap();
   loadProjects();
-  loadCells();
-
   const modal = document.getElementById('createProjectModal');
   if (modal) {
     modal.addEventListener('click', function(e) {
@@ -12822,16 +12818,27 @@ async function checkAuthOnLoad() {
       const { data: profile } = await db.from('profiles')
         .select('*').eq('id', session.user.id).single();
 
-      if (profile && profile.is_active) {
+           if (profile && profile.is_active) {
         currentUser = session.user;
         currentProfile = profile;
         document.getElementById('loginScreen').style.display = 'none';
         applyRoleBasedUI();
-        showApp();
+        
+        // 👇👇👇 ضع الكود هنا 👇👇👇
+        console.log('✅ Auth OK — loading cells in 500ms...');
+        setTimeout(async () => {
+          if (typeof map !== 'undefined' && map) {
+            try { map.invalidateSize(); } catch(e) {}
+          }
+          if (typeof loadCells === 'function') {
+            await loadCells();
+          }
+        }, 500);
+        // 👆👆👆 نهاية الكود 👆👆👆
+        
         toast('👋 Welcome back, ' + (profile.full_name || profile.username), 'success', 2000);
         return;
       }
-    }
 
     // لا يوجد تسجيل دخول — اعرض شاشة الدخول
     document.getElementById('loginScreen').style.display = 'flex';
