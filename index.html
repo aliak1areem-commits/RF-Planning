@@ -3030,7 +3030,7 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
     </div>
 
     <!-- Form -->
-    <form id="loginForm" onsubmit="event.preventDefault();doLogin();">
+    <form id="loginForm">
       <div style="margin-bottom:16px;">
         <label style="display:block;font-size:12px;font-weight:700;color:#5A6B87;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">Username</label>
         <input type="text" id="loginUsername" placeholder="your.username" autocomplete="username"
@@ -12624,7 +12624,11 @@ function requirePermission(perm, action) {
   toast('❌ You don\'t have permission for: ' + (action || perm), 'error', 4000);
   return false;
 }
-
+// ✅ اربط الـ submit بعد تعريف doLogin
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  await doLogin();
+});
 // ═══ Login ═══
 async function doLogin() {
   const usernameEl = document.getElementById('loginUsername');
