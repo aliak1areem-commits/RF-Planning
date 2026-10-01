@@ -957,6 +957,10 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
   <span>🌐</span><span id="langLabel">AR</span>
 </button>
           <div class="topbar-actions">
+            <div id="userBadge" style="display:flex;align-items:center;gap:8px;padding:6px 12px;background:#F4F7FB;border-radius:20px;font-size:12.5px;color:#0C1B3D;font-family:'JetBrains Mono',monospace;"></div>
+<button class="btn btn-ghost" onclick="doLogout()" title="Sign Out" style="color:#D64545;border-color:#F5D5D5;">
+  <span>🚪</span><span>Logout</span>
+</button>
         <button class="btn btn-ghost" onclick="toggleDarkMode()" title="Toggle Dark Mode" id="darkModeBtn">
           <span>🌙</span><span>Dark</span>
         </button>
@@ -3014,7 +3018,44 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
     </div>
   </div>
 </div>
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" style="position:fixed;inset:0;z-index:100000;background:linear-gradient(135deg,#0C1B3D 0%,#142A5C 100%);display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:20px;width:100%;max-width:420px;padding:40px 36px;box-shadow:0 30px 80px rgba(0,0,0,.5);">
 
+    <!-- Logo & Title -->
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,#00A1E0,#124191);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:24px;color:#fff;box-shadow:0 10px 30px rgba(0,161,224,.4);">RF</div>
+      <h1 style="font-size:22px;font-weight:800;color:#0C1B3D;margin:0 0 6px;">RF Planning Platform</h1>
+      <p style="font-size:13px;color:#5A6B87;margin:0;">Sign in to continue</p>
+    </div>
+
+    <!-- Form -->
+    <form id="loginForm" onsubmit="event.preventDefault();doLogin();">
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:12px;font-weight:700;color:#5A6B87;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">Username</label>
+        <input type="text" id="loginUsername" placeholder="your.username" autocomplete="username"
+               style="width:100%;padding:12px 14px;border:1.5px solid #D7DEEA;border-radius:10px;font-size:14px;outline:none;font-family:inherit;transition:all .15s;">
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="display:block;font-size:12px;font-weight:700;color:#5A6B87;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"
+               style="width:100%;padding:12px 14px;border:1.5px solid #D7DEEA;border-radius:10px;font-size:14px;outline:none;font-family:inherit;transition:all .15s;">
+      </div>
+
+      <div id="loginError" style="display:none;background:#FCEAEA;color:#B91C1C;padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:16px;"></div>
+
+      <button type="submit" id="loginBtn"
+              style="width:100%;padding:14px;background:linear-gradient(135deg,#124191,#00A1E0);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 6px 20px rgba(18,65,145,.35);transition:all .15s;">
+        Sign In
+      </button>
+    </form>
+
+    <div style="text-align:center;margin-top:20px;font-size:11.5px;color:#94A3B8;">
+      v2.0 · Built for Ali Amer · © 2026 MFC
+    </div>
+
+  </div>
+</div>
 <div class="toast" id="toast"></div>
   
 
@@ -12514,7 +12555,408 @@ document.addEventListener('click', function(e) {
   observer.observe(document.body, { childList: true, subtree: true });
   window.__langObserver = observer;
 })();
+/* =========================================================
+   🔐 AUTHENTICATION + ROLE-BASED ACCESS CONTROL
+   ========================================================= */
 
+// ═══ Permission Matrix ═══
+const PERMISSIONS = {
+  admin: {
+    // كل شي
+    'page:map': true, 'page:dashboard': true, 'page:projects': true,
+    'page:import': true, 'page:cells': true, 'page:tools': true,
+    'tool:pci': true, 'tool:gsm': true, 'tool:neighbor': true,
+    'tool:3g-nb': true, 'tool:hsn': true, 'tool:psc': true,
+    'tool:bsic': true, 'tool:symmetry': true, 'tool:azimuth-opt': true,
+    'tool:distance': true, 'tool:azimuth': true, 'tool:unit': true,
+    'tool:kml': true, 'tool:new-site': true,
+    'action:edit-cells': true, 'action:delete-cells': true,
+    'action:manage-users': true, 'action:manage-projects': true,
+    'action:apply-changes': true
+  },
+  engineer: {
+    'page:map': true, 'page:dashboard': true, 'page:projects': true,
+    'page:import': true, 'page:cells': true, 'page:tools': true,
+    'tool:pci': true, 'tool:gsm': true, 'tool:neighbor': true,
+    'tool:3g-nb': true, 'tool:hsn': true, 'tool:psc': true,
+    'tool:bsic': true, 'tool:symmetry': true, 'tool:azimuth-opt': true,
+    'tool:distance': true, 'tool:azimuth': true, 'tool:unit': true,
+    'tool:kml': true, 'tool:new-site': true,
+    'action:edit-cells': true, 'action:delete-cells': false,
+    'action:manage-users': false, 'action:manage-projects': true,
+    'action:apply-changes': true
+  },
+  optimizer: {
+    'page:map': true, 'page:dashboard': true, 'page:projects': false,
+    'page:import': false, 'page:cells': true, 'page:tools': true,
+    'tool:pci': true, 'tool:gsm': false, 'tool:neighbor': true,
+    'tool:3g-nb': true, 'tool:hsn': true, 'tool:psc': true,
+    'tool:bsic': true, 'tool:symmetry': true, 'tool:azimuth-opt': true,
+    'tool:distance': true, 'tool:azimuth': true, 'tool:unit': true,
+    'tool:kml': true, 'tool:new-site': false,
+    'action:edit-cells': true, 'action:delete-cells': false,
+    'action:manage-users': false, 'action:manage-projects': false,
+    'action:apply-changes': true
+  },
+  viewer: {
+    'page:map': true, 'page:dashboard': true, 'page:projects': false,
+    'page:import': false, 'page:cells': true, 'page:tools': false,
+    'tool:pci': false, 'tool:gsm': false, 'tool:neighbor': false,
+    'tool:3g-nb': false, 'tool:hsn': false, 'tool:psc': false,
+    'tool:bsic': false, 'tool:symmetry': false, 'tool:azimuth-opt': false,
+    'tool:distance': true, 'tool:azimuth': true, 'tool:unit': true,
+    'tool:kml': false, 'tool:new-site': false,
+    'action:edit-cells': false, 'action:delete-cells': false,
+    'action:manage-users': false, 'action:manage-projects': false,
+    'action:apply-changes': false
+  }
+};
+
+// ═══ State ═══
+let currentUser = null;
+let currentProfile = null;
+
+// ═══ Permission Check ═══
+function hasPermission(perm) {
+  if (!currentProfile) return false;
+  const rolePerms = PERMISSIONS[currentProfile.role];
+  return rolePerms && rolePerms[perm] === true;
+}
+
+function requirePermission(perm, action) {
+  if (hasPermission(perm)) return true;
+  toast('❌ You don\'t have permission for: ' + (action || perm), 'error', 4000);
+  return false;
+}
+
+// ═══ Login ═══
+async function doLogin() {
+  const usernameEl = document.getElementById('loginUsername');
+  const passwordEl = document.getElementById('loginPassword');
+  const btn = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
+
+  const username = (usernameEl.value || '').trim().toLowerCase();
+  const password = passwordEl.value || '';
+
+  if (!username || !password) {
+    errEl.textContent = 'Please enter both username and password.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+  errEl.style.display = 'none';
+
+  try {
+    // Supabase يستخدم email — نضيف domain وهمي
+    const email = username.includes('@') ? username : (username + '@rfplanning.local');
+
+    const { data, error } = await db.auth.signInWithPassword({ email, password });
+
+    if (error) throw error;
+
+    // جلب Profile
+    const { data: profile, error: pErr } = await db.from('profiles')
+      .select('*').eq('id', data.user.id).single();
+
+    if (pErr) throw pErr;
+    if (!profile.is_active) {
+      await db.auth.signOut();
+      throw new Error('Your account is disabled. Contact admin.');
+    }
+
+    // تحديث آخر تسجيل
+    await db.from('profiles').update({ last_login: new Date().toISOString() }).eq('id', data.user.id);
+
+    currentUser = data.user;
+    currentProfile = profile;
+
+    // إخفاء شاشة الدخول
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('loginPassword').value = '';
+
+    applyRoleBasedUI();
+    showApp();
+    toast('👋 Welcome, ' + (profile.full_name || profile.username) + '!', 'success', 3000);
+
+  } catch (e) {
+    console.error(e);
+    errEl.textContent = '❌ ' + (e.message || 'Login failed');
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+}
+
+// ═══ Logout ═══
+async function doLogout() {
+  if (!confirm('Sign out?')) return;
+  try {
+    await db.auth.signOut();
+  } catch (e) { console.error(e); }
+  currentUser = null;
+  currentProfile = null;
+  location.reload();
+}
+
+// ═══ Apply Role-Based UI ═══
+function applyRoleBasedUI() {
+  if (!currentProfile) return;
+
+  const role = currentProfile.role;
+
+  // ═══ 1. Update User Badge ═══
+  const badge = document.getElementById('userBadge');
+  if (badge) {
+    const roleIcons = { admin: '👑', engineer: '🛠️', optimizer: '🎯', viewer: '👁️' };
+    const roleColors = { admin: '#F2A900', engineer: '#1F9D55', optimizer: '#7C3AED', viewer: '#5A6B87' };
+    badge.innerHTML =
+      '<span style="font-size:14px;">' + roleIcons[role] + '</span>' +
+      '<span style="font-weight:700;">' + escapeHtml(currentProfile.username) + '</span>' +
+      '<span style="background:' + roleColors[role] + ';color:#fff;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.3px;">' + role + '</span>';
+  }
+
+  // ═══ 2. Hide Nav Items (اللي ما عنده صلاحية) ═══
+  const navPermMap = {
+    'map': 'page:map',
+    'dashboard': 'page:dashboard',
+    'projects': 'page:projects',
+    'import': 'page:import',
+    'cells': 'page:cells',
+    'tools': 'page:tools',
+    'tool-pci-checker': 'tool:pci',
+    'tool-gsm-planner': 'tool:gsm',
+    'tool-neighbor': 'tool:neighbor',
+    'tool-3g-nb': 'tool:3g-nb',
+    'tool-hsn': 'tool:hsn',
+    'tool-psc-checker': 'tool:psc',
+    'tool-bsic': 'tool:bsic',
+    'tool-symmetry': 'tool:symmetry',
+    'tool-azimuth-opt': 'tool:azimuth-opt',
+    'tool-distance': 'tool:distance',
+    'tool-azimuth': 'tool:azimuth',
+    'tool-unit': 'tool:unit',
+    'tool-kml': 'tool:kml',
+    'tool-new-site': 'tool:new-site'
+  };
+
+  Object.entries(navPermMap).forEach(([page, perm]) => {
+    const btn = document.querySelector('[data-page="' + page + '"]');
+    if (btn) btn.style.display = hasPermission(perm) ? '' : 'none';
+  });
+
+  // ═══ 3. Hide Tool Cards (في صفحة Tools) ═══
+  const toolCardPerms = [
+    { selector: '.tool-card[onclick*="tool-pci-checker"]', perm: 'tool:pci' },
+    { selector: '.tool-card[onclick*="tool-gsm-planner"]', perm: 'tool:gsm' },
+    { selector: '.tool-card[onclick*="tool-neighbor"]', perm: 'tool:neighbor' },
+    { selector: '.tool-card[onclick*="tool-3g-nb"]', perm: 'tool:3g-nb' },
+    { selector: '.tool-card[onclick*="tool-hsn"]', perm: 'tool:hsn' },
+    { selector: '.tool-card[onclick*="tool-psc-checker"]', perm: 'tool:psc' },
+    { selector: '.tool-card[onclick*="tool-bsic"]', perm: 'tool:bsic' },
+    { selector: '.tool-card[onclick*="tool-symmetry"]', perm: 'tool:symmetry' },
+    { selector: '.tool-card[onclick*="tool-azimuth-opt"]', perm: 'tool:azimuth-opt' },
+    { selector: '.tool-card[onclick*="tool-distance"]', perm: 'tool:distance' },
+    { selector: '.tool-card[onclick*="tool-azimuth"]', perm: 'tool:azimuth' },
+    { selector: '.tool-card[onclick*="tool-unit"]', perm: 'tool:unit' },
+    { selector: '.tool-card[onclick*="tool-kml"]', perm: 'tool:kml' }
+  ];
+
+  toolCardPerms.forEach(item => {
+    document.querySelectorAll(item.selector).forEach(el => {
+      el.style.display = hasPermission(item.perm) ? '' : 'none';
+    });
+  });
+
+  // ═══ 4. Hide/Disable Actions ═══
+  // زر رفع الملفات (Import) — إذا ما عنده
+  const importPage = document.getElementById('page-import');
+  if (importPage && !hasPermission('page:import')) {
+    importPage.style.display = 'none';
+  }
+
+  // أزرار "Apply Changes" في الأدوات
+  document.querySelectorAll('button').forEach(btn => {
+    const txt = (btn.textContent || '').toLowerCase();
+    if (txt.includes('apply all') || txt.includes('save to') || txt.includes('apply suggestions')) {
+      if (!hasPermission('action:apply-changes')) {
+        btn.disabled = true;
+        btn.title = 'You don\'t have permission';
+        btn.style.opacity = '0.4';
+        btn.style.cursor = 'not-allowed';
+      }
+    }
+  });
+
+  // ═══ 5. Add Admin Button (لـ admin فقط) ═══
+  if (role === 'admin') {
+    const adminBtn = document.getElementById('adminUsersBtn');
+    if (!adminBtn) {
+      const badgeEl = document.getElementById('userBadge');
+      if (badgeEl && badgeEl.parentElement) {
+        const btn = document.createElement('button');
+        btn.id = 'adminUsersBtn';
+        btn.className = 'btn btn-ghost';
+        btn.style.cssText = 'margin-right:8px;background:#FDF1DC;color:#8A5A00;border-color:#FDE68A;';
+        btn.innerHTML = '<span>👥</span><span>Users</span>';
+        btn.onclick = showUsersManager;
+        badgeEl.parentElement.insertBefore(btn, badgeEl);
+      }
+    }
+  }
+
+  // ═══ 6. Hide Legend / Warning ═══
+  console.log('%c🔐 Role: ' + role.toUpperCase() + ' — UI adjusted', 'color:#124191;font-weight:bold;');
+}
+
+// ═══ Check Auth on Load ═══
+async function checkAuthOnLoad() {
+  try {
+    const { data: { session } } = await db.auth.getSession();
+
+    if (session && session.user) {
+      const { data: profile } = await db.from('profiles')
+        .select('*').eq('id', session.user.id).single();
+
+      if (profile && profile.is_active) {
+        currentUser = session.user;
+        currentProfile = profile;
+        document.getElementById('loginScreen').style.display = 'none';
+        applyRoleBasedUI();
+        showApp();
+        toast('👋 Welcome back, ' + (profile.full_name || profile.username), 'success', 2000);
+        return;
+      }
+    }
+
+    // لا يوجد تسجيل دخول — اعرض شاشة الدخول
+    document.getElementById('loginScreen').style.display = 'flex';
+    // اخفِ كل شي تحتها
+    document.querySelector('.app').style.display = 'none';
+
+  } catch (e) {
+    console.error('Auth check error:', e);
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.querySelector('.app').style.display = 'none';
+  }
+}
+
+// ═══ Show App after login ═══
+// نضيف في doLogin بعد applyRoleBasedUI
+function showApp() {
+  const app = document.querySelector('.app');
+  if (app) app.style.display = '';
+}
+
+// ═══ Users Manager (Admin Only) ═══
+async function showUsersManager() {
+  if (!requirePermission('action:manage-users', 'manage users')) return;
+
+  const { data: users, error } = await db.from('profiles').select('*').order('created_at', { ascending: false });
+
+  const existing = document.getElementById('usersManagerModal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'usersManagerModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(12,27,61,.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:99999;padding:20px;';
+
+  const rows = (users || []).map(u =>
+    '<tr style="border-bottom:1px solid #F0F3F9;">' +
+      '<td style="padding:10px;"><b>' + escapeHtml(u.username) + '</b></td>' +
+      '<td style="padding:10px;">' + escapeHtml(u.full_name || '—') + '</td>' +
+      '<td style="padding:10px;">' +
+        '<select onchange="updateUserRole(\'' + u.id + '\', this.value)" style="padding:5px 8px;border-radius:6px;border:1px solid #D7DEEA;font-size:12px;font-family:monospace;">' +
+          ['admin','engineer','optimizer','viewer'].map(r =>
+            '<option value="' + r + '"' + (u.role === r ? ' selected' : '') + '>' + r + '</option>'
+          ).join('') +
+        '</select>' +
+      '</td>' +
+      '<td style="padding:10px;">' +
+        '<span style="background:' + (u.is_active ? '#E7F7EE;color:#1F9D55' : '#FCEAEA;color:#B91C1C') + ';padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;">' + (u.is_active ? 'Active' : 'Disabled') + '</span>' +
+      '</td>' +
+      '<td style="padding:10px;font-size:11px;color:#94A3B8;">' + (u.last_login ? new Date(u.last_login).toLocaleDateString() : 'Never') + '</td>' +
+      '<td style="padding:10px;">' +
+        '<button onclick="toggleUserActive(\'' + u.id + '\',' + !u.is_active + ')" style="padding:4px 10px;background:#F4F7FB;border:1px solid #D7DEEA;border-radius:6px;font-size:11px;cursor:pointer;">' +
+          (u.is_active ? '🚫 Disable' : '✅ Enable') +
+        '</button>' +
+      '</td>' +
+    '</tr>'
+  ).join('');
+
+  modal.innerHTML =
+    '<div style="background:#fff;border-radius:14px;width:100%;max-width:900px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,.4);">' +
+      '<div style="padding:20px 24px;border-bottom:1px solid #E9EEF6;display:flex;justify-content:space-between;align-items:center;">' +
+        '<div>' +
+          '<h3 style="margin:0;font-size:18px;color:#0C1B3D;">👥 Users Management</h3>' +
+          '<p style="margin:4px 0 0;font-size:12.5px;color:#5A6B87;">Manage roles and access permissions</p>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'usersManagerModal\').remove()" style="width:34px;height:34px;border-radius:8px;background:#FCEAEA;color:#D64545;border:none;cursor:pointer;font-size:16px;">✕</button>' +
+      '</div>' +
+      '<div style="padding:20px 24px;overflow-y:auto;">' +
+        '<table style="width:100%;border-collapse:collapse;font-size:13px;">' +
+          '<thead><tr style="background:#EAF2FB;">' +
+            '<th style="padding:10px;text-align:left;font-size:11px;color:#124191;text-transform:uppercase;">Username</th>' +
+            '<th style="padding:10px;text-align:left;font-size:11px;color:#124191;text-transform:uppercase;">Full Name</th>' +
+            '<th style="padding:10px;text-align:left;font-size:11px;color:#124191;text-transform:uppercase;">Role</th>' +
+            '<th style="padding:10px;text-align:left;font-size:11px;color:#124191;text-transform:uppercase;">Status</th>' +
+            '<th style="padding:10px;text-align:left;font-size:11px;color:#124191;text-transform:uppercase;">Last Login</th>' +
+            '<th style="padding:10px;text-align:left;font-size:11px;color:#124191;text-transform:uppercase;">Actions</th>' +
+          '</tr></thead>' +
+          '<tbody>' + rows + '</tbody>' +
+        '</table>' +
+      '</div>' +
+      '<div style="padding:14px 24px;background:#FBFCFE;border-top:1px solid #E9EEF6;font-size:12px;color:#5A6B87;">' +
+        '💡 To add new users, go to <b>Supabase Dashboard → Authentication → Users → Add User</b>. Roles appear here automatically.' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target.id === 'usersManagerModal') modal.remove(); });
+}
+
+async function updateUserRole(userId, newRole) {
+  if (!requirePermission('action:manage-users')) return;
+  try {
+    const { error } = await db.from('profiles').update({ role: newRole }).eq('id', userId);
+    if (error) throw error;
+    toast('✅ Role updated to ' + newRole, 'success');
+  } catch (e) {
+    toast('❌ ' + e.message, 'error');
+  }
+}
+
+async function toggleUserActive(userId, active) {
+  if (!requirePermission('action:manage-users')) return;
+  try {
+    const { error } = await db.from('profiles').update({ is_active: active }).eq('id', userId);
+    if (error) throw error;
+    toast('✅ User ' + (active ? 'enabled' : 'disabled'), 'success');
+    document.getElementById('usersManagerModal').remove();
+    showUsersManager();
+  } catch (e) {
+    toast('❌ ' + e.message, 'error');
+  }
+}
+
+// ═══ Init on Load ═══
+setTimeout(() => {
+  checkAuthOnLoad();
+}, 500);
+
+// Monitor auth changes
+if (db && db.auth) {
+  db.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      currentProfile = null;
+      location.reload();
+    }
+  });
+}
 console.log('%c🌐 Language switcher loaded', 'color:#1F9D55;font-weight:bold;');
 console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
 console.log('%cTools: PCI · GSM · NB · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
