@@ -1080,6 +1080,7 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
             <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="fitAllCells()">🎯 Fit to View</button>
             <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="clearFilters()">🗑️ Clear Filters</button>
                         <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="clearCache()">⚡ Clear Cache</button>
+            <button class="btn btn-danger" onclick="clearAllCache()" style="margin-top:8px;width:100%;">🗑️ Delet Cache</button>
             <button class="btn btn-ghost" id="multiSelectBtn" style="width:100%;justify-content:center;" onclick="toggleMultiSelectMode()">🎯 Multi-Select Mode</button>
                         <button class="btn btn-gold" style="width:100%;justify-content:center;margin-top:8px;" onclick="copyPolygonCells()">📋 Copy Polygon Cells</button>
             <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:8px;" onclick="clearDrawings()">🗑️ Clear Drawings</button>
@@ -3591,34 +3592,38 @@ async function refreshCellsInBackground() {
     console.warn('Background refresh failed:', e);
   }
 }
+// ═══════════════════════════════════════════════════
+// 📥 loadCells — سريع + Cache
+// ═══════════════════════════════════════════════════
 async function loadCells(useCache) {
   useCache = useCache !== false;
   const loadingEl = document.getElementById('loadingOverlay');
+  const t0 = performance.now();
+  const cacheKey = 'cells_' + (currentProjectId || 'all');
 
-    // جرّب Cache أولاً
-  if (useCache && !currentProjectId) {
-    const cached = loadCacheFromDisk();
-    if (cached && cached.length) {
+  // ═══ 1. جرّب Cache ═══
+  if (useCache) {
+    const cached = await CacheDB.get(cacheKey);
+    if (cached && cached.length > 0) {
+      console.log(`⚡ Cache HIT: ${cached.length} cells`);
       allCells = cached.map(normalizeCell);
       rebuildLookups();
       updateStats();
       applyFilters();
       setTimeout(() => {
         if (map) map.invalidateSize();
-        setTimeout(() => fitAllCells(), 200);
-      }, 150);
+        setTimeout(() => fitAllCells(), 150);
+      }, 50);
       if (loadingEl) loadingEl.style.display = 'none';
-            toast('⚡ Loaded ' + allCells.length + ' cells from cache', 'success');
-      setTimeout(() => refreshCellsInBackground(), 2000);
+      toast(`⚡ ${allCells.length.toLocaleString()} خلية (Cache)`, 'success', 1500);
       return;
-   
     }
   }
 
   if (loadingEl) loadingEl.style.display = 'flex';
 
-    try {
-    // 🚀 1. اجلب العدد الإجمالي
+  try {
+    // ═══ 2. اجلب من Supabase ═══
     let countQuery = db.from('rf_cells').select('id', { count: 'exact', head: true });
     if (currentProjectId) countQuery = countQuery.eq('project_id', currentProjectId);
     const { count } = await countQuery;
@@ -3626,8 +3631,17 @@ async function loadCells(useCache) {
 
     console.log('📊 Total cells: ' + total);
 
-    // 🚀 2. اجلب كل الصفحات بالتوازي
-    const PAGE_SIZE = 1000;
+    if (total === 0) {
+      allCells = [];
+      rebuildLookups();
+      updateStats();
+      applyFilters();
+      if (loadingEl) loadingEl.style.display = 'none';
+      return;
+    }
+
+    // ═══ 3. تحميل سريع جداً (PAGE_SIZE كبير + كلهم parallel) ═══
+    const PAGE_SIZE = 5000;   // ← كبير لتقليل عدد الطلبات
     const pages = Math.ceil(total / PAGE_SIZE);
     const promises = [];
 
@@ -3647,36 +3661,38 @@ async function loadCells(useCache) {
       if (r.data) allData = allData.concat(r.data);
     });
 
-   allCells = allData.map(normalizeCell);
-rebuildLookups();
-updateStats();
-applyFilters();
+    allCells = allData.map(normalizeCell);
+    rebuildLookups();
+    updateStats();
+    applyFilters();
 
-     
+    // ═══ 4. احفظ في Cache ═══
+    const toCache = allCells.map(c => ({
+      id: c.id, cell_name: c.cell_name, site: c.site,
+      lat: c.lat, long: c.long, bore: c.bore,
+      pci: c.pci, rsi: c.rsi, bcch: c.bcch, bsic: c.bsic,
+      tch: c.tch, lac: c.lac, hsn: c.hsn,
+      psc: c.psc, uarfcn_dl: c.uarfcn_dl, uarfcn_ul: c.uarfcn_ul,
+      rnc_id: c.rnc_id, bsc: c.bsc, bw: c.bw, height: c.height,
+      cell_radius: c.radius, comment: c.comment, project_id: c.project_id,
+    }));
+    await CacheDB.set(cacheKey, toCache);
 
-    // 💾 احفظ في cache (فقط للمشروع الكامل)
-    if (!currentProjectId) {
-      saveCacheToDisk(allCells);
-    }
-
-    // 🎯 Zoom للخلايا
     setTimeout(() => {
       if (map) map.invalidateSize();
-      setTimeout(() => fitAllCells(), 200);
-    }, 150);
-    // ✅ حمّل علاقات الجيران
-  
+      setTimeout(() => fitAllCells(), 150);
+    }, 100);
 
-    toast('Loaded ' + allCells.length + ' cells', 'success');
-    toast('Loaded ' + allCells.length + ' cells', 'success');
+    const dur = ((performance.now() - t0) / 1000).toFixed(1);
+    console.log(`✅ Loaded ${allCells.length} in ${dur}s`);
+    toast(`✅ ${allCells.length.toLocaleString()} خلية (${dur}s)`, 'success', 1500);
   } catch (e) {
     console.error(e);
-    toast('Error loading cells: ' + e.message, 'error');
+    toast('Error: ' + e.message, 'error');
   } finally {
     if (loadingEl) loadingEl.style.display = 'none';
   }
 }
-
 /* =========================================================
    NORMALIZE
    ========================================================= */
@@ -10575,24 +10591,28 @@ async function threeGSaveToSupabase() {
 }
 
 // ═══════════════════════════════════════════════════
-// 📥 Load Neighbors — نسخة محسّنة (Batch + Progress)
+// 📥 threeGLoadNeighbors — سريع + Cache
 // ═══════════════════════════════════════════════════
 async function threeGLoadNeighbors(projectId) {
-  // ✅ إذا محمّلين مسبقاً، لا نعيد التحميل
-  if (typeof threeGAllNeighbors !== 'undefined' && threeGAllNeighbors.length > 0) {
-    console.log('⏭️ Neighbors already loaded:', threeGAllNeighbors.length);
+  const cacheKey = 'neighbors_' + (projectId || 'all');
+  const t0 = performance.now();
+
+  // ═══ 1. جرّب Cache ═══
+  const cached = await CacheDB.get(cacheKey);
+  if (cached && cached.length > 0) {
+    console.log(`⚡ Neighbors Cache HIT: ${cached.length}`);
+    threeGAllNeighbors = cached;
+    toast(`⚡ ${cached.length.toLocaleString()} جار (Cache)`, 'success', 1500);
     return threeGAllNeighbors;
   }
 
-  const t0 = performance.now();
-  console.log('📥 Loading neighbors FAST for project:', projectId || 'ALL');
+  // ═══ 2. اجلب من Supabase ═══
+  console.log('📥 Loading neighbors for project:', projectId || 'ALL');
 
   try {
-    // 1. اجلب العدد الكلي
     let countQuery = db.from('rf_neighbors').select('id', { count: 'exact', head: true });
     if (projectId) countQuery = countQuery.eq('project_id', parseInt(projectId));
     const { count, error: cErr } = await countQuery;
-    
     if (cErr) throw cErr;
     const total = count || 0;
 
@@ -10603,48 +10623,33 @@ async function threeGLoadNeighbors(projectId) {
 
     console.log(`📊 Total: ${total.toLocaleString()}`);
 
-    // 2. حد أقصى 500K
-    const MAX_LOAD = 500000;
-    const toLoad = Math.min(total, MAX_LOAD);
+    // ═══ 3. تحميل موحّد سريع (PAGE كبير + كلهم مرة وحدة) ═══
+    const PAGE_SIZE = 5000;
+    const pages = Math.ceil(total / PAGE_SIZE);
+    const promises = [];
 
-    // ✅ تحسينات السرعة:
-    const PAGE_SIZE = 2000;      // ← 2000 بدل 1000 (نص الطلبات)
-    const CONCURRENT = 10;       // ← 10 بدل 3 (أسرع 3x)
-    
-    const pages = Math.ceil(toLoad / PAGE_SIZE);
-    let allData = [];
-
-    console.log(`⚡ ${pages} pages, ${CONCURRENT} parallel, PAGE_SIZE=${PAGE_SIZE}`);
-
-    for (let batchStart = 0; batchStart < pages; batchStart += CONCURRENT) {
-      const batchEnd = Math.min(batchStart + CONCURRENT, pages);
-      const batchPromises = [];
-
-      for (let i = batchStart; i < batchEnd; i++) {
-        let q = db.from('rf_neighbors')
-          .select('source_cell,neighbor_cell,relation_type,source_rnc,source_cell_id,neighbor_rnc,neighbor_cell_id,bsc_name,bidirectional,project_id,id')
-          .range(i * PAGE_SIZE, (i + 1) * PAGE_SIZE - 1);
-        if (projectId) q = q.eq('project_id', parseInt(projectId));
-        batchPromises.push(q);
-      }
-
-      const results = await Promise.all(batchPromises);
-      results.forEach(r => {
-        if (r.error) console.warn('Batch error:', r.error.message);
-        else if (r.data) allData = allData.concat(r.data);
-      });
-
-      const progress = Math.round((allData.length / toLoad) * 100);
-      console.log(`   📥 ${allData.length.toLocaleString()}/${toLoad.toLocaleString()} (${progress}%)`);
-
-      // ✅ لا انتظار بين الدفعات (لا sleep)
+    for (let i = 0; i < pages; i++) {
+      let q = db.from('rf_neighbors')
+        .select('source_cell,neighbor_cell,relation_type,source_rnc,source_cell_id,neighbor_rnc,neighbor_cell_id,bsc_name,bidirectional,project_id,id')
+        .range(i * PAGE_SIZE, (i + 1) * PAGE_SIZE - 1);
+      if (projectId) q = q.eq('project_id', parseInt(projectId));
+      promises.push(q);
     }
 
-    threeGAllNeighbors = allData;
-    const dur = ((performance.now() - t0) / 1000).toFixed(1);
-    console.log(`✅ Loaded ${threeGAllNeighbors.length.toLocaleString()} in ${dur}s`);
-    return threeGAllNeighbors;
+    const results = await Promise.all(promises);
+    let allData = [];
+    results.forEach(r => {
+      if (r.data) allData = allData.concat(r.data);
+    });
 
+    // ═══ 4. احفظ في Cache ═══
+    await CacheDB.set(cacheKey, allData);
+    threeGAllNeighbors = allData;
+
+    const dur = ((performance.now() - t0) / 1000).toFixed(1);
+    console.log(`✅ Loaded ${allData.length.toLocaleString()} in ${dur}s`);
+    toast(`✅ ${allData.length.toLocaleString()} جار (${dur}s)`, 'success', 2000);
+    return threeGAllNeighbors;
   } catch (e) {
     console.error('❌ Failed:', e);
     threeGAllNeighbors = [];
@@ -13144,9 +13149,108 @@ window.handleCreateUser = async function() {
     btn.textContent = '➕ إنشاء';
   }
 };
+// ═══════════════════════════════════════════════════
+// 💾 IndexedDB Cache — تخزين دائم
+// ═══════════════════════════════════════════════════
+const CacheDB = {
+  dbName: 'rf_planner_cache_v2',
+  version: 1,
+  _db: null,
+
+  async init() {
+    if (this._db) return this._db;
+    return new Promise((res, rej) => {
+      const r = indexedDB.open(this.dbName, this.version);
+      r.onupgradeneeded = e => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('cache')) {
+          db.createObjectStore('cache', { keyPath: 'key' });
+        }
+      };
+      r.onsuccess = e => { this._db = e.target.result; res(this._db); };
+      r.onerror = e => rej(e.target.error);
+    });
+  },
+
+  async set(key, value) {
+    const db = await this.init();
+    return new Promise((res, rej) => {
+      const tx = db.transaction('cache', 'readwrite');
+      tx.objectStore('cache').put({ key, value, savedAt: Date.now() });
+      tx.oncomplete = () => res(true);
+      tx.onerror = () => rej(tx.error);
+    });
+  },
+
+  async get(key) {
+    const db = await this.init();
+    return new Promise((res) => {
+      const tx = db.transaction('cache', 'readonly');
+      const r = tx.objectStore('cache').get(key);
+      r.onsuccess = () => res(r.result ? r.result.value : null);
+      r.onerror = () => res(null);
+    });
+  },
+
+  async clear() {
+    const db = await this.init();
+    return new Promise((res) => {
+      const tx = db.transaction('cache', 'readwrite');
+      tx.objectStore('cache').clear();
+      tx.oncomplete = () => res(true);
+    });
+  },
+
+  async info() {
+    const db = await this.init();
+    return new Promise((res) => {
+      const tx = db.transaction('cache', 'readonly');
+      const r = tx.objectStore('cache').getAll();
+      r.onsuccess = () => {
+        const items = r.result || [];
+        const size = new Blob([JSON.stringify(items)]).size;
+        res({
+          count: items.length,
+          sizeMB: (size / 1048576).toFixed(2),
+          items: items.map(i => ({
+            key: i.key,
+            sizeMB: (new Blob([JSON.stringify(i.value)]).size / 1048576).toFixed(2),
+            savedAt: new Date(i.savedAt).toLocaleString(),
+          })),
+        });
+      };
+    });
+  },
+};
+
+window.CacheDB = CacheDB;
+console.log('✅ CacheDB ready');  
 console.log('%c🌐 Language switcher loaded', 'color:#1F9D55;font-weight:bold;');
 console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
 console.log('%cTools: PCI · GSM · NB · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
+  
+// ═══════════════════════════════════════════════════
+// 🗑️ Cache Management Functions
+// ═══════════════════════════════════════════════════
+
+window.clearAllCache = async function() {
+  if (!confirm('مسح كل Cache؟')) return;
+  await CacheDB.clear();
+  toast('🗑️ تم مسح Cache', 'success');
+  console.log('Cache cleared');
+};
+
+window.showCacheInfo = async function() {
+  const info = await CacheDB.info();
+  console.log('📊 Cache:', info);
+  alert(`📊 Cache:\n\n• Items: ${info.count}\n• Size: ${info.sizeMB} MB\n\n` +
+    info.items.map(i => `• ${i.key}: ${i.sizeMB} MB (${i.savedAt})`).join('\n'));
+};
+
+// ═══════════════════════════════════════════════════
+// 🚀 Startup — تحميل تلقائي عند الفتح
+// ═══════════════════════════════════════════════════
+console.log('✅ Cache functions ready');
 </script>
 
 <script>
