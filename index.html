@@ -4343,10 +4343,6 @@ function openProject(projectId) {
   const proj = allProjects.find(p => p.id === projectId);
   document.getElementById('pageSubtitle').textContent = 'Project: ' + (proj ? proj.name : '');
   loadCells();
-  // ✅ حمّل الجيران للمشروع الجديد
-  if (typeof threeGLoadNeighbors === 'function') {
-    threeGLoadNeighbors(currentProjectId);
-  }
 }
 
 /* =========================================================
