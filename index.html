@@ -10593,7 +10593,10 @@ async function threeGSaveToSupabase() {
 // ═══════════════════════════════════════════════════
 // 📥 threeGLoadNeighbors — سريع + Cache
 // ═══════════════════════════════════════════════════
-async function threeGLoadNeighbors(projectId) {
+  // 🛑 معطّل — استخدم loadNeighborsForCell بدلاً
+  async function threeGLoadNeighbors(projectId) {
+  console.log('🛑 threeGLoadNeighbors disabled');
+  return [];
   const cacheKey = 'neighbors_' + (projectId || 'all');
   const t0 = performance.now();
 
@@ -12948,20 +12951,7 @@ async function checkAuthOnLoad() {
           }
         }, 500);
 
-        // ═══════════════════════════════════════════════
-        // 2️⃣ تحميل الجيران في الخلفية بعد 1500ms
-        // ═══════════════════════════════════════════════
-        setTimeout(async () => {
-          if (typeof threeGLoadNeighbors === 'function' &&
-              typeof threeGAllNeighbors !== 'undefined' &&
-              threeGAllNeighbors.length === 0) {
-            console.log('⏳ Loading neighbors in background...');
-            const nb = await threeGLoadNeighbors(currentProjectId);
-            if (nb && nb.length > 0) {
-              toast('✅ تم تحميل ' + nb.length.toLocaleString() + ' جار', 'success', 3000);
-            }
-          }
-        }, 1500);
+         // ✅ لا تحمّل الجيران الكامل — استخدم loadNeighborsForCell عند الحاجة فقط
 
         toast('👋 Welcome back, ' + (profile.full_name || profile.username), 'success', 2000);
         return;
