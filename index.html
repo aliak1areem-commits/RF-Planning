@@ -10574,41 +10574,95 @@ async function threeGSaveToSupabase() {
   }
 }
 
+// ═══════════════════════════════════════════════════
+// 📥 Load Neighbors — نسخة محسّنة (Batch + Progress)
+// ═══════════════════════════════════════════════════
 async function threeGLoadNeighbors(projectId) {
+  // ✅ إذا محمّلين مسبقاً، لا نعيد التحميل
+  if (typeof threeGAllNeighbors !== 'undefined' && threeGAllNeighbors.length > 0) {
+    console.log('⏭️ Neighbors already loaded:', threeGAllNeighbors.length);
+    return threeGAllNeighbors;
+  }
+
   try {
-    // 🚀 1. احصل على العدد الكلي
+    console.log('📥 Loading neighbors for project:', projectId || 'ALL');
+
+    // 1. اجلب العدد الكلي
     let countQuery = db.from('rf_neighbors').select('id', { count: 'exact', head: true });
     if (projectId) countQuery = countQuery.eq('project_id', parseInt(projectId));
-    const { count } = await countQuery;
+    const { count, error: cErr } = await countQuery;
+    
+    if (cErr) throw cErr;
     const total = count || 0;
 
-    console.log('📊 Total neighbor relations in DB: ' + total);
-
-    // 🚀 2. اجلب كل الصفحات بالتوازي
-    const PAGE_SIZE = 1000;
-    const pages = Math.ceil(total / PAGE_SIZE);
-    const promises = [];
-
-    for (let i = 0; i < pages; i++) {
-      let q = db.from('rf_neighbors')
-        .select('*')
-        .range(i * PAGE_SIZE, (i + 1) * PAGE_SIZE - 1);
-      if (projectId) q = q.eq('project_id', parseInt(projectId));
-      promises.push(q);
+    if (total === 0) {
+      console.log('⚠️ No neighbors to load');
+      threeGAllNeighbors = [];
+      return [];
     }
 
-    const results = await Promise.all(promises);
+    console.log(`📊 Total neighbors: ${total.toLocaleString()}`);
+
+    // 2. ✅ حد أقصى 200K (حماية)
+    const MAX_LOAD = 200000;
+    const toLoad = Math.min(total, MAX_LOAD);
+    
+    if (total > MAX_LOAD) {
+      console.warn(`⚠️ Loading only ${MAX_LOAD.toLocaleString()}/${total.toLocaleString()}`);
+    }
+
+    // 3. حمّل على دفعات
+    const PAGE_SIZE = 1000;
+    const CONCURRENT = 3;  // ✅ 3 طلبات بالتوازي (آمن)
+    const pages = Math.ceil(toLoad / PAGE_SIZE);
     let allData = [];
-    results.forEach(r => {
-      if (r.error) throw r.error;
-      if (r.data) allData = allData.concat(r.data);
-    });
+
+    // ✅ حدّث الـ loading overlay
+    const loadingEl = document.getElementById('loadingOverlay');
+    const subtext = document.getElementById('loadingSubtext');
+    const progressBar = document.getElementById('loadingProgressBar');
+
+    for (let batchStart = 0; batchStart < pages; batchStart += CONCURRENT) {
+      const batchEnd = Math.min(batchStart + CONCURRENT, pages);
+      const batchPromises = [];
+
+      for (let i = batchStart; i < batchEnd; i++) {
+        let q = db.from('rf_neighbors')
+          .select('source_cell,neighbor_cell,relation_type,source_rnc,source_cell_id,neighbor_rnc,neighbor_cell_id,bsc_name,bidirectional,project_id,id')
+          .range(i * PAGE_SIZE, (i + 1) * PAGE_SIZE - 1);
+        if (projectId) q = q.eq('project_id', parseInt(projectId));
+        batchPromises.push(q);
+      }
+
+      const results = await Promise.all(batchPromises);
+      results.forEach(r => {
+        if (r.error) {
+          console.warn('⚠️ Batch error:', r.error.message);
+        } else if (r.data) {
+          allData = allData.concat(r.data);
+        }
+      });
+
+      // ✅ حدّث التقدم
+      const progress = Math.round((allData.length / toLoad) * 100);
+      if (subtext) subtext.textContent = `تحميل الجيران: ${allData.length.toLocaleString()}/${toLoad.toLocaleString()} (${progress}%)`;
+      if (progressBar) progressBar.style.width = progress + '%';
+
+      console.log(`   📥 ${allData.length.toLocaleString()}/${toLoad.toLocaleString()} (${progress}%)`);
+
+      // ✅ انتظر 50ms بين الدفعات (حماية من rate limit)
+      if (batchEnd < pages) {
+        await new Promise(r => setTimeout(r, 50));
+      }
+    }
 
     threeGAllNeighbors = allData;
-    console.log('✅ Loaded ' + threeGAllNeighbors.length + ' neighbor relations from DB');
+    console.log(`✅ Loaded ${threeGAllNeighbors.length.toLocaleString()} neighbors`);
     return threeGAllNeighbors;
+
   } catch (e) {
-    console.warn('Failed to load neighbors:', e);
+    console.error('❌ Failed to load neighbors:', e);
+    threeGAllNeighbors = [];
     return [];
   }
 }
@@ -12826,13 +12880,30 @@ async function checkAuthOnLoad() {
         
         console.log('✅ Auth OK — loading cells in 500ms...');
         setTimeout(async () => {
-          if (typeof map !== 'undefined' && map) {
-            try { map.invalidateSize(); } catch(err) {}
-          }
-          if (typeof loadCells === 'function') {
-            await loadCells();
-          }
-        }, 500);
+  if (typeof map !== 'undefined' && map) {
+    try { map.invalidateSize(); } catch(err) {}
+  }
+  if (typeof loadCells === 'function') {
+    await loadCells();
+  }
+  
+  // ✅ بعد ما الخلايا تحمّلت → حمّل الجيران في الخلفية
+  setTimeout(async () => {
+    if (typeof threeGLoadNeighbors === 'function' && 
+        typeof threeGAllNeighbors !== 'undefined' && 
+        threeGAllNeighbors.length === 0) {
+      console.log('⏳ Loading neighbors in background...');
+      toast('⏳ جاري تحميل الجيران في الخلفية...', 'info', 3000);
+      
+      await threeGLoadNeighbors(currentProjectId);
+      
+      if (threeGAllNeighbors.length > 0) {
+        toast('✅ تم تحميل ' + threeGAllNeighbors.length.toLocaleString() + ' علاقة جيران', 'success', 3000);
+        console.log('✅ Neighbors ready:', threeGAllNeighbors.length);
+      }
+    }
+  }, 1500);  // انتظر ثانية ونص بعد الخلايا
+}, 500);
         
         toast('👋 Welcome back, ' + (profile.full_name || profile.username), 'success', 2000);
         return;
