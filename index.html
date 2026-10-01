@@ -12867,36 +12867,38 @@ async function checkAuthOnLoad() {
         currentProfile = profile;
         document.getElementById('loginScreen').style.display = 'none';
         applyRoleBasedUI();
-        
-        console.log('✅ Auth OK — loading cells in 500ms...');
+
+        // ═══════════════════════════════════════════════
+        // 1️⃣ تحميل الخلايا بعد 500ms
+        // ═══════════════════════════════════════════════
         setTimeout(async () => {
-  if (typeof map !== 'undefined' && map) {
-    try { map.invalidateSize(); } catch(err) {}
-  }
-  if (typeof loadCells === 'function') {
-    await loadCells();
-  }
-  
-// ✅ ابدأ تحميل الجيران فورًا بعد الخلايا
-setTimeout(async () => {
-  if (typeof threeGLoadNeighbors === 'function' && 
-      typeof threeGAllNeighbors !== 'undefined' && 
-      threeGAllNeighbors.length === 0) {
-    console.log('⏳ Loading neighbors in background...');
-    
-    // ✅ لا toast منفصل (بيظهر toast عند الانتهاء)
-    const nb = await threeGLoadNeighbors(currentProjectId);
-    
-    if (nb && nb.length > 0) {
-      toast('✅ تم تحميل ' + nb.length.toLocaleString() + ' جار', 'success', 3000);
-    }
-  }
-}, 200);  // ← 200ms بدل 1500ms (يبدأ أسرع)
-        
+          if (typeof map !== 'undefined' && map) {
+            try { map.invalidateSize(); } catch(err) {}
+          }
+          if (typeof loadCells === 'function') {
+            await loadCells();
+          }
+        }, 500);
+
+        // ═══════════════════════════════════════════════
+        // 2️⃣ تحميل الجيران في الخلفية بعد 1500ms
+        // ═══════════════════════════════════════════════
+        setTimeout(async () => {
+          if (typeof threeGLoadNeighbors === 'function' &&
+              typeof threeGAllNeighbors !== 'undefined' &&
+              threeGAllNeighbors.length === 0) {
+            console.log('⏳ Loading neighbors in background...');
+            const nb = await threeGLoadNeighbors(currentProjectId);
+            if (nb && nb.length > 0) {
+              toast('✅ تم تحميل ' + nb.length.toLocaleString() + ' جار', 'success', 3000);
+            }
+          }
+        }, 1500);
+
         toast('👋 Welcome back, ' + (profile.full_name || profile.username), 'success', 2000);
         return;
       }
-    }   // ✅ هذا هو الـ } الي كان ناقص
+    }
 
     // لا يوجد تسجيل دخول — اعرض شاشة الدخول
     document.getElementById('loginScreen').style.display = 'flex';
