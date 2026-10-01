@@ -11553,7 +11553,7 @@ function nsPlanAll(siteName, lat, lng, height, sectors, sectorAz, siteType, band
 
     if (has3G) {
       bands3G.forEach(b => {
-        const cellName = 'U' + siteName + sec;
+             const cellName = 'U' + siteName + nsGet3GLetter(sec, b);
         const cell = nsPlan3GCell(cellName, lat, lng, az, height, b, nearby3G, sitePsc, opts);
         plan.cells.push(cell);
         sitePsc.add(cell.psc);
@@ -11583,6 +11583,11 @@ function nsGet2GLetter(sector, band) {
     const idx = ['A','B','C','D','E','F'].indexOf(sector);
     return ['D','E','F','J','K','L'][idx] || sector;
   }
+}
+  function nsGet3GLetter(sector, band) {
+  if (band === '2100') return sector;                        // A B C D E F
+  const map = { A:'G', B:'H', C:'I', D:'J', E:'K', F:'L' };   // 900
+  return map[sector] || sector;
 }
 
 /* ⭐ FIXED — Co-site BCCH/BSIC now enforced via 'used' Set */
@@ -11638,8 +11643,18 @@ function nsPlan2GCell(cellName, lat, lng, az, height, band, nearby2G, usedBcch, 
   const allBsics = [];
   for (let ncc = 0; ncc < 8; ncc++) for (let bcc = 0; bcc < 8; bcc++) allBsics.push(String(ncc) + String(bcc));
 
-  // ⭐ CO-SITE: hard filter — remove same BCCH+BSIC combo
-  let bsicCandidates = allBsics.filter(b => !usedBcchBsic.has(bcch + '_' + b));
+   // ⭐ CO-SITE: hard filter — remove same BCCH+BSIC combo
+  // ⭐ + منع صارم لنفس BCCH+BSIC ضمن 3 كم من الخلايا الموجودة
+  const clashBsics = new Set(
+    nearby2G
+      .filter(c => c.gsmBand === band && c.bcch === bcch && c.bsic &&
+                   haversineDistance(lat, lng, c.lat, c.long) <= 3000)
+      .map(c => c.bsic)
+  );
+  let bsicCandidates = allBsics.filter(b =>
+    !usedBcchBsic.has(bcch + '_' + b) && !clashBsics.has(b));
+  if (bsicCandidates.length === 0)
+    bsicCandidates = allBsics.filter(b => !usedBcchBsic.has(bcch + '_' + b));
   if (bsicCandidates.length === 0) bsicCandidates = allBsics;
 
   const bsicScores = bsicCandidates.map(b => {
@@ -11666,7 +11681,7 @@ function nsPlan2GCell(cellName, lat, lng, az, height, band, nearby2G, usedBcch, 
   return {
     cell_name: cellName, tech: 'GSM', band: band,
     lat, long: lng, bore: az, height, cell_radius: 5000,
-    bcch, tch: bcch, bsic,
+    bcch, tch: null, bsic,
     status: 'planned',
     nearestSameBcch: nsFindNearestSameBcch(lat, lng, bcch, band, nearby2G),
     nearestSameBsic: nsFindNearestSameBsic(lat, lng, bcch, bsic, band, nearby2G)
@@ -11674,7 +11689,7 @@ function nsPlan2GCell(cellName, lat, lng, az, height, band, nearby2G, usedBcch, 
 }
 
 function nsPlan3GCell(cellName, lat, lng, az, height, band, nearby3G, usedPsc, opts) {
-  const uarfcn = band === '900' ? { dl: 3012, ul: 9372 } : { dl: 10700, ul: 9700 };
+  const uarfcn = band === '900' ? { dl: 3012, ul: 2787 } : { dl: 10700, ul: 9750 };
 
   const allCands = [];
   for (let p = 0; p <= 511; p++) allCands.push(p);
@@ -11723,7 +11738,10 @@ function nsPlan4GCell(cellName, lat, lng, az, height, nearby4G, usedPci, usedRsi
   const allCands = [];
   for (let p = 0; p <= 503; p++) allCands.push(p);
 
-  let candidates = allCands.filter(p => !usedPci.has(p));
+   // ⭐ نفس الموقع: منع نفس PCI ونفس mod3
+  const usedMod3 = new Set([...usedPci].map(u => u % 3));
+  let candidates = allCands.filter(p => !usedPci.has(p) && !usedMod3.has(p % 3));
+  if (candidates.length === 0) candidates = allCands.filter(p => !usedPci.has(p));
   if (candidates.length === 0) candidates = allCands;
 
   const scores = candidates.map(p => {
@@ -11766,10 +11784,18 @@ function nsPlan4GCell(cellName, lat, lng, az, height, nearby4G, usedPci, usedRsi
   });
   usedRsi.forEach(r => { if (r > 0) usedRsisSet.add(r); });
 
-  let rsi = 1;
-  for (let r = 1; r <= 838; r++) {
-    if (!usedRsisSet.has(r)) { rsi = r; break; }
+  const RSI_STEP = 10;   // عدّله حسب Ncs المستخدم عندكم
+  const validRsi = [];
+  for (let r = 1; r <= 837; r++) {   // نطاق RSI الصحيح 0–837
+    let ok = true;
+    for (const u of usedRsisSet) {
+      if (Math.abs(u - r) < RSI_STEP) { ok = false; break; }
+    }
+    if (ok) validRsi.push(r);
   }
+  const rsi = validRsi.length
+    ? validRsi[Math.floor(Math.random() * validRsi.length)]
+    : 1;
 
   return {
     cell_name: cellName, tech: 'LTE', band: '4G',
