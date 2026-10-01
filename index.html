@@ -12792,18 +12792,19 @@ function applyRoleBasedUI() {
   });
 
   // ═══ 5. Add Admin Button (لـ admin فقط) ═══
+   // 👇👇👇 أضف هذا الكود الجديد هنا 👇👇👇
   if (role === 'admin') {
-    const adminBtn = document.getElementById('adminUsersBtn');
-    if (!adminBtn) {
+    const addUserBtn = document.getElementById('addUserBtn');
+    if (!addUserBtn) {
       const badgeEl = document.getElementById('userBadge');
       if (badgeEl && badgeEl.parentElement) {
-        const btn = document.createElement('button');
-        btn.id = 'adminUsersBtn';
-        btn.className = 'btn btn-ghost';
-        btn.style.cssText = 'margin-right:8px;background:#FDF1DC;color:#8A5A00;border-color:#FDE68A;';
-        btn.innerHTML = '<span>👥</span><span>Users</span>';
-        btn.onclick = showUsersManager;
-        badgeEl.parentElement.insertBefore(btn, badgeEl);
+        const btn2 = document.createElement('button');
+        btn2.id = 'addUserBtn';
+        btn2.className = 'btn';
+        btn2.style.cssText = 'margin-right:8px;background:#1F9D55;color:#fff;border:none;';
+        btn2.innerHTML = '<span>➕</span><span>Add User</span>';
+        btn2.onclick = showAddUserModal;
+        badgeEl.parentElement.insertBefore(btn2, badgeEl);
       }
     }
   }
@@ -12957,6 +12958,133 @@ if (db && db.auth) {
     }
   });
 }
+  // ═══════════════════════════════════════════════════
+// Modal إضافة مستخدم
+// ═══════════════════════════════════════════════════
+window.showAddUserModal = function() {
+  if (!hasPermission('action:manage-users')) {
+    toast('❌ ليس عندك صلاحية', 'error');
+    return;
+  }
+
+  const existing = document.getElementById('addUserModal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'addUserModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(12,27,61,.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:99999;padding:20px;';
+
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:14px;width:100%;max-width:480px;box-shadow:0 30px 80px rgba(0,0,0,.4);">
+      <div style="padding:20px 24px;border-bottom:1px solid #E9EEF6;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <h3 style="margin:0;font-size:17px;color:#0C1B3D;">➕ إضافة مستخدم جديد</h3>
+          <p style="margin:4px 0 0;font-size:12px;color:#5A6B87;">سيتم إنشاء الحساب فوراً</p>
+        </div>
+        <button onclick="document.getElementById('addUserModal').remove()" style="width:32px;height:32px;border-radius:8px;background:#FCEAEA;color:#D64545;border:none;cursor:pointer;font-size:16px;">✕</button>
+      </div>
+
+      <div style="padding:20px 24px;">
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:11.5px;font-weight:700;color:#5A6B87;text-transform:uppercase;margin-bottom:6px;">Username *</label>
+          <input type="text" id="newUsername" placeholder="john.doe" style="width:100%;padding:11px 14px;border:1.5px solid #D7DEEA;border-radius:10px;font-size:13.5px;font-family:monospace;outline:none;box-sizing:border-box;">
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:11.5px;font-weight:700;color:#5A6B87;text-transform:uppercase;margin-bottom:6px;">Full Name</label>
+          <input type="text" id="newFullName" placeholder="John Doe" style="width:100%;padding:11px 14px;border:1.5px solid #D7DEEA;border-radius:10px;font-size:13.5px;outline:none;box-sizing:border-box;">
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:11.5px;font-weight:700;color:#5A6B87;text-transform:uppercase;margin-bottom:6px;">Password * (8+ chars)</label>
+          <input type="text" id="newPassword" placeholder="StrongPass123!" style="width:100%;padding:11px 14px;border:1.5px solid #D7DEEA;border-radius:10px;font-size:13.5px;font-family:monospace;outline:none;box-sizing:border-box;">
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:11.5px;font-weight:700;color:#5A6B87;text-transform:uppercase;margin-bottom:6px;">Role</label>
+          <select id="newRole" style="width:100%;padding:11px 14px;border:1.5px solid #D7DEEA;border-radius:10px;font-size:13.5px;font-family:inherit;outline:none;background:#fff;box-sizing:border-box;">
+            <option value="viewer">👁️ Viewer</option>
+            <option value="optimizer">🎯 Optimizer</option>
+            <option value="engineer">🛠️ Engineer</option>
+            <option value="admin">👑 Admin</option>
+          </select>
+        </div>
+
+        <div id="addUserError" style="display:none;background:#FCEAEA;color:#B91C1C;padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:14px;"></div>
+      </div>
+
+      <div style="padding:14px 24px;background:#FBFCFE;border-top:1px solid #E9EEF6;display:flex;gap:10px;justify-content:flex-end;border-radius:0 0 14px 14px;">
+        <button onclick="document.getElementById('addUserModal').remove()" style="padding:9px 18px;background:#fff;color:#5A6B87;border:1.5px solid #D7DEEA;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">إلغاء</button>
+        <button id="createUserBtn" onclick="handleCreateUser()" style="padding:9px 22px;background:#1F9D55;color:#fff;border:none;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">➕ إنشاء</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  setTimeout(() => document.getElementById('newUsername').focus(), 100);
+
+  modal.addEventListener('click', e => {
+    if (e.target.id === 'addUserModal') modal.remove();
+  });
+};
+
+window.handleCreateUser = async function() {
+  const username = (document.getElementById('newUsername').value || '').trim().toLowerCase();
+  const fullName = (document.getElementById('newFullName').value || '').trim();
+  const password = document.getElementById('newPassword').value;
+  const role = document.getElementById('newRole').value;
+  const btn = document.getElementById('createUserBtn');
+  const errBox = document.getElementById('addUserError');
+
+  errBox.style.display = 'none';
+
+  if (!username || username.length < 3) {
+    errBox.textContent = '❌ اسم المستخدم 3 أحرف على الأقل';
+    errBox.style.display = 'block';
+    return;
+  }
+  if (!/^[a-z0-9._-]+$/.test(username)) {
+    errBox.textContent = '❌ فقط حروف إنجليزية، أرقام، . _ -';
+    errBox.style.display = 'block';
+    return;
+  }
+  if (!password || password.length < 8) {
+    errBox.textContent = '❌ كلمة المرور 8 أحرف على الأقل';
+    errBox.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'جاري الإنشاء...';
+
+  try {
+    const { data, error } = await db.rpc('admin_create_user', {
+      p_username: username,
+      p_password: password,
+      p_full_name: fullName || username,
+      p_role: role,
+    });
+
+    if (error) throw error;
+    if (data && data.error) throw new Error(data.error);
+
+    toast('✅ تم إنشاء المستخدم: ' + username, 'success');
+    document.getElementById('addUserModal').remove();
+
+    if (document.getElementById('usersManagerModal')) {
+      document.getElementById('usersManagerModal').remove();
+      showUsersManager();
+    }
+
+  } catch (e) {
+    console.error(e);
+    errBox.textContent = '❌ ' + (e.message || 'فشل الإنشاء');
+    errBox.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '➕ إنشاء';
+  }
+};
 console.log('%c🌐 Language switcher loaded', 'color:#1F9D55;font-weight:bold;');
 console.log('%cRF Planning Pro v2 Loaded', 'color:#124191;font-weight:bold;font-size:14px;');
 console.log('%cTools: PCI · GSM · NB · Distance · Azimuth · Unit · KML', 'color:#00A1E0;font-size:11px;');
