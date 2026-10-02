@@ -14758,7 +14758,7 @@ window.startDemoMode = function(){
     banner.id = '__demoBanner';
     banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#006C35,#00A550);color:#fff;padding:9px 20px;font-size:12.5px;font-weight:700;text-align:center;letter-spacing:.05em;text-transform:uppercase;box-shadow:0 4px 20px rgba(0,108,53,.5);font-family:Inter,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;gap:16px;';
     banner.innerHTML = '<span>👤 DEMO MODE · Riyadh 🇸🇦 · ' + sitePositions.length + ' sites · ' + demoCells.length + ' cells · NOT real</span>' +
-      '<a href="javascript:location.reload()" style="color:#FFD700;text-decoration:underline;font-size:11px;cursor:pointer;">↺ Exit Demo</a>';
+      '<a href="javascript:exitDemoMode()" style="color:#FFD700;text-decoration:underline;font-size:11px;cursor:pointer;">↺ Exit Demo</a>';
     document.body.appendChild(banner);
   }
 
