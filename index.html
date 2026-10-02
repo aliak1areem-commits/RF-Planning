@@ -12860,17 +12860,36 @@ function nsShowOnMap() {
     nbMapLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
     nbMapLayers = [];
 
+    const layersByCategory = {};
+    const addToCategory = (cat, layer) => {
+      if (!layersByCategory[cat]) layersByCategory[cat] = [];
+      layersByCategory[cat].push(layer);
+      nbMapLayers.push(layer);
+      return layer;
+    };
+
     const { lat, lng } = nsLastPlan;
+
     const siteMarker = L.circleMarker([lat, lng], { radius: 16, color: '#124191', weight: 4, fillColor: '#124191', fillOpacity: 1 }).addTo(map);
     siteMarker.bindTooltip('🏗️ NEW: ' + nsLastPlan.siteName, { permanent: true, direction: 'top', offset: [0, -18], className: 'nb-label-source' });
-    nbMapLayers.push(siteMarker);
+    addToCategory('site', siteMarker);
+
+    let n2g900 = 0, n2g1800 = 0, n3g900 = 0, n3g2100 = 0, n4g = 0;
 
     nsLastPlan.cells.forEach(c => {
       const coords = makeSectorCoords(c.lat, c.long, c.bore);
-      let color = '#124191';
-      if (c.tech === 'GSM') color = c.band === '1800' ? '#7C3AED' : '#D97706';
-      else if (c.tech === '3G') color = c.band === '900' ? '#14B8A6' : '#0D9488';
-      const poly = L.polygon(coords, { color: '#fff', weight: 2.5, fillColor: color, fillOpacity: 0.85 }).addTo(map);
+      let cat, color;
+      if (c.tech === 'GSM') {
+        if (c.band === '900') { cat = '2g900'; color = '#D97706'; n2g900++; }
+        else { cat = '2g1800'; color = '#7C3AED'; n2g1800++; }
+      } else if (c.tech === '3G') {
+        if (c.band === '900') { cat = '3g900'; color = '#14B8A6'; n3g900++; }
+        else { cat = '3g2100'; color = '#0D9488'; n3g2100++; }
+      } else {
+        cat = '4g'; color = '#124191'; n4g++;
+      }
+
+      const poly = L.polygon(coords, { color: '#fff', weight: 2.5, fillColor: color, fillOpacity: 0.85, interactive: true }).addTo(map);
       poly.bindTooltip(c.cell_name, { permanent: true, direction: 'center', className: 'nb-label' });
 
       let popup = '<div style="font-family:Inter,sans-serif;font-size:12px;min-width:200px;">';
@@ -12881,14 +12900,38 @@ function nsShowOnMap() {
       if (c.bsic) popup += '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>BSIC:</span><b>' + c.bsic + '</b></div>';
       if (c.psc != null) popup += '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>PSC:</span><b>' + c.psc + '</b></div>';
       if (c.pci != null) popup += '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>PCI:</span><b>' + c.pci + '</b></div>';
-      if (c.rsi != null) popup += '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>RSI:</span><b>' + c.rsi + '</b></div>';
       popup += '</div>';
       poly.bindPopup(popup);
-      nbMapLayers.push(poly);
+      addToCategory(cat, poly);
     });
 
     map.setView([lat, lng], 14);
-    toast('New site displayed on map', 'success');
+
+    const onToggle = () => {
+      Object.entries(layersByCategory).forEach(([cat, layers]) => {
+        const visible = ToolLegend.isActive(cat);
+        layers.forEach(l => {
+          if (visible) { if (!map.hasLayer(l)) map.addLayer(l); }
+          else { if (map.hasLayer(l)) map.removeLayer(l); }
+        });
+      });
+    };
+
+    const items = [{ id: 'site', color: '#124191', label: 'New Site', count: 1 }];
+    if (n2g900 > 0) items.push({ id: '2g900', color: '#D97706', label: '2G-900', count: n2g900 });
+    if (n2g1800 > 0) items.push({ id: '2g1800', color: '#7C3AED', label: '2G-1800', count: n2g1800 });
+    if (n3g900 > 0) items.push({ id: '3g900', color: '#14B8A6', label: '3G-900', count: n3g900 });
+    if (n3g2100 > 0) items.push({ id: '3g2100', color: '#0D9488', label: '3G-2100', count: n3g2100 });
+    if (n4g > 0) items.push({ id: '4g', color: '#124191', label: 'LTE', count: n4g });
+
+    ToolLegend.show({
+      icon: '🏗️',
+      title: 'New Site · ' + nsLastPlan.cells.length + ' cells',
+      items: items,
+      onToggle: onToggle
+    });
+
+    toast('🏗️ New site displayed on map', 'success');
   }, 400);
 }
 
