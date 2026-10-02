@@ -983,6 +983,131 @@ body.dark .tool-legend-count { background: #142A5C; color: #AEB9D4; }
 body.dark .tool-legend-item:hover { background: #142A5C; }
 body.dark .tool-legend-actions { border-color: #1E3A6D; }
 body.dark .tool-legend-actions button { background: #142A5C; color: #AEB9D4; border-color: #1E3A6D; } 
+  /* =========================================================
+   🎨 TOOL LEGEND — Legend تفاعلي لكل الأدوات
+   ========================================================= */
+.tool-legend {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 600;
+  background: rgba(255,255,255,.98);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  border: 1px solid rgba(18,65,145,.08);
+  font-size: 11.5px;
+  min-width: 230px;
+  max-width: 320px;
+  max-height: calc(100% - 40px);
+  overflow-y: auto;
+  display: none;
+}
+.tool-legend.show { display: block; }
+.tool-legend-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #0C1B3D;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #E9EEF6;
+}
+.tool-legend-head .close-btn {
+  margin-left: auto;
+  background: #FCEAEA;
+  color: #D64545;
+  border: none;
+  border-radius: 6px;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: inherit;
+  transition: all .15s;
+}
+.tool-legend-head .close-btn:hover { background: #f8d6d6; }
+.tool-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: all .15s;
+}
+.tool-legend-item:hover { background: #F4F7FB; }
+.tool-legend-item.disabled { opacity: 0.4; }
+.tool-legend-item input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #124191;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin: 0;
+}
+.tool-legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.tool-legend-label {
+  flex: 1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #1B1F2A;
+}
+.tool-legend-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: #F4F7FB;
+  padding: 2px 7px;
+  border-radius: 10px;
+  color: #5A6B87;
+}
+.tool-legend-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #E9EEF6;
+}
+.tool-legend-actions button {
+  flex: 1;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid #D7DEEA;
+  background: #fff;
+  color: #5A6B87;
+  transition: all .15s;
+}
+.tool-legend-actions button:hover {
+  background: #EAF2FB;
+  color: #124191;
+  border-color: #124191;
+}
+body.dark .tool-legend {
+  background: rgba(15,32,56,.98);
+  border-color: #1E3A6D;
+}
+body.dark .tool-legend-head { color: #fff; border-color: #1E3A6D; }
+body.dark .tool-legend-label { color: #E2E8F0; }
+body.dark .tool-legend-count { background: #142A5C; color: #AEB9D4; }
+body.dark .tool-legend-item:hover { background: #142A5C; }
+body.dark .tool-legend-actions { border-color: #1E3A6D; }
+body.dark .tool-legend-actions button { background: #142A5C; color: #AEB9D4; border-color: #1E3A6D; }
 </style>
 </head>
 <body>
@@ -1280,6 +1405,20 @@ body.dark .tool-legend-actions button { background: #142A5C; color: #AEB9D4; bor
           <div id="legendItems"></div>
         </div>
         <!-- 🎨 Tool Legend -->
+        <div class="tool-legend" id="toolLegend">
+          <div class="tool-legend-head">
+            <span id="toolLegendIcon">🎯</span>
+            <span id="toolLegendTitle">Legend</span>
+            <button class="close-btn" onclick="ToolLegend.hide()" title="Hide">✕</button>
+          </div>
+          <div id="toolLegendItems"></div>
+          <div class="tool-legend-actions">
+            <button onclick="ToolLegend.toggleAll(true)">✅ All</button>
+            <button onclick="ToolLegend.toggleAll(false)">☐ None</button>
+            <button onclick="ToolLegend.invert()">↺ Invert</button>
+          </div>
+        </div>
+                <!-- 🎨 Tool Legend -->
         <div class="tool-legend" id="toolLegend">
           <div class="tool-legend-head">
             <span id="toolLegendIcon">🎯</span>
@@ -3357,6 +3496,7 @@ function switchView(page) {
     if (typeof nbHideLegend === 'function') nbHideLegend();
     if (typeof hideNeighborLinesLegend === 'function') hideNeighborLinesLegend();
             if (typeof ToolLegend !== 'undefined') ToolLegend.hide();
+            if (typeof ToolLegend !== 'undefined') ToolLegend.hide();
   }
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -3983,6 +4123,7 @@ function resetMapView() {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
+    if (typeof ToolLegend !== 'undefined') ToolLegend.hide();
 
   // ═══ 4. مسح متغيرات الأدوات ═══
   if (typeof nbCurrentSource !== 'undefined') nbCurrentSource = null;
@@ -5539,33 +5680,69 @@ function showPCIOnMap() {
   setTimeout(() => {
     sectorLayer.clearLayers();
     labelLayer.clearLayers();
+    nbMapLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
+    nbMapLayers = [];
+
+    const layersByCategory = {};
+    const addToCategory = (cat, layer) => {
+      if (!layersByCategory[cat]) layersByCategory[cat] = [];
+      layersByCategory[cat].push(layer);
+      nbMapLayers.push(layer);
+      return layer;
+    };
 
     lastPCIResults.cells.forEach(cell => {
       if (!cell.lat || !cell.long) return;
-      let color;
-      if (lastPCIResults.stillConflicted.has(cell.id)) color = '#D64545';
-      else if (cell.suggested_pci !== cell.pci) color = '#1F9D55';
-      else color = '#94A3B8';
+      let cat, color;
+      if (lastPCIResults.stillConflicted.has(cell.id)) { cat = 'unresolved'; color = '#D64545'; }
+      else if (cell.suggested_pci !== cell.pci) { cat = 'reassigned'; color = '#1F9D55'; }
+      else { cat = 'clean'; color = '#94A3B8'; }
 
       const coords = makeSectorCoords(cell.lat, cell.long, cell.bore);
-      const polygon = L.polygon(coords, {
-        color: color, weight: 1, fillColor: color, fillOpacity: 0.7, interactive: true
+      const poly = L.polygon(coords, {
+        color: color, weight: 1.5, fillColor: color, fillOpacity: 0.75, interactive: true
       });
-      polygon.bindPopup(
+      poly.bindPopup(
         '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:220px;">' +
           '<div style="font-weight:700;font-size:14px;font-family:monospace;margin-bottom:6px;">' + escapeHtml(cell.cell_name) + '</div>' +
           '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Original PCI:</span><b>' + cell.pci + '</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>New PCI:</span><b style="color:#1F9D55;">' + cell.suggested_pci + '</b></div>' +
         '</div>'
       );
-      sectorLayer.addLayer(polygon);
+      addToCategory(cat, poly);
     });
 
     if (lastPCIResults.cells.length) {
       const bounds = L.latLngBounds(lastPCIResults.cells.map(c => [c.lat, c.long]));
       map.fitBounds(bounds, { padding: [50, 50] });
     }
-    toast('Showing PCI results on map', 'success');
+
+    const onToggle = () => {
+      Object.entries(layersByCategory).forEach(([cat, layers]) => {
+        const visible = ToolLegend.isActive(cat);
+        layers.forEach(l => {
+          if (visible) { if (!map.hasLayer(l)) map.addLayer(l); }
+          else { if (map.hasLayer(l)) map.removeLayer(l); }
+        });
+      });
+    };
+
+    const unresolvedN = lastPCIResults.stillConflicted.size;
+    const reassignedN = lastPCIResults.cells.filter(c => c.suggested_pci !== c.pci && !lastPCIResults.stillConflicted.has(c.id)).length;
+    const cleanN = lastPCIResults.cells.length - unresolvedN - reassignedN;
+
+    ToolLegend.show({
+      icon: '🧮',
+      title: 'PCI Checker · ' + lastPCIResults.cells.length + ' cells',
+      items: [
+        { id: 'unresolved', color: '#D64545', label: 'Unresolved', count: unresolvedN },
+        { id: 'reassigned', color: '#1F9D55', label: 'Reassigned', count: reassignedN },
+        { id: 'clean', color: '#94A3B8', label: 'Clean', count: cleanN }
+      ],
+      onToggle: onToggle
+    });
+
+    toast('📍 PCI results on map', 'success');
   }, 300);
 }
 
@@ -6157,39 +6334,51 @@ function nbShowOnMap() {
     if (sectorLayer) sectorLayer.clearLayers();
     if (labelLayer) labelLayer.clearLayers();
     if (coverageLayer) coverageLayer.clearLayers();
-    nbMapLayers.forEach(l => map.removeLayer(l));
+    nbMapLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
     nbMapLayers = [];
+
+    // 🎯 تخزين الطبقات حسب الفئة
+    const layersByCategory = {};
+    const addToCategory = (cat, layer) => {
+      if (!layersByCategory[cat]) layersByCategory[cat] = [];
+      layersByCategory[cat].push(layer);
+      nbMapLayers.push(layer);
+      return layer;
+    };
 
     const sLat = nbCurrentSource.lat, sLon = nbCurrentSource.long, sBore = nbCurrentSource.bore;
     map.setView([sLat, sLon], 14);
 
+    // دائرة نصف القطر
     const radiusCircle = L.circle([sLat, sLon], {
       radius: nbCurrentRadius, color: '#2563EB', weight: 2, dashArray: '6,6',
       fillColor: '#2563EB', fillOpacity: 0.04, interactive: false
     }).addTo(map);
-    nbMapLayers.push(radiusCircle);
+    addToCategory('source', radiusCircle);
 
+    // الخلية المصدر
     const srcCoords = makeSectorCoords(sLat, sLon, sBore);
     const srcPoly = L.polygon(srcCoords, {
       color: '#991B1B', weight: 2.5, fillColor: '#DC2626', fillOpacity: 0.85
     }).addTo(map);
-    srcPoly.bindTooltip('🎯 ' + nbCurrentSource.cell_name, { permanent: true, direction: 'top', offset: [0, -10], className: 'nb-label-source' });
-    nbMapLayers.push(srcPoly);
+    srcPoly.bindTooltip('🎯 ' + escapeHtml(nbCurrentSource.cell_name), { permanent: true, direction: 'top', offset: [0, -10], className: 'nb-label-source' });
+    addToCategory('source', srcPoly);
 
+    // الجيران
     nbCurrentNeighbors.forEach(nb => {
       if (!nb.cell) return;
       const nLat = nb.cell.lat, nLon = nb.cell.long;
-      let fill, stroke;
-      if (nb.status === 'Missing') { fill = '#F97316'; stroke = '#C2410C'; }
-      else if (nb.status === 'Added (Not Found)') { fill = '#EAB308'; stroke = '#A16207'; }
-      else { fill = '#16A34A'; stroke = '#15803D'; }
+      let cat, fill, stroke;
+      if (nb.status === 'Missing') { cat = 'missing'; fill = '#F97316'; stroke = '#C2410C'; }
+      else if (nb.status === 'Added (Not Found)') { cat = 'not-found'; fill = '#EAB308'; stroke = '#A16207'; }
+      else { cat = 'added'; fill = '#16A34A'; stroke = '#15803D'; }
 
       const line = L.polyline([[sLat, sLon], [nLat, nLon]], {
-        color: nb.status === 'Missing' ? '#DC2626' : '#16A34A',
+        color: nb.status === 'Missing' ? '#DC2626' : (nb.status === 'Added (Not Found)' ? '#EAB308' : '#16A34A'),
         weight: nb.isFront ? 3 : 1.5, opacity: 0.85,
         dashArray: nb.status === 'Missing' ? '8,6' : null
       }).addTo(map);
-      nbMapLayers.push(line);
+      addToCategory(cat, line);
 
       const nCoords = makeSectorCoords(nLat, nLon, nb.cell.bore);
       const nPoly = L.polygon(nCoords, { color: stroke, weight: 1.5, fillColor: fill, fillOpacity: 0.7 }).addTo(map);
@@ -6197,13 +6386,14 @@ function nbShowOnMap() {
       nPoly.bindPopup(
         '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:200px;">' +
           '<div style="font-weight:800;font-family:monospace;margin-bottom:6px;">' + escapeHtml(nb.name) + '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Status:</span><b style="color:' + (nb.status === 'Missing' ? '#DC2626' : '#16A34A') + ';">' + nb.status + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Status:</span><b>' + nb.status + '</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Distance:</span><b>' + (nb.distance != null ? nb.distance.toFixed(0) + ' m' : '—') + '</b></div>' +
         '</div>'
       );
-      nbMapLayers.push(nPoly);
+      addToCategory(cat, nPoly);
     });
 
+    // Zoom
     const points = [[sLat, sLon]];
     nbCurrentNeighbors.forEach(nb => { if (nb.cell) points.push([nb.cell.lat, nb.cell.long]); });
     if (points.length > 1) {
@@ -6213,8 +6403,38 @@ function nbShowOnMap() {
       map.fitBounds(L.latLngBounds(sw, ne), { padding: [40, 40], maxZoom: 15 });
     }
 
-    nbShowLegend();
-    toast('📍 ' + nbCurrentNeighbors.length + ' neighbors shown on map', 'success');
+    // 🎨 Legend تفاعلي
+    const onToggle = () => {
+      Object.entries(layersByCategory).forEach(([cat, layers]) => {
+        const visible = ToolLegend.isActive(cat);
+        layers.forEach(l => {
+          if (visible) { if (!map.hasLayer(l)) map.addLayer(l); }
+          else { if (map.hasLayer(l)) map.removeLayer(l); }
+        });
+      });
+    };
+
+    const added = nbCurrentNeighbors.filter(n => n.status === 'Added').length;
+    const missing = nbCurrentNeighbors.filter(n => n.status === 'Missing').length;
+    const notFound = nbCurrentNeighbors.filter(n => n.status === 'Added (Not Found)').length;
+
+    ToolLegend.show({
+      icon: '🔗',
+      title: '2G Neighbor · ' + nbCurrentNeighbors.length,
+      items: [
+        { id: 'source', color: '#DC2626', label: 'Source Cell', count: 1 },
+        { id: 'added', color: '#16A34A', label: 'Added', count: added },
+        { id: 'missing', color: '#F97316', label: 'Missing', count: missing, dashed: true },
+        { id: 'not-found', color: '#EAB308', label: 'Not Found in DB', count: notFound }
+      ],
+      onToggle: onToggle
+    });
+
+    // إخفاء Legend القديم
+    const oldLegend = document.getElementById('nbLegend');
+    if (oldLegend) oldLegend.style.display = 'none';
+
+    toast('📍 ' + nbCurrentNeighbors.length + ' neighbors on map', 'success');
   }, 500);
 }
 
@@ -6595,13 +6815,24 @@ function gsmShowOnMap() {
   setTimeout(() => {
     if (sectorLayer) sectorLayer.clearLayers();
     if (labelLayer) labelLayer.clearLayers();
+    nbMapLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
+    nbMapLayers = [];
+
+    const layersByCategory = {};
+    const addToCategory = (cat, layer) => {
+      if (!layersByCategory[cat]) layersByCategory[cat] = [];
+      layersByCategory[cat].push(layer);
+      nbMapLayers.push(layer);
+      return layer;
+    };
 
     const target = gsmLastResults.cell;
     map.setView([target.lat, target.long], 14);
 
+    // Target Cell
     const targetCoords = makeSectorCoords(target.lat, target.long, target.bore);
     const targetPoly = L.polygon(targetCoords, {
-      color: '#FF3232', weight: 1.2, fillColor: '#FF3232', fillOpacity: 0.82, interactive: true
+      color: '#FF3232', weight: 2.5, fillColor: '#FF3232', fillOpacity: 0.85, interactive: true
     });
     targetPoly.bindPopup(
       '<div style="font-family:Inter,sans-serif;font-size:12.5px;">' +
@@ -6610,22 +6841,24 @@ function gsmShowOnMap() {
         'BSIC: <b style="color:#1F9D55;">' + gsmLastResults.bsic + '</b>' +
       '</div>'
     );
-    sectorLayer.addLayer(targetPoly);
+    addToCategory('target', targetPoly);
+
+    let conflictN = 0, cositeN = 0, frontN = 0, nonfrontN = 0;
 
     gsmLastResults.nearby.forEach(c => {
       const full = allCells.find(x => x.cell_name === c.cell);
       if (!full) return;
       const coords = makeSectorCoords(full.lat, full.long, full.bore);
       const isConflict = !c.isCoSite && c.isFront && c.bcch === gsmLastResults.bcch;
-      let color;
-      if (isConflict) color = '#D64545';
-      else if (c.isCoSite) color = '#6B7280';
-      else if (c.isFront) color = '#FF5050';
-      else color = '#FFDC00';
+      let cat, color;
+      if (isConflict) { cat = 'conflict'; color = '#D64545'; conflictN++; }
+      else if (c.isCoSite) { cat = 'cosite'; color = '#6B7280'; cositeN++; }
+      else if (c.isFront) { cat = 'front'; color = '#FF5050'; frontN++; }
+      else { cat = 'nonfront'; color = '#FFDC00'; nonfrontN++; }
 
-      const poly = L.polygon(coords, { color: '#FFFFFF', weight: 0.8, fillColor: color, fillOpacity: 0.7, interactive: true });
+      const poly = L.polygon(coords, { color: '#FFFFFF', weight: 0.8, fillColor: color, fillOpacity: 0.75, interactive: true });
       poly.bindPopup('<b>' + escapeHtml(c.cell) + '</b><br>BCCH: ' + (c.bcch != null ? c.bcch : '—') + '<br>BSIC: ' + (c.bsic || '—'));
-      sectorLayer.addLayer(poly);
+      addToCategory(cat, poly);
     });
 
     const points = [[target.lat, target.long]];
@@ -6634,8 +6867,32 @@ function gsmShowOnMap() {
       if (full) points.push([full.lat, full.long]);
     });
     if (points.length > 1) map.fitBounds(L.latLngBounds(points), { padding: [60, 60] });
-    toast('📍 Showing GSM plan', 'success');
-  }, 350);
+
+    const onToggle = () => {
+      Object.entries(layersByCategory).forEach(([cat, layers]) => {
+        const visible = ToolLegend.isActive(cat);
+        layers.forEach(l => {
+          if (visible) { if (!map.hasLayer(l)) map.addLayer(l); }
+          else { if (map.hasLayer(l)) map.removeLayer(l); }
+        });
+      });
+    };
+
+    ToolLegend.show({
+      icon: '📡',
+      title: 'GSM Planner · ' + gsmLastResults.nearby.length,
+      items: [
+        { id: 'target', color: '#FF3232', label: 'Target Cell', count: 1 },
+        { id: 'conflict', color: '#D64545', label: 'Conflict (Front)', count: conflictN },
+        { id: 'cosite', color: '#6B7280', label: 'Co-site', count: cositeN },
+        { id: 'front', color: '#FF5050', label: 'Front (Safe)', count: frontN },
+        { id: 'nonfront', color: '#FFDC00', label: 'Non-Front', count: nonfrontN }
+      ],
+      onToggle: onToggle
+    });
+
+    toast('📍 ' + gsmLastResults.nearby.length + ' cells on map', 'success');
+  }, 400);
 }
 
 async function gsmSaveToDatabase() {
@@ -8140,51 +8397,41 @@ function hsnShowOnMap() {
   setTimeout(() => {
     sectorLayer.clearLayers();
     labelLayer.clearLayers();
+    nbMapLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
+    nbMapLayers = [];
 
-    // 🎯 اعرض فقط الخلايا المتعارضة
-    const conflictCells = hsnLastResults.cells.filter(c =>
-      hsnLastResults.conflictMap.has(c.id)
-    );
+    const conflictCells = hsnLastResults.cells.filter(c => hsnLastResults.conflictMap.has(c.id));
 
     if (!conflictCells.length) {
       toast('✅ No conflicts — all cells clean!', 'success', 5000);
       return;
     }
 
-    // 🎯 حجم ثابت بالمتر — لا يعتمد على zoom
-    // 80 متر فقط (يظهر صغير في كل الـ zooms)
-    const FIXED_RADIUS_M = 80;
+    const layersByCategory = {};
+    const addToCategory = (cat, layer) => {
+      if (!layersByCategory[cat]) layersByCategory[cat] = [];
+      layersByCategory[cat].push(layer);
+      nbMapLayers.push(layer);
+      return layer;
+    };
 
+    const FIXED_RADIUS_M = 80;
     function makeFixedSector(lat, lng, azimuth) {
       const radius_m = FIXED_RADIUS_M;
       const half_width_m = FIXED_RADIUS_M * 0.35;
-
       const near_d = radius_m * 0.04;
       const far_d = radius_m;
       const near_w = half_width_m * 0.30;
       const far_w = half_width_m;
-
       function pt(fwd_m, right_m) {
         const distance = Math.sqrt(fwd_m * fwd_m + right_m * right_m);
         const offsetAngle = Math.atan2(right_m, fwd_m) * 180 / Math.PI;
         return destinationPoint(lat, lng, azimuth + offsetAngle, distance);
       }
-
       return [pt(0, 0), pt(near_d, -near_w), pt(far_d, -far_w), pt(far_d, far_w), pt(near_d, near_w)];
     }
 
-    // رتّب: LOW أولاً، ثم MEDIUM، ثم HIGH (الأعلى فوق)
-    conflictCells.sort((a, b) => {
-      const priority = (cell) => {
-        const conflicts = hsnLastResults.conflictMap.get(cell.id);
-        const count = conflicts.length;
-        const avg = conflicts.reduce((s, c) => s + (c.conflictLevel || 0.5), 0) / count;
-        if (count >= 3 && avg > 0.7) return 3;   // HIGH
-        if (count >= 2 || conflicts.some(c => c.sameSite)) return 2; // MEDIUM
-        return 1; // LOW
-      };
-      return priority(a) - priority(b);
-    });
+    let highN = 0, medN = 0, lowN = 0;
 
     conflictCells.forEach(cell => {
       if (!cell.lat || !cell.long) return;
@@ -8193,20 +8440,18 @@ function hsnShowOnMap() {
       const conflictCount = conflicts.length;
       const avgLevel = conflicts.reduce((a, c) => a + (c.conflictLevel || 0.5), 0) / conflictCount;
 
-      let color, fillOpacity, weight;
+      let cat, color, fillOpacity, weight;
       if (conflictCount >= 3 && avgLevel > 0.7) {
-        color = '#B91C1C'; fillOpacity = 0.95; weight = 2.5;
+        cat = 'high'; color = '#B91C1C'; fillOpacity = 0.95; weight = 2.5; highN++;
       } else if (conflictCount >= 2 || conflicts.some(c => c.sameSite)) {
-        color = '#F97316'; fillOpacity = 0.85; weight = 2;
+        cat = 'medium'; color = '#F97316'; fillOpacity = 0.85; weight = 2; medN++;
       } else {
-        color = '#FBBF24'; fillOpacity = 0.75; weight = 1.5;
+        cat = 'low'; color = '#FBBF24'; fillOpacity = 0.75; weight = 1.5; lowN++;
       }
 
       const coords = makeFixedSector(cell.lat, cell.long, cell.bore);
       const poly = L.polygon(coords, {
-        color: color, weight: weight,
-        fillColor: color, fillOpacity: fillOpacity,
-        lineJoin: 'round'
+        color: color, weight: weight, fillColor: color, fillOpacity: fillOpacity, lineJoin: 'round'
       });
 
       const suggested = hsnLastResults.suggestedHSNs.get(cell.id);
@@ -8216,96 +8461,43 @@ function hsnShowOnMap() {
       poly.bindPopup(
         '<div style="font-family:Inter,sans-serif;font-size:13px;min-width:240px;">' +
           '<div style="font-weight:800;font-family:monospace;margin-bottom:8px;color:#0C1B3D;">' + escapeHtml(cell.cell_name) + '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;">' +
-            '<span style="color:#5A6B87;">Band:</span><b>' + (cell.gsmBand === '1800' ? '1800 MHz' : '900 MHz') + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;">' +
-            '<span style="color:#5A6B87;">Current HSN:</span><b style="color:#B91C1C;">' + cell.hsn + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;">' +
-            '<span style="color:#5A6B87;">Suggested:</span><b style="color:#1F9D55;">' + (suggested != null ? suggested : '—') + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;">' +
-            '<span style="color:#5A6B87;">Conflicts:</span><b style="color:#B91C1C;">' + conflictCount + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F3F9;">' +
-            '<span style="color:#5A6B87;">🏠 Same-Site:</span><b>' + sameSiteCount + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:4px 0;">' +
-            '<span style="color:#5A6B87;">📡 Neighbor:</span><b>' + neighborCount + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>Band:</span><b>' + (cell.gsmBand === '1800' ? '1800 MHz' : '900 MHz') + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>Current HSN:</span><b style="color:#B91C1C;">' + cell.hsn + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>Suggested:</span><b style="color:#1F9D55;">' + (suggested != null ? suggested : '—') + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>Conflicts:</span><b style="color:#B91C1C;">' + conflictCount + '</b></div>' +
         '</div>'
       );
-
-      sectorLayer.addLayer(poly);
+      addToCategory(cat, poly);
     });
 
     const bounds = L.latLngBounds(conflictCells.map(c => [c.lat, c.long]));
     if (bounds.isValid()) map.fitBounds(bounds, { padding: [80, 80] });
 
-    showHSNLegend(conflictCells.length);
-    toast('⚠️ ' + conflictCells.length + ' conflicts (fixed 80m size)', 'success', 4000);
-  }, 400);
-}
-
-function showHSNLegend(count) {
-  let legend = document.getElementById('hsnLegend');
-  if (!legend) {
-    legend = document.createElement('div');
-    legend.id = 'hsnLegend';
-    legend.className = 'legend';
-    legend.style.cssText = 'left:20px;bottom:20px;display:block;';
-    document.querySelector('.map-container').appendChild(legend);
-  }
-  legend.style.display = 'block';
-  legend.innerHTML =
-    '<div class="legend-title">🎵 HSN Conflicts (' + (count || 0) + ')</div>' +
-    '<div class="legend-item"><span class="legend-dot" style="background:#B91C1C;"></span><span>HIGH (≥3 & strong)</span></div>' +
-    '<div class="legend-item"><span class="legend-dot" style="background:#F97316;"></span><span>MEDIUM (2+, same-site)</span></div>' +
-    '<div class="legend-item"><span class="legend-dot" style="background:#FBBF24;"></span><span>LOW (1 conflict)</span></div>' +
-    '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #E9EEF6;font-size:10.5px;color:#5A6B87;line-height:1.5;">' +
-      '✅ Clean cells hidden<br>' +
-      '🎯 900 = full · 1800 = 55%' +
-    '</div>';
-}
-  function hsnShowAllOnMap() {
-  if (!hsnLastResults) { toast('Run analysis first', 'error'); return; }
-
-  window.__gsmMode = true;
-  switchView('map');
-
-  setTimeout(() => {
-    sectorLayer.clearLayers();
-    labelLayer.clearLayers();
-
-    hsnLastResults.cells.forEach(cell => {
-      if (!cell.lat || !cell.long) return;
-
-      const hasConflict = hsnLastResults.conflictMap.has(cell.id);
-
-      let color;
-      if (hasConflict) color = '#B91C1C';
-      else if (cell.gsmBand === '1800') color = '#7C3AED';
-      else color = '#1F9D55';
-
-      const coords = makeSectorCoordsScaled(cell.lat, cell.long, cell.bore, 1.0, cell.gsmBand);
-      const poly = L.polygon(coords, {
-        color: color, weight: 1,
-        fillColor: color,
-        fillOpacity: hasConflict ? 0.8 : 0.3
+    const onToggle = () => {
+      Object.entries(layersByCategory).forEach(([cat, layers]) => {
+        const visible = ToolLegend.isActive(cat);
+        layers.forEach(l => {
+          if (visible) { if (!map.hasLayer(l)) map.addLayer(l); }
+          else { if (map.hasLayer(l)) map.removeLayer(l); }
+        });
       });
+    };
 
-      poly.bindPopup(
-        '<div style="font-family:Inter,sans-serif;font-size:12px;">' +
-          '<b style="font-family:monospace;">' + escapeHtml(cell.cell_name) + '</b><br>' +
-          'HSN: <b>' + cell.hsn + '</b><br>' +
-          'Conflicts: <b style="color:' + (hasConflict ? '#B91C1C' : '#1F9D55') + ';">' +
-            (hasConflict ? hsnLastResults.conflictMap.get(cell.id).length : 0) + '</b>' +
-        '</div>'
-      );
-
-      sectorLayer.addLayer(poly);
+    ToolLegend.show({
+      icon: '🎵',
+      title: 'HSN Conflicts · ' + conflictCells.length,
+      items: [
+        { id: 'high', color: '#B91C1C', label: 'HIGH (≥3 & strong)', count: highN },
+        { id: 'medium', color: '#F97316', label: 'MEDIUM (2+, same-site)', count: medN },
+        { id: 'low', color: '#FBBF24', label: 'LOW (1 conflict)', count: lowN }
+      ],
+      onToggle: onToggle
     });
 
-    const bounds = L.latLngBounds(hsnLastResults.cells.map(c => [c.lat, c.long]));
-    if (bounds.isValid()) map.fitBounds(bounds, { padding: [50, 50] });
+    const oldLegend = document.getElementById('hsnLegend');
+    if (oldLegend) oldLegend.style.display = 'none';
 
-    showHSNLegend(hsnLastResults.conflictMap.size);
-    toast('📍 Showing all ' + hsnLastResults.cells.length + ' cells', 'success');
+    toast('⚠️ ' + conflictCells.length + ' conflicts on map', 'success', 4000);
   }, 400);
 }
 /* =========================================================
@@ -8655,8 +8847,9 @@ function showPSCOnMap() {
   setTimeout(() => {
     if (sectorLayer) sectorLayer.clearLayers();
     if (labelLayer) labelLayer.clearLayers();
+    nbMapLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
+    nbMapLayers = [];
 
-    // 🎯 اجمع IDs الخلايا المتعارضة فقط
     const conflictIds = new Set();
     pscLastResults.conflicts.forEach(cf => {
       conflictIds.add(cf.cell1.id);
@@ -8664,88 +8857,79 @@ function showPSCOnMap() {
     });
 
     if (!conflictIds.size) {
-      toast('✅ لا توجد تعارضات — كل الخلايا نظيفة', 'success', 5000);
+      toast('✅ لا توجد تعارضات', 'success', 5000);
       return;
     }
 
-    // 🎯 فلتر — اعرض فقط الخلايا المتعارضة
     const conflictCells = pscLastResults.cells.filter(c => conflictIds.has(c.id));
 
-    // رتّب: النظيفة أولاً (أسفل) → المعاد تخصيصها → Unresolved (فوق)
-    conflictCells.sort((a, b) => {
-      const priority = (cell) => {
-        if (pscLastResults.stillConflicted.has(cell.id)) return 3;
-        if (cell.suggestedPsc !== cell.originalPsc) return 2;
-        return 1;
-      };
-      return priority(a) - priority(b);
-    });
+    const layersByCategory = {};
+    const addToCategory = (cat, layer) => {
+      if (!layersByCategory[cat]) layersByCategory[cat] = [];
+      layersByCategory[cat].push(layer);
+      nbMapLayers.push(layer);
+      return layer;
+    };
+
+    let unresolvedN = 0, willChangeN = 0, conflictN = 0;
 
     conflictCells.forEach(c => {
       if (!c.lat || !c.lon) return;
 
-      let color, statusText;
-      if (pscLastResults.stillConflicted.has(c.id)) {
-        color = '#D64545';       // 🔴 لم يُحل بعد
-        statusText = 'Unresolved';
-      } else if (c.suggestedPsc !== c.originalPsc) {
-        color = '#1F9D55';       // 🟢 سيتم تغييره
-        statusText = 'Will Change';
-      } else {
-        color = '#F59E0B';       // 🟠 متعارض لكن ما تغيّر
-        statusText = 'Conflict';
-      }
+      let cat, color;
+      if (pscLastResults.stillConflicted.has(c.id)) { cat = 'unresolved'; color = '#D64545'; unresolvedN++; }
+      else if (c.suggestedPsc !== c.originalPsc) { cat = 'will-change'; color = '#1F9D55'; willChangeN++; }
+      else { cat = 'conflict'; color = '#F59E0B'; conflictN++; }
 
       const coords = makeSectorCoords(c.lat, c.lon, c.dir);
       const poly = L.polygon(coords, {
-        color: color, weight: 2,
-        fillColor: color, fillOpacity: 0.8,
-        interactive: true
+        color: color, weight: 2, fillColor: color, fillOpacity: 0.8, interactive: true
       });
-
-      // عدّ التعارضات لهذي الخلية
       const cellConflicts = pscLastResults.conflicts.filter(cf =>
         cf.cell1.id === c.id || cf.cell2.id === c.id
       );
-
       poly.bindPopup(
         '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:230px;">' +
           '<div style="font-weight:800;font-family:monospace;margin-bottom:8px;">' + escapeHtml(c.name) + '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Band:</span><b>' + c.band + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Dir:</span><b>' + c.dir.toFixed(0) + '°</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Original PSC:</span><b>' + c.originalPsc + '</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>New PSC:</span><b style="color:#1F9D55;">' + c.suggestedPsc + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;border-top:1px solid #F0F3F9;margin-top:6px;"><span>Conflicts:</span><b style="color:#B91C1C;">' + cellConflicts.length + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Status:</span><b>' + statusText + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Conflicts:</span><b style="color:#B91C1C;">' + cellConflicts.length + '</b></div>' +
         '</div>'
       );
-
-      sectorLayer.addLayer(poly);
+      addToCategory(cat, poly);
     });
 
-    // 🎯 Zoom على الخلايا المتعارضة فقط
     if (conflictCells.length) {
       const bounds = L.latLngBounds(conflictCells.map(c => [c.lat, c.lon]));
       map.fitBounds(bounds, { padding: [50, 50] });
     }
 
-    // 🎯 Legend
-    let legend = document.getElementById('pscLegend');
-    if (!legend) {
-      legend = document.createElement('div');
-      legend.id = 'pscLegend';
-      legend.className = 'legend';
-      legend.style.cssText = 'left:20px;bottom:20px;display:block;';
-      document.querySelector('.map-container').appendChild(legend);
-    }
-    legend.style.display = 'block';
-    legend.innerHTML =
-      '<div class="legend-title">📶 PSC Conflicts (' + conflictCells.length + ')</div>' +
-      '<div class="legend-item"><span class="legend-dot" style="background:#D64545;"></span><span>Unresolved</span></div>' +
-      '<div class="legend-item"><span class="legend-dot" style="background:#1F9D55;"></span><span>Will Change</span></div>' +
-      '<div class="legend-item"><span class="legend-dot" style="background:#F59E0B;"></span><span>Conflict</span></div>';
+    const onToggle = () => {
+      Object.entries(layersByCategory).forEach(([cat, layers]) => {
+        const visible = ToolLegend.isActive(cat);
+        layers.forEach(l => {
+          if (visible) { if (!map.hasLayer(l)) map.addLayer(l); }
+          else { if (map.hasLayer(l)) map.removeLayer(l); }
+        });
+      });
+    };
 
-    toast('⚠️ ' + conflictCells.length + ' خلية متعارضة على الماب', 'success', 4000);
+    ToolLegend.show({
+      icon: '📶',
+      title: 'PSC Conflicts · ' + conflictCells.length,
+      items: [
+        { id: 'unresolved', color: '#D64545', label: 'Unresolved', count: unresolvedN },
+        { id: 'will-change', color: '#1F9D55', label: 'Will Change', count: willChangeN },
+        { id: 'conflict', color: '#F59E0B', label: 'Conflict', count: conflictN }
+      ],
+      onToggle: onToggle
+    });
+
+    // إخفاء Legend القديم
+    const oldLegend = document.getElementById('pscLegend');
+    if (oldLegend) oldLegend.style.display = 'none';
+
+    toast('⚠️ ' + conflictCells.length + ' conflict cells on map', 'success', 4000);
   }, 300);
 }
 
@@ -9224,15 +9408,24 @@ function bsicShowOnMap() {
   setTimeout(() => {
     sectorLayer.clearLayers();
     labelLayer.clearLayers();
+    nbMapLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
+    nbMapLayers = [];
 
     const conflictCells = bsicLastResults.cells.filter(c => c.same_bsic_nearby > 0);
 
     if (!conflictCells.length) {
-      toast('✅ No clashes to show — all cells clean', 'success', 5000);
+      toast('✅ No clashes to show', 'success', 5000);
       return;
     }
 
-    // Fixed 80m size
+    const layersByCategory = {};
+    const addToCategory = (cat, layer) => {
+      if (!layersByCategory[cat]) layersByCategory[cat] = [];
+      layersByCategory[cat].push(layer);
+      nbMapLayers.push(layer);
+      return layer;
+    };
+
     const FIXED_RADIUS_M = 80;
     function makeFixedSector(lat, lng, azimuth) {
       const radius_m = FIXED_RADIUS_M;
@@ -9249,53 +9442,57 @@ function bsicShowOnMap() {
       return [pt(0, 0), pt(near_d, -near_w), pt(far_d, -far_w), pt(far_d, far_w), pt(near_d, near_w)];
     }
 
-    // Sort: low first
-    conflictCells.sort((a, b) => a.same_bsic_nearby - b.same_bsic_nearby);
+    let highN = 0, medN = 0, lowN = 0;
 
     conflictCells.forEach(cell => {
-      let color, weight;
-      if (cell.same_bsic_nearby >= 3) { color = '#B91C1C'; weight = 2.5; }
-      else if (cell.same_bsic_nearby >= 2) { color = '#F97316'; weight = 2; }
-      else { color = '#FBBF24'; weight = 1.5; }
+      let cat, color, weight;
+      if (cell.same_bsic_nearby >= 3) { cat = 'high'; color = '#B91C1C'; weight = 2.5; highN++; }
+      else if (cell.same_bsic_nearby >= 2) { cat = 'medium'; color = '#F97316'; weight = 2; medN++; }
+      else { cat = 'low'; color = '#FBBF24'; weight = 1.5; lowN++; }
 
       const coords = makeFixedSector(cell.lat, cell.lon, cell.bore);
       const poly = L.polygon(coords, {
-        color: color, weight: weight,
-        fillColor: color, fillOpacity: 0.85,
-        lineJoin: 'round'
+        color: color, weight: weight, fillColor: color, fillOpacity: 0.85, lineJoin: 'round'
       });
-
       poly.bindPopup(
         '<div style="font-family:Inter,sans-serif;font-size:13px;min-width:220px;">' +
-          '<div style="font-weight:800;font-family:monospace;margin-bottom:8px;color:#0C1B3D;">' + escapeHtml(cell.cell_name) + '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #F0F3F9;"><span>BCCH:</span><b>' + cell.bcch + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #F0F3F9;"><span>Current BSIC:</span><b style="color:#B91C1C;">' + cell.bsic + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #F0F3F9;"><span>Suggested:</span><b style="color:#1F9D55;">' + cell.suggested + '</b></div>' +
+          '<div style="font-weight:800;font-family:monospace;margin-bottom:8px;">' + escapeHtml(cell.cell_name) + '</div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>BCCH:</span><b>' + cell.bcch + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Current BSIC:</span><b style="color:#B91C1C;">' + cell.bsic + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Suggested:</span><b style="color:#1F9D55;">' + cell.suggested + '</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Clashes:</span><b style="color:#B91C1C;">' + cell.same_bsic_nearby + '</b></div>' +
         '</div>'
       );
-
-      sectorLayer.addLayer(poly);
+      addToCategory(cat, poly);
     });
 
     const bounds = L.latLngBounds(conflictCells.map(c => [c.lat, c.lon]));
     if (bounds.isValid()) map.fitBounds(bounds, { padding: [80, 80] });
 
-    // Legend
-    let legend = document.getElementById('bsicLegend');
-    if (!legend) {
-      legend = document.createElement('div');
-      legend.id = 'bsicLegend';
-      legend.className = 'legend';
-      legend.style.cssText = 'left:20px;bottom:20px;display:block;';
-      document.querySelector('.map-container').appendChild(legend);
-    }
-    legend.style.display = 'block';
-    legend.innerHTML =
-      '<div class="legend-title">🎨 BSIC Clashes (' + conflictCells.length + ')</div>' +
-      '<div class="legend-item"><span class="legend-dot" style="background:#B91C1C;"></span><span>HIGH (3+)</span></div>' +
-      '<div class="legend-item"><span class="legend-dot" style="background:#F97316;"></span><span>MEDIUM (2)</span></div>' +
-      '<div class="legend-item"><span class="legend-dot" style="background:#FBBF24;"></span><span>LOW (1)</span></div>';
+    const onToggle = () => {
+      Object.entries(layersByCategory).forEach(([cat, layers]) => {
+        const visible = ToolLegend.isActive(cat);
+        layers.forEach(l => {
+          if (visible) { if (!map.hasLayer(l)) map.addLayer(l); }
+          else { if (map.hasLayer(l)) map.removeLayer(l); }
+        });
+      });
+    };
+
+    ToolLegend.show({
+      icon: '🎨',
+      title: 'BSIC Clashes · ' + conflictCells.length,
+      items: [
+        { id: 'high', color: '#B91C1C', label: 'HIGH (3+)', count: highN },
+        { id: 'medium', color: '#F97316', label: 'MEDIUM (2)', count: medN },
+        { id: 'low', color: '#FBBF24', label: 'LOW (1)', count: lowN }
+      ],
+      onToggle: onToggle
+    });
+
+    // إخفاء Legend القديم
+    const oldLegend = document.getElementById('bsicLegend');
+    if (oldLegend) oldLegend.style.display = 'none';
 
     toast('⚠️ ' + conflictCells.length + ' clash cells on map', 'success', 4000);
   }, 400);
@@ -9452,11 +9649,14 @@ function drawNeighborLines(cell) {
   neighbors.sort((a, b) => a.distance - b.distance);
   const top = neighbors.slice(0, maxNB);
 
+  // 🎯 تخزين الطبقات حسب الفئة
+  const layersByCategory = { front: [], side: [], back: [], source: [] };
+
   top.forEach(n => {
-    let color, dashArray, weight;
-    if (n.direction === 'Front') { color = '#16A34A'; dashArray = null; weight = 2.5; }
-    else if (n.direction === 'Side') { color = '#F59E0B'; dashArray = '6,4'; weight = 1.8; }
-    else { color = '#94A3B8'; dashArray = '3,6'; weight = 1.2; }
+    let cat, color, dashArray, weight;
+    if (n.direction === 'Front') { cat = 'front'; color = '#16A34A'; dashArray = null; weight = 2.5; }
+    else if (n.direction === 'Side') { cat = 'side'; color = '#F59E0B'; dashArray = '6,4'; weight = 1.8; }
+    else { cat = 'back'; color = '#94A3B8'; dashArray = '3,6'; weight = 1.2; }
 
     const line = L.polyline([
       [cell.lat, cell.long],
@@ -9491,6 +9691,7 @@ function drawNeighborLines(cell) {
 
     neighborLineLayer.addLayer(line);
     neighborLineLayer.addLayer(dot);
+    layersByCategory[cat].push(line, dot);
   });
 
   const srcMarker = L.circleMarker([cell.lat, cell.long], {
@@ -9506,31 +9707,47 @@ function drawNeighborLines(cell) {
   );
 
   neighborLineLayer.addLayer(srcMarker);
+  layersByCategory.source.push(srcMarker);
+
+  // 🎯 احفظ للاستخدام في الـ Legend
+  window.__nbLineLayersByCat = layersByCategory;
 
   toast('🔗 ' + top.length + ' neighbors shown', 'success');
   showNeighborLinesLegend(top.length);
 }
 
 function showNeighborLinesLegend(count) {
-  let legend = document.getElementById('nbLinesLegend');
-  if (!legend) {
-    legend = document.createElement('div');
-    legend.id = 'nbLinesLegend';
-    legend.className = 'legend';
-    legend.style.cssText = 'right:20px;bottom:20px;display:block;max-width:200px;';
-    document.querySelector('.map-container').appendChild(legend);
-  }
-  legend.style.display = 'block';
-  legend.innerHTML =
-    '<div class="legend-title">🔗 Neighbor Lines (' + count + ')</div>' +
-    '<div class="legend-item"><span style="width:20px;height:0;border-top:3px solid #16A34A;display:inline-block;"></span><span>Front</span></div>' +
-    '<div class="legend-item"><span style="width:20px;height:0;border-top:3px dashed #F59E0B;display:inline-block;"></span><span>Side</span></div>' +
-    '<div class="legend-item"><span style="width:20px;height:0;border-top:3px dotted #94A3B8;display:inline-block;"></span><span>Back</span></div>';
-}
+  const byCat = window.__nbLineLayersByCat || { front: [], side: [], back: [], source: [] };
 
-function hideNeighborLinesLegend() {
-  const legend = document.getElementById('nbLinesLegend');
-  if (legend) legend.style.display = 'none';
+  // 🎨 Legend تفاعلي
+  const onToggle = () => {
+    if (!map) return;
+    ['front', 'side', 'back', 'source'].forEach(cat => {
+      const layers = byCat[cat] || [];
+      const isActive = ToolLegend.isActive(cat);
+      layers.forEach(l => {
+        try {
+          if (isActive) { if (!map.hasLayer(l)) map.addLayer(l); }
+          else { if (map.hasLayer(l)) map.removeLayer(l); }
+        } catch (e) {}
+      });
+    });
+  };
+
+  ToolLegend.show({
+    icon: '🗺️',
+    title: 'Neighbor Lines · ' + (count || 0),
+    items: [
+      { id: 'source', color: '#124191', label: 'Source Cell', count: 1 },
+      { id: 'front', color: '#16A34A', label: 'Front', count: byCat.front.length / 2 },
+      { id: 'side', color: '#F59E0B', label: 'Side', count: byCat.side.length / 2, dashed: true },
+      { id: 'back', color: '#94A3B8', label: 'Back', count: byCat.back.length / 2, dashed: true }
+    ],
+    onToggle: onToggle
+  });
+
+  const oldLegend = document.getElementById('nbLinesLegend');
+  if (oldLegend) oldLegend.style.display = 'none';
 }
   /* =========================================================
    NEIGHBOR SYMMETRY CHECKER
@@ -9739,15 +9956,24 @@ function symShowOnMap() {
   switchView('map');
 
   setTimeout(() => {
-    // امسح الطبقات السابقة
-    symMapLayers.forEach(l => map.removeLayer(l));
+    symMapLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
     symMapLayers = [];
     sectorLayer.clearLayers();
     labelLayer.clearLayers();
+    nbMapLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
+    nbMapLayers = [];
 
     const asym = symLastResults.asymmetric;
 
-    // ارسم الخلايا المتعارضة
+    const layersByCategory = {};
+    const addToCategory = (cat, layer) => {
+      if (!layersByCategory[cat]) layersByCategory[cat] = [];
+      layersByCategory[cat].push(layer);
+      nbMapLayers.push(layer);
+      return layer;
+    };
+
+    // خلايا المصدر (فريدة)
     const shown = new Set();
     asym.forEach(item => {
       [item.sourceCell, item.neighborCell].forEach(cell => {
@@ -9756,47 +9982,59 @@ function symShowOnMap() {
 
         const coords = makeSectorCoordsScaled(cell.lat, cell.long, cell.bore, 1.0, cell.gsmBand);
         const poly = L.polygon(coords, {
-          color: '#DC2626',
-          weight: 2,
-          fillColor: '#DC2626',
-          fillOpacity: 0.5
+          color: '#DC2626', weight: 2,
+          fillColor: '#DC2626', fillOpacity: 0.5
         });
-
         poly.bindPopup(
           '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:220px;">' +
             '<div style="font-weight:800;font-family:monospace;margin-bottom:6px;">' + escapeHtml(cell.cell_name) + '</div>' +
             '<div style="color:#B91C1C;font-weight:700;">⚠️ عنده علاقة غير متماثلة</div>' +
           '</div>'
         );
-        sectorLayer.addLayer(poly);
+        addToCategory('source', poly);
       });
     });
 
-    // ارسم خطوط (أسهم) للعلاقات غير المتماثلة (أول 200)
+    // خطوط غير متماثلة
     asym.slice(0, 200).forEach(item => {
       const line = L.polyline([
         [item.sourceCell.lat, item.sourceCell.long],
         [item.neighborCell.lat, item.neighborCell.long]
       ], {
-        color: '#DC2626',
-        weight: 2,
-        opacity: 0.7,
-        dashArray: '8,6'
+        color: '#DC2626', weight: 2, opacity: 0.7, dashArray: '8,6'
       });
-      sectorLayer.addLayer(line);
+      addToCategory('asym-line', line);
     });
 
-    // Fit bounds
     if (shown.size) {
       const points = [...shown].map(id => {
         const c = allCells.find(x => x.id === id);
         return c ? [c.lat, c.long] : null;
       }).filter(Boolean);
-
       if (points.length > 1) {
         map.fitBounds(L.latLngBounds(points), { padding: [60, 60] });
       }
     }
+
+    const onToggle = () => {
+      Object.entries(layersByCategory).forEach(([cat, layers]) => {
+        const visible = ToolLegend.isActive(cat);
+        layers.forEach(l => {
+          if (visible) { if (!map.hasLayer(l)) map.addLayer(l); }
+          else { if (map.hasLayer(l)) map.removeLayer(l); }
+        });
+      });
+    };
+
+    ToolLegend.show({
+      icon: '🔗',
+      title: 'Neighbor Symmetry · ' + asym.length,
+      items: [
+        { id: 'source', color: '#DC2626', label: 'Affected Cells', count: shown.size },
+        { id: 'asym-line', color: '#DC2626', label: 'Asymmetric Relation', count: Math.min(asym.length, 200), dashed: true }
+      ],
+      onToggle: onToggle
+    });
 
     toast('📍 ' + asym.length + ' asymmetric relations on map', 'success', 4000);
   }, 400);
@@ -10009,18 +10247,27 @@ function azoptShowOnMap() {
   switchView('map');
 
   setTimeout(() => {
-    azoptMapLayers.forEach(l => map.removeLayer(l));
+    azoptMapLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
     azoptMapLayers = [];
     sectorLayer.clearLayers();
     labelLayer.clearLayers();
+    nbMapLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
+    nbMapLayers = [];
 
-    // ارسم الخلايا المتغيرة فقط (أول 100)
     const toShow = azoptLastResults.results.filter(r => r.absChange >= 15).slice(0, 100);
+
+    const layersByCategory = {};
+    const addToCategory = (cat, layer) => {
+      if (!layersByCategory[cat]) layersByCategory[cat] = [];
+      layersByCategory[cat].push(layer);
+      nbMapLayers.push(layer);
+      return layer;
+    };
 
     toShow.forEach(item => {
       const cell = item.cell;
 
-      // القطاع الحالي (أحمر شفاف)
+      // القطاع الحالي
       const currentCoords = makeSectorCoordsScaled(cell.lat, cell.long, cell.bore, 1.0, cell.gsmBand);
       const currentPoly = L.polygon(currentCoords, {
         color: '#DC2626', weight: 1.5,
@@ -10028,54 +10275,59 @@ function azoptShowOnMap() {
         dashArray: '5,4'
       });
       currentPoly.bindTooltip('Current: ' + cell.bore + '°', { sticky: true });
-      sectorLayer.addLayer(currentPoly);
+      currentPoly.bindPopup(
+        '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:220px;">' +
+          '<div style="font-weight:800;font-family:monospace;margin-bottom:8px;">' + escapeHtml(cell.cell_name) + '</div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Current:</span><b style="color:#DC2626;">' + item.currentBore + '°</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Suggested:</span><b style="color:#16A34A;">' + item.suggestedBore + '°</b></div>' +
+        '</div>'
+      );
+      addToCategory('current', currentPoly);
 
-      // القطاع المقترح (أخضر)
+      // القطاع المقترح
       const suggestedCoords = makeSectorCoordsScaled(cell.lat, cell.long, item.suggestedBore, 1.0, cell.gsmBand);
       const suggestedPoly = L.polygon(suggestedCoords, {
-        color: '#16A34A', weight: 2,
-        fillColor: '#16A34A', fillOpacity: 0.55
+        color: '#16A34A', weight: 2, fillColor: '#16A34A', fillOpacity: 0.55
       });
       suggestedPoly.bindPopup(
         '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:220px;">' +
           '<div style="font-weight:800;font-family:monospace;margin-bottom:8px;">' + escapeHtml(cell.cell_name) + '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;">' +
-            '<span>Current:</span><b style="color:#DC2626;">' + item.currentBore + '°</b>' +
-          '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;">' +
-            '<span>Suggested:</span><b style="color:#16A34A;">' + item.suggestedBore + '°</b>' +
-          '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;border-top:1px solid #F0F3F9;margin-top:6px;">' +
-            '<span>Change:</span><b>' + (item.change >= 0 ? '+' : '') + Math.round(item.change) + '°</b>' +
-          '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;">' +
-            '<span>Front Coverage:</span><b>' + item.beforeFront + ' → ' + item.afterFront + '</b>' +
-          '</div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Current:</span><b>' + item.currentBore + '°</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Suggested:</span><b style="color:#16A34A;">' + item.suggestedBore + '°</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Change:</span><b>' + (item.change >= 0 ? '+' : '') + Math.round(item.change) + '°</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Front Coverage:</span><b>' + item.beforeFront + ' → ' + item.afterFront + '</b></div>' +
         '</div>'
       );
-      sectorLayer.addLayer(suggestedPoly);
+      addToCategory('suggested', suggestedPoly);
     });
 
-    // Fit bounds
     if (toShow.length) {
       const points = toShow.map(r => [r.cell.lat, r.cell.long]);
       map.fitBounds(L.latLngBounds(points), { padding: [60, 60] });
     }
 
-    // Legend
-    let legend = document.getElementById('azoptLegend');
-    if (!legend) {
-      legend = document.createElement('div');
-      legend.id = 'azoptLegend';
-      legend.className = 'legend';
-      legend.style.cssText = 'right:20px;bottom:20px;display:block;';
-      document.querySelector('.map-container').appendChild(legend);
-    }
-    legend.style.display = 'block';
-    legend.innerHTML =
-      '<div class="legend-title">🎯 Azimuth Optimization</div>' +
-      '<div class="legend-item"><span class="legend-dot" style="background:#DC2626;opacity:.4;"></span><span>Current Azimuth</span></div>' +
-      '<div class="legend-item"><span class="legend-dot" style="background:#16A34A;"></span><span>Suggested Azimuth</span></div>';
+    const onToggle = () => {
+      Object.entries(layersByCategory).forEach(([cat, layers]) => {
+        const visible = ToolLegend.isActive(cat);
+        layers.forEach(l => {
+          if (visible) { if (!map.hasLayer(l)) map.addLayer(l); }
+          else { if (map.hasLayer(l)) map.removeLayer(l); }
+        });
+      });
+    };
+
+    ToolLegend.show({
+      icon: '🎯',
+      title: 'Azimuth Optimization · ' + toShow.length,
+      items: [
+        { id: 'current', color: '#DC2626', label: 'Current Azimuth', count: toShow.length, dashed: true },
+        { id: 'suggested', color: '#16A34A', label: 'Suggested Azimuth', count: toShow.length }
+      ],
+      onToggle: onToggle
+    });
+
+    const oldLegend = document.getElementById('azoptLegend');
+    if (oldLegend) oldLegend.style.display = 'none';
 
     toast('📍 ' + toShow.length + ' cells on map', 'success', 4000);
   }, 400);
@@ -11601,6 +11853,109 @@ window.ToolLegend = {
     return this.items.filter(i => i.active !== false).map(i => i.id);
   }
 };
+/* =========================================================
+   🎨 TOOL LEGEND — Legend تفاعلي لكل الأدوات
+   ========================================================= */
+window.ToolLegend = {
+  items: [],
+  onToggleCallback: null,
+  container: null,
+  _initialized: false,
+
+  init() {
+    if (this._initialized) return;
+    this.container = document.getElementById('toolLegend');
+    this._initialized = true;
+  },
+
+  show(options) {
+    this.init();
+    const opts = options || {};
+    this.items = (opts.items || []).map(i => ({
+      id: i.id,
+      color: i.color || '#999',
+      label: i.label || i.id,
+      count: i.count != null ? i.count : null,
+      dashed: !!i.dashed,
+      active: i.active !== false
+    }));
+    this.onToggleCallback = opts.onToggle || null;
+
+    const iconEl = document.getElementById('toolLegendIcon');
+    const titleEl = document.getElementById('toolLegendTitle');
+    if (iconEl) iconEl.textContent = opts.icon || '🎯';
+    if (titleEl) titleEl.textContent = opts.title || 'Legend';
+
+    this.render();
+    if (this.container) this.container.classList.add('show');
+  },
+
+  render() {
+    const itemsEl = document.getElementById('toolLegendItems');
+    if (!itemsEl) return;
+
+    itemsEl.innerHTML = this.items.map(item => {
+      const colorStyle = item.dashed
+        ? 'background: transparent; border: 2px dashed ' + item.color + ';'
+        : 'background: ' + item.color + '; border: 1px solid rgba(0,0,0,.15);';
+      return (
+        '<label class="tool-legend-item' + (item.active === false ? ' disabled' : '') + '" data-id="' + item.id + '">' +
+          '<input type="checkbox"' + (item.active !== false ? ' checked' : '') + '>' +
+          '<span class="tool-legend-color" style="' + colorStyle + '"></span>' +
+          '<span class="tool-legend-label">' + item.label + '</span>' +
+          (item.count != null ? '<span class="tool-legend-count">' + item.count + '</span>' : '') +
+        '</label>'
+      );
+    }).join('');
+
+    itemsEl.querySelectorAll('.tool-legend-item').forEach(el => {
+      const id = el.getAttribute('data-id');
+      const cb = el.querySelector('input[type="checkbox"]');
+      if (cb) cb.addEventListener('change', () => this.toggle(id));
+    });
+  },
+
+  toggle(id) {
+    const item = this.items.find(i => i.id === id);
+    if (!item) return;
+    item.active = !item.active;
+    this.render();
+    if (typeof this.onToggleCallback === 'function') {
+      this.onToggleCallback(item, this.items);
+    }
+  },
+
+  toggleAll(active) {
+    this.items.forEach(i => i.active = !!active);
+    this.render();
+    if (typeof this.onToggleCallback === 'function') {
+      this.onToggleCallback(null, this.items);
+    }
+  },
+
+  invert() {
+    this.items.forEach(i => i.active = !i.active);
+    this.render();
+    if (typeof this.onToggleCallback === 'function') {
+      this.onToggleCallback(null, this.items);
+    }
+  },
+
+  isActive(id) {
+    const item = this.items.find(i => i.id === id);
+    return item ? item.active !== false : true;
+  },
+
+  hide() {
+    if (this.container) this.container.classList.remove('show');
+    this.items = [];
+    this.onToggleCallback = null;
+  },
+
+  activeIds() {
+    return this.items.filter(i => i.active !== false).map(i => i.id);
+  }
+};  
 // 🎯 Legend خاص بـ 3G/IRAT — نسخة واحدة نهائية
 function showThreeGNeighborLegend(neighbors, mode) {
   // 🎯 حماية: تأكد أنها مصفوفة
