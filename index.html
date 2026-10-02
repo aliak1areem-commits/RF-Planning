@@ -4,6 +4,179 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RF Planning Platform</title>
+  <!-- ═══════════════════════════════════════════════════════════════
+     🛡️ ANTI-INSPECT + DEVTOOLS BLUR — Demo Mode Protection
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  console.log('%c🛡️ Anti-Inspect Protection Active', 'background:#006C35;color:#fff;padding:6px 12px;border-radius:6px;font-weight:700;font-size:12px');
+
+  // ═══════════════════════════════════════════════════════
+  // 1. Block Right-Click (context menu)
+  // ═══════════════════════════════════════════════════════
+  document.addEventListener('contextmenu', function(e){
+    e.preventDefault();
+    return false;
+  });
+
+  // ═══════════════════════════════════════════════════════
+  // 2. Block Keyboard Shortcuts
+  // ═══════════════════════════════════════════════════════
+  document.addEventListener('keydown', function(e){
+    // F12
+    if (e.key === 'F12' || e.keyCode === 123){
+      e.preventDefault(); e.stopPropagation();
+      showWarning();
+      return false;
+    }
+
+    // Ctrl+Shift+I / J / C (Windows/Linux)
+    if (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)){
+      e.preventDefault(); e.stopPropagation();
+      showWarning();
+      return false;
+    }
+
+    // Ctrl+U (View Source)
+    if (e.ctrlKey && (e.key === 'U' || e.key === 'u')){
+      e.preventDefault(); e.stopPropagation();
+      showWarning();
+      return false;
+    }
+
+    // Ctrl+S (Save page)
+    if (e.ctrlKey && (e.key === 'S' || e.key === 's')){
+      e.preventDefault(); e.stopPropagation();
+      return false;
+    }
+
+    // Cmd+Option+I / J / C (Mac)
+    if (e.metaKey && e.altKey && ['I','i','J','j','C','c'].includes(e.key)){
+      e.preventDefault(); e.stopPropagation();
+      showWarning();
+      return false;
+    }
+
+    // Cmd+Option+U (Mac View Source)
+    if (e.metaKey && e.altKey && (e.key === 'U' || e.key === 'u')){
+      e.preventDefault(); e.stopPropagation();
+      return false;
+    }
+  }, true);
+
+  // ═══════════════════════════════════════════════════════
+  // 3. Warning Toast
+  // ═══════════════════════════════════════════════════════
+  let warnCooldown = 0;
+  function showWarning(){
+    const now = Date.now();
+    if (now - warnCooldown < 2000) return;
+    warnCooldown = now;
+
+    const warn = document.createElement('div');
+    warn.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999999;background:linear-gradient(135deg,#006C35,#00A550);color:#fff;padding:24px 40px;border-radius:14px;font-size:15px;font-weight:700;text-align:center;box-shadow:0 20px 60px rgba(0,108,53,.6);font-family:Inter,system-ui,sans-serif;letter-spacing:.02em;animation:warnPop .35s cubic-bezier(.34,1.56,.64,1);';
+    warn.innerHTML = '🛡️ Demo Mode — Inspection Disabled<br><span style="font-size:11.5px;opacity:.85;font-weight:500;letter-spacing:.05em;text-transform:uppercase;margin-top:6px;display:block;">This is a public demo. Please respect it.</span>';
+
+    if (!document.getElementById('__warnAnim')){
+      const st = document.createElement('style');
+      st.id = '__warnAnim';
+      st.textContent = '@keyframes warnPop{from{opacity:0;transform:translate(-50%,-50%) scale(.85)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}';
+      document.head.appendChild(st);
+    }
+
+    document.body.appendChild(warn);
+    setTimeout(() => { warn.style.transition = 'opacity .3s'; warn.style.opacity = '0'; }, 1800);
+    setTimeout(() => warn.remove(), 2200);
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // 4. 🎬 Detect DevTools Open → Blur content
+  // ═══════════════════════════════════════════════════════
+  let devtoolsOpen = false;
+  const threshold = 160;
+
+  function detectDevTools(){
+    const widthDiff = window.outerWidth - window.innerWidth;
+    const heightDiff = window.outerHeight - window.innerHeight;
+    const isOpen = widthDiff > threshold || heightDiff > threshold;
+
+    if (isOpen && !devtoolsOpen){
+      // 🔓 DevTools opened
+      devtoolsOpen = true;
+      console.warn('%c🛡️ DevTools detected — Content Blurred', 'background:#006C35;color:#fff;padding:8px 16px;border-radius:6px;font-weight:700;font-size:14px');
+
+      // 🎬 Blur everything
+      document.body.style.transition = 'filter .3s ease';
+      document.body.style.filter = 'blur(20px)';
+      document.body.style.pointerEvents = 'none';
+      document.body.style.userSelect = 'none';
+
+      // 🚨 Show blocking overlay
+      if (!document.getElementById('__devWarn')){
+        const w = document.createElement('div');
+        w.id = '__devWarn';
+        w.style.cssText = 'position:fixed;inset:0;z-index:99999999;background:radial-gradient(circle at 50% 50%,rgba(0,108,53,.15),rgba(0,0,0,.95));backdrop-filter:blur(30px);color:#fff;display:flex;align-items:center;justify-content:center;font-family:Inter,system-ui,sans-serif;text-align:center;padding:40px;animation:warnPop .4s cubic-bezier(.34,1.56,.64,1);';
+        w.innerHTML =
+          '<div style="max-width:520px;">' +
+            '<div style="font-size:88px;margin-bottom:24px;filter:drop-shadow(0 10px 30px rgba(0,165,80,.5));">🛡️</div>' +
+            '<h1 style="font-size:32px;margin:0 0 14px;color:#00A550;font-weight:800;letter-spacing:-.02em;">Demo Mode Protected</h1>' +
+            '<p style="font-size:15px;color:#94A3B8;line-height:1.7;margin:0 0 24px;">' +
+              'Developer Tools detected.<br>' +
+              'Please close them to continue viewing this demo.' +
+            '</p>' +
+            '<div style="display:inline-flex;align-items:center;gap:10px;background:rgba(0,165,80,.12);border:1px solid rgba(0,165,80,.3);border-radius:10px;padding:12px 20px;font-size:12.5px;color:#00A550;font-weight:600;letter-spacing:.03em;">' +
+              '<span style="font-size:16px;">💡</span>' +
+              '<span>Press <kbd style="background:rgba(0,0,0,.3);padding:2px 8px;border-radius:4px;font-family:monospace;font-size:11px;border:1px solid rgba(255,255,255,.15);">F12</kbd> or <kbd style="background:rgba(0,0,0,.3);padding:2px 8px;border-radius:4px;font-family:monospace;font-size:11px;border:1px solid rgba(255,255,255,.15);">Ctrl+Shift+I</kbd> to toggle</span>' +
+            '</div>' +
+            '<div style="margin-top:36px;font-size:11px;color:#475569;letter-spacing:.15em;text-transform:uppercase;">' +
+              'Riyadh Demo · Sample Network' +
+            '</div>' +
+          '</div>';
+        document.body.appendChild(w);
+      }
+
+    } else if (!isOpen && devtoolsOpen){
+      // 🔒 DevTools closed
+      devtoolsOpen = false;
+      console.log('%c✅ DevTools closed — Content Restored', 'background:#00A550;color:#fff;padding:6px 12px;border-radius:6px;font-weight:700;font-size:12px');
+
+      document.body.style.filter = '';
+      document.body.style.pointerEvents = '';
+      document.body.style.userSelect = '';
+
+      const w = document.getElementById('__devWarn');
+      if (w) {
+        w.style.transition = 'opacity .3s';
+        w.style.opacity = '0';
+        setTimeout(() => w.remove(), 300);
+      }
+    }
+  }
+
+  // Run detection every 500ms
+  setInterval(detectDevTools, 500);
+
+  // ═══════════════════════════════════════════════════════
+  // 5. Block Drag
+  // ═══════════════════════════════════════════════════════
+  document.addEventListener('dragstart', function(e){
+    if (e.target.tagName === 'IMG' || e.target.tagName === 'A') {
+      e.preventDefault();
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════
+  // 6. Disable Text Selection (except inputs)
+  // ═══════════════════════════════════════════════════════
+  const selectionStyle = document.createElement('style');
+  selectionStyle.textContent = `
+    body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    input, textarea, select, [contenteditable] { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
+  `;
+  document.head.appendChild(selectionStyle);
+
+})();
+</script>
 <meta name="theme-color" content="#0B1730">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23124191'/%3E%3Cpath d='M9 22V10h7a4 4 0 010 8h-7m7 0l5 4' stroke='white' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <script src="https://unpkg.com/lucide@0.400.0/dist/umd/lucide.min.js"></script>
