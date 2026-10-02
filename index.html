@@ -1502,7 +1502,7 @@ body.dark [style*="color:#0C1B3D"]{color:var(--text)!important}
 body.dark [style*="color:#5A6B87"]{color:var(--text-2)!important}
 body.dark [style*="solid #E9EEF6"],body.dark [style*="solid #D7DEEA"]{border-color:var(--border)!important}
 /* ═══════════════════════════════════════════════════════════
-   🎯 FIX — Page Layout Overflow (New Site Planner)
+   🏗️ FIX — New Site Planner Layout (COMPLETE)
    ═══════════════════════════════════════════════════════════ */
 
 /* Page wrapper */
@@ -1514,17 +1514,161 @@ body.dark [style*="solid #E9EEF6"],body.dark [style*="solid #D7DEEA"]{border-col
   overflow: hidden !important;
 }
 
-/* Tool page — only scroll area */
+/* Tool page — scroll area */
 #page-tool-new-site .tool-page {
   flex: 1 1 auto !important;
   min-height: 0 !important;
   max-height: 100% !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
-  padding: 24px 24px 100px 24px !important;
+  padding: 20px 24px 120px 24px !important;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
-/* App container */
+/* ⚠️ اخفِ العنوان المكرر داخل الصفحة */
+#page-tool-new-site .tool-page-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-bottom: 16px !important;
+  padding: 12px 0 !important;
+  border-bottom: 1px solid #E9EEF6 !important;
+}
+
+#page-tool-new-site .tool-page-header .tool-page-title {
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  color: #0C1B3D !important;
+}
+
+#page-tool-new-site .tool-page-header .tool-page-sub {
+  font-size: 12px !important;
+  color: #5A6B87 !important;
+  margin-top: 2px !important;
+}
+
+#page-tool-new-site .tool-page-header .back-btn {
+  width: 38px !important;
+  height: 38px !important;
+  flex-shrink: 0 !important;
+}
+
+/* الأقسام */
+#page-tool-new-site .tool-section {
+  background: #fff !important;
+  border-radius: 12px !important;
+  padding: 18px 20px !important;
+  border: 1px solid #E9EEF6 !important;
+  box-shadow: 0 2px 8px rgba(12,27,61,.05) !important;
+  margin-bottom: 14px !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#page-tool-new-site .tool-section h3 {
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  color: #0C1B3D !important;
+  margin-bottom: 14px !important;
+  padding-bottom: 10px !important;
+  border-bottom: 1px solid #F0F3F9 !important;
+}
+
+/* form-row — responsive */
+#page-tool-new-site .form-row {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+  gap: 12px !important;
+  margin-bottom: 12px !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* الحقول */
+#page-tool-new-site .form-field {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#page-tool-new-site .form-field label {
+  font-size: 11px !important;
+  margin-bottom: 5px !important;
+}
+
+#page-tool-new-site .form-field input,
+#page-tool-new-site .form-field select {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 9px 12px !important;
+  font-size: 13px !important;
+}
+
+/* Sectors container */
+#page-tool-new-site #ns_sectors_container > div {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important;
+  gap: 10px !important;
+  max-width: 100% !important;
+}
+
+#page-tool-new-site #ns_sectors_container > div > div {
+  padding: 12px !important;
+  box-sizing: border-box !important;
+}
+
+/* Action row */
+#page-tool-new-site .action-row {
+  display: flex !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  margin-top: 12px !important;
+}
+
+/* أزرار */
+#page-tool-new-site .btn {
+  padding: 10px 18px !important;
+  font-size: 13px !important;
+  white-space: nowrap !important;
+}
+
+/* tabs */
+#page-tool-new-site .nb-tabs {
+  margin: 12px 0 !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+}
+
+/* جداول */
+#page-tool-new-site .data-table {
+  font-size: 12px !important;
+  max-width: 100% !important;
+}
+
+#page-tool-new-site .data-table th,
+#page-tool-new-site .data-table td {
+  padding: 8px 10px !important;
+}
+
+/* KPIs */
+#page-tool-new-site .kpi-grid {
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+#page-tool-new-site .kpi-card {
+  padding: 12px !important;
+}
+
+#page-tool-new-site .kpi-card .kpi-value {
+  font-size: 20px !important;
+}
+
+/* ═══ App + Main Layout ═══ */
 .app {
   height: 100vh !important;
   max-height: 100vh !important;
@@ -1536,15 +1680,49 @@ body.dark [style*="solid #E9EEF6"],body.dark [style*="solid #D7DEEA"]{border-col
   height: 100vh !important;
 }
 
-/* Hide inactive pages */
+/* اخف الصفحات غير النشطة */
 .page:not(.active) {
   display: none !important;
 }
 
-/* Hide stray elements */
-body > form,
-body > div:not(.app):not(.toast):not(#loginScreen) {
-  display: none !important;
+/* Responsive */
+@media (max-width: 900px) {
+  #page-tool-new-site .form-row {
+    grid-template-columns: 1fr !important;
+  }
+  
+  #page-tool-new-site .tool-page {
+    padding: 14px 14px 120px 14px !important;
+  }
+  
+  #page-tool-new-site .tool-section {
+    padding: 14px 16px !important;
+  }
+  
+  #page-tool-new-site .tool-page-header .tool-page-title {
+    font-size: 16px !important;
+  }
+  
+  #page-tool-new-site .tool-page-header .tool-page-sub {
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  #page-tool-new-site .tool-page-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+  
+  #page-tool-new-site .action-row {
+    flex-direction: column !important;
+  }
+  
+  #page-tool-new-site .action-row .btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
 }
 </style>
 </head>
@@ -3407,13 +3585,13 @@ body > div:not(.app):not(.toast):not(#loginScreen) {
 
       </div>
     </section>
-    <section class="page" id="page-tool-new-site">
-  <div class="tool-page" style="max-width:1600px;">
-    <div class="tool-page-header">
-      <button class="back-btn" onclick="switchView('tools')">←</button>
+   <section class="page" id="page-tool-new-site">
+  <div class="tool-page">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button class="back-btn" onclick="switchView('tools')" style="width:40px;height:40px;border-radius:10px;background:#fff;border:1.5px solid #D7DEEA;color:#5A6B87;font-size:18px;cursor:pointer;">←</button>
       <div>
-        <div class="tool-page-title">🏗️ New Site Planner PRO</div>
-        <div class="tool-page-sub">Auto-plan BCCH/BSIC/PSC/PCI/RSI + Smart Neighbors + Co-site validation</div>
+        <div style="font-size:20px;font-weight:700;color:#0C1B3D;">🏗️ New Site Planner PRO</div>
+        <div style="font-size:12.5px;color:#5A6B87;margin-top:2px;">Auto-plan BCCH/BSIC/PSC/PCI/RSI + Smart Neighbors + Co-site validation</div>
       </div>
     </div>
 
