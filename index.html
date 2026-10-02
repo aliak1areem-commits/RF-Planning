@@ -5684,10 +5684,11 @@ function showPCIOnMap() {
     nbMapLayers = [];
 
     const layersByCategory = {};
-    const addToCategory = (cat, layer) => {
+   const addToCategory = (cat, layer) => {
       if (!layersByCategory[cat]) layersByCategory[cat] = [];
       layersByCategory[cat].push(layer);
       nbMapLayers.push(layer);
+      if (map && !map.hasLayer(layer)) map.addLayer(layer);
       return layer;
     };
 
@@ -6339,10 +6340,11 @@ function nbShowOnMap() {
 
     // 🎯 تخزين الطبقات حسب الفئة
     const layersByCategory = {};
-    const addToCategory = (cat, layer) => {
+   const addToCategory = (cat, layer) => {
       if (!layersByCategory[cat]) layersByCategory[cat] = [];
       layersByCategory[cat].push(layer);
       nbMapLayers.push(layer);
+      if (map && !map.hasLayer(layer)) map.addLayer(layer);
       return layer;
     };
 
@@ -6819,10 +6821,11 @@ function gsmShowOnMap() {
     nbMapLayers = [];
 
     const layersByCategory = {};
-    const addToCategory = (cat, layer) => {
+  const addToCategory = (cat, layer) => {
       if (!layersByCategory[cat]) layersByCategory[cat] = [];
       layersByCategory[cat].push(layer);
       nbMapLayers.push(layer);
+      if (map && !map.hasLayer(layer)) map.addLayer(layer);
       return layer;
     };
 
@@ -8408,10 +8411,11 @@ function hsnShowOnMap() {
     }
 
     const layersByCategory = {};
-    const addToCategory = (cat, layer) => {
+ const addToCategory = (cat, layer) => {
       if (!layersByCategory[cat]) layersByCategory[cat] = [];
       layersByCategory[cat].push(layer);
       nbMapLayers.push(layer);
+      if (map && !map.hasLayer(layer)) map.addLayer(layer);
       return layer;
     };
 
@@ -8868,6 +8872,7 @@ function showPSCOnMap() {
       if (!layersByCategory[cat]) layersByCategory[cat] = [];
       layersByCategory[cat].push(layer);
       nbMapLayers.push(layer);
+      if (map && !map.hasLayer(layer)) map.addLayer(layer);
       return layer;
     };
 
@@ -9419,10 +9424,11 @@ function bsicShowOnMap() {
     }
 
     const layersByCategory = {};
-    const addToCategory = (cat, layer) => {
+   const addToCategory = (cat, layer) => {
       if (!layersByCategory[cat]) layersByCategory[cat] = [];
       layersByCategory[cat].push(layer);
       nbMapLayers.push(layer);
+      if (map && !map.hasLayer(layer)) map.addLayer(layer);
       return layer;
     };
 
@@ -9966,10 +9972,11 @@ function symShowOnMap() {
     const asym = symLastResults.asymmetric;
 
     const layersByCategory = {};
-    const addToCategory = (cat, layer) => {
+   const addToCategory = (cat, layer) => {
       if (!layersByCategory[cat]) layersByCategory[cat] = [];
       layersByCategory[cat].push(layer);
       nbMapLayers.push(layer);
+      if (map && !map.hasLayer(layer)) map.addLayer(layer);
       return layer;
     };
 
@@ -10261,6 +10268,7 @@ function azoptShowOnMap() {
       if (!layersByCategory[cat]) layersByCategory[cat] = [];
       layersByCategory[cat].push(layer);
       nbMapLayers.push(layer);
+      if (map && !map.hasLayer(layer)) map.addLayer(layer);
       return layer;
     };
 
@@ -11591,6 +11599,7 @@ function threeGShowOnMap(mode) {
       if (!layersByCategory[cat]) layersByCategory[cat] = [];
       layersByCategory[cat].push(layer);
       nbMapLayers.push(layer);
+      if (map && !map.hasLayer(layer)) map.addLayer(layer);
       return layer;
     };
 
@@ -12861,10 +12870,11 @@ function nsShowOnMap() {
     nbMapLayers = [];
 
     const layersByCategory = {};
-    const addToCategory = (cat, layer) => {
+   const addToCategory = (cat, layer) => {
       if (!layersByCategory[cat]) layersByCategory[cat] = [];
       layersByCategory[cat].push(layer);
       nbMapLayers.push(layer);
+      if (map && !map.hasLayer(layer)) map.addLayer(layer);
       return layer;
     };
 
