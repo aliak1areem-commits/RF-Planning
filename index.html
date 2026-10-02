@@ -858,6 +858,131 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
   .quick-chips { display: none; }
   .map-mini-stats { display: none; }
 }
+ /* =========================================================
+   🎨 TOOL LEGEND — Legend تفاعلي لكل الأدوات
+   ========================================================= */
+.tool-legend {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 600;
+  background: rgba(255,255,255,.98);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  border: 1px solid rgba(18,65,145,.08);
+  font-size: 11.5px;
+  min-width: 230px;
+  max-width: 320px;
+  max-height: calc(100% - 40px);
+  overflow-y: auto;
+  display: none;
+}
+.tool-legend.show { display: block; }
+.tool-legend-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #0C1B3D;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #E9EEF6;
+}
+.tool-legend-head .close-btn {
+  margin-left: auto;
+  background: #FCEAEA;
+  color: #D64545;
+  border: none;
+  border-radius: 6px;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: inherit;
+  transition: all .15s;
+}
+.tool-legend-head .close-btn:hover { background: #f8d6d6; }
+.tool-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: all .15s;
+}
+.tool-legend-item:hover { background: #F4F7FB; }
+.tool-legend-item.disabled { opacity: 0.4; }
+.tool-legend-item input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #124191;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin: 0;
+}
+.tool-legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.tool-legend-label {
+  flex: 1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #1B1F2A;
+}
+.tool-legend-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: #F4F7FB;
+  padding: 2px 7px;
+  border-radius: 10px;
+  color: #5A6B87;
+}
+.tool-legend-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #E9EEF6;
+}
+.tool-legend-actions button {
+  flex: 1;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid #D7DEEA;
+  background: #fff;
+  color: #5A6B87;
+  transition: all .15s;
+}
+.tool-legend-actions button:hover {
+  background: #EAF2FB;
+  color: #124191;
+  border-color: #124191;
+}
+body.dark .tool-legend {
+  background: rgba(15,32,56,.98);
+  border-color: #1E3A6D;
+}
+body.dark .tool-legend-head { color: #fff; border-color: #1E3A6D; }
+body.dark .tool-legend-label { color: #E2E8F0; }
+body.dark .tool-legend-count { background: #142A5C; color: #AEB9D4; }
+body.dark .tool-legend-item:hover { background: #142A5C; }
+body.dark .tool-legend-actions { border-color: #1E3A6D; }
+body.dark .tool-legend-actions button { background: #142A5C; color: #AEB9D4; border-color: #1E3A6D; } 
 </style>
 </head>
 <body>
@@ -1154,7 +1279,20 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
           <div class="legend-title">Legend</div>
           <div id="legendItems"></div>
         </div>
-
+        <!-- 🎨 Tool Legend -->
+        <div class="tool-legend" id="toolLegend">
+          <div class="tool-legend-head">
+            <span id="toolLegendIcon">🎯</span>
+            <span id="toolLegendTitle">Legend</span>
+            <button class="close-btn" onclick="ToolLegend.hide()" title="Hide">✕</button>
+          </div>
+          <div id="toolLegendItems"></div>
+          <div class="tool-legend-actions">
+            <button onclick="ToolLegend.toggleAll(true)">✅ All</button>
+            <button onclick="ToolLegend.toggleAll(false)">☐ None</button>
+            <button onclick="ToolLegend.invert()">↺ Invert</button>
+          </div>
+        </div>
        <div class="loading-overlay" id="loadingOverlay" style="display:none;">
   <div class="spinner"></div>
   <div class="text">Loading cells from Supabase...</div>
@@ -3218,6 +3356,7 @@ function switchView(page) {
     window.__nbMode = false;
     if (typeof nbHideLegend === 'function') nbHideLegend();
     if (typeof hideNeighborLinesLegend === 'function') hideNeighborLinesLegend();
+            if (typeof ToolLegend !== 'undefined') ToolLegend.hide();
   }
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -3840,6 +3979,7 @@ function resetMapView() {
 
   // ═══ 3. مسح كل الـ Legends ═══
   ['nbLegend', 'nbLinesLegend', 'pscLegend', 'hsnLegend', 'bsicLegend', 'azoptLegend'].forEach(id => {
+      if (typeof ToolLegend !== 'undefined') ToolLegend.hide();
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -11189,9 +11329,18 @@ function threeGShowOnMap(mode) {
     if (sectorLayer) sectorLayer.clearLayers();
     if (labelLayer) labelLayer.clearLayers();
     if (coverageLayer) coverageLayer.clearLayers();
-    nbMapLayers.forEach(l => map.removeLayer(l));
+    nbMapLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
     nbMapLayers = [];
     threeGMapLayers = [];
+
+    // 🎯 تخزين الطبقات حسب الفئة
+    const layersByCategory = {};
+    const addToCategory = (cat, layer) => {
+      if (!layersByCategory[cat]) layersByCategory[cat] = [];
+      layersByCategory[cat].push(layer);
+      nbMapLayers.push(layer);
+      return layer;
+    };
 
     const src = threeGNbCurrent.source;
     const sLat = src.lat, sLon = src.long, sBore = src.bore;
@@ -11203,9 +11352,9 @@ function threeGShowOnMap(mode) {
       color: '#2563EB', weight: 2, dashArray: '6,6',
       fillColor: '#2563EB', fillOpacity: 0.04, interactive: false
     }).addTo(map);
-    nbMapLayers.push(radiusCircle);
+    addToCategory('source', radiusCircle);
 
-    // ═══ 2. الخلية المصدر (حمراء كبيرة) ═══
+    // ═══ 2. الخلية المصدر ═══
     const srcCoords = makeSectorCoords(sLat, sLon, sBore);
     const srcPoly = L.polygon(srcCoords, {
       color: '#991B1B', weight: 2.5, fillColor: '#DC2626', fillOpacity: 0.85
@@ -11213,27 +11362,37 @@ function threeGShowOnMap(mode) {
     srcPoly.bindTooltip('🎯 ' + escapeHtml(src.cell_name), {
       permanent: true, direction: 'top', offset: [0, -10], className: 'nb-label-source'
     });
-    nbMapLayers.push(srcPoly);
+    addToCategory('source', srcPoly);
 
-    // ═══ 3. الجيران (تمييز Intra/Inter + Added/Missing) ═══
+    // ═══ 3. الجيران ═══
     const points = [[sLat, sLon]];
     threeGNbCurrent.neighbors.forEach(nb => {
       if (!nb.cell) return;
       points.push([nb.cell.lat, nb.cell.long]);
 
-      // 🎯 تحديد اللون حسب Type + Status
+      // 🎯 تحديد الفئة
+      let cat;
+      if (mode === 'irat') {
+        cat = nb.status === 'Missing' ? 'irat-missing' : 'irat-added';
+      } else {
+        const isIntra = nb.type === 'Intra-Freq';
+        const isMissing = nb.status === 'Missing';
+        if (isIntra && !isMissing) cat = 'intra-added';
+        else if (!isIntra && !isMissing) cat = 'inter-added';
+        else if (isIntra && isMissing) cat = 'intra-missing';
+        else cat = 'inter-missing';
+      }
+
       const style = getNeighborStyle(nb);
 
-      // خط بين المصدر والجار
       const line = L.polyline([[sLat, sLon], [nb.cell.lat, nb.cell.long]], {
         color: style.lineColor,
         weight: nb.isFront ? 3 : 1.5,
         opacity: 0.85,
         dashArray: style.dashArray
       }).addTo(map);
-      nbMapLayers.push(line);
+      addToCategory(cat, line);
 
-      // قطاع الجار
       const nCoords = makeSectorCoords(nb.cell.lat, nb.cell.long, nb.cell.bore);
       const nPoly = L.polygon(nCoords, {
         color: style.stroke,
@@ -11242,7 +11401,6 @@ function threeGShowOnMap(mode) {
         fillOpacity: 0.75
       }).addTo(map);
       nPoly.bindTooltip(nb.name, { permanent: true, direction: 'center', className: 'nb-label' });
-
       nPoly.bindPopup(
         '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:230px;">' +
           '<div style="font-weight:800;font-family:monospace;margin-bottom:6px;">' + escapeHtml(nb.name) + '</div>' +
@@ -11250,10 +11408,9 @@ function threeGShowOnMap(mode) {
           '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Status:</span><b style="color:' + style.textColor + ';">' + nb.status + '</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Distance:</span><b>' + (nb.distance != null ? nb.distance.toFixed(0) + ' m' : '—') + '</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Direction:</span><b>' + nb.direction + '</b></div>' +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span>Band:</span><b>' + (nb.nbBand || '—') + '</b></div>' +
         '</div>'
       );
-      nbMapLayers.push(nPoly);
+      addToCategory(cat, nPoly);
     });
 
     // ═══ 4. Zoom ═══
@@ -11264,8 +11421,54 @@ function threeGShowOnMap(mode) {
       map.fitBounds(L.latLngBounds(sw, ne), { padding: [40, 40], maxZoom: 15 });
     }
 
-    // ═══ 5. Legend ═══
-    showThreeGNeighborLegend(threeGNbCurrent.neighbors, mode);
+    // ═══ 5. 🎨 Legend تفاعلي ═══
+    const onToggle = () => {
+      Object.entries(layersByCategory).forEach(([cat, layers]) => {
+        const visible = ToolLegend.isActive(cat);
+        layers.forEach(l => {
+          if (visible) { if (!map.hasLayer(l)) map.addLayer(l); }
+          else { if (map.hasLayer(l)) map.removeLayer(l); }
+        });
+      });
+    };
+
+    if (mode === 'irat') {
+      const added = threeGNbCurrent.neighbors.filter(n => n.status !== 'Missing').length;
+      const missing = threeGNbCurrent.neighbors.filter(n => n.status === 'Missing').length;
+
+      ToolLegend.show({
+        icon: '🔗',
+        title: 'IRAT (3G → 2G) · ' + threeGNbCurrent.neighbors.length,
+        items: [
+          { id: 'source', color: '#DC2626', label: '3G Source Cell', count: 1 },
+          { id: 'irat-added', color: '#16A34A', label: 'Added (IRAT)', count: added },
+          { id: 'irat-missing', color: '#F97316', label: 'Missing (IRAT)', count: missing, dashed: true }
+        ],
+        onToggle: onToggle
+      });
+    } else {
+      const intraAdded = threeGNbCurrent.neighbors.filter(n => n.type === 'Intra-Freq' && n.status !== 'Missing').length;
+      const intraMissing = threeGNbCurrent.neighbors.filter(n => n.type === 'Intra-Freq' && n.status === 'Missing').length;
+      const interAdded = threeGNbCurrent.neighbors.filter(n => n.type === 'Inter-Freq' && n.status !== 'Missing').length;
+      const interMissing = threeGNbCurrent.neighbors.filter(n => n.type === 'Inter-Freq' && n.status === 'Missing').length;
+
+      ToolLegend.show({
+        icon: '📡',
+        title: '3G Neighbor · ' + threeGNbCurrent.neighbors.length,
+        items: [
+          { id: 'source', color: '#DC2626', label: 'Source Cell', count: 1 },
+          { id: 'intra-added', color: '#16A34A', label: 'Intra-Freq Added', count: intraAdded },
+          { id: 'intra-missing', color: '#DC2626', label: 'Intra-Freq Missing', count: intraMissing, dashed: true },
+          { id: 'inter-added', color: '#2563EB', label: 'Inter-Freq Added', count: interAdded },
+          { id: 'inter-missing', color: '#F97316', label: 'Inter-Freq Missing', count: interMissing, dashed: true }
+        ],
+        onToggle: onToggle
+      });
+    }
+
+    // 🎯 حذف الـ Legend القديم إن وجد
+    const oldLegend = document.getElementById('nbLegend');
+    if (oldLegend) oldLegend.style.display = 'none';
 
     toast('📍 ' + threeGNbCurrent.neighbors.length + ' neighbors on map', 'success');
   }, 400);
@@ -11290,7 +11493,114 @@ function getNeighborStyle(nb) {
     return { fill: '#F97316', stroke: '#C2410C', lineColor: '#F97316', dashArray: '8,6', textColor: '#C2410C' };
   }
 }
+/* =========================================================
+   🎨 TOOL LEGEND — Legend تفاعلي لكل الأدوات
+   ========================================================= */
+window.ToolLegend = {
+  items: [],
+  onToggleCallback: null,
+  container: null,
+  _initialized: false,
 
+  init() {
+    if (this._initialized) return;
+    this.container = document.getElementById('toolLegend');
+    this._initialized = true;
+  },
+
+  /**
+   * show({ icon, title, items, onToggle })
+   * items: [{ id, color, label, count, dashed, active }]
+   */
+  show(options) {
+    this.init();
+    const opts = options || {};
+    this.items = (opts.items || []).map(i => ({
+      id: i.id,
+      color: i.color || '#999',
+      label: i.label || i.id,
+      count: i.count != null ? i.count : null,
+      dashed: !!i.dashed,
+      active: i.active !== false
+    }));
+    this.onToggleCallback = opts.onToggle || null;
+
+    const iconEl = document.getElementById('toolLegendIcon');
+    const titleEl = document.getElementById('toolLegendTitle');
+    if (iconEl) iconEl.textContent = opts.icon || '🎯';
+    if (titleEl) titleEl.textContent = opts.title || 'Legend';
+
+    this.render();
+    if (this.container) this.container.classList.add('show');
+  },
+
+  render() {
+    const itemsEl = document.getElementById('toolLegendItems');
+    if (!itemsEl) return;
+
+    itemsEl.innerHTML = this.items.map(item => {
+      const colorStyle = item.dashed
+        ? 'background: transparent; border: 2px dashed ' + item.color + ';'
+        : 'background: ' + item.color + '; border: 1px solid rgba(0,0,0,.15);';
+      return (
+        '<label class="tool-legend-item' + (item.active === false ? ' disabled' : '') + '" data-id="' + item.id + '">' +
+          '<input type="checkbox"' + (item.active !== false ? ' checked' : '') + '>' +
+          '<span class="tool-legend-color" style="' + colorStyle + '"></span>' +
+          '<span class="tool-legend-label">' + item.label + '</span>' +
+          (item.count != null ? '<span class="tool-legend-count">' + item.count + '</span>' : '') +
+        '</label>'
+      );
+    }).join('');
+
+    // Attach listeners
+    itemsEl.querySelectorAll('.tool-legend-item').forEach(el => {
+      const id = el.getAttribute('data-id');
+      const cb = el.querySelector('input[type="checkbox"]');
+      if (cb) cb.addEventListener('change', () => this.toggle(id));
+    });
+  },
+
+  toggle(id) {
+    const item = this.items.find(i => i.id === id);
+    if (!item) return;
+    item.active = !item.active;
+    this.render();
+    if (typeof this.onToggleCallback === 'function') {
+      this.onToggleCallback(item, this.items);
+    }
+  },
+
+  toggleAll(active) {
+    this.items.forEach(i => i.active = !!active);
+    this.render();
+    if (typeof this.onToggleCallback === 'function') {
+      this.onToggleCallback(null, this.items);
+    }
+  },
+
+  invert() {
+    this.items.forEach(i => i.active = !i.active);
+    this.render();
+    if (typeof this.onToggleCallback === 'function') {
+      this.onToggleCallback(null, this.items);
+    }
+  },
+
+  isActive(id) {
+    const item = this.items.find(i => i.id === id);
+    return item ? item.active !== false : true;
+  },
+
+  hide() {
+    if (this.container) this.container.classList.remove('show');
+    this.items = [];
+    this.onToggleCallback = null;
+  },
+
+  activeIds() {
+    return this.items.filter(i => i.active !== false).map(i => i.id);
+  }
+};
 // 🎯 Legend خاص بـ 3G/IRAT — نسخة واحدة نهائية
 function showThreeGNeighborLegend(neighbors, mode) {
   // 🎯 حماية: تأكد أنها مصفوفة
