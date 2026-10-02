@@ -4786,21 +4786,20 @@ async function importSaveToSupabase() {
     const duplicates = cellsWithProject.length - rowsToSave.length;
     if (duplicates > 0) toast('⚠️ تم تجاهل ' + duplicates + ' صف مكرر', 'info', 4000);
 
-    const BATCH = 150;
-    let saved = 0;
-    for (let i = 0; i < rowsToSave.length; i += BATCH) {
-      const batch = rowsToSave.slice(i, i + BATCH);
-     const { error } = await db.from('rf_cells').upsert(batch, {
-  onConflict: 'cell_name,project_id',
-  ignoreDuplicates: false
-});
-      if (error) {
-        console.error('❌ Insert error:', error);
-        throw error;
-      }
-            saved += batch.length;
-      btn.textContent = 'Saving ' + saved + '/' + rowsToSave.length + '...';
-    }
+    const BATCH = 500;
+let saved = 0;
+for (let i = 0; i < rowsToSave.length; i += BATCH) {
+  const batch = rowsToSave.slice(i, i + BATCH);
+  const { error } = await db.from('rf_cells').upsert(batch, {
+    onConflict: 'cell_name',
+    ignoreDuplicates: false
+  });
+  if (error) throw error;
+  saved += batch.length;
+  btn.textContent = 'Saving ' + saved + '/' + rowsToSave.length + '...';
+  // 🎯 انتظار بين الدفعات
+  await new Promise(r => setTimeout(r, 1000));
+}
 
     toast('✅ Saved ' + saved + ' cells', 'success');
     importClearPreview();
@@ -10626,20 +10625,20 @@ async function threeGSaveToSupabase(btn) {
     }
 
     // 2) أزل التكرار من الملف وأدخل الجديد
-    const uniq = new Map();
-    all.forEach(r => uniq.set(r.source_cell + '|' + r.neighbor_cell + '|' + r.relation_type, r));
-    const rowsToSave = [...uniq.values()];
-
-    const BATCH = 150;
-    let saved = 0;
-    for (let i = 0; i < rowsToSave.length; i += BATCH) {
-      const batch = rowsToSave.slice(i, i + BATCH);
-      const { error } = await db.from('rf_neighbors').insert(batch);
-      if (error) throw error;
-      saved += batch.length;
-      btn.textContent = 'Saving ' + saved + '/' + rowsToSave.length + '...';
-    }
-
+  const BATCH = 500;
+let saved = 0;
+for (let i = 0; i < rowsToSave.length; i += BATCH) {
+  const batch = rowsToSave.slice(i, i + BATCH);
+  const { error } = await db.from('rf_cells').upsert(batch, {
+    onConflict: 'cell_name',
+    ignoreDuplicates: false
+  });
+  if (error) throw error;
+  saved += batch.length;
+  btn.textContent = 'Saving ' + saved + '/' + rowsToSave.length + '...';
+  // 🎯 انتظار بين الدفعات
+  await new Promise(r => setTimeout(r, 1000));
+}
     // 3) احذف القديم بعد النجاح
     for (let i = 0; i < oldIds.length; i += 200) {
       const { error } = await db.from('rf_neighbors').delete().in('id', oldIds.slice(i, i + 200));
