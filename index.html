@@ -1495,166 +1495,50 @@ body.dark [style*="background:#EAF2FB"]{background:var(--primary-soft)!important
 body.dark [style*="color:#0C1B3D"]{color:var(--text)!important}
 body.dark [style*="color:#5A6B87"]{color:var(--text-2)!important}
 body.dark [style*="solid #E9EEF6"],body.dark [style*="solid #D7DEEA"]{border-color:var(--border)!important}
-  /* ═══════════════════════════════════════════════════════════
-   🔧 FIX — New Site Planner PRO Layout
+/* ═══════════════════════════════════════════════════════════
+   🎯 FIX — Page Layout Overflow (New Site Planner)
    ═══════════════════════════════════════════════════════════ */
 
-/* Fix header overlap + spacing */
-#page-tool-new-site .tool-page {
-  padding: 32px 24px 120px 24px !important;
-  max-width: 1600px !important;
-  scroll-padding-bottom: 120px !important;
-  overflow-y: auto !important;
-}
-
-/* Header spacing */
-#page-tool-new-site .tool-page-header {
-  margin: 0 0 32px 0 !important;
-  padding: 0 0 20px 0 !important;
-  gap: 16px !important;
-  min-height: 56px !important;
+/* Page wrapper */
+#page-tool-new-site.active {
   display: flex !important;
-  align-items: center !important;
-  border-bottom: 1px solid #E9EEF6 !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
 }
 
-#page-tool-new-site .tool-page-title {
-  font-size: 22px !important;
-  font-weight: 800 !important;
-  line-height: 1.2 !important;
-  margin: 0 !important;
-  padding: 0 !important;
+/* Tool page — only scroll area */
+#page-tool-new-site .tool-page {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 24px 24px 100px 24px !important;
 }
 
-#page-tool-new-site .tool-page-sub {
-  font-size: 13px !important;
-  line-height: 1.4 !important;
-  margin: 4px 0 0 0 !important;
-  padding: 0 !important;
+/* App container */
+.app {
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
 }
 
-/* Back button */
-#page-tool-new-site .back-btn {
-  width: 42px !important;
-  height: 42px !important;
-  flex-shrink: 0 !important;
-  margin: 0 !important;
+.main {
+  overflow: hidden !important;
+  height: 100vh !important;
 }
 
-/* Sections - consistent spacing */
-#page-tool-new-site .tool-section {
-  margin: 0 0 24px 0 !important;
-  padding: 22px 24px !important;
-  border-radius: 14px !important;
+/* Hide inactive pages */
+.page:not(.active) {
+  display: none !important;
 }
 
-#page-tool-new-site .tool-section:first-of-type {
-  margin-top: 0 !important;
-}
-
-/* Last section - prevent cutoff */
-#page-tool-new-site .tool-page > .tool-section:last-child,
-#page-tool-new-site #nsResults > .tool-section:last-child {
-  margin-bottom: 60px !important;
-}
-
-/* h3 inside sections */
-#page-tool-new-site .tool-section h3 {
-  margin: 0 0 18px 0 !important;
-  padding: 0 0 14px 0 !important;
-  font-size: 15px !important;
-  line-height: 1.3 !important;
-  border-bottom: 1px solid #F0F3F9 !important;
-}
-
-/* Form rows */
-#page-tool-new-site .form-row {
-  margin: 0 0 16px 0 !important;
-  padding: 0 !important;
-}
-
-#page-tool-new-site .form-row:last-child {
-  margin-bottom: 0 !important;
-}
-
-/* Form fields */
-#page-tool-new-site .form-field {
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-#page-tool-new-site .form-field label {
-  margin-bottom: 6px !important;
-  display: block !important;
-}
-
-#page-tool-new-site .form-field input,
-#page-tool-new-site .form-field select {
-  margin: 0 !important;
-}
-
-#page-tool-new-site .form-field .hint {
-  margin-top: 4px !important;
-}
-
-/* Results wrapper */
-#page-tool-new-site #nsResults {
-  margin-top: 8px !important;
-  padding-bottom: 40px !important;
-}
-
-#page-tool-new-site #nsResults .tool-section {
-  margin-bottom: 24px !important;
-}
-
-/* Tabs spacing */
-#page-tool-new-site .nb-tabs {
-  margin: 0 0 20px 0 !important;
-  padding: 4px !important;
-}
-
-/* Action rows */
-#page-tool-new-site .action-row {
-  margin-top: 20px !important;
-  padding: 0 !important;
-  gap: 12px !important;
-}
-
-#page-tool-new-site .action-row:first-child {
-  margin-top: 0 !important;
-}
-
-/* Sectors container */
-#page-tool-new-site #ns_sectors_container {
-  margin: 16px 0 0 0 !important;
-}
-
-#page-tool-new-site #ns_sectors_container > div {
-  margin: 0 !important;
-}
-
-/* KPI grid inside results */
-#page-tool-new-site .kpi-grid {
-  margin-bottom: 20px !important;
-}
-
-/* Filter checkbox groups */
-#page-tool-new-site .filter-group {
-  margin-bottom: 16px !important;
-}
-
-/* Titles inside sections */
-#page-tool-new-site .tool-section > h3 + div {
-  margin-top: 0 !important;
-}
-
-/* Prevent child margins from pushing layout */
-#page-tool-new-site .tool-section > *:first-child {
-  margin-top: 0 !important;
-}
-
-#page-tool-new-site .tool-section > *:last-child {
-  margin-bottom: 0 !important;
+/* Hide stray elements */
+body > form,
+body > div:not(.app):not(.toast):not(#loginScreen) {
+  display: none !important;
 }
 </style>
 </head>
