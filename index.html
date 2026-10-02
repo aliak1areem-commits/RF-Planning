@@ -953,9 +953,7 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
         <span id="pageTitle">Cell Map</span>
         <span class="subtitle" id="pageSubtitle">Visualize cells on the map</span>
       </div>
-      <button class="btn btn-ghost" onclick="toggleLanguage()" title="Switch Language" id="langToggleBtn">
-  <span>🌐</span><span id="langLabel">AR</span>
-</button>
+     
           <div class="topbar-actions">
             <div id="userBadge" style="display:flex;align-items:center;gap:8px;padding:6px 12px;background:#F4F7FB;border-radius:20px;font-size:12.5px;color:#0C1B3D;font-family:'JetBrains Mono',monospace;"></div>
 <button class="btn btn-ghost" onclick="doLogout()" title="Sign Out" style="color:#D64545;border-color:#F5D5D5;">
@@ -1628,9 +1626,10 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
                 <tbody></tbody>
               </table>
             </div>
-            <div class="action-row">
+                       <div class="action-row">
               <button class="btn btn-success" onclick="exportPCIResults()">📥 Export CSV</button>
               <button class="btn btn-secondary" onclick="showPCIOnMap()">🗺️ Show on Map</button>
+              <button class="btn btn-gold" onclick="pciApplyAll(this)">💾 Apply All Suggestions</button>
             </div>
           </div>
         </div>
@@ -1806,7 +1805,7 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
         <div class="action-row">
           <button class="btn btn-success" onclick="exportPSCResults()">📥 Export CSV</button>
           <button class="btn btn-secondary" onclick="showPSCOnMap()">🗺️ Show on Map</button>
-          <button class="btn btn-gold" onclick="pscApplyAll()">💾 Apply All Suggestions</button>
+          <button class="btn btn-gold" onclick="pscApplyAll(this)">💾 Apply All Suggestions</button>
         </div>
       </div>
     </div>
@@ -2094,17 +2093,11 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
               <input type="number" id="sym_max_dist" value="5000" min="500" max="20000" step="500">
               <div class="hint">الجيران المقبولون فقط ضمن هذه المسافة</div>
             </div>
-            <div class="form-field">
-              <label>Radius for Missing (m)</label>
-              <input type="number" id="sym_missing_radius" value="3000" min="500" max="15000" step="500">
-              <div class="hint">للتحقق من العلاقات المفقودة</div>
-            </div>
+            
             <div class="form-field">
               <label>Technology</label>
-              <select id="sym_tech">
+                           <select id="sym_tech">
                 <option value="GSM">GSM (2G)</option>
-                <option value="LTE">LTE (4G)</option>
-                <option value="all">All</option>
               </select>
             </div>
           </div>
@@ -2802,15 +2795,7 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
           <input type="number" id="ns_height" value="30" min="5" max="200">
         </div>
       </div>
-      <div class="form-row">
-        <div class="form-field">
-          <label>Site Type</label>
-          <select id="ns_site_type">
-            <option value="macro">🏢 Macro (Greenfield / Rooftop)</option>
-            <option value="micro">📡 Micro / Small Cell</option>
-            <option value="indoor">🏬 Indoor (DAS)</option>
-          </select>
-        </div>
+   
         <div class="form-field">
           <label>Technologies</label>
           <select id="ns_type">
@@ -2875,14 +2860,8 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
           <input type="checkbox" id="ns_opt_cosite" checked>
           <span>🔒 منع تكرار BCCH/PSC/PCI على نفس الموقع (Co-site Rules)</span>
         </label>
-        <label class="filter-checkbox">
-          <input type="checkbox" id="ns_opt_distance" checked>
-          <span>📏 إعادة استخدام القيم فقط على مسافة آمنة</span>
-        </label>
-        <label class="filter-checkbox">
-          <input type="checkbox" id="ns_opt_facing" checked>
-          <span>🎯 تجنب التعارض الأمامي (Face-to-Face)</span>
-        </label>
+      
+       
         <label class="filter-checkbox">
           <input type="checkbox" id="ns_opt_autoNb" checked>
           <span>🔗 اقتراح الجيران تلقائياً</span>
@@ -2985,7 +2964,7 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
           </div>
           <div id="nsSaveSummary" style="background:#EAF2FB;border-radius:10px;padding:16px;margin-bottom:16px;"></div>
           <div class="action-row">
-            <button class="btn btn-success" onclick="nsSaveToDatabase()" style="font-size:14px;padding:12px 24px;">💾 Save All to Supabase</button>
+            <button class="btn btn-success" onclick="nsSaveToDatabase(this)" style="font-size:14px;padding:12px 24px;">💾 Save All to Supabase</button>
             <button class="btn btn-secondary" onclick="nsShowOnMap()">🗺️ Show on Map</button>
             <button class="btn btn-gold" onclick="nsExportCSV()">📥 Export CSV</button>
             <button class="btn btn-ghost" onclick="nsExportKML()">🗺️ Export KML</button>
@@ -3103,9 +3082,10 @@ let importPreviewData = [];
 
 const GSM_BAND_ARFCN = { '900': { from: 34, to: 46 }, '1800': { from: 663, to: 680 } };
 const GSM_BAND_SUFFIX = {
-  'A':'900', 'B':'900', 'C':'900',
+  'A':'900',  'B':'900',  'C':'900',
+  'G':'900',  'H':'900',  'I':'900',
   'D':'1800', 'E':'1800', 'F':'1800',
-  'G':'900', 'H':'1800', 'I':'1800', 'J':'1800'
+  'J':'1800', 'K':'1800', 'L':'1800'
 };
 const GSM_RADIUS_M = 1200;
 const GSM_FRONT_THRESHOLD = 45;
@@ -3179,7 +3159,12 @@ function escapeHtml(s) {
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   }[c]));
 }
-
+function toCSV(rows) {
+  return '\uFEFF' + rows.map(r => r.map(v => {
+    const s = v == null ? '' : String(v);
+    return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }).join(',')).join('\r\n');
+}
 /* =========================================================
    MATH
    ========================================================= */
@@ -3387,10 +3372,17 @@ function initMap() {
     }
 
     if (e.layerType === 'polygon') {
-      const cellsInside = allCells.filter(c => {
-        if (!c.lat || !c.long) return false;
-        return e.layer.getBounds().contains([c.lat, c.long]);
-      });
+          const ring = e.layer.getLatLngs()[0];
+      const inside = (lat, lng) => {
+        let r = false;
+        for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+          const yi = ring[i].lat, xi = ring[i].lng, yj = ring[j].lat, xj = ring[j].lng;
+          if ((yi > lat) !== (yj > lat) &&
+              lng < (xj - xi) * (lat - yi) / (yj - yi) + xi) r = !r;
+        }
+        return r;
+      };
+      const cellsInside = allCells.filter(c => c.lat && c.long && inside(c.lat, c.long));
       window.__lastPolygonCells = cellsInside;
       toast('📦 ' + cellsInside.length + ' خلية داخل المضلع — اضغط "Copy Polygon Cells"', 'success', 5000);
     }
@@ -3414,7 +3406,7 @@ function initMap() {
     navigator.clipboard.writeText(tsv).then(() => {
       toast('✅ Copied ' + window.__lastPolygonCells.length + ' cells — paste in Excel', 'success', 5000);
     }).catch(() => {
-      const csv = rows.map(r => r.join(',')).join('\n');
+const csv = toCSV(rows);
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -3445,7 +3437,6 @@ map.on('zoomstart movestart', function() {
     
     if (sectorLayer) sectorLayer.clearLayers();
     if (labelLayer) labelLayer.clearLayers();
-    if (neighborLineLayer) neighborLineLayer.clearLayers();
   });
 
   // ✅ ارسم بعد انتهاء الزوم (بانتظار 400ms)
@@ -3488,10 +3479,10 @@ map.on('zoomstart movestart', function() {
     fetch(url)
       .then(r => r.json())
       .then(data => {
-        const addr = data.display_name || 'Unknown location';
-        const short = data.address ?
+               const addr = escapeHtml(data.display_name || 'Unknown location');
+        const short = escapeHtml(data.address ?
           (data.address.city || data.address.town || data.address.village || data.address.state || '') +
-          (data.address.country ? ', ' + data.address.country : '') : '';
+          (data.address.country ? ', ' + data.address.country : '') : '');
 
         const popup = L.popup()
           .setLatLng(e.latlng)
@@ -3749,7 +3740,7 @@ const gsmBand = (function() {
     long: parseFloat(row.long) || 0,
     bore: row.bore || 0,
     radius: row.cell_radius || 5000,
-    pci: row.pci || 0,
+    pci: row.pci != null ? parseInt(row.pci) : null,
     rsi: row.rsi || 0,
     bcch: row.bcch || 0,
     bsic: row.bsic || '',
@@ -3902,7 +3893,7 @@ if (c.tech === 'LTE' && !showLTE) return false;
 if (c.tech === '3G' && !show3G) return false;
 
     if (search) {
-      const hay = (c.cell_name + ' ' + c.site + ' ' + c.pci + ' ' + c.cell_id).toLowerCase();
+      const hay = (c.cell_name + ' ' + c.site + ' ' + (c.pci != null ? c.pci : '') + ' ' + c.cell_id).toLowerCase();
       if (hay.indexOf(search) === -1) return false;
     }
     if (pciQuery && String(c.pci) !== pciQuery) return false;
@@ -3975,16 +3966,19 @@ const viewportBounds = map.getBounds().pad(0.1);
     visibleCells.forEach(cell => {
       if (!cell.lat || !cell.long) return;
       const key = cell.site;
-      if (!sites[key]) sites[key] = { lat: cell.lat, long: cell.long, gsm: 0, lte: 0 };
+           if (!sites[key]) sites[key] = { lat: cell.lat, long: cell.long, gsm: 0, g3: 0, lte: 0 };
       if (cell.tech === 'GSM') sites[key].gsm++;
+      else if (cell.tech === '3G') sites[key].g3++;
       else if (cell.tech === 'LTE') sites[key].lte++;
     });
 
     Object.entries(sites).forEach(([siteName, info]) => {
-      const color = info.gsm && info.lte ? '#7C3AED' :
+      const kinds = (info.gsm ? 1 : 0) + (info.g3 ? 1 : 0) + (info.lte ? 1 : 0);
+      const color = kinds > 1 ? '#7C3AED' :
                     info.gsm ? '#D97706' :
+                    info.g3 ? '#14B8A6' :
                     info.lte ? '#124191' : '#94A3B8';
-      const total = info.gsm + info.lte;
+      const total = info.gsm + info.g3 + info.lte;
 
       const circle = L.circleMarker([info.lat, info.long], {
         
@@ -3995,7 +3989,8 @@ const viewportBounds = map.getBounds().pad(0.1);
       circle.bindPopup(
         '<div style="font-family:Inter,sans-serif;font-size:12.5px;min-width:180px;">' +
           '<div style="font-weight:800;font-size:14px;font-family:monospace;margin-bottom:8px;color:#0C1B3D;">' + escapeHtml(siteName) + '</div>' +
-          '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:#D97706;">📡 GSM:</span><b>' + info.gsm + '</b></div>' +
+                  '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:#D97706;">📡 GSM:</span><b>' + info.gsm + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:#14B8A6;">📶 3G:</span><b>' + info.g3 + '</b></div>' +
           '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:#124191;">📶 LTE:</span><b>' + info.lte + '</b></div>' +
         '</div>'
       );
@@ -4124,7 +4119,7 @@ function getLayerPriority(cell) {
       });
       polygon.on('mouseover', function() {
         this.setStyle({ fillOpacity: 0.85, weight: 2 });
-        if (!multiSelectMode) this.bindTooltip(cell.cell_name, { sticky: true }).openTooltip();
+        if (!multiSelectMode) this.bindTooltip(escapeHtml(cell.cell_name), { sticky: true }).openTooltip();
       });
       polygon.on('mouseout', function() {
         this.setStyle({ fillOpacity: fillOpacity, weight: weight });
@@ -4158,7 +4153,7 @@ function getLayerPriority(cell) {
       let labelText = '';
       let labelColor = cell.color;
       if (labelMode === 'name') labelText = cell.cell_name;
-      else if (labelMode === 'pci') { labelText = 'PCI ' + cell.pci; labelColor = '#0C1B3D'; }
+      else if (labelMode === 'pci') { labelText = 'PCI ' + (cell.pci != null ? cell.pci : '—'); labelColor = '#0C1B3D'; }
       else if (labelMode === 'both') labelText = cell.cell_name + ' · ' + cell.pci;
       else if (labelMode === 'site') { labelText = cell.site; labelColor = '#124191'; }
       else return;
@@ -4179,10 +4174,10 @@ function getLayerPriority(cell) {
   if (typeof updateMiniStats === 'function') updateMiniStats();
 }
 
-function makeSectorCoords(lat, lng, azimuth) { return makeSectorCoordsScaled(lat, lng, azimuth, 1.0); }
+function makeSectorCoords(lat, lng, azimuth) { return makeSectorCoordsScaled(lat, lng, azimuth, 1.0, null, 15); }
 
-function makeSectorCoordsScaled(lat, lng, azimuth, scale) {
-  const zoom = map.getZoom();
+function makeSectorCoordsScaled(lat, lng, azimuth, scale, _band, zoomOverride) {
+  const zoom = zoomOverride || map.getZoom();
   let radius_m, half_width_m;
   if (zoom >= 16) { radius_m = 150; half_width_m = 45; }
   else if (zoom >= 14) { radius_m = 350; half_width_m = 100; }
@@ -4791,7 +4786,7 @@ async function importSaveToSupabase() {
     const duplicates = cellsWithProject.length - rowsToSave.length;
     if (duplicates > 0) toast('⚠️ تم تجاهل ' + duplicates + ' صف مكرر', 'info', 4000);
 
-    const BATCH = 500;
+    const BATCH = 150;
     let saved = 0;
     for (let i = 0; i < rowsToSave.length; i += BATCH) {
       const batch = rowsToSave.slice(i, i + BATCH);
@@ -5067,7 +5062,7 @@ function findPairsWithin(cells, maxRadiusM) {
 
 function analyzeConflicts(cells, settings) {
   // 🛑 LTE only
-  cells = cells.filter(c => c.pci != null && c.pci > 0);
+  cells = cells.filter(c => c.pci != null);
 
   const maxRadius = Math.max(
     settings.same_pci_radius_m, settings.mod3_radius_m,
@@ -5212,7 +5207,7 @@ function optimizePCI(cells, analysis, settings, pciPool, passes) {
 function runPCIChecker() {
   if (!allCells.length) { toast('No cells loaded', 'error'); return; }
 
-  const lteCells = allCells.filter(c => c.tech === 'LTE' && c.pci > 0);
+  const lteCells = allCells.filter(c => c.tech === 'LTE' && c.pci != null);
   if (!lteCells.length) {
     toast('No LTE cells (PCI > 0). PCI Checker works on LTE only.', 'error', 5000);
     return;
@@ -5351,9 +5346,9 @@ function exportPCIResults() {
     const changed = newPci !== c.pci;
     const unresolved = lastPCIResults.stillConflicted.has(c.id);
     const status = unresolved ? 'Unresolved' : (changed ? 'Reassigned' : 'Clean');
-    rows.push([c.cell_name, c.pci, newPci, newPci % 3, c.lat, c.long, c.bore, status]);
+     rows.push([c.cell_name, c.pci, newPci, newPci % 3, c.lat, c.long, c.bore, status]);
   });
-  const csv = rows.map(r => r.join(',')).join('\n');
+  const csv = toCSV(rows);
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -5364,6 +5359,36 @@ function exportPCIResults() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   toast('✅ CSV exported', 'success');
+}
+  async function pciApplyAll(btn) {
+  if (!lastPCIResults) { toast('Run analysis first', 'error'); return; }
+  if (!requirePermission('action:apply-changes', 'apply PCI changes')) return;
+  const changes = lastPCIResults.cells.filter(c => c.suggested_pci !== c.pci);
+  if (!changes.length) { toast('No changes to apply', 'info'); return; }
+  if (!confirm('Apply ' + changes.length + ' PCI changes to Supabase?')) return;
+
+  btn.disabled = true;
+  let applied = 0, failed = 0;
+  try {
+    for (let i = 0; i < changes.length; i += 20) {
+      const chunk = changes.slice(i, i + 20);
+      const res = await Promise.all(chunk.map(c =>
+        db.from('rf_cells').update({ pci: c.suggested_pci }).eq('id', c.id)));
+      res.forEach((r, k) => {
+        if (r.error) { failed++; console.error(r.error); return; }
+        applied++;
+        const local = allCells.find(x => x.id === chunk[k].id);
+        if (local) local.pci = chunk[k].suggested_pci;
+      });
+      btn.textContent = 'Applying ' + applied + '/' + changes.length + '...';
+    }
+    if (typeof persistCellsCache === 'function') persistCellsCache();
+    toast('✅ Applied ' + applied + ' PCI changes' + (failed ? ' (' + failed + ' failed)' : ''), 'success', 5000);
+    setTimeout(runPCIChecker, 500);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💾 Apply All Suggestions';
+  }
 }
 
 function showPCIOnMap() {
@@ -5465,7 +5490,7 @@ function exportSelectedCells() {
   const selected = allCells.filter(c => selectedCellIds.has(c.id));
   const rows = [['Cell Name', 'PCI', 'RSI', 'Lat', 'Long', 'Azimuth', 'Site', 'Region', 'Sector']];
   selected.forEach(c => rows.push([c.cell_name, c.pci, c.rsi, c.lat, c.long, c.bore, c.site, c.region, c.sector]));
-  const csv = rows.map(r => r.join(',')).join('\n');
+const csv = toCSV(rows);
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -5517,7 +5542,7 @@ function showSiteInfo(cell) {
   } else {
     rfSection =
       '<div class="info-section-title">🔢 LTE Parameters</div>' +
-      '<div class="info-row"><span class="k">PCI</span><span class="v" style="color:#124191;font-weight:800;">' + (cell.pci || '—') + '</span></div>' +
+      '<div class="info-row"><span class="k">PCI</span><span class="v" style="color:#124191;font-weight:800;">' + (cell.pci != null ? cell.pci : '—') + '</span></div>' +
       '<div class="info-row"><span class="k">RSI</span><span class="v">' + (cell.rsi || '—') + '</span></div>';
   }
 
@@ -6503,7 +6528,7 @@ function gsmExportCSV() {
       c.bcch != null ? c.bcch : '', c.bsic || '',
       c.isFront ? 'Yes' : 'No', isConflict ? 'Yes' : 'No']);
   });
-  const csv = rows.map(r => r.join(',')).join('\n');
+const csv = toCSV(rows);
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -6605,34 +6630,25 @@ function renderDashboard() {
     '</div>';
 
   // ═══ CONFLICTS ═══
-  const lteCells = cells.filter(c => c.tech === 'LTE' && c.pci > 0);
+  const lteCells = cells.filter(c => c.tech === 'LTE' && c.pci != null);
   const gsmCells = cells.filter(c => c.tech === 'GSM');
   const g3Cells = cells.filter(c => c.tech === '3G');
 
   // PCI conflicts
-  const pciCount = {};
-  lteCells.forEach(c => { pciCount[c.pci] = (pciCount[c.pci] || 0) + 1; });
-  const pciConflicts = Object.values(pciCount).filter(v => v > 1).length;
+   const pciConflicts = dashCountClashes(lteCells, c => c.pci, 5000);
 
   // PSC conflicts
-  const pscCount = {};
-  g3Cells.filter(c => c.psc != null).forEach(c => { pscCount[c.psc] = (pscCount[c.psc] || 0) + 1; });
-  const pscConflicts = Object.values(pscCount).filter(v => v > 1).length;
+  const pscConflicts = dashCountClashes(g3Cells.filter(c => c.psc != null), c => c.gsmBand + '|' + c.psc, 2000);
 
   // BSIC conflicts
-  const bsicKey = {};
-  gsmCells.filter(c => c.bsic).forEach(c => {
-    const k = (c.bcch || '') + '-' + c.bsic;
-    bsicKey[k] = (bsicKey[k] || 0) + 1;
-  });
-  const bsicConflicts = Object.values(bsicKey).filter(v => v > 1).length;
+  const bsicConflicts = dashCountClashes(gsmCells.filter(c => c.bsic), c => c.bcch + '-' + c.bsic, 10000);
 
   // GSM w/o BCCH
   const gsmNoBcch = gsmCells.filter(c => !c.bcch).length;
   // 3G w/o PSC
   const g3NoPsc = g3Cells.filter(c => c.psc == null).length;
   // LTE w/o PCI
-  const lteNoPci = cells.filter(c => c.tech === 'LTE' && !c.pci).length;
+  const lteNoPci = cells.filter(c => c.tech === 'LTE' && c.pci == null).length;
 
   document.getElementById('dashConflicts').innerHTML =
     '<div style="font-size:13px;font-weight:800;color:#0C1B3D;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;">⚠️ Conflict Summary</div>' +
@@ -6646,27 +6662,21 @@ function renderDashboard() {
     '</div>';
 
   // ═══ NEIGHBORS ═══
-  let nbHtml = '';
-  if (typeof threeGAllNeighbors !== 'undefined' && threeGAllNeighbors.length > 0) {
-    const inter = threeGAllNeighbors.filter(n => n.relation_type === 'inter').length;
-    const intra = threeGAllNeighbors.filter(n => n.relation_type === 'intra').length;
-    const irat  = threeGAllNeighbors.filter(n => n.relation_type === 'irat').length;
-    const total = threeGAllNeighbors.length;
-    const avgPerCell = cells.length ? (total / cells.length).toFixed(1) : 0;
-
-    nbHtml =
-      '<div style="font-size:13px;font-weight:800;color:#0C1B3D;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;">🔗 Neighbor Relations</div>' +
+    const nbBox = document.getElementById('dashNeighbors');
+  nbBox.innerHTML = '<div style="text-align:center;color:#5A6B87;padding:20px;font-size:13px;">Loading neighbor counts...</div>';
+  dashLoadNbCounts().then(n => {
+    const total = n.inter + n.intra + n.irat;
+    const avg = g3Cells.length ? (total / g3Cells.length).toFixed(1) : 0;
+    nbBox.innerHTML =
+      '<div style="font-size:13px;font-weight:800;color:#0C1B3D;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;">🔗 3G Neighbor Relations</div>' +
       '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;">' +
-        dashNbCard('📡 Inter-Freq', inter, '#2563EB') +
-        dashNbCard('🔄 Intra-Freq', intra, '#16A34A') +
-        dashNbCard('📞 IRAT (3G→2G)', irat, '#8B5CF6') +
+        dashNbCard('📡 Inter-Freq', n.inter, '#2563EB') +
+        dashNbCard('🔄 Intra-Freq', n.intra, '#16A34A') +
+        dashNbCard('📞 IRAT (3G→2G)', n.irat, '#8B5CF6') +
         dashNbCard('Σ Total', total, '#124191') +
-        dashNbCard('📊 Avg / Cell', avgPerCell, '#F2A900') +
+        dashNbCard('📊 Avg / 3G Cell', avg, '#F2A900') +
       '</div>';
-  } else {
-    nbHtml = '<div style="text-align:center;color:#5A6B87;padding:20px;font-size:13px;">No neighbor data loaded</div>';
-  }
-  document.getElementById('dashNeighbors').innerHTML = nbHtml;
+  }).catch(() => { nbBox.innerHTML = ''; });
 
   // ═══ DATA QUALITY ═══
   const dqItems = [
@@ -6704,6 +6714,33 @@ function renderDashboard() {
 
   // ═══ INSIGHTS ═══
   dashRenderInsights(cells, pciConflicts, pscConflicts, bsicConflicts, gsmNoBcch, g3NoPsc, lteNoPci);
+}
+  function dashCountClashes(cells, keyFn, radiusM) {
+  const groups = new Map();
+  cells.forEach(c => {
+    const k = keyFn(c);
+    if (k == null) return;
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(c);
+  });
+  let pairs = 0;
+  groups.forEach(list => {
+    for (let i = 0; i < list.length; i++)
+      for (let j = i + 1; j < list.length; j++)
+        if (haversineDistance(list[i].lat, list[i].long, list[j].lat, list[j].long) <= radiusM) pairs++;
+  });
+  return pairs;
+}
+
+async function dashLoadNbCounts() {
+  const out = {};
+  for (const t of ['inter', 'intra', 'irat']) {
+    let q = db.from('rf_neighbors').select('id', { count: 'exact', head: true }).eq('relation_type', t);
+    if (currentProjectId) q = q.eq('project_id', currentProjectId);
+    const { count } = await q;
+    out[t] = count || 0;
+  }
+  return out;
 }
 
 function dashKpi(icon, label, value, color) {
@@ -6922,7 +6959,7 @@ function dashExport() {
   cells.forEach(c => {
     rows.push([c.cell_name, c.tech, c.gsmBand || '', c.site, c.region, c.pci || '', c.psc || '', c.bcch || '', c.bsic || '', c.hsn != null ? c.hsn : '']);
   });
-  const csv = rows.map(r => r.join(',')).join('\n');
+const csv = toCSV(rows);
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -7144,7 +7181,7 @@ function renderCellsPage(page) {
       row += '<td>' + (c.gsmBand || '—') + '</td>';
     }
     if (cellsPageState.visibleColumns.includes('pci')) {
-      row += '<td style="font-family:monospace;color:' + (c.pci ? '#124191' : '#CBD5E1') + ';">' + (c.pci || '—') + '</td>';
+      row += '<td style="font-family:monospace;color:' + (c.pci != null ? '#124191' : '#CBD5E1') + ';">' + (c.pci != null ? c.pci : '—') + '</td>';
     }
     if (cellsPageState.visibleColumns.includes('psc')) {
       row += '<td style="font-family:monospace;color:' + (c.psc != null ? '#0F766E' : '#CBD5E1') + ';">' + (c.psc != null ? c.psc : '—') + '</td>';
@@ -7279,7 +7316,7 @@ function cellsExportFiltered() {
       c.uarfcn_dl || '', c.bore, c.lat, c.long, (c.comment || '').replace(/,/g, ';')
     ]);
   });
-  const csv = rows.map(r => r.join(',')).join('\n');
+const csv = toCSV(rows);
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -7306,7 +7343,7 @@ function cellsBulkExport() {
   selected.forEach(c => {
     rows.push([c.cell_name, c.site, c.tech, c.gsmBand || '', c.pci || '', c.psc || '', c.bcch || '', c.bsic || '', c.lat, c.long]);
   });
-  const csv = rows.map(r => r.join(',')).join('\n');
+const csv = toCSV(rows);
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -7701,7 +7738,7 @@ function runHSNChecker() {
   // Sort by conflict count
   const conflictedCells = Array.from(conflictMap.entries())
     .sort((a, b) => b[1].length - a[1].length);
-
+  const hsnByName = new Map(features.map(f => [f.cell_name, f]));
   conflictedCells.forEach(([featureId, cellConflicts]) => {
     const feat = featureDict.get(featureId);
     if (!feat) return;
@@ -7717,7 +7754,12 @@ function runHSNChecker() {
       else siteHSNs.add(cell.hsn);
     });
 
-    const forbidden = new Set([...neighborHSNs, ...siteHSNs, ...usedSuggestions]);
+       const forbidden = new Set([...neighborHSNs, ...siteHSNs]);
+    // الجيران اللي انعالجوا قبل: استخدم القيمة الجديدة مالتهم
+    cellConflicts.forEach(c => {
+      const nf = hsnByName.get(c.cell);
+      if (nf && suggestedHSNs.has(nf.id)) forbidden.add(suggestedHSNs.get(nf.id));
+    });
 
     const available = allPossibleHSNs.filter(h => !forbidden.has(h));
 
@@ -7733,7 +7775,6 @@ function runHSNChecker() {
     }
 
     suggestedHSNs.set(featureId, suggestedHSN);
-    usedSuggestions.add(suggestedHSN);
     hsnDistribution[suggestedHSN] = (hsnDistribution[suggestedHSN] || 0) + 1;
   });
 
@@ -7846,7 +7887,7 @@ function clearHSNResults() {
 /* =========================================================
    APPLY ALL SUGGESTIONS
    ========================================================= */
-async function hsnApplyAll() {
+async function hsnApplyAll(btn) {
   if (!hsnLastResults) { toast('Run analysis first', 'error'); return; }
 
   const count = hsnLastResults.suggestedHSNs.size;
@@ -7854,7 +7895,6 @@ async function hsnApplyAll() {
 
   if (!confirm('Apply ' + count + ' suggested HSN values to Supabase?\n\nهذا سيحدّث ' + count + ' خلية.')) return;
 
-  const btn = event.target;
   btn.disabled = true;
   btn.textContent = 'Applying...';
 
@@ -8571,7 +8611,7 @@ function showPSCOnMap() {
 }
 
 /* 💾 تطبيق الاقتراحات في Supabase */
-async function pscApplyAll() {
+async function pscApplyAll(btn) {
   if (!pscLastResults) { toast('Run analysis first', 'error'); return; }
 
   const changes = pscLastResults.cells.filter(c => c.suggestedPsc !== c.originalPsc);
@@ -8579,7 +8619,6 @@ async function pscApplyAll() {
 
   if (!confirm('تطبيق ' + changes.length + ' تغيير PSC في Supabase؟')) return;
 
-  const btn = event.target;
   btn.disabled = true;
   btn.textContent = 'Applying...';
 
@@ -8963,7 +9002,7 @@ function clearBSICResults() {
 // =========================================================
 // Apply All
 // =========================================================
-async function bsicApplyAll() {
+async function bsicApplyAll(btn) {
   if (!bsicLastResults) { toast('Run analysis first', 'error'); return; }
 
   const changes = bsicLastResults.cells.filter(c => c.suggested && c.suggested !== c.bsic);
@@ -8971,7 +9010,6 @@ async function bsicApplyAll() {
 
   if (!confirm('Apply BSIC changes to ' + changes.length + ' cells?\n\nهذا سيحدّث قاعدة البيانات.')) return;
 
-  const btn = event.target;
   btn.disabled = true;
   btn.textContent = 'Applying...';
 
@@ -9375,7 +9413,6 @@ function symGetNbList(cell) {
 
 function runSymmetryChecker() {
   const maxDist = parseInt(document.getElementById('sym_max_dist').value) || 5000;
-  const missingRadius = parseInt(document.getElementById('sym_missing_radius').value) || 3000;
   const tech = document.getElementById('sym_tech').value;
 
   let cells = allCells.filter(c => /[A-Z]$/.test(c.cell_name));
@@ -9441,7 +9478,7 @@ function runSymmetryChecker() {
     asymmetric: asymmetric,
     symmetricCount: symCount,
     maxDist: maxDist,
-    missingRadius: missingRadius,
+    missingRadius: 3000,
     tech: tech
   };
 
@@ -9515,7 +9552,7 @@ async function symFixOne(idx) {
     if (error) throw error;
 
     // حدّث الذاكرة المحلية
-    neighborCell[slot] = sourceName;
+      neighborCell[slot] = sourceName;
     toast('✅ Added ' + sourceName + ' → ' + item.neighbor, 'success');
     persistCellsCache();
     runSymmetryChecker();
@@ -9543,7 +9580,7 @@ function symExportCSV() {
     rows.push([r.source, r.neighbor, r.distance.toFixed(0), r.direction, r.reverseExists ? 'Yes' : 'No']);
   });
 
-  const csv = rows.map(r => r.join(',')).join('\n');
+const csv = toCSV(rows);
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -9813,7 +9850,7 @@ function azoptExportCSV() {
     ]);
   });
 
-  const csv = rows.map(r => r.join(',')).join('\n');
+const csv = toCSV(rows);
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -10493,19 +10530,26 @@ function threeGFileSelected(input, type) {
 }
 
 function threeGParseCSV(text) {
-  const lines = text.trim().split(/\r?\n/);
-  if (lines.length < 2) return [];
-  const delim = lines[0].includes('\t') ? '\t' : ',';
-  const headers = lines[0].split(delim).map(h => h.trim().replace(/^"|"$/g, ''));
+  text = text.replace(/^\uFEFF/, '');
+  const delim = (text.split(/\r?\n/)[0] || '').includes('\t') ? '\t' : ',';
   const rows = [];
-  for (let i = 1; i < lines.length; i++) {
-    const vals = lines[i].split(delim).map(v => v.trim().replace(/^"|"$/g, ''));
-    if (vals.length < headers.length) continue;
-    const obj = {};
-    headers.forEach((h, idx) => { obj[h] = vals[idx]; });
-    rows.push(obj);
+  let row = [], field = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQ) {
+      if (ch === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else inQ = false; }
+      else field += ch;
+    } else if (ch === '"') inQ = true;
+    else if (ch === delim) { row.push(field); field = ''; }
+    else if (ch === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+    else if (ch !== '\r') field += ch;
   }
-  return rows;
+  if (field !== '' || row.length) { row.push(field); rows.push(row); }
+  if (rows.length < 2) return [];
+  const headers = rows[0].map(h => h.trim());
+  return rows.slice(1)
+    .filter(r => r.length >= headers.length && r.some(v => v.trim()))
+    .map(r => { const o = {}; headers.forEach((h, i) => { o[h] = (r[i] || '').trim(); }); return o; });
 }
 
 function threeGFindCol(sampleRow, keywords, exclude) {
@@ -10550,7 +10594,7 @@ function threeGClearImport() {
   toast('تم المسح', 'info');
 }
 
-async function threeGSaveToSupabase() {
+async function threeGSaveToSupabase(btn) {
   const projectId = document.getElementById('3g_project').value;
   if (!projectId) { toast('اختر مشروع أولاً', 'error'); return; }
 
@@ -10562,27 +10606,46 @@ async function threeGSaveToSupabase() {
 
   if (!all.length) { toast('لا توجد بيانات للحفظ', 'error'); return; }
 
-  const btn = event.target;
   btn.disabled = true;
   btn.textContent = 'Saving...';
 
   try {
-    const types = [...new Set(all.map(r => r.relation_type))];
+     const types = [...new Set(all.map(r => r.relation_type))];
+    const pid = parseInt(projectId);
+
+    // 1) سجّل ids القديمة (ما نحذف شي قبل نجاح الإدخال)
+    const oldIds = [];
     for (const t of types) {
-      await db.from('rf_neighbors').delete()
-        .eq('project_id', parseInt(projectId))
-        .eq('relation_type', t);
+      for (let from = 0; ; from += 1000) {
+        const { data, error } = await db.from('rf_neighbors').select('id')
+          .eq('project_id', pid).eq('relation_type', t).order('id').range(from, from + 999);
+        if (error) throw error;
+        oldIds.push(...data.map(r => r.id));
+        if (data.length < 1000) break;
+      }
     }
 
-    const BATCH = 500;
+    // 2) أزل التكرار من الملف وأدخل الجديد
+    const uniq = new Map();
+    all.forEach(r => uniq.set(r.source_cell + '|' + r.neighbor_cell + '|' + r.relation_type, r));
+    const rowsToSave = [...uniq.values()];
+
+    const BATCH = 150;
     let saved = 0;
-    for (let i = 0; i < all.length; i += BATCH) {
-      const batch = all.slice(i, i + BATCH);
+    for (let i = 0; i < rowsToSave.length; i += BATCH) {
+      const batch = rowsToSave.slice(i, i + BATCH);
       const { error } = await db.from('rf_neighbors').insert(batch);
       if (error) throw error;
       saved += batch.length;
-      btn.textContent = 'Saving ' + saved + '/' + all.length + '...';
+      btn.textContent = 'Saving ' + saved + '/' + rowsToSave.length + '...';
     }
+
+    // 3) احذف القديم بعد النجاح
+    for (let i = 0; i < oldIds.length; i += 200) {
+      const { error } = await db.from('rf_neighbors').delete().in('id', oldIds.slice(i, i + 200));
+      if (error) throw error;
+    }
+    cellNeighborsCache.clear();
 
     toast('✅ Saved ' + saved + ' علاقة في Supabase', 'success', 5000);
     await threeGLoadNeighbors(projectId);
@@ -10922,7 +10985,7 @@ async function runIRATAnalysis() {
       '<td>' + (nb.cell ? escapeHtml(nb.cell.site) : '—') + '</td>' +
       '<td>' + (nb.cell && nb.cell.bsc ? escapeHtml(nb.cell.bsc) : '—') + '</td>' +
       '<td>' + (nb.cell && nb.cell.bcch ? nb.cell.bcch : '—') + '</td>' +
-      '<td>' + (nb.cell && nb.cell.bsic ? nb.cell.bsic : '—') + '</td>' +
+      '<td>' + (nb.cell && nb.cell.bsic ? escapeHtml(String(nb.cell.bsic)) : '—') + '</td>' +
     '</tr>';
   }).join('') || '<tr><td colspan="9" style="text-align:center;padding:20px;">No IRAT neighbors</td></tr>';
 
@@ -11063,73 +11126,56 @@ function computeIRATForCell(source, radius, thr, cellNbs) {
 /* ─────────── Duplicates ─────────── */
 async function run3GDuplicateCheck() {
   const input = document.getElementById('3gbatch_input');
-  const cellsInput = input && input.value.trim();
-  
-  // إذا ما فيه خلايا في الـ input، استخدم الي في الذاكرة
-  let cellNames = [];
-  if (cellsInput) {
-    cellNames = cellsInput.split('\n').map(s => s.trim().toUpperCase()).filter(Boolean);
-  } else {
-    // استخدم كل الخلايا 3G في الذاكرة
-    cellNames = allCells.filter(c => c.tech === '3G').map(c => c.cell_name);
-  }
-  
-  if (cellNames.length === 0) {
-    toast('⚠️ أدخل خلايا في Batch أو حمّل بيانات أولاً', 'error', 3000);
-    return;
-  }
-  
-  toast('⏳ تحميل جيران ' + cellNames.length + ' خلية...', 'info', 3000);
-  
-  const tbody = document.querySelector('#3gdup_table tbody');
-  const dups = [];
-  
-  for (const cellName of cellNames) {
-    // حمّل جيران هذه الخلية
-    const cellNbs = await loadNeighborsForCell(cellName);
-    
-    // فقط العلاقات الي فيها الخلية هي الـ source
-    const sourced = cellNbs.filter(n => n.source_cell === cellName);
-    
-    // رتّب حسب type
-    const lists = {
-      inter: sourced.filter(n => n.relation_type === 'inter').map(n => n.neighbor_cell),
-      intra: sourced.filter(n => n.relation_type === 'intra').map(n => n.neighbor_cell),
-      irat:  sourced.filter(n => n.relation_type === 'irat').map(n => n.neighbor_cell)
-    };
-    
-    // ابحث عن تكرارات
-    const seen = {};
-    const all = [
-      ...lists.inter.map(n => ({ n, t: 'inter' })),
-      ...lists.intra.map(n => ({ n, t: 'intra' })),
-      ...lists.irat.map(n => ({ n, t: 'irat' }))
-    ];
-    
-    all.forEach(({ n, t }) => {
-      if (seen[n]) {
-        dups.push({
-          cell: cellName,
-          nb: n,
-          in_intra: lists.intra.includes(n),
-          in_inter: lists.inter.includes(n),
-          in_irat: lists.irat.includes(n)
+  const txt = input && input.value.trim();
+  const cellNames = txt
+    ? txt.split('\n').map(s => s.trim().toUpperCase()).filter(Boolean)
+    : allCells.filter(c => c.tech === '3G').map(c => c.cell_name);
+
+  if (!cellNames.length) { toast('⚠️ Enter cells in Batch or load data first', 'error', 3000); return; }
+  toast('⏳ Checking ' + cellNames.length + ' cells...', 'info', 3000);
+
+  const bySource = new Map();
+  const CH = 150;
+  try {
+    for (let i = 0; i < cellNames.length; i += CH) {
+      const chunk = cellNames.slice(i, i + CH);
+      for (let from = 0; ; from += 1000) {
+        let q = db.from('rf_neighbors').select('id,source_cell,neighbor_cell,relation_type')
+          .in('source_cell', chunk).order('id').range(from, from + 999);
+        if (currentProjectId) q = q.eq('project_id', currentProjectId);
+        const { data, error } = await q;
+        if (error) throw error;
+        data.forEach(r => {
+          if (!bySource.has(r.source_cell)) bySource.set(r.source_cell, []);
+          bySource.get(r.source_cell).push(r);
         });
+        if (data.length < 1000) break;
       }
-      seen[n] = true;
+    }
+  } catch (e) { toast('Error: ' + e.message, 'error'); return; }
+
+  const dups = [];
+  bySource.forEach((rows, cell) => {
+    const byNb = new Map();
+    rows.forEach(r => {
+      if (!byNb.has(r.neighbor_cell)) byNb.set(r.neighbor_cell, []);
+      byNb.get(r.neighbor_cell).push(r.relation_type);
     });
-  }
-  
-  tbody.innerHTML = dups.length
+    byNb.forEach((types, nb) => {
+      if (types.length > 1) dups.push({
+        cell, nb,
+        in_intra: types.includes('intra'),
+        in_inter: types.includes('inter'),
+        in_irat: types.includes('irat')
+      });
+    });
+  });
+
+  document.querySelector('#3gdup_table tbody').innerHTML = dups.length
     ? dups.map(d => '<tr style="background:#FFF3E0;">' +
-        '<td><b>' + escapeHtml(d.cell) + '</b></td>' +
-        '<td>' + escapeHtml(d.nb) + '</td>' +
-        '<td>' + (d.in_intra ? '✔' : '—') + '</td>' +
-        '<td>' + (d.in_inter ? '✔' : '—') + '</td>' +
-        '<td>' + (d.in_irat ? '✔' : '—') + '</td>' +
-      '</tr>').join('')
-    : '<tr><td colspan="5" style="text-align:center;padding:20px;color:#1F9D55;">✅ لا توجد تكرارات</td></tr>';
-  
+        '<td><b>' + escapeHtml(d.cell) + '</b></td><td>' + escapeHtml(d.nb) + '</td>' +
+        '<td>' + (d.in_intra ? '✔' : '—') + '</td><td>' + (d.in_inter ? '✔' : '—') + '</td><td>' + (d.in_irat ? '✔' : '—') + '</td></tr>').join('')
+    : '<tr><td colspan="5" style="text-align:center;padding:20px;color:#1F9D55;">✅ No duplicates</td></tr>';
   toast('✅ Found ' + dups.length + ' duplicates in ' + cellNames.length + ' cells', 'success');
 }
 
@@ -11471,8 +11517,7 @@ function nsRunPlanner() {
   const numSectors = parseInt(document.getElementById('ns_num_sectors').value);
 
   const opts = {
-    coSiteRule: document.getElementById('ns_opt_cosite').checked,
-    facingRule: document.getElementById('ns_opt_facing').checked,
+      coSiteRule: document.getElementById('ns_opt_cosite').checked,
     autoNb: document.getElementById('ns_opt_autoNb').checked,
     bidir: document.getElementById('ns_opt_bidir').checked,
     frontThr: parseInt(document.getElementById('ns_front_threshold').value) || 45,
@@ -11550,9 +11595,11 @@ function nsPlanAll(siteName, lat, lng, height, sectors, sectorAz, siteType, band
         const cell = nsPlan2GCell(cellName, lat, lng, az, height, b, nearby2G,
           siteBcch[b], siteBsic[b], siteBcchBsic[b], opts);
         plan.cells.push(cell);
-        siteBcch[b].add(cell.bcch);
-        siteBsic[b].add(cell.bsic);
-        siteBcchBsic[b].add(cell.bcch + '_' + cell.bsic);
+               if (opts.coSiteRule) {
+          siteBcch[b].add(cell.bcch);
+          siteBsic[b].add(cell.bsic);
+          siteBcchBsic[b].add(cell.bcch + '_' + cell.bsic);
+        }
       });
     }
 
@@ -11561,7 +11608,7 @@ function nsPlanAll(siteName, lat, lng, height, sectors, sectorAz, siteType, band
              const cellName = 'U' + siteName + nsGet3GLetter(sec, b);
         const cell = nsPlan3GCell(cellName, lat, lng, az, height, b, nearby3G, sitePsc, opts);
         plan.cells.push(cell);
-        sitePsc.add(cell.psc);
+        if (opts.coSiteRule) sitePsc.add(cell.psc);
       });
     }
 
@@ -11569,8 +11616,7 @@ function nsPlanAll(siteName, lat, lng, height, sectors, sectorAz, siteType, band
       const cellName = 'L' + siteName + sec;
       const cell = nsPlan4GCell(cellName, lat, lng, az, height, nearby4G, sitePci, siteRsi, opts);
       plan.cells.push(cell);
-      sitePci.add(cell.pci);
-      siteRsi.add(cell.rsi);
+           if (opts.coSiteRule) { sitePci.add(cell.pci); siteRsi.add(cell.rsi); }
     }
   });
 
@@ -11852,50 +11898,50 @@ function nsPlanNeighbors(newCells, nearby, radius, opts) {
   const neighbors = [];
   const seen = new Set();
 
-  newCells.forEach(newCell => {
-    const sameTech = nearby.filter(c => c.tech === newCell.tech);
-    const scored = sameTech.map(c => {
-      const d = haversineDistance(newCell.lat, newCell.long, c.lat, c.long);
-      const bearing = calculateBearing(newCell.lat, newCell.long, c.lat, c.long);
-      const angleDiff = boreDifference(newCell.bore, bearing);
-      const distScore = Math.max(0, 1 - d / radius);
-      const angleScore = angleDiff <= opts.frontThr ? 1 : (angleDiff <= 120 ? 0.5 : 0.1);
-      return { cell: c, dist: d, angleDiff, score: distScore * 0.6 + angleScore * 0.4 };
-    }).sort((a, b) => b.score - a.score).slice(0, opts.maxNb);
+  // الخلايا الجديدة تدخل بالمرشحين (co-site + بين القطاعات)
+  const newAsPool = newCells.map(c => ({
+    cell_name: c.cell_name, tech: c.tech, gsmBand: c.band,
+    lat: c.lat, long: c.long, bore: c.bore
+  }));
+  const pool = nearby.concat(newAsPool);
 
-    scored.forEach(x => {
-      const key = newCell.cell_name + '→' + x.cell.cell_name;
-      if (seen.has(key)) return;
-      seen.add(key);
-      let relType = 'inter';
-      if (newCell.tech === '3G') relType = newCell.band === x.cell.gsmBand ? 'intra' : 'inter';
-      neighbors.push({ source_cell: newCell.cell_name, neighbor_cell: x.cell.cell_name, relation_type: relType, distance: x.dist });
-      if (opts.bidir) {
-        const revKey = x.cell.cell_name + '→' + newCell.cell_name;
-        if (!seen.has(revKey)) {
-          seen.add(revKey);
-          neighbors.push({ source_cell: x.cell.cell_name, neighbor_cell: newCell.cell_name, relation_type: relType, distance: x.dist });
-        }
-      }
-    });
+  const add = (src, dst, type, dist) => {
+    const key = src + '→' + type + '→' + dst;
+    if (src === dst || seen.has(key)) return;
+    seen.add(key);
+    neighbors.push({ source_cell: src, neighbor_cell: dst, relation_type: type, distance: dist });
+  };
+
+  const score = (nc, c, thr, weights) => {
+    const d = haversineDistance(nc.lat, nc.long, c.lat, c.long);
+    const bearing = calculateBearing(nc.lat, nc.long, c.lat, c.long);
+    const angleDiff = boreDifference(nc.bore, bearing);
+    const distScore = Math.max(0, 1 - d / radius);
+    const angleScore = angleDiff <= thr ? 1 : (angleDiff <= 120 ? 0.5 : 0.1);
+    return { cell: c, dist: d, angleDiff, score: distScore * weights[0] + angleScore * weights[1] };
+  };
+
+  // 2G (تنحفظ nb1..nb35) و 3G (intra/inter) — LTE بدون جيران
+  newCells.filter(c => c.tech === 'GSM' || c.tech === '3G').forEach(nc => {
+    pool.filter(c => c.tech === nc.tech && c.cell_name !== nc.cell_name)
+      .map(c => score(nc, c, opts.frontThr, [0.6, 0.4]))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, opts.maxNb)
+      .forEach(x => {
+        const type = nc.tech === 'GSM' ? 'gsm'
+                   : (nc.band === x.cell.gsmBand ? 'intra' : 'inter');
+        add(nc.cell_name, x.cell.cell_name, type, x.dist);
+        if (opts.bidir) add(x.cell.cell_name, nc.cell_name, type, x.dist);
+      });
   });
 
-  newCells.filter(c => c.tech === '3G').forEach(newCell => {
-    const gsmNearby = nearby.filter(c => c.tech === 'GSM');
-    const scored = gsmNearby.map(c => {
-      const d = haversineDistance(newCell.lat, newCell.long, c.lat, c.long);
-      const bearing = calculateBearing(newCell.lat, newCell.long, c.lat, c.long);
-      const angleDiff = boreDifference(newCell.bore, bearing);
-      const score = Math.max(0, 1 - d / radius) * (angleDiff <= opts.iratThr ? 1 : 0.3);
-      return { cell: c, dist: d, score };
-    }).sort((a, b) => b.score - a.score).slice(0, 10);
-
-    scored.forEach(x => {
-      const key = newCell.cell_name + '→irat→' + x.cell.cell_name;
-      if (seen.has(key)) return;
-      seen.add(key);
-      neighbors.push({ source_cell: newCell.cell_name, neighbor_cell: x.cell.cell_name, relation_type: 'irat', distance: x.dist });
-    });
+  // IRAT: 3G → 2G
+  newCells.filter(c => c.tech === '3G').forEach(nc => {
+    pool.filter(c => c.tech === 'GSM')
+      .map(c => score(nc, c, opts.iratThr, [0.7, 0.3]))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10)
+      .forEach(x => add(nc.cell_name, x.cell.cell_name, 'irat', x.dist));
   });
 
   return neighbors;
@@ -12005,11 +12051,11 @@ function nsRenderNeighbors(neighbors) {
     document.getElementById('nsNeighborsPreview').innerHTML = '<div style="text-align:center;color:#5A6B87;padding:20px;">No neighbors suggested</div>';
     return;
   }
-  const groups = { 'intra': [], 'inter': [], 'irat': [] };
+   const groups = { 'gsm': [], 'intra': [], 'inter': [], 'irat': [] };
   neighbors.forEach(n => { if (groups[n.relation_type]) groups[n.relation_type].push(n); });
 
-  const labels = { 'intra': '🔄 3G Intra-Freq', 'inter': '↔️ 3G Inter-Freq', 'irat': '📞 3G → 2G (IRAT)' };
-  const colors = { 'intra': '#0EA5E9', 'inter': '#F59E0B', 'irat': '#8B5CF6' };
+  const labels = { 'gsm': '📡 2G → 2G', 'intra': '🔄 3G Intra-Freq', 'inter': '↔️ 3G Inter-Freq', 'irat': '📞 3G → 2G (IRAT)' };
+  const colors = { 'gsm': '#D97706', 'intra': '#0EA5E9', 'inter': '#F59E0B', 'irat': '#8B5CF6' };
 
   let html = '';
   Object.entries(groups).forEach(([key, items]) => {
@@ -12050,7 +12096,7 @@ function nsRenderConflicts(conflicts) {
   document.getElementById('nsConflictsReport').innerHTML = html;
 }
 
-async function nsSaveToDatabase() {
+async function nsSaveToDatabase(btn) {
   if (!nsLastPlan) { toast('Run the planner first', 'error'); return; }
   const projId = document.getElementById('ns_save_project').value;
   if (!projId) { toast('Select a project', 'error'); return; }
@@ -12058,22 +12104,32 @@ async function nsSaveToDatabase() {
   const pid = parseInt(projId);
   if (!confirm('Add ' + nsLastPlan.cells.length + ' cells and ' + nsLastPlan.neighbors.length + ' neighbors?')) return;
 
-  const btn = event.target;
   btn.disabled = true;
   btn.textContent = 'Saving...';
 
   try {
+    // ═══ 1) أسماء الخلايا الجديدة + جيران 2G ═══
+    const newNames = new Set(nsLastPlan.cells.map(c => c.cell_name));
+    const gsmNb = {};
+    nsLastPlan.neighbors.filter(n => n.relation_type === 'gsm').forEach(n => {
+      (gsmNb[n.source_cell] = gsmNb[n.source_cell] || []).push(n.neighbor_cell);
+    });
+
+    // ═══ 2) تجهيز الخلايا مع nb1..nb35 ═══
     const cellsPayload = nsLastPlan.cells.map(c => {
       const obj = { project_id: pid };
       ['cell_name', 'lat', 'long', 'bore', 'height', 'cell_radius', 'bcch', 'tch', 'bsic', 'psc', 'uarfcn_dl', 'uarfcn_ul', 'rnc_id', 'pci', 'rsi'].forEach(k => {
         if (c[k] != null && c[k] !== '') obj[k] = c[k];
       });
+      (gsmNb[c.cell_name] || []).slice(0, 35).forEach((nm, i) => { obj['nb' + (i + 1)] = nm; });
       return obj;
     });
 
+    // ═══ 3) إدخال الخلايا ═══
     const { error: cellErr } = await db.from('rf_cells').insert(cellsPayload);
     if (cellErr) throw new Error('Cells: ' + cellErr.message);
 
+    // ═══ 4) جيران 3G في rf_neighbors ═══
     const validTypes = ['inter', 'intra', 'irat'];
     const nbPayload = nsLastPlan.neighbors
       .filter(n => validTypes.includes(n.relation_type))
@@ -12081,7 +12137,7 @@ async function nsSaveToDatabase() {
 
     let nbSaved = 0;
     if (nbPayload.length > 0) {
-      const BATCH = 500;
+      const BATCH = 150;
       for (let i = 0; i < nbPayload.length; i += BATCH) {
         const { error: nbErr } = await db.from('rf_neighbors').insert(nbPayload.slice(i, i + BATCH));
         if (nbErr) throw new Error('Neighbors: ' + nbErr.message);
@@ -12089,8 +12145,35 @@ async function nsSaveToDatabase() {
       }
     }
 
+    // ═══ 5) جيران 2G العكسية على الخلايا الموجودة ═══
+    const gsmRev = {};
+    nsLastPlan.neighbors
+      .filter(n => n.relation_type === 'gsm' && !newNames.has(n.source_cell))
+      .forEach(n => { (gsmRev[n.source_cell] = gsmRev[n.source_cell] || []).push(n.neighbor_cell); });
+
+    if (Object.keys(gsmRev).length > 30) {
+      toast('⏳ Updating ' + Object.keys(gsmRev).length + ' reverse neighbors...', 'info', 3000);
+    }
+
+    for (const [name, list] of Object.entries(gsmRev)) {
+      const ex = cellByName.get(name.toUpperCase());
+      if (!ex) continue;
+      const present = new Set(nbGetNbFields(ex).map(x => x.value));
+      const empty = nbGetEmptySlots(ex);
+      const upd = {};
+      let k = 0;
+      list.forEach(nm => {
+        if (!present.has(nm.toUpperCase()) && k < empty.length) upd[empty[k++].slot] = nm;
+      });
+      if (!Object.keys(upd).length) continue;
+      const { error } = await db.from('rf_cells').update(upd).eq('id', ex.id);
+      if (error) throw new Error('Reverse NB: ' + error.message);
+    }
+
+    // ═══ 6) النهاية ═══
     toast('Added ' + cellsPayload.length + ' cells and ' + nbSaved + ' neighbors', 'success', 5000);
-        await loadCells(false);
+    await loadCells(false);
+    if (typeof persistCellsCache === 'function') persistCellsCache();
     if (typeof threeGLoadNeighbors === 'function') await threeGLoadNeighbors(pid);
   } catch (e) {
     console.error(e);
@@ -12153,7 +12236,7 @@ function nsExportCSV() {
       c.psc != null ? c.psc : '', c.uarfcn_dl || '', c.uarfcn_ul || '',
       c.pci != null ? c.pci : '', c.rsi != null ? c.rsi : '', c.lat, c.long]);
   });
-  const csv = rows.map(r => r.join(',')).join('\n');
+const csv = toCSV(rows);
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -12167,10 +12250,10 @@ function nsExportCSV() {
 function nsExportKML() {
   if (!nsLastPlan) return;
   let kml = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document>\n';
-  kml += '  <name>' + nsLastPlan.siteName + '</name>\n';
+   kml += '  <name>' + escapeHtml(nsLastPlan.siteName) + '</name>\n';
   nsLastPlan.cells.forEach(c => {
     const coords = kmlSectorCoords(c.lat, c.long, c.bore);
-    kml += '  <Placemark>\n    <name>' + c.cell_name + '</name>\n';
+    kml += '  <Placemark>\n    <name>' + escapeHtml(c.cell_name) + '</name>\n';
     kml += '    <Polygon><outerBoundaryIs><LinearRing><coordinates>\n';
     coords.forEach(p => { kml += '      ' + p[1].toFixed(6) + ',' + p[0].toFixed(6) + ',0\n'; });
     kml += '    </coordinates></LinearRing></outerBoundaryIs></Polygon>\n  </Placemark>\n';
@@ -12197,187 +12280,7 @@ function nsClearAll() {
 setTimeout(() => {
   if (document.getElementById('ns_num_sectors')) nsUpdateSectors();
 }, 1000);
-  /* =========================================================
-   🌐 AUTO-TRANSLATOR — Arabic UI → English
-   ========================================================= */
-function applyEnglishUI() {
-  // Dictionary: Arabic → English (only user-visible text)
-  const DICT = {
-    // ═══ Common Toasts ═══
-    'تم المسح': 'Cleared',
-    'شغّل التحليل أولاً': 'Run analysis first',
-    'شغّل التحليل أولاً ': 'Run analysis first',
-    'Search cleared': 'Search cleared',
-    'جاري البحث...': 'Searching...',
-    'جاري تجهيز الصورة...': 'Preparing image...',
-    'تم حفظ الصورة': 'Image saved',
-    'فشل التصوير — جرب مرة ثانية': 'Screenshot failed — try again',
-    'فشل الاتصال': 'Connection failed',
-    'تم الحذف': 'Deleted',
-    'تم نسخ': 'Copied',
-    'تم نسخ الإحداثيات': 'Coordinates copied',
-    'اكتب ملاحظتك...': 'Write your comment...',
-    'سيظهر التعليق لكل الفريق · يدعم النص العادي والروابط': 'Comment visible to team · supports text and links',
-    'ما فيه Bookmarks بعد': 'No bookmarks yet',
-    'Bookmark name:': 'Bookmark name:',
-    'تم حفظ': 'Saved',
-    'تم تحميل': 'Loaded',
 
-    // ═══ Map Actions ═══
-    '⚠️ Draw a polygon first': '⚠️ Draw a polygon first',
-    '✅ Copied': '✅ Copied',
-    '📥 CSV downloaded': '📥 CSV downloaded',
-    '🗑️ Drawings cleared': '🗑️ Drawings cleared',
-    '🗺️ Cells re-displayed': '🗺️ Cells re-displayed',
-    '📍 Coordinates copied': '📍 Coordinates copied',
-    '📋 Copied': '📋 Copied',
-    '🗑️ Deleted': '🗑️ Deleted',
-    '👆 اختر خلية من الماب لعرض جيرانها': '👆 Select a cell on the map to view neighbors',
-    '❌ Not found': '❌ Not found',
-    '❌ Invalid coordinates': '❌ Invalid coordinates',
-    '❌ Out of allowed range': '❌ Out of allowed range',
-    '⚠️ No cells in band': '⚠️ No cells in band',
-    '⚡ Filter:': '⚡ Filter:',
-
-    // ═══ 3G/IRAT ═══
-    '— اختر مشروع —': '— Select Project —',
-    'لم يُرفع': 'Not uploaded',
-    '⏳ جاري القراءة...': '⏳ Reading...',
-    'الملف فارغ': 'File is empty',
-    'لم أجد أعمدة Source/Neighbor في CSV': 'Source/Neighbor columns not found in CSV',
-    'علاقة (': ' relations (',
-    'تم تحميل': 'Loaded',
-    'لا توجد بيانات للحفظ': 'No data to save',
-    'أدخل اسم خلية': 'Enter cell name',
-    'الخلية': 'Cell',
-    'غير موجودة في rf_cells': ' not found in rf_cells',
-    'الأداة للخلايا 3G فقط (تبدأ بـ U)': 'Tool works on 3G cells only (start with U)',
-    'أدخل اسم خلية 3G': 'Enter 3G cell name',
-    'الخلية غير موجودة': 'Cell not found',
-    'يجب أن تبدأ بـ U (3G)': 'Must start with U (3G)',
-    'أدخل خلايا': 'Enter cells',
-    'علاقة في Supabase': ' relations in Supabase',
-    'لا توجد تكرارات': 'No duplicates',
-    'عرض الموقع الجديد على الماب': 'New site displayed on map',
-
-    // ═══ 3G Neighbor Lines ═══
-    'اختر خلية من الماب لعرض جيرانها': 'Select a cell on the map to show its neighbors',
-
-    // ═══ PSC Checker ═══
-    '❌ لا توجد خلايا 3G بـ PSC. تأكد من رفع بيانات 3G أولاً.': 'No 3G cells with PSC. Upload 3G data first.',
-    '❌ نطاق PSC غير صحيح (0-511)': 'Invalid PSC range (0-511)',
-    '❌ لا توجد خلايا PSC في النطاق': 'No PSC cells in range',
-    'خلية 3G': '3G cells',
-    'تعارض موجود': 'conflicts found',
-    'تعارض ·': ' conflicts · ',
-    'اقتراح': 'suggestions',
-    '❌ لا توجد تعارضات — كل الخلايا نظيفة': 'No conflicts — all cells clean',
-    '✅ لا توجد تعارضات — كل PSCs سليمة': '✅ No conflicts — all PSCs clean',
-    'لا توجد تغييرات': 'No changes',
-    'تطبيق': 'Apply ',
-    'تغيير PSC في Supabase؟': ' PSC changes in Supabase?',
-    '✅ تم تطبيق': '✅ Applied ',
-    'تغيير': ' changes',
-    'فشل)': ' failed)',
-    'خطأ:': 'Error:',
-    '✅ تم تصدير CSV': '✅ CSV exported',
-    'خلية متعارضة على الماب': ' conflict cells on map',
-
-    // ═══ PSC Details ═══
-    '— خطيرة (تؤثر على handover)': '— critical (affects handover)',
-
-    // ═══ BSIC Analyzer ═══
-    '<b>Clash Finder:</b> ابحث عن خلايا لها نفس BCCH + BSIC ضمن مسافة محددة (تحليل مركّز على BCCH محدد).': '<b>Clash Finder:</b> Find cells with same BCCH + BSIC within a specified distance.',
-    '<b>Full Optimizer:</b> تحليل كل خلايا GSM — كشف كل تعارضات BSIC وإعادة توزيع كامل.': '<b>Full Optimizer:</b> Analyze all GSM cells — detect and reassign all BSIC conflicts.',
-    'خلية تحتاج تغيير BSIC': ' cells need BSIC change',
-    '✅ لا توجد تعارضات — كل BSICs سليمة': '✅ No conflicts — all BSICs clean',
-    'Apply BSIC changes to': 'Apply BSIC changes to ',
-    'cells?\n\nهذا سيحدّث قاعدة البيانات.': ' cells?\n\nThis will update the database.',
-
-    // ═══ Symmetry ═══
-    '✅ كل العلاقات متماثلة!': '✅ All relations are symmetric!',
-    'عنده علاقة غير متماثلة': 'has asymmetric relation',
-
-    // ═══ Azimuth Opt ═══
-    '✅ كل الخلايا محسّنة — لا تغيير مطلوب': '✅ All cells optimized — no changes needed',
-
-    // ═══ New Site Planner ═══
-    'Select field first': 'Select field first',
-    '❌ No cell with': '❌ No cell with',
-    '⚠️ اسم الموقع موجود مسبقاً': '⚠️ Site name already exists',
-    '✅ التخطيط جاهز': '✅ Plan ready',
-    'التخطيط نظيف': 'Plan is clean',
-    'تحليل': 'Analyzing ',
-    'خلية': ' cells',
-    'خلية بـ': ' cells with ',
-    'خلية داخل المضلع — اضغط': ' cells inside polygon — click',
-    'cells — paste in Excel': ' cells — paste in Excel',
-
-    // ═══ HSN ═══
-    '— خلايا نفس الموقع لها نفس HSN': '— same-site cells with same HSN',
-    '— خلايا متجاورة لها نفس HSN': '— neighboring cells with same HSN',
-    'هذا سيحدّث': 'This will update',
-    'خلية.': ' cells.',
-
-    // ═══ Buttons / Labels (in HTML) ═══
-    'حفظ': 'Save',
-    'مسح': 'Clear',
-    'اختر': 'Select',
-    'مشروع': 'Project',
-    'ملف': 'File',
-    'سطر لكل خلية': 'one per line'
-  };
-
-  // ─── Replace text in elements ───
-  function replaceText(str) {
-    if (!str) return str;
-    let result = str;
-    Object.entries(DICT).forEach(([ar, en]) => {
-      result = result.split(ar).join(en);
-    });
-    return result;
-  }
-
-  // Walk all text nodes
-  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
-  let node;
-  const textNodes = [];
-  while (node = walker.nextNode()) textNodes.push(node);
-  textNodes.forEach(n => {
-    if (/[\u0600-\u06FF]/.test(n.textContent)) {
-      n.textContent = replaceText(n.textContent);
-    }
-  });
-
-  // Replace in attributes
-  ['placeholder', 'title', 'value', 'alt'].forEach(attr => {
-    document.querySelectorAll('[' + attr + ']').forEach(el => {
-      const v = el.getAttribute(attr);
-      if (v && /[\u0600-\u06FF]/.test(v)) el.setAttribute(attr, replaceText(v));
-    });
-  });
-
-  // Override toast + confirm + alert
-  const originalToast = window.toast;
-  window.toast = function(msg, type, duration) {
-    return originalToast(replaceText(msg), type, duration);
-  };
-
-  const originalConfirm = window.confirm;
-  window.confirm = function(msg) {
-    return originalConfirm(replaceText(msg));
-  };
-
-  const originalAlert = window.alert;
-  window.alert = function(msg) {
-    return originalAlert(replaceText(msg));
-  };
-
-  console.log('%c🌐 English UI applied', 'color:#1F9D55;font-weight:bold;');
-}
-
-// Apply on load
-setTimeout(applyEnglishUI, 500);
   /* =========================================================
    🌐 LANGUAGE SWITCHER (AR ↔ EN)
    ========================================================= */
@@ -12573,7 +12476,7 @@ function translateText(str, targetLang) {
 // ═══════════════════════════════════════════════════════════
 // APPLY LANGUAGE
 // ═══════════════════════════════════════════════════════════
-function applyLanguage(lang) {
+function applyLanguage(lang, silent) {
   currentLang = lang;
   localStorage.setItem(LANG_KEY, lang);
 
@@ -12590,14 +12493,15 @@ function applyLanguage(lang) {
     const textNodes = [];
     let node;
     while (node = walker.nextNode()) textNodes.push(node);
-    textNodes.forEach(n => {
+      textNodes.forEach(n => {
+      if (n.parentElement && n.parentElement.closest('#cellCommentDisplay, textarea, .no-translate')) return;
       if (n.nodeValue && /[\u0600-\u06FF]/.test(n.nodeValue)) {
         n.nodeValue = translateText(n.nodeValue, 'en');
       }
     });
 
     // Attributes
-    ['placeholder', 'title', 'value', 'alt', 'aria-label'].forEach(attr => {
+    ['placeholder', 'title', 'alt', 'aria-label'].forEach(attr => {
       document.querySelectorAll('[' + attr + ']').forEach(el => {
         const v = el.getAttribute(attr);
         if (v && /[\u0600-\u06FF]/.test(v)) {
@@ -12608,7 +12512,7 @@ function applyLanguage(lang) {
   }
   // ⚠️ Note: 'ar' mode would need a full reverse dictionary — omitted for simplicity
 
-  toast(lang === 'ar' ? '🌐 تم التبديل للعربية' : '🌐 Switched to English', 'success', 2000);
+  if (!silent) toast(lang === 'ar' ? '🌐 تم التبديل للعربية' : '🌐 Switched to English', 'success', 2000);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -12650,7 +12554,7 @@ function toggleLanguage() {
 // ═══════════════════════════════════════════════════════════
 setTimeout(() => {
   if (currentLang === 'en') {
-    applyLanguage('en');
+  applyLanguage('en', true);
   } else {
     // Just update the button label
     const label = document.getElementById('langLabel');
@@ -12662,8 +12566,8 @@ setTimeout(() => {
 document.addEventListener('click', function(e) {
   if (currentLang !== 'en') return;
   if (e.target.closest('.nav-item') || e.target.closest('.nb-tab') || e.target.closest('.back-btn')) {
-    setTimeout(() => applyLanguage('en'), 200);
-    setTimeout(() => applyLanguage('en'), 600);
+   setTimeout(() => applyLanguage('en', true), 200);   // ← أضف true
+    setTimeout(() => applyLanguage('en', true), 600);   // ← أضف true
   }
 }, true);
 
@@ -12684,7 +12588,7 @@ document.addEventListener('click', function(e) {
     }
     if (hasNew) {
       if (timer) clearTimeout(timer);
-      timer = setTimeout(() => applyLanguage('en'), 150);
+      timer = setTimeout(() => applyLanguage('en', true), 150);   // ← أضف true
     }
   });
   observer.observe(document.body, { childList: true, subtree: true });
@@ -13374,7 +13278,7 @@ async function ensureReferencedCells(cellNames) {
   if (missing.length === 0) return;
   
   console.log(`📥 Loading ${missing.length} referenced cells...`);
-  const BATCH = 500;
+  const BATCH = 150;
   let added = 0;
   for (let i = 0; i < missing.length; i += BATCH) {
     const batch = missing.slice(i, i + BATCH);
