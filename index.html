@@ -3411,7 +3411,17 @@ body.dark [style*="solid #E9EEF6"],body.dark [style*="solid #D7DEEA"]{border-col
       <div id="loginError" class="login-error" style="display:none"></div>
       <button type="submit" id="loginBtn" class="btn btn-primary">Sign in</button>
     </form>
-    <div class="login-foot">v2.0 · Built for Ali Amer · © 2026 MFC</div>
+      <!-- 👤 Try Demo Button -->
+    <div style="margin-top:20px;padding-top:18px;border-top:1px solid rgba(255,255,255,.1);text-align:center;">
+      <button type="button" id="tryDemoBtn" onclick="startDemoMode()"
+        style="width:100%;padding:12px;background:linear-gradient(135deg,#006C35,#00A550);color:#fff;border:none;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.02em;box-shadow:0 6px 20px rgba(0,108,53,.4);transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <span style="font-size:16px;">👤</span>
+        <span>Try Demo — No Login Required</span>
+      </button>
+      <div style="font-size:11px;color:#94A3B8;margin-top:8px;">
+        Riyadh sample network · Read-only
+      </div>
+    </div>
   </div>
 </div>
     <!-- Form -->
@@ -14331,6 +14341,235 @@ if ('serviceWorker' in navigator) {
     if (!refreshing) { refreshing = true; window.location.reload(); }
   });
 }
+</script>
+  <!-- ═══════════════════════════════════════════════════════════════
+     👤 DEMO MODE — Riyadh Sample Network
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+window.startDemoMode = function(){
+  console.log('%c👤 Starting Demo Mode...', 'background:#006C35;color:#fff;padding:8px 16px;border-radius:6px;font-weight:700');
+
+  // ═══ 1. Hide login + show app ═══
+  const loginScreen = document.getElementById('loginScreen');
+  const app = document.querySelector('.app');
+  if (loginScreen) loginScreen.style.display = 'none';
+  if (app) app.style.display = '';
+
+  // ═══ 2. Prevent auth checks ═══
+  window.checkAuthOnLoad = function(){};
+  window.doLogin = function(){};
+
+  // ═══ 3. Block Supabase (safety) ═══
+  if (!window.__demoFetchPatched) {
+    window.__demoFetchPatched = true;
+    const origFetch = window.fetch;
+    window.fetch = function(url, opts){
+      if (typeof url === 'string' && url.includes('supabase.co')) {
+        return Promise.resolve(new Response('[]', {status:200, headers:{'Content-Type':'application/json'}}));
+      }
+      return origFetch.apply(this, arguments);
+    };
+  }
+
+  // ═══ 4. Generate fake data ═══
+  const rand = (min, max) => Math.random() * (max - min) + min;
+  const randInt = (min, max) => Math.floor(rand(min, max + 1));
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+  const NUM_SITES = 300;
+  const SECTORS = ['A','B','C'];
+  const SECTOR_ANGLES = [0, 120, 240];
+  const MIN_LAT = 24.60, MAX_LAT = 24.85;
+  const MIN_LNG = 46.50, MAX_LNG = 46.85;
+  const MIN_DIST = 0.008;
+  const CELL_RADIUS = 700;
+
+  const BAND_OFFSETS = {
+    '2g900':  { dx: -60, dy: -60 },
+    '2g1800': { dx: +60, dy: -60 },
+    '3g900':  { dx: -60, dy: +60 },
+    '3g2100': { dx: +60, dy: +60 },
+    'lte':    { dx: 0,   dy: 0 }
+  };
+
+  function offsetPos(lat, lng, dxM, dyM){
+    const latPerM = 1 / 111320;
+    const lngPerM = 1 / (111320 * Math.cos(lat * Math.PI / 180));
+    return { lat: lat + dyM * latPerM, lng: lng + dxM * lngPerM };
+  }
+
+  function isInWater(lat, lng){
+    const t = (lng - 46.50) / 0.35;
+    const wadiLat = 24.75 - t * 0.15;
+    return Math.abs(lat - wadiLat) < 0.008;
+  }
+
+  function poissonDiskSampling(n, minDist, maxAttempts){
+    maxAttempts = maxAttempts || 40;
+    const positions = [];
+    const minDistSq = minDist * minDist;
+    let attempts = 0;
+    const maxTotal = n * maxAttempts;
+    while(positions.length < n && attempts < maxTotal){
+      attempts++;
+      const lat = rand(MIN_LAT, MAX_LAT);
+      const lng = rand(MIN_LNG, MAX_LNG);
+      if(isInWater(lat, lng)) continue;
+      let ok = true;
+      for(let i = 0; i < positions.length; i++){
+        const dLat = positions[i].lat - lat;
+        const dLng = positions[i].lng - lng;
+        if(dLat*dLat + dLng*dLng < minDistSq){ ok = false; break; }
+      }
+      if(ok) positions.push({ lat: lat, lng: lng });
+    }
+    return positions;
+  }
+
+  console.log('🔄 Generating Riyadh demo data...');
+  const sitePositions = poissonDiskSampling(NUM_SITES, MIN_DIST);
+  const demoCells = [];
+  let siteCounter = 1;
+
+  sitePositions.forEach(function(pos){
+    const siteNum = siteCounter;
+    const siteName = 'Site' + siteNum;
+    const region = 'RYD' + (Math.floor(siteNum / 20) + 1);
+    const lac    = randInt(100, 999);
+    const rncId  = randInt(1, 20);
+    const bsc    = 'BSC' + randInt(1, 15);
+    const u2100  = pick([10700, 10712, 10812]);
+    const u900   = pick([3012, 3020, 3030]);
+
+    SECTORS.forEach(function(sector, k){
+      const bore = SECTOR_ANGLES[k] + randInt(-10, 10);
+
+      const addCell = function(bandKey, cellData){
+        const off = BAND_OFFSETS[bandKey];
+        const p = offsetPos(pos.lat, pos.lng, off.dx, off.dy);
+        const obj = {
+          id: 900000 + demoCells.length,
+          site: siteName, region: region, sector: sector,
+          lat: p.lat, long: p.lng,
+          bore: bore, radius: CELL_RADIUS,
+          height: randInt(20, 45),
+          comment: null, project_id: null, color: '#D64545'
+        };
+        for(const key in cellData) obj[key] = cellData[key];
+        demoCells.push(obj);
+      };
+
+      addCell('2g900', { cell_name:'Cell'+siteNum+sector, cell_id:randInt(1000,99999), tech:'GSM', gsmBand:'900', pci:null, rsi:0, bcch:randInt(1,124), bsic:String(randInt(0,7))+String(randInt(0,7)), tch:randInt(1,124), lac:lac, hsn:randInt(0,63), psc:null, uarfcn_dl:null, uarfcn_ul:null, rnc_id:null, bsc:bsc, bw:0 });
+      addCell('2g1800', { cell_name:'Cell'+siteNum+sector+'_18', cell_id:randInt(1000,99999), tech:'GSM', gsmBand:'1800', pci:null, rsi:0, bcch:randInt(600,700), bsic:String(randInt(0,7))+String(randInt(0,7)), tch:randInt(600,700), lac:lac, hsn:randInt(0,63), psc:null, uarfcn_dl:null, uarfcn_ul:null, rnc_id:null, bsc:bsc, bw:0 });
+      addCell('3g900', { cell_name:'UCell'+siteNum+sector+'_9', cell_id:randInt(1000,99999), tech:'3G', gsmBand:'900', pci:null, rsi:0, bcch:0, bsic:'', tch:0, lac:lac, hsn:null, psc:randInt(0,511), uarfcn_dl:u900, uarfcn_ul:u900-9500, rnc_id:rncId, bsc:'', bw:0 });
+      addCell('3g2100', { cell_name:'UCell'+siteNum+sector, cell_id:randInt(1000,99999), tech:'3G', gsmBand:'2100', pci:null, rsi:0, bcch:0, bsic:'', tch:0, lac:lac, hsn:null, psc:randInt(0,511), uarfcn_dl:u2100, uarfcn_ul:u2100-9500, rnc_id:rncId, bsc:'', bw:0 });
+      addCell('lte', { cell_name:'LCell'+siteNum+sector, cell_id:randInt(1000,99999), tech:'LTE', gsmBand:null, pci:randInt(0,503), rsi:randInt(1,837), bcch:0, bsic:'', tch:0, lac:0, hsn:null, psc:null, uarfcn_dl:null, uarfcn_ul:null, rnc_id:null, bsc:'', bw:pick([10,15,20]) });
+    });
+    siteCounter++;
+  });
+
+  console.log('📊 Generated ' + demoCells.length + ' cells / ' + sitePositions.length + ' sites');
+
+  // ═══ 5. Inject data ═══
+  try { allCells = demoCells; } catch(e){ window.allCells = demoCells; }
+  try { visibleCells = demoCells.slice(); } catch(e){ window.visibleCells = demoCells.slice(); }
+  try { allProjects = [{ id:9001, name:'Riyadh Demo', description:'Sample demo network', created_at:new Date().toISOString() }]; } catch(e){}
+
+  // ═══ 6. Override loaders ═══
+  window.loadCells = async function(){
+    try { allCells = demoCells; visibleCells = demoCells.slice(); } catch(e){}
+    try { rebuildLookups(); } catch(e){}
+    try { updateStats(); } catch(e){}
+    try { applyFilters(); } catch(e){}
+    try { renderMap(); } catch(e){}
+    const nav = document.getElementById('navCellsCount');
+    if(nav) nav.textContent = demoCells.length.toLocaleString();
+  };
+  window.loadProjects = async function(){
+    try { renderProjectsList(); } catch(e){}
+    try { renderProjectSelect(); } catch(e){}
+  };
+
+  // ═══ 7. Render ═══
+  try { if (typeof rebuildLookups === 'function') rebuildLookups(); } catch(e){}
+  try { if (typeof updateStats === 'function') updateStats(); } catch(e){}
+  try { if (typeof applyFilters === 'function') applyFilters(); } catch(e){}
+  try { if (typeof renderMap === 'function') renderMap(); } catch(e){}
+  try { if (typeof renderProjectsList === 'function') renderProjectsList(); } catch(e){}
+
+  const nav = document.getElementById('navCellsCount');
+  if(nav) nav.textContent = demoCells.length.toLocaleString();
+
+  // ═══ 8. Fly to Riyadh ═══
+  if (typeof map !== 'undefined' && map){
+    setTimeout(function(){
+      try { map.invalidateSize(); } catch(e){}
+      try { map.flyTo([24.72, 46.67], 11, { duration:1.5 }); } catch(e){}
+      setTimeout(function(){ try { fitAllCells(); } catch(e){} }, 1800);
+    }, 400);
+  }
+
+  // ═══ 9. Read-only enforcement ═══
+  ['pciApplyAll','pscApplyAll','bsicApplyAll','hsnApplyAll','gsmSaveToDatabase',
+   'importSaveToSupabase','nsSaveToDatabase','deleteProject','createProject',
+   'updateUserRole','toggleUserActive']
+  .forEach(function(fn){
+    if (typeof window[fn] === 'function') window[fn] = function(){ alert('❌ Demo mode — read-only'); };
+  });
+
+  // ═══ 10. Demo banner (top) ═══
+  let banner = document.getElementById('__demoBanner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = '__demoBanner';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#006C35,#00A550);color:#fff;padding:9px 20px;font-size:12.5px;font-weight:700;text-align:center;letter-spacing:.05em;text-transform:uppercase;box-shadow:0 4px 20px rgba(0,108,53,.5);font-family:Inter,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;gap:16px;';
+    banner.innerHTML = '<span>👤 DEMO MODE · Riyadh 🇸🇦 · ' + sitePositions.length + ' sites · ' + demoCells.length + ' cells · NOT real</span>' +
+      '<a href="javascript:location.reload()" style="color:#FFD700;text-decoration:underline;font-size:11px;cursor:pointer;">↺ Exit Demo</a>';
+    document.body.appendChild(banner);
+  }
+
+  // Push content down by banner height
+  document.body.style.paddingTop = '40px';
+
+  console.log('%c✅ DEMO MODE READY', 'background:#006C35;color:#fff;padding:10px 20px;border-radius:8px;font-weight:700;font-size:14px');
+  console.log('%c→ Riyadh · ' + sitePositions.length + ' sites · ' + demoCells.length + ' cells', 'color:#A89383;font-size:12px');
+};
+</script>
+  <script>
+// 🛡️ Block all Supabase calls before any script loads
+(function(){
+  const blockList = ['supabase.co', 'supabase.in', 'supabase.io'];
+  const origFetch = window.fetch;
+  window.fetch = function(url){
+    if (typeof url === 'string'){
+      for (const b of blockList){
+        if (url.includes(b)) {
+          console.warn('🛡️ Blocked Supabase call:', url);
+          return Promise.resolve(new Response('[]', {status:200}));
+        }
+      }
+    }
+    return origFetch.apply(this, arguments);
+  };
+  // Also block XHR
+  const OrigXHR = window.XMLHttpRequest;
+  window.XMLHttpRequest = function(){
+    const xhr = new OrigXHR();
+    const origOpen = xhr.open;
+    xhr.open = function(method, url){
+      if (typeof url === 'string'){
+        for (const b of blockList){
+          if (url.includes(b)) {
+            console.warn('🛡️ Blocked XHR:', url);
+            throw new Error('Blocked');
+          }
+        }
+      }
+      return origOpen.apply(this, arguments);
+    };
+    return xhr;
+  };
+})();
 </script>
 </body>
 </html>
