@@ -3,8 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RF Planning  | </title>
-
+<title>RF Planning Platform</title>
+<meta name="theme-color" content="#0B1730">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23124191'/%3E%3Cpath d='M9 22V10h7a4 4 0 010 8h-7m7 0l5 4' stroke='white' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<script src="https://unpkg.com/lucide@0.400.0/dist/umd/lucide.min.js"></script>
+<script>
+  if (!window.lucide) {
+    document.write('<script src="https://cdn.jsdelivr.net/npm/lucide@0.400.0/dist/umd/lucide.min.js"><\/script>');
+  }
+</script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"/>
@@ -545,62 +552,7 @@ body {
   0%, 100% { fill-opacity: 0.7; }
   50% { fill-opacity: 1; }
 }
- /* =========================================================
-   DARK MODE
-   ========================================================= */
-body.dark { background: #0A1628; color: #E2E8F0; }
-body.dark .main { background: #0A1628; }
-body.dark .topbar { background: #0F2038; border-color: #1E3A6D; color: #fff; }
-body.dark .topbar-title { color: #fff; }
-body.dark .topbar-title .subtitle { color: #AEB9D4; }
-body.dark .stats-bar { background: #0F2038; border-color: #1E3A6D; color: #AEB9D4; }
-body.dark .stats-bar-item b { color: #fff; }
-body.dark .btn-ghost { background: #0F2038; color: #AEB9D4; border-color: #1E3A6D; }
-body.dark .btn-ghost:hover { background: #142A5C; color: #fff; }
-body.dark .btn-secondary { background: #142A5C; color: #60A5FA; }
-body.dark .map-sidebar { background: #0F2038; border-color: #1E3A6D; }
-body.dark .map-sidebar h3 { color: #fff; }
-body.dark .map-sidebar h3::after { background: #1E3A6D; }
-body.dark .filter-search { background: #142A5C; color: #fff; border-color: #1E3A6D; }
-body.dark .filter-search::placeholder { color: #5A6B87; }
-body.dark .filter-checkbox:hover { background: #142A5C; }
-body.dark .filter-checkbox span { color: #E2E8F0; }
-body.dark .tool-section { background: #0F2038; border-color: #1E3A6D; }
-body.dark .tool-section h3 { color: #fff; border-color: #1E3A6D; }
-body.dark .form-field label { color: #AEB9D4; }
-body.dark .form-field input, body.dark .form-field select { background: #142A5C; color: #fff; border-color: #1E3A6D; }
-body.dark .data-table thead th { background: #142A5C; color: #60A5FA; border-color: #1E3A6D; }
-body.dark .data-table tbody td { border-color: #1E3A6D; color: #E2E8F0; }
-body.dark .data-table tbody tr:hover td { background: #142A5C; }
-body.dark .kpi-card { background: #142A5C; border-color: #1E3A6D; }
-body.dark .kpi-card .kpi-label { color: #AEB9D4; }
-body.dark .kpi-card .kpi-value { color: #60A5FA; }
-body.dark .tool-card { background: #0F2038; border-color: #1E3A6D; }
-body.dark .tool-card:hover { border-color: #60A5FA; }
-body.dark .tool-title { color: #fff; }
-body.dark .tool-desc { color: #AEB9D4; }
-body.dark .nb-tabs { background: #0F2038; border-color: #1E3A6D; }
-body.dark .nb-tab { color: #AEB9D4; }
-body.dark .nb-tab:hover { background: #142A5C; color: #fff; }
-body.dark .site-info-card { background: #0F2038; border-color: #1E3A6D; }
-body.dark .site-info-body { background: #0F2038; }
-body.dark .info-row { border-color: #1E3A6D; }
-body.dark .info-row .k { color: #AEB9D4; }
-body.dark .info-row .v { color: #fff; }
-body.dark .info-section-title { color: #AEB9D4; border-color: #1E3A6D; }
-body.dark .legend { background: rgba(15,32,56,.98); color: #E2E8F0; }
-body.dark .legend-title { color: #60A5FA; }
-body.dark .basemap-switcher { background: rgba(15,32,56,.98); }
-body.dark .basemap-btn { color: #AEB9D4; }
-body.dark .basemap-btn:hover { background: #142A5C; color: #fff; }
-body.dark .tool-page-title { color: #fff; }
-body.dark .tool-page-sub { color: #AEB9D4; }
-body.dark .back-btn { background: #0F2038; color: #AEB9D4; border-color: #1E3A6D; }
-body.dark .modal-backdrop > div { background: #0F2038 !important; }
-body.dark .modal-backdrop > div > div { border-color: #1E3A6D !important; }
-body.dark .modal-backdrop h3 { color: #fff !important; }
-body.dark .modal-backdrop label { color: #AEB9D4 !important; }
-body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !important; border-color: #1E3A6D !important; } 
+
   /* 🔍 Map Search Box */
 .map-search-box {
   position: absolute;
@@ -1108,126 +1060,306 @@ body.dark .tool-legend-count { background: #142A5C; color: #AEB9D4; }
 body.dark .tool-legend-item:hover { background: #142A5C; }
 body.dark .tool-legend-actions { border-color: #1E3A6D; }
 body.dark .tool-legend-actions button { background: #142A5C; color: #AEB9D4; border-color: #1E3A6D; }
+  /* =========================================================
+   PRO THEME (append at END of <style>)
+   ========================================================= */
+:root{
+  --bg:#F5F7FA; --surface:#fff; --surface-2:#F1F4F9; --surface-3:#E8EDF5;
+  --border:#E2E8F0; --border-strong:#CBD5E1;
+  --text:#0F172A; --text-2:#475569; --text-3:#64748B;
+  --primary:#124191; --primary-hover:#0E3374; --primary-soft:#E8EEF9; --primary-ring:rgba(18,65,145,.18);
+  --success:#15803D; --success-soft:#E6F4EA;
+  --warning:#B45309; --warning-soft:#FEF3C7;
+  --danger:#B91C1C;  --danger-soft:#FDECEC;
+  --radius:10px; --radius-sm:8px;
+  --shadow-sm:0 1px 2px rgba(15,23,42,.06);
+  --shadow-md:0 4px 14px rgba(15,23,42,.08);
+  --shadow-lg:0 16px 40px rgba(15,23,42,.16);
+  --sb-bg:#0B1730; --sb-text:#A9B6D0; --sb-active:rgba(255,255,255,.08);
+}
+body.dark{
+  --bg:#0B1220; --surface:#111A2E; --surface-2:#16223A; --surface-3:#1D2B48;
+  --border:#22314F; --border-strong:#2F4268;
+  --text:#E6EBF5; --text-2:#AAB6CC; --text-3:#8492AE;
+  --primary:#5B8DEF; --primary-hover:#7AA3F5; --primary-soft:#172A52; --primary-ring:rgba(91,141,239,.3);
+  --success:#4ADE80; --success-soft:#12301F;
+  --warning:#FBBF24; --warning-soft:#33280E;
+  --danger:#F87171;  --danger-soft:#3A1717;
+  --sb-bg:#070D1A;
+}
+
+/* ---- Base ---- */
+html,body{font-size:14px}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-feature-settings:'tnum','cv11'}
+.main{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border-strong)}
+::-webkit-scrollbar-thumb:hover{background:var(--text-3)}
+svg.lucide{width:18px;height:18px;stroke-width:1.75}
+i[data-lucide]{display:inline-flex}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+
+/* ---- Shell: sidebar ---- */
+.app{grid-template-columns:232px 1fr;transition:grid-template-columns .2s}
+.app.nav-collapsed{grid-template-columns:68px 1fr}
+.sidebar{background:var(--sb-bg);border-right:1px solid rgba(255,255,255,.06)}
+.sb-brand{display:flex;align-items:center;gap:12px;padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-logo{width:36px;height:36px;border-radius:9px;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+.sb-brand-text b{display:block;font-size:14px;color:#fff;font-weight:700}
+.sb-brand-text span{font-size:11px;color:var(--sb-text)}
+.sb-nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.sb-section{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5F6F8F;padding:14px 12px 6px}
+.nav-item{color:var(--sb-text);font-size:13.5px;font-weight:500;padding:9px 12px;border-radius:8px;gap:12px;position:relative}
+.nav-item:hover{background:var(--sb-active);color:#fff}
+.nav-item.active{background:var(--sb-active);color:#fff;font-weight:600}
+.nav-item.active::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:#5B8DEF}
+.nav-item svg{flex-shrink:0}
+.nav-item .badge{margin-left:auto;background:rgba(255,255,255,.1);color:#C9D4EC;font-family:inherit}
+.sb-footer{padding:12px 14px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;color:#6F7FA0;font-size:11px}
+.sb-footer button{background:none;border:0;color:#8FA0C4;cursor:pointer;display:flex;padding:6px;border-radius:6px}
+.sb-footer button:hover{background:var(--sb-active);color:#fff}
+.app.nav-collapsed .sb-brand-text,.app.nav-collapsed .nav-item span,
+.app.nav-collapsed .sb-section,.app.nav-collapsed .sb-ver{display:none}
+.app.nav-collapsed .nav-item,.app.nav-collapsed .sb-brand{justify-content:center}
+.app.nav-collapsed .sb-footer{justify-content:center}
+@media(max-width:700px){
+  .app{grid-template-columns:68px 1fr}
+  .sb-brand-text,.nav-item span,.sb-section,.sb-ver{display:none}
+  .nav-item,.sb-brand{justify-content:center}
+}
+
+/* ---- Shell: topbar ---- */
+.topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);box-shadow:none;padding:0 20px}
+.topbar-title{color:var(--text);font-size:15px;font-weight:700}
+.topbar-title .subtitle{color:var(--text-3);font-weight:500;font-size:12.5px}
+#pageIcon{display:none}
+.stats-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;gap:22px;font-size:12px}
+.stats-bar-item{color:var(--text-2)}
+.stats-bar-item b{color:var(--text);font-family:inherit;font-weight:700}
+.icon-btn{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-2);border-radius:var(--radius-sm);cursor:pointer;transition:.15s}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+.user-menu{position:relative}
+.user-chip{display:flex;align-items:center;gap:8px;height:36px;padding:0 10px 0 4px;border:1px solid var(--border-strong);background:var(--surface);border-radius:999px;cursor:pointer;color:var(--text);font:600 12.5px 'Inter',sans-serif}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+#userBadge{display:flex;align-items:center;gap:6px}
+.role-pill{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:999px;background:var(--surface-3);color:var(--text-2)}
+.role-admin{background:var(--warning-soft);color:var(--warning)}
+.role-engineer{background:var(--success-soft);color:var(--success)}
+.role-optimizer{background:var(--primary-soft);color:var(--primary)}
+.menu{position:absolute;right:0;top:44px;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:6px;display:none;z-index:10001}
+.menu.show{display:block}
+.menu button{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:0;background:none;border-radius:6px;font:500 13px 'Inter',sans-serif;color:var(--text);cursor:pointer;text-align:left}
+.menu button:hover{background:var(--surface-2)}
+.menu hr{border:0;border-top:1px solid var(--border);margin:6px 0}
+.menu .danger-item{color:var(--danger)}
+
+/* ---- Buttons ---- */
+.btn{border-radius:var(--radius-sm);font-weight:600;font-size:13px;padding:8px 14px;border:1px solid transparent}
+.btn-primary,.btn-gold{background:var(--primary);color:#fff}
+.btn-primary:hover:not(:disabled),.btn-gold:hover:not(:disabled){background:var(--primary-hover)}
+.btn-secondary,.btn-success{background:var(--primary-soft);color:var(--primary)}
+.btn-secondary:hover:not(:disabled),.btn-success:hover:not(:disabled){background:var(--surface-3)}
+.btn-ghost{background:var(--surface);color:var(--text-2);border-color:var(--border-strong)}
+.btn-ghost:hover:not(:disabled){background:var(--surface-2);color:var(--text)}
+.btn-danger{background:var(--danger-soft);color:var(--danger)}
+
+/* ---- Forms ---- */
+.form-field label{font-size:11.5px;font-weight:600;color:var(--text-2);text-transform:none;letter-spacing:0}
+.form-field input,.form-field select,.filter-search{font-family:inherit;font-size:13px;color:var(--text);background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:9px 12px}
+.form-field input:focus,.form-field select:focus,.filter-search:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-ring);background:var(--surface)}
+.form-field .hint{color:var(--text-3)}
+.filter-checkbox:hover{background:var(--surface-2)}
+
+/* ---- Cards ---- */
+.tool-page-title{font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.01em}
+.tool-page-sub{color:var(--text-2)}
+.tool-page-header .back-btn{background:var(--surface);border-color:var(--border-strong);color:var(--text-2)}
+.tool-section,.kpi-card,.result-item{background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-sm);border-radius:12px}
+.tool-section{padding:20px 22px}
+.tool-section h3{font-size:14px;font-weight:700;color:var(--text);border-bottom:1px solid var(--border);padding-bottom:12px}
+.kpi-card{padding:14px 16px;text-align:left}
+.kpi-card .kpi-label{font-size:11px;font-weight:600;color:var(--text-2);letter-spacing:.04em}
+.kpi-card .kpi-value{font-family:inherit;font-size:24px;font-weight:700;color:var(--text)}
+.kpi-card.warn .kpi-value{color:var(--warning)}
+.kpi-card.danger .kpi-value{color:var(--danger)}
+.kpi-card.success .kpi-value{color:var(--success)}
+.result-box{background:var(--primary-soft);border-left-color:var(--primary)}
+.result-box .value,.result-item .value{color:var(--text)}
+
+/* ---- Tables ---- */
+.data-table{font-family:'Inter',system-ui,sans-serif;font-size:12.5px}
+.data-table thead th{position:sticky;top:0;z-index:1;background:var(--surface-2);color:var(--text-2);font-weight:600;font-size:11px;letter-spacing:.04em;border-bottom:1px solid var(--border)}
+.data-table tbody td{border-bottom:1px solid var(--border);color:var(--text);font-variant-numeric:tabular-nums}
+.data-table tbody tr:not([style]):nth-child(even) td{background:var(--surface-2)}
+.data-table tbody tr:not([style]):hover td{background:var(--primary-soft)}
+body.dark .data-table tbody tr[style] td{color:#1B1F2A}
+
+/* ---- Toast ---- */
+.toast,.toast.success,.toast.error,.toast.info{background:var(--surface);color:var(--text);border:1px solid var(--border);border-left:4px solid var(--primary);box-shadow:var(--shadow-lg);font-weight:500;border-radius:var(--radius-sm)}
+.toast.success{border-left-color:var(--success)}
+.toast.error{border-left-color:var(--danger)}
+
+/* ---- Map: left panel (accordion) ---- */
+.map-sidebar{background:var(--surface);border-right:1px solid var(--border);padding:8px 14px;width:300px}
+.map-sidebar details{border-bottom:1px solid var(--border);padding:2px 0}
+.map-sidebar summary{list-style:none;cursor:pointer;font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.05em;padding:12px 0;display:flex;align-items:center;justify-content:space-between}
+.map-sidebar summary::-webkit-details-marker{display:none}
+.map-sidebar summary::after{content:"+";color:var(--text-3);font-weight:500;font-size:16px}
+.map-sidebar details[open] summary::after{content:"–"}
+.map-sidebar .filter-group{margin-bottom:12px}
+
+/* ---- Map: floating controls ---- */
+.map-toolbar{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:500;display:flex;flex-direction:column;align-items:center;gap:8px;width:min(560px,calc(100% - 160px));pointer-events:none}
+.map-toolbar>*{pointer-events:auto}
+.map-search-box{position:static;transform:none;width:100%;max-width:none;display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:4px 4px 4px 14px;box-shadow:var(--shadow-md)}
+.map-search-box svg{width:16px;height:16px;color:var(--text-3);flex-shrink:0}
+.map-search-box input{color:var(--text);padding:8px 4px}
+.map-search-box button{background:var(--primary);border-radius:999px;font-size:12.5px;font-weight:600;padding:8px 16px}
+.quick-chips{position:static;transform:none;max-width:none;justify-content:center}
+.chip{background:var(--surface)!important;color:var(--text-2)!important;border:1px solid var(--border)!important;font-size:11.5px;padding:4px 11px;box-shadow:var(--shadow-sm)}
+.chip:hover{color:var(--primary)!important}
+.chip.active{background:var(--primary)!important;color:#fff!important;border-color:var(--primary)!important}
+.map-controls{position:absolute;top:12px;right:12px;z-index:500;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.basemap-switcher{position:static;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px;box-shadow:var(--shadow-md)}
+.basemap-btn{color:var(--text-2);font-size:12px;padding:6px 10px;border-radius:6px}
+.basemap-btn.active{background:var(--primary);color:#fff}
+.ctl-group{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);overflow:hidden}
+.ctl{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:0;background:transparent;color:var(--text-2);cursor:pointer}
+.ctl+.ctl{border-top:1px solid var(--border)}
+.ctl:hover{background:var(--surface-2);color:var(--primary)}
+.goto-panel,.bookmarks-panel{position:absolute;top:46px;right:48px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:12px;color:var(--text)}
+.goto-panel{width:220px}
+.goto-panel input{background:var(--surface);color:var(--text);border-color:var(--border-strong)}
+.goto-panel button{background:var(--primary)}
+.bookmarks-panel{width:260px}
+.site-info-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);top:212px;right:12px;width:320px;max-height:calc(100% - 232px)}
+.site-info-head{background:var(--sb-bg)}
+.info-row{border-color:var(--border)}
+.info-row .k{color:var(--text-2)}
+.info-row .v{color:var(--text)}
+.info-section-title{color:var(--text-3);border-color:var(--border)}
+.legend,.map-mini-stats{background:var(--surface);color:var(--text);border:1px solid var(--border);box-shadow:var(--shadow-md)}
+.legend-title{color:var(--text-2)}
+.map-mini-stats span b{color:var(--primary)}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--surface);color:var(--text);border-radius:10px}
+.nb-label{background:var(--surface)!important;color:var(--text)!important;border-color:var(--primary)!important}
+.cell-context-menu{background:var(--surface);border-color:var(--border)}
+.ctx-item{color:var(--text)}
+.ctx-item:hover{background:var(--surface-2);color:var(--primary)}
+.ctx-sep{background:var(--border)}
+
+/* ---- Split view ---- */
+.split-close{display:none}
+.main.split{display:grid;grid-template-columns:minmax(420px,44%) 1fr;grid-template-rows:auto auto minmax(0,1fr)}
+.main.split>.topbar,.main.split>.stats-bar{grid-column:1/-1}
+.main.split>.page{display:none}
+.main.split>.page.split-tool{display:flex;grid-column:1;grid-row:3;border-right:1px solid var(--border);overflow:hidden}
+.main.split>#page-map.active{display:flex;grid-column:2;grid-row:3}
+.main.split .tool-page{max-width:none;padding:16px}
+.main.split .map-sidebar,.main.split .map-toolbar{display:none}
+.main.split .legend,.main.split .map-mini-stats{left:12px!important}
+.main.split .split-close{display:flex;align-items:center;gap:6px;position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:600;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:999px;padding:6px 14px;font:600 12.5px 'Inter',sans-serif;cursor:pointer;box-shadow:var(--shadow-md)}
+
+/* ---- Tools hub ---- */
+.tools-head{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:16px 24px 0}
+.tools-head .filter-search{max-width:280px}
+.seg{display:inline-flex;gap:2px;background:var(--surface-2);padding:3px;border-radius:9px;flex-wrap:wrap}
+.seg button{border:0;background:none;padding:6px 12px;border-radius:7px;font:600 12.5px 'Inter',sans-serif;color:var(--text-2);cursor:pointer}
+.seg button.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm)}
+.tool-card{background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-sm);border-radius:12px;padding:20px;min-height:0;gap:10px}
+.tool-card:hover{transform:none;border-color:var(--primary);box-shadow:var(--shadow-md)}
+.tool-card.is-filtered{display:none!important}
+.tool-title{color:var(--text);font-size:15px}
+.tool-desc{color:var(--text-2)}
+.tool-icon{background:var(--primary-soft)!important;color:var(--primary)!important;width:42px;height:42px;border-radius:10px}
+.tool-tag{background:var(--surface-2)!important;color:var(--text-2)!important;font-weight:600}
+.nb-tabs{background:var(--surface);border-color:var(--border)}
+.nb-tab{color:var(--text-2)}
+.nb-tab:hover{background:var(--surface-2);color:var(--text)}
+.nb-tab.active{background:var(--primary);color:#fff}
+
+/* ---- Login ---- */
+.login{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(1200px 600px at 20% -10%,#17306B 0%,#0B1730 60%)}
+.login-card{width:100%;max-width:400px;background:var(--surface);border-radius:16px;padding:32px;box-shadow:var(--shadow-lg)}
+.login-brand{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.login-brand h1{font-size:18px;font-weight:700;color:var(--text)}
+.login-brand p{font-size:13px;color:var(--text-2)}
+.login-card label{display:block;font-size:12px;font-weight:600;color:var(--text-2);margin:14px 0 6px}
+.login-card input{width:100%;padding:11px 12px;border:1px solid var(--border-strong);border-radius:8px;font:14px 'Inter',sans-serif;background:var(--surface);color:var(--text)}
+.login-card input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-ring)}
+.login-error{background:var(--danger-soft);color:var(--danger);padding:10px 12px;border-radius:8px;font-size:13px;margin-top:14px}
+.login-card .btn{width:100%;justify-content:center;margin-top:20px;padding:12px;font-size:14px}
+.login-foot{text-align:center;margin-top:18px;font-size:12px;color:var(--text-3)}
+
+/* ---- Modals ---- */
+.modal-backdrop>div{background:var(--surface)!important;color:var(--text)}
+.modal-backdrop h3{color:var(--text)!important}
+
+/* ---- Dark-mode bridge ---- */
+body.dark [style*="background:#fff"]{background:var(--surface)!important}
+body.dark [style*="background:#F9FBFE"],body.dark [style*="background:#FBFCFE"],body.dark [style*="background:#F4F7FB"]{background:var(--surface-2)!important}
+body.dark [style*="background:#EAF2FB"]{background:var(--primary-soft)!important}
+body.dark [style*="color:#0C1B3D"]{color:var(--text)!important}
+body.dark [style*="color:#5A6B87"]{color:var(--text-2)!important}
+body.dark [style*="solid #E9EEF6"],body.dark [style*="solid #D7DEEA"]{border-color:var(--border)!important}
 </style>
 </head>
 <body>
 <div class="app">
 
   <!-- ============ SIDEBAR ============ -->
-  <aside class="sidebar">
-    <div class="sidebar-brand">
-      <div class="sidebar-logo">RF</div>
-      <div class="sidebar-brand-text">
-        <h1>RF Planning </h1>
-        <span> Ali A. Kareem </span>
-      </div>
-    </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section">Navigation</div>
-      <button class="nav-item active" data-page="map">
-        <span class="icon">🗺️</span><span>Map</span>
-      </button>
-      <button class="nav-item" data-page="dashboard">
-        <span class="icon">📊</span><span>Dashboard</span>
-      </button>
-      <button class="nav-item" data-page="projects">
-        <span class="icon">📁</span><span>Projects</span>
-      </button>
-      <button class="nav-item" data-page="import">
-        <span class="icon">📥</span><span>Import</span>
-      </button>
-      <button class="nav-item" data-page="cells">
-        <span class="icon">📋</span><span>Cells</span>
-        <span class="badge" id="navCellsCount">0</span>
-      </button>
+ <aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo"><i data-lucide="radio-tower"></i></div>
+    <div class="sb-brand-text"><b>RF Planning</b><span>Network optimization</span></div>
+  </div>
 
-      <div class="nav-section">Tools</div>
-      <button class="nav-item" data-page="tools">
-        <span class="icon">🔧</span><span>Tools</span>
-      </button>
-      <button class="nav-item" data-page="tool-pci-checker">
-        <span class="icon">🧮</span><span>PCI Checker</span>
-      </button>
-      <button class="nav-item" data-page="tool-gsm-planner">
-        <span class="icon">📡</span><span>2G-Freq. Planner</span>
-      </button>
-      <button class="nav-item" data-page="tool-neighbor">
-        <span class="icon">🔗</span><span>2G-Neighbor Analysis</span>
-      </button>
-      <button class="nav-item" data-page="tool-3g-nb">
-  <span class="icon">📶</span><span>3G / IRAT Analyzer</span>
-</button>
-      <button class="nav-item" data-page="tool-new-site">
-  <span class="icon">🏗️</span><span>New Site Planner</span>
-</button>
-            <button class="nav-item" data-page="tool-hsn">
-        <span class="icon">🎵</span><span>HSN Analysis</span>
-      </button>
-      <button class="nav-item" data-page="tool-psc-checker">
-  <span class="icon">📶</span><span>PSC Checker (3G)</span>
-</button>
-            <button class="nav-item" data-page="tool-bsic">
-        <span class="icon">🎨</span><span>BSIC Analyzer</span>
-      </button>
-            <button class="nav-item" data-page="tool-symmetry">
-        <span class="icon">🔗</span><span>Symmetry Checker</span>
-      </button>
-            <button class="nav-item" data-page="tool-azimuth-opt">
-        <span class="icon">🎯</span><span>Azimuth Optimizer</span>
-      </button>
-      <button class="nav-item" data-page="tool-distance">
-        <span class="icon">📐</span><span>Distance & Bearing</span>
-      </button>
-      <button class="nav-item" data-page="tool-azimuth">
-        <span class="icon">🎯</span><span>Azimuth & Tilt</span>
-      </button>
-      <button class="nav-item" data-page="tool-unit">
-        <span class="icon">🔢</span><span>Unit Converter</span>
-      </button>
-      <button class="nav-item" data-page="tool-kml">
-        <span class="icon">🗺️</span><span>Export KML</span>
-      </button>
-    </nav>
-    <div class="sidebar-footer">
-      v2.0 · Built for Ali Amer<br>
-      © 2026 MFC
-    </div>
-  </aside>
+  <nav class="sb-nav">
+    <div class="sb-section">Workspace</div>
+    <button class="nav-item active" data-page="map"><i data-lucide="map"></i><span>Map</span></button>
+    <button class="nav-item" data-page="dashboard"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></button>
+    <button class="nav-item" data-page="cells"><i data-lucide="table-2"></i><span>Cells</span><span class="badge" id="navCellsCount">0</span></button>
 
+    <div class="sb-section">Data</div>
+    <button class="nav-item" data-page="projects"><i data-lucide="folder"></i><span>Projects</span></button>
+    <button class="nav-item" data-page="import"><i data-lucide="upload"></i><span>Import</span></button>
+
+    <div class="sb-section">Optimization</div>
+    <button class="nav-item" data-page="tools"><i data-lucide="wrench"></i><span>Tools</span></button>
+  </nav>
+
+  <div class="sb-footer">
+    <span class="sb-ver">v2.0</span>
+    <button onclick="toggleNav()" title="Collapse menu"><i data-lucide="chevrons-left"></i></button>
+  </div>
+</aside>
   <!-- ============ MAIN ============ -->
   <main class="main">
 
-    <div class="topbar">
-      <div class="topbar-title">
-        <span id="pageIcon">🗺️</span>
-        <span id="pageTitle">Cell Map</span>
-        <span class="subtitle" id="pageSubtitle">Visualize cells on the map</span>
-      </div>
-     
-          <div class="topbar-actions">
-            <div id="userBadge" style="display:flex;align-items:center;gap:8px;padding:6px 12px;background:#F4F7FB;border-radius:20px;font-size:12.5px;color:#0C1B3D;font-family:'JetBrains Mono',monospace;"></div>
-<button class="btn btn-ghost" onclick="doLogout()" title="Sign Out" style="color:#D64545;border-color:#F5D5D5;">
-  <span>🚪</span><span>Logout</span>
-</button>
-        <button class="btn btn-ghost" onclick="toggleDarkMode()" title="Toggle Dark Mode" id="darkModeBtn">
-          <span>🌙</span><span>Dark</span>
-        </button>
-               <button class="btn btn-ghost" id="toggleSidebarBtn" onclick="toggleMapSidebar()" title="Collapse/Expand panel"><span>◀</span></button>
-           <button class="btn btn-ghost" onclick="resetMapView()" title="Show Normal Map" style="background:#FCEAEA;color:#D64545;border-color:#F5D5D5;">
-  <span>🗺️</span><span>Reset View</span>
-</button> 
-               <button class="btn btn-ghost" onclick="loadCells(false)">
-          <span>🔄</span><span>Refresh</span>
-        </button>
-      </div>
-    </div>
+   <div class="topbar">
+  <div class="topbar-title">
+    <span id="pageIcon"></span>
+    <span id="pageTitle">Cell Map</span>
+    <span class="subtitle" id="pageSubtitle">Visualize cells on the map</span>
+  </div>
 
-    <div class="stats-bar">
-      <div class="stats-bar-item">📡 <b id="statTotal">0</b> Cells</div>
-      <div class="stats-bar-item">📍 <b id="statSites">0</b> Sites</div>
-      <div class="stats-bar-item">🌐 <b id="statBands">0</b> Regions</div>
-      <div class="stats-bar-item" style="margin-left:auto;">🎯 Visible: <b id="statVisible">0</b></div>
+  <div class="topbar-actions">
+    <button class="icon-btn" onclick="loadCells(false)" title="Refresh data"><i data-lucide="refresh-cw"></i></button>
+    <button class="icon-btn" id="toggleSidebarBtn" onclick="toggleMapSidebar()" title="Toggle filters panel"><i data-lucide="panel-left"></i></button>
+
+    <div class="user-menu">
+      <button class="user-chip" onclick="toggleUserMenu(event)">
+        <span class="avatar" id="userAvatar">?</span>
+        <span id="userBadge"></span>
+        <i data-lucide="chevron-down"></i>
+      </button>
+      <div class="menu" id="userMenu" onclick="event.stopPropagation()">
+        <button id="darkModeBtn" onclick="toggleDarkMode()"><i data-lucide="moon"></i><span>Dark mode</span></button>
+        <hr>
+        <button class="danger-item" onclick="doLogout()"><i data-lucide="log-out"></i><span>Sign out</span></button>
+      </div>
     </div>
+  </div>
+</div>
 
     <!-- PAGE: MAP -->
     <section class="page active" id="page-map">
@@ -1354,56 +1486,48 @@ body.dark .tool-legend-actions button { background: #142A5C; color: #AEB9D4; bor
             </div>
           </div>
         </div>
-                <!-- 🔍 Search Box على الماب -->
-        <div class="map-search-box" id="mapSearchBox">
-          <input type="text" id="mapSearchInput" placeholder="🔍 Search cell / site / PCI..." 
-                 onkeypress="if(event.key==='Enter') mapSearchFly()">
-          <button onclick="mapSearchFly()" title="Search">🔍</button>
+             <div class="map-toolbar">
+          <div class="map-search-box" id="mapSearchBox">
+            <i data-lucide="search"></i>
+            <input type="text" id="mapSearchInput" placeholder="Search cell, site or PCI" onkeypress="if(event.key==='Enter') mapSearchFly()">
+            <button onclick="mapSearchFly()">Search</button>
+          </div>
+          <div class="quick-chips">
+            <button class="chip active" data-filter="all" onclick="applyQuickChip('all')">All</button>
+            <button class="chip" data-filter="gsm" onclick="applyQuickChip('gsm')">2G</button>
+            <button class="chip" data-filter="threeg" onclick="applyQuickChip('threeg')">3G</button>
+            <button class="chip" data-filter="lte" onclick="applyQuickChip('lte')">4G</button>
+            <button class="chip" data-filter="b900" onclick="applyQuickChip('b900')">900 MHz</button>
+            <button class="chip" data-filter="b1800" onclick="applyQuickChip('b1800')">1800 MHz</button>
+            <button class="chip" data-filter="b2100" onclick="applyQuickChip('b2100')">2100 MHz</button>
+          </div>
         </div>
 
-        <!-- 🎯 Go to Coordinates -->
-        <div class="goto-coords" id="gotoCoords">
-          <button onclick="toggleGotoCoords()" title="Go to Coordinates">🎯</button>
+        <div class="map-controls">
+          <div class="basemap-switcher">
+            <button class="basemap-btn active" data-basemap="street">Street</button>
+            <button class="basemap-btn" data-basemap="satellite">Satellite</button>
+            <button class="basemap-btn" data-basemap="terrain">Terrain</button>
+          </div>
+          <div class="ctl-group">
+            <button class="ctl" onclick="toggleGotoCoords()" title="Go to coordinates"><i data-lucide="crosshair"></i></button>
+            <button class="ctl" onclick="toggleBookmarksPanel()" title="Bookmarks"><i data-lucide="bookmark"></i></button>
+            <button class="ctl" onclick="takeMapScreenshot()" title="Screenshot"><i data-lucide="camera"></i></button>
+            <button class="ctl" onclick="resetMapView()" title="Reset map view"><i data-lucide="rotate-ccw"></i></button>
+          </div>
           <div class="goto-panel" id="gotoPanel">
             <input type="text" id="gotoLat" placeholder="Latitude" value="33.3">
             <input type="text" id="gotoLon" placeholder="Longitude" value="44.4">
             <button onclick="gotoCoordinates()">Go</button>
           </div>
+          <div class="bookmarks-panel" id="bookmarksPanel"></div>
         </div>
-                <!-- ⚡ Quick Filter Chips -->
-      <div class="quick-chips">
-  <button class="chip active" data-filter="all" onclick="applyQuickChip('all')">🌐 All</button>
-  <button class="chip gsm" data-filter="gsm" onclick="applyQuickChip('gsm')">📡 2G</button>
-  <button class="chip threeg" data-filter="threeg" onclick="applyQuickChip('threeg')">📶 3G</button>
-  <button class="chip lte" data-filter="lte" onclick="applyQuickChip('lte')">📡 4G</button>
-  <button class="chip b900" data-filter="b900" onclick="applyQuickChip('b900')">900 MHz</button>
-  <button class="chip b1800" data-filter="b1800" onclick="applyQuickChip('b1800')">1800 MHz</button>
-  <button class="chip b2100" data-filter="b2100" onclick="applyQuickChip('b2100')">2100 MHz</button>
-</div>
 
-        <!-- 📊 Mini Stats -->
         <div class="map-mini-stats" id="miniStats">
-          <span>👁️ Visible: <b>0</b></span>
-          <span>📍 Sites: <b>0</b></span>
+          <span>Visible: <b>0</b></span><span>Sites: <b>0</b></span>
         </div>
 
-        <!-- 📸 Screenshot -->
-        <button class="screenshot-btn" onclick="takeMapScreenshot()">📸 Screenshot</button>
-
-        <!-- 🗺️ Bookmarks -->
-        <button class="bookmarks-btn" onclick="toggleBookmarksPanel()" title="Bookmarks">🗺️</button>
-        <div class="bookmarks-panel" id="bookmarksPanel"></div>
-
-        <div class="basemap-switcher">
-          <button class="basemap-btn active" data-basemap="street">Street</button>
-          <button class="basemap-btn" data-basemap="satellite">Satellite</button>
-          <button class="basemap-btn" data-basemap="terrain">Terrain</button>
-        </div>
-
-        <div class="legend" id="legend" style="display:none;">
-          <div class="legend-title">Legend</div>
-          <div id="legendItems"></div>
-        </div>
+        <button class="split-close" onclick="closeSplit()"><i data-lucide="x"></i> Close map</button>
         <!-- 🎨 Tool Legend -->
         <div class="tool-legend" id="toolLegend">
           <div class="tool-legend-head">
@@ -1797,6 +1921,18 @@ body.dark .tool-legend-actions button { background: #142A5C; color: #AEB9D4; bor
           <div class="tool-tag" style="background:#FCEAEA;color:#B91C1C;">Export</div>
         </div>
       </div>
+              <div class="tool-card" onclick="switchView('tool-3g-nb')">
+          <div class="tool-icon"></div>
+          <div class="tool-title">3G / IRAT Analyzer</div>
+          <div class="tool-desc">Audit 3G intra/inter-frequency neighbors and 3G→2G IRAT relations, import neighbor files, detect duplicates.</div>
+          <div class="tool-tag">Neighbors</div>
+        </div>
+        <div class="tool-card" onclick="switchView('tool-new-site')">
+          <div class="tool-icon"></div>
+          <div class="tool-title">New Site Planner</div>
+          <div class="tool-desc">Plan BCCH/BSIC/PSC/PCI/RSI for a new site with co-site rules and suggested neighbors.</div>
+          <div class="tool-tag">Planning</div>
+        </div>
     </section>
 
     <!-- PAGE: PCI CHECKER -->
@@ -3275,16 +3411,23 @@ body.dark .tool-legend-actions button { background: #142A5C; color: #AEB9D4; bor
   </div>
 </div>
 <!-- LOGIN SCREEN -->
-<div id="loginScreen" style="position:fixed;inset:0;z-index:100000;background:linear-gradient(135deg,#0C1B3D 0%,#142A5C 100%);display:flex;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:#fff;border-radius:20px;width:100%;max-width:420px;padding:40px 36px;box-shadow:0 30px 80px rgba(0,0,0,.5);">
-
-    <!-- Logo & Title -->
-    <div style="text-align:center;margin-bottom:32px;">
-      <div style="width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,#00A1E0,#124191);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:24px;color:#fff;box-shadow:0 10px 30px rgba(0,161,224,.4);">RF</div>
-      <h1 style="font-size:22px;font-weight:800;color:#0C1B3D;margin:0 0 6px;">RF Planning Platform</h1>
-      <p style="font-size:13px;color:#5A6B87;margin:0;">Sign in to continue</p>
+<div id="loginScreen" class="login">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="sb-logo"><i data-lucide="radio-tower"></i></div>
+      <div><h1>RF Planning Platform</h1><p>Sign in to continue</p></div>
     </div>
-
+    <form id="loginForm">
+      <label for="loginUsername">Username</label>
+      <input type="text" id="loginUsername" placeholder="your.username" autocomplete="username">
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+      <div id="loginError" class="login-error" style="display:none"></div>
+      <button type="submit" id="loginBtn" class="btn btn-primary">Sign in</button>
+    </form>
+    <div class="login-foot">v2.0</div>
+  </div>
+</div>
     <!-- Form -->
     <form id="loginForm">
       <div style="margin-bottom:16px;">
@@ -3422,7 +3565,7 @@ function toast(msg, type, duration) {
   duration = duration || 3000;
   const el = document.getElementById('toast');
   if (!el) return;
-  el.textContent = msg;
+  el.textContent = String(msg).replace(EMOJI_G, '').replace(/\s{2,}/g, ' ').trim();
   el.className = 'toast show ' + type;
   clearTimeout(el._t);
   el._t = setTimeout(function() { el.className = 'toast ' + type; }, duration);
@@ -3524,16 +3667,20 @@ function switchView(page) {
 }
 document.querySelectorAll('.nav-item').forEach(function(btn) {
   btn.addEventListener('click', function() {
-    switchView(btn.dataset.page);
+    switchView(btn.dataset.page, true);
   });
 });
 
 function toggleMapSidebar() {
   const sb = document.getElementById('mapSidebar');
-  const btn = document.getElementById('toggleSidebarBtn');
+  function toggleMapSidebar() {
+  const sb = document.getElementById('mapSidebar');
   sb.classList.toggle('collapsed');
   const collapsed = sb.classList.contains('collapsed');
-  btn.querySelector('span').textContent = collapsed ? '▶' : '◀';
+  const legend = document.getElementById('legend');
+  if (legend) legend.style.left = collapsed ? '20px' : '340px';
+  setTimeout(() => { if (map) map.invalidateSize(); }, 300);
+}
   const legend = document.getElementById('legend');
   if (legend) legend.style.left = collapsed ? '20px' : '340px';
   setTimeout(() => { if (map) map.invalidateSize(); }, 300);
@@ -4089,6 +4236,8 @@ document.addEventListener('keydown', function(e) {
    🗺️ إعادة الماب للوضع الطبيعي
    ========================================================= */
 function resetMapView() {
+    document.querySelector('.main').classList.remove('split');
+
   window.__gsmMode = false;
   window.__nbMode = false;
   currentView = 'map';
@@ -9511,17 +9660,13 @@ function toggleDarkMode() {
   localStorage.setItem('rf_dark_mode', isDark ? '1' : '0');
   const btn = document.getElementById('darkModeBtn');
   if (btn) {
-    btn.querySelector('span').textContent = isDark ? '☀️' : '🌙';
-    btn.querySelectorAll('span')[1].textContent = isDark ? 'Light' : 'Dark';
+    btn.innerHTML = '<i data-lucide="' + (isDark ? 'sun' : 'moon') + '"></i><span>' + (isDark ? 'Light mode' : 'Dark mode') + '</span>';
+    if (window.lucide) lucide.createIcons();
   }
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = isDark ? '#0B1220' : '#F5F7FA';
+  closeUserMenu();
 }
-
-// استرجع الوضع عند التحميل
-(function() {
-  if (localStorage.getItem('rf_dark_mode') === '1') {
-    setTimeout(() => toggleDarkMode(), 100);
-  }
-})();
 
 /* =========================================================
    PERFORMANCE CACHE
@@ -10615,16 +10760,14 @@ function captureMap() {
     scale: 1.5,
     width: mapContainer.offsetWidth,
     height: mapContainer.offsetHeight,
-    ignoreElements: (el) => {
+        ignoreElements: (el) => {
       return el.classList && (
         el.classList.contains('map-sidebar') ||
-        el.classList.contains('basemap-switcher') ||
-        el.classList.contains('map-search-box') ||
-        el.classList.contains('quick-chips') ||
-        el.classList.contains('goto-coords') ||
+        el.classList.contains('map-toolbar') ||
+        el.classList.contains('map-controls') ||
         el.classList.contains('screenshot-btn') ||
-        el.classList.contains('bookmarks-btn') ||
-        el.classList.contains('bookmarks-panel')
+        el.classList.contains('map-mini-stats') ||
+        el.classList.contains('tool-legend')
       );
     }
   }).then(canvas => {
@@ -11573,7 +11716,7 @@ async function run3GDuplicateCheck() {
   document.querySelector('#3gdup_table tbody').innerHTML = dups.length
     ? dups.map(d => '<tr style="background:#FFF3E0;">' +
         '<td><b>' + escapeHtml(d.cell) + '</b></td><td>' + escapeHtml(d.nb) + '</td>' +
-        '<td>' + (d.in_intra ? '✔' : '—') + '</td><td>' + (d.in_inter ? '✔' : '—') + '</td><td>' + (d.in_irat ? '✔' : '—') + '</td></tr>').join('')
+        '<td>' + (d.in_intra ? 'Yes' : '—') + '</td><td>' + (d.in_inter ? 'Yes' : '—') + '</td><td>' + (d.in_irat ? 'Yes' : '—') + '</td></tr>').join('')
     : '<tr><td colspan="5" style="text-align:center;padding:20px;color:#1F9D55;">✅ No duplicates</td></tr>';
   toast('✅ Found ' + dups.length + ' duplicates in ' + cellNames.length + ' cells', 'success');
 }
@@ -11786,9 +11929,16 @@ window.ToolLegend = {
     }));
     this.onToggleCallback = opts.onToggle || null;
 
-    const iconEl = document.getElementById('toolLegendIcon');
+       const iconEl = document.getElementById('toolLegendIcon');
     const titleEl = document.getElementById('toolLegendTitle');
-    if (iconEl) iconEl.textContent = opts.icon || '🎯';
+    if (iconEl) {
+      if (opts.lucideIcon) {
+        iconEl.innerHTML = '<i data-lucide="' + opts.lucideIcon + '"></i>';
+        if (window.lucide) lucide.createIcons();
+      } else {
+        iconEl.textContent = opts.icon || '🎯';
+      }
+    }
     if (titleEl) titleEl.textContent = opts.title || 'Legend';
 
     this.render();
@@ -11890,11 +12040,17 @@ window.ToolLegend = {
     }));
     this.onToggleCallback = opts.onToggle || null;
 
-    const iconEl = document.getElementById('toolLegendIcon');
+      const iconEl = document.getElementById('toolLegendIcon');
     const titleEl = document.getElementById('toolLegendTitle');
-    if (iconEl) iconEl.textContent = opts.icon || '🎯';
+    if (iconEl) {
+      if (opts.lucideIcon) {
+        iconEl.innerHTML = '<i data-lucide="' + opts.lucideIcon + '"></i>';
+        if (window.lucide) lucide.createIcons();
+      } else {
+        iconEl.textContent = opts.icon || '🎯';
+      }
+    }
     if (titleEl) titleEl.textContent = opts.title || 'Legend';
-
     this.render();
     if (this.container) this.container.classList.add('show');
   },
@@ -12716,7 +12872,7 @@ function nsRenderPlan(plan) {
 }
 
 function nsKpiCard(icon, label, value, color) {
-  return '<div class="kpi-card"><div class="kpi-label">' + icon + ' ' + label + '</div><div class="kpi-value" style="color:' + color + ';">' + value + '</div></div>';
+  return '<div class="kpi-card"><div class="kpi-label">' + label + '</div><div class="kpi-value">' + value + '</div></div>';
 }
 
 function nsRenderNeighbors(neighbors) {
@@ -13474,12 +13630,11 @@ function applyRoleBasedUI() {
   // ═══ 1. Update User Badge ═══
   const badge = document.getElementById('userBadge');
   if (badge) {
-    const roleIcons = { admin: '👑', engineer: '🛠️', optimizer: '🎯', viewer: '👁️' };
-    const roleColors = { admin: '#F2A900', engineer: '#1F9D55', optimizer: '#7C3AED', viewer: '#5A6B87' };
-    badge.innerHTML =
-      '<span style="font-size:14px;">' + roleIcons[role] + '</span>' +
-      '<span style="font-weight:700;">' + escapeHtml(currentProfile.username) + '</span>' +
-      '<span style="background:' + roleColors[role] + ';color:#fff;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.3px;">' + role + '</span>';
+       badge.innerHTML =
+      '<span>' + escapeHtml(currentProfile.username) + '</span>' +
+      '<span class="role-pill role-' + role + '">' + role + '</span>';
+    const av = document.getElementById('userAvatar');
+    if (av) av.textContent = (currentProfile.username || '?').charAt(0).toUpperCase();
   }
 
   // ═══ 2. Hide Nav Items (اللي ما عنده صلاحية) ═══
@@ -13521,8 +13676,10 @@ function applyRoleBasedUI() {
     { selector: '.tool-card[onclick*="tool-psc-checker"]', perm: 'tool:psc' },
     { selector: '.tool-card[onclick*="tool-bsic"]', perm: 'tool:bsic' },
     { selector: '.tool-card[onclick*="tool-symmetry"]', perm: 'tool:symmetry' },
-    { selector: '.tool-card[onclick*="tool-azimuth-opt"]', perm: 'tool:azimuth-opt' },
-    { selector: '.tool-card[onclick*="tool-distance"]', perm: 'tool:distance' },
+       { selector: '.tool-card[onclick*="\'tool-azimuth-opt\'"]', perm: 'tool:azimuth-opt' },
+    { selector: '.tool-card[onclick*="\'tool-azimuth\'"]', perm: 'tool:azimuth' },
+    { selector: '.tool-card[onclick*="\'tool-new-site\'"]', perm: 'tool:new-site' },
+    { selector: '.tool-card[onclick*="\'tool-3g-nb\'"]', perm: 'tool:3g-nb' },
     { selector: '.tool-card[onclick*="tool-azimuth"]', perm: 'tool:azimuth' },
     { selector: '.tool-card[onclick*="tool-unit"]', perm: 'tool:unit' },
     { selector: '.tool-card[onclick*="tool-kml"]', perm: 'tool:kml' }
@@ -13556,22 +13713,14 @@ function applyRoleBasedUI() {
 
   // ═══ 5. Add Admin Button (لـ admin فقط) ═══
    // 👇👇👇 أضف هذا الكود الجديد هنا 👇👇👇
-  if (role === 'admin') {
-    const addUserBtn = document.getElementById('addUserBtn');
-    if (!addUserBtn) {
-      const badgeEl = document.getElementById('userBadge');
-      if (badgeEl && badgeEl.parentElement) {
-        const btn2 = document.createElement('button');
-        btn2.id = 'addUserBtn';
-        btn2.className = 'btn';
-        btn2.style.cssText = 'margin-right:8px;background:#1F9D55;color:#fff;border:none;';
-        btn2.innerHTML = '<span>➕</span><span>Add User</span>';
-        btn2.onclick = showAddUserModal;
-        badgeEl.parentElement.insertBefore(btn2, badgeEl);
-      }
-    }
+   if (role === 'admin' && !document.getElementById('addUserBtn')) {
+    const b = document.createElement('button');
+    b.id = 'addUserBtn';
+    b.innerHTML = '<i data-lucide="user-plus"></i><span>Add user</span>';
+    b.onclick = () => { closeUserMenu(); showAddUserModal(); };
+    document.getElementById('userMenu').prepend(b);
+    if (window.lucide) lucide.createIcons();
   }
-
   // ═══ 6. Hide Legend / Warning ═══
   console.log('%c🔐 Role: ' + role.toUpperCase() + ' — UI adjusted', 'color:#124191;font-weight:bold;');
 }
@@ -13964,6 +14113,155 @@ window.showCacheInfo = async function() {
   alert(`📊 Cache:\n\n• Items: ${info.count}\n• Size: ${info.sizeMB} MB\n\n` +
     info.items.map(i => `• ${i.key}: ${i.sizeMB} MB (${i.savedAt})`).join('\n'));
 };
+  /* =========================================================
+   PRO UI LAYER
+   ========================================================= */
+const TOOL_META = {
+  'tool-pci-checker': { icon: 'hash',             cat: 'LTE' },
+  'tool-psc-checker': { icon: 'signal',           cat: '3G' },
+  'tool-3g-nb':       { icon: 'share-2',          cat: 'Neighbors' },
+  'tool-gsm-planner': { icon: 'radio',            cat: '2G' },
+  'tool-bsic':        { icon: 'palette',          cat: '2G' },
+  'tool-hsn':         { icon: 'shuffle',          cat: '2G' },
+  'tool-neighbor':    { icon: 'share-2',          cat: 'Neighbors' },
+  'tool-symmetry':    { icon: 'arrow-left-right', cat: 'Neighbors' },
+  'tool-azimuth-opt': { icon: 'compass',          cat: 'Planning' },
+  'tool-new-site':    { icon: 'building-2',       cat: 'Planning' },
+  'tool-distance':    { icon: 'ruler',            cat: 'Utilities' },
+  'tool-azimuth':     { icon: 'navigation',       cat: 'Utilities' },
+  'tool-unit':        { icon: 'calculator',       cat: 'Utilities' },
+  'tool-kml':         { icon: 'globe',            cat: 'Utilities' }
+};
+
+function initToolsHub() {
+  document.querySelectorAll('.tools-grid .tool-card').forEach(card => {
+    const m = (card.getAttribute('onclick') || '').match(/'(tool-[^']+)'/);
+    const meta = m && TOOL_META[m[1]];
+    if (!meta) return;
+    card.dataset.cat = meta.cat;
+    const ic = card.querySelector('.tool-icon');
+    if (ic) ic.innerHTML = '<i data-lucide="' + meta.icon + '"></i>';
+    const tag = card.querySelector('.tool-tag');
+    if (tag) tag.textContent = meta.cat;
+  });
+}
+
+function filterTools(cat) {
+  if (typeof cat === 'string') {
+    window.__toolCat = cat;
+    document.querySelectorAll('#toolsCats button').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+  }
+  const q = (document.getElementById('toolsSearch').value || '').toLowerCase().trim();
+  const c = window.__toolCat || 'All';
+  document.querySelectorAll('.tools-grid .tool-card').forEach(card => {
+    const ok = card.textContent.toLowerCase().includes(q) && (c === 'All' || card.dataset.cat === c);
+    card.classList.toggle('is-filtered', !ok);
+  });
+}
+
+/* ---- Map left panel -> accordion ---- */
+function makeSidebarAccordion() {
+  const sb = document.getElementById('mapSidebar');
+  if (!sb || sb.dataset.acc) return;
+  const kids = Array.from(sb.children);
+  sb.innerHTML = '';
+  let det = null, idx = 0;
+  kids.forEach(el => {
+    if (el.tagName === 'H3') {
+      det = document.createElement('details');
+      det.open = idx++ < 2;
+      const s = document.createElement('summary');
+      s.textContent = el.textContent;
+      det.appendChild(s);
+      sb.appendChild(det);
+    } else if (det) det.appendChild(el);
+    else sb.appendChild(el);
+  });
+  sb.dataset.acc = '1';
+}
+
+/* ---- Remove emoji — BUT exclude #toolLegend (protected) ---- */
+const EMOJI_T = /[\p{Extended_Pictographic}]/u;
+const EMOJI_G = /[\p{Extended_Pictographic}\uFE0F\u200D]/gu;
+function stripAllEmoji(root) {
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => {
+      if (!n.parentElement) return NodeFilter.FILTER_REJECT;
+      // 🛡️ محمي: ToolLegend + Map + Comments + Scripts
+      if (n.parentElement.closest('#map,#cellCommentDisplay,#toolLegend,textarea,script,style')) {
+        return NodeFilter.FILTER_REJECT;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  let n;
+  while ((n = w.nextNode())) {
+    if (EMOJI_T.test(n.nodeValue)) n.nodeValue = n.nodeValue.replace(EMOJI_G, '').replace(/^\s+/, '');
+  }
+  root.querySelectorAll('[placeholder]').forEach(el => { el.placeholder = el.placeholder.replace(EMOJI_G, '').trim(); });
+  root.querySelectorAll('optgroup').forEach(g => { g.label = g.label.replace(EMOJI_G, '').trim(); });
+}
+
+/* ---- Menus / nav ---- */
+function toggleUserMenu(e) { e.stopPropagation(); document.getElementById('userMenu').classList.toggle('show'); }
+function closeUserMenu() { const m = document.getElementById('userMenu'); if (m) m.classList.remove('show'); }
+document.addEventListener('click', closeUserMenu);
+
+function toggleNav() {
+  const a = document.querySelector('.app');
+  a.classList.toggle('nav-collapsed');
+  localStorage.setItem('rf_nav_collapsed', a.classList.contains('nav-collapsed') ? '1' : '0');
+  setTimeout(() => { if (map) map.invalidateSize(); }, 250);
+}
+
+/* ---- Split view ---- */
+(function () {
+  const base = switchView;
+  window.switchView = function (page, force) {
+    const main = document.querySelector('.main');
+    const inTool = typeof currentView === 'string' && currentView.indexOf('tool-') === 0;
+
+    if (page === 'map' && inTool && !force) {
+      const tp = document.getElementById('page-' + currentView);
+      main.classList.add('split');
+      document.querySelectorAll('.page.split-tool').forEach(p => p.classList.remove('split-tool'));
+      tp.classList.add('split-tool', 'active');
+      document.getElementById('page-map').classList.add('active');
+      setTimeout(() => { if (map) map.invalidateSize(); }, 250);
+      return;
+    }
+
+    main.classList.remove('split');
+    document.querySelectorAll('.page.split-tool').forEach(p => p.classList.remove('split-tool'));
+    base(page);
+    if (page.indexOf('tool-') === 0) {
+      const t = document.querySelector('.nav-item[data-page="tools"]');
+      if (t) t.classList.add('active');
+    }
+  };
+})();
+
+function closeSplit() {
+  const prev = currentView;
+  resetMapView();
+  switchView(prev, true);
+}
+
+/* ---- Init ---- */
+window.addEventListener('DOMContentLoaded', function () {
+  if (localStorage.getItem('rf_nav_collapsed') === '1') document.querySelector('.app').classList.add('nav-collapsed');
+  initToolsHub();
+  makeSidebarAccordion();
+  stripAllEmoji(document.body);
+  if (window.lucide) lucide.createIcons();
+
+  let t;
+  new MutationObserver(muts => {
+    if (muts.every(m => m.target.closest && m.target.closest('#map,#toolLegend'))) return;
+    clearTimeout(t);
+    t = setTimeout(() => { stripAllEmoji(document.body); if (window.lucide) lucide.createIcons(); }, 120);
+  }).observe(document.body, { childList: true, subtree: true });
+});
 // ═══════════════════════════════════════════════════
 // 🎯 Per-Cell Neighbor Loading (الطريقة الصحيحة)
 // ═══════════════════════════════════════════════════
