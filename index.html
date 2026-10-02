@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"/>
 <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -964,8 +964,7 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
         <button class="btn btn-ghost" onclick="toggleDarkMode()" title="Toggle Dark Mode" id="darkModeBtn">
           <span>🌙</span><span>Dark</span>
         </button>
-        <button class="btn btn-ghost" id="toggleSidebarBtn" onclick="toggleMapSidebar()" title="Collapse/Expand panel">
-        </button>
+               <button class="btn btn-ghost" id="toggleSidebarBtn" onclick="toggleMapSidebar()" title="Collapse/Expand panel"><span>◀</span></button>
            <button class="btn btn-ghost" onclick="resetMapView()" title="Show Normal Map" style="background:#FCEAEA;color:#D64545;border-color:#F5D5D5;">
   <span>🗺️</span><span>Reset View</span>
 </button> 
@@ -1852,7 +1851,7 @@ body.dark .modal-backdrop input { background: #142A5C !important; color: #fff !i
             </div>
             <div class="form-field">
               <label>Analysis Radius (km)</label>
-              <input type="number" id="bsic_analysis_radius" value="3" min="1" max="5" step="1">
+              <input type="number" id="bsic_analysis_radius" value="3" min="1" max="50" step="1">
               <div class="hint">نطاق عد الجيران</div>
             </div>
           </div>
@@ -3454,9 +3453,7 @@ map.on('zoomstart movestart', function() {
     if (zoomTimer) clearTimeout(zoomTimer);
     zoomTimer = setTimeout(function() {
       if (window.__gsmMode || window.__nbMode) return;
-      if (visibleCells.length &&
-          document.getElementById('showSectors') &&
-          document.getElementById('showSectors').checked) {
+            if (visibleCells.length) {
         if (isRendering) return;
         isRendering = true;
         try { renderMap(); } finally { isRendering = false; }
@@ -3469,9 +3466,7 @@ map.on('zoomstart movestart', function() {
     if (moveTimer) clearTimeout(moveTimer);
     moveTimer = setTimeout(function() {
       if (window.__gsmMode || window.__nbMode) return;
-      if (visibleCells.length &&
-          document.getElementById('showSectors') &&
-          document.getElementById('showSectors').checked) {
+          if (visibleCells.length) {
         if (isRendering) return;
         isRendering = true;
         try { renderMap(); } finally { isRendering = false; }
@@ -3592,6 +3587,24 @@ async function refreshCellsInBackground() {
     console.warn('Background refresh failed:', e);
   }
 }
+  function cellsForCache() {
+  return allCells.map(c => {
+    const o = {
+      id: c.id, cell_name: c.cell_name, cell_id: c.cell_id, site: c.site,
+      lat: c.lat, long: c.long, bore: c.bore, pci: c.pci, rsi: c.rsi,
+      bcch: c.bcch, bsic: c.bsic, tch: c.tch, lac: c.lac, hsn: c.hsn,
+      psc: c.psc, uarfcn_dl: c.uarfcn_dl, uarfcn_ul: c.uarfcn_ul,
+      rnc_id: c.rnc_id, bsc: c.bsc, bw: c.bw, height: c.height,
+      cell_radius: c.radius, comment: c.comment || null, project_id: c.project_id
+    };
+    for (let i = 1; i <= 35; i++) if (c['nb' + i]) o['nb' + i] = c['nb' + i];
+    return o;
+  });
+}
+async function persistCellsCache() {
+  try { await CacheDB.set('cells_' + (currentProjectId || 'all'), cellsForCache()); }
+  catch (e) { console.warn(e); }
+}
 // ═══════════════════════════════════════════════════
 // 📥 loadCells — سريع + Cache
 // ═══════════════════════════════════════════════════
@@ -3603,7 +3616,7 @@ async function loadCells(useCache) {
 
   // ═══ 1. جرّب Cache ═══
   if (useCache) {
-    const cached = await CacheDB.get(cacheKey);
+    const cached = await CacheDB.get(cacheKey, 10 * 60 * 1000);
     if (cached && cached.length > 0) {
       console.log(`⚡ Cache HIT: ${cached.length} cells`);
       allCells = cached.map(normalizeCell);
@@ -3667,16 +3680,7 @@ async function loadCells(useCache) {
     applyFilters();
 
     // ═══ 4. احفظ في Cache ═══
-    const toCache = allCells.map(c => ({
-      id: c.id, cell_name: c.cell_name, site: c.site,
-      lat: c.lat, long: c.long, bore: c.bore,
-      pci: c.pci, rsi: c.rsi, bcch: c.bcch, bsic: c.bsic,
-      tch: c.tch, lac: c.lac, hsn: c.hsn,
-      psc: c.psc, uarfcn_dl: c.uarfcn_dl, uarfcn_ul: c.uarfcn_ul,
-      rnc_id: c.rnc_id, bsc: c.bsc, bw: c.bw, height: c.height,
-      cell_radius: c.radius, comment: c.comment, project_id: c.project_id,
-    }));
-    await CacheDB.set(cacheKey, toCache);
+      await CacheDB.set(cacheKey, cellsForCache());
 
     setTimeout(() => {
       if (map) map.invalidateSize();
@@ -3698,15 +3702,14 @@ async function loadCells(useCache) {
    ========================================================= */
 function normalizeCell(row) {
   const name = row.cell_name || '';
-  const prefixMatch = name.match(/^[A-Z]+/);
+  const baseName = name.toUpperCase().replace(/^[LU]/, '');
+  const prefixMatch = baseName.match(/^[A-Z]+/);
   const region = prefixMatch ? prefixMatch[0] : 'UNKNOWN';
   const sector = name.slice(-1);
 
-  let site = row.site;
-  if (!site) {
-    site = name.replace(/[A-Z]$/, '');
-    site = site.replace(/^L/, '');
-  }
+  const site = row.site
+    ? String(row.site).toUpperCase().replace(/^[LU]/, '')
+    : baseName.replace(/[A-Z]$/, '');
 
    // 🎯 قاعدة بسيطة: يبدأ بـ L = LTE، U = 3G، غير ذلك = GSM
   const nameUpper = name.toUpperCase();
@@ -3758,9 +3761,11 @@ const gsmBand = (function() {
   uarfcn_ul: uarfcn_ul_val,
     rnc_id: row.rnc_id != null ? parseInt(row.rnc_id) : null,
     bsc: row.bsc || '',
-    bw: row.bw || 0,
+      bw: row.bw || 0,
     height: row.height || 0,
-   tech: isGSM ? 'GSM' : (isLTE ? 'LTE' : (is3G ? '3G' : 'Unknown')),
+    comment: row.comment || null,
+    project_id: row.project_id || null,
+    tech: isGSM ? 'GSM' : (isLTE ? 'LTE' : (is3G ? '3G' : 'Unknown')),
     color: CELL_COLOR
   };
 
@@ -3784,7 +3789,7 @@ function updateStats() {
     .filter(c => /[A-Z]$/.test(c.cell_name))
     .map(c => {
       let site = c.cell_name.replace(/[A-Z]$/, '');
-      site = site.replace(/^L/, '');
+      site = site.replace(/^[LU]/, '');
       return site.toUpperCase();
     })
   );
@@ -4212,7 +4217,11 @@ function fitAllCells() {
 
 function clearFilters() {
   document.getElementById('searchFilter').value = '';
-  document.getElementById('pciFilter').value = '';
+  const p = document.getElementById('pciFilter'); if (p) p.value = '';
+  const f = document.getElementById('findByField'); if (f) f.value = '';
+  const v = document.getElementById('findByValue'); if (v) v.value = '';
+  const b = document.getElementById('clearFieldSearchBtn'); if (b) b.remove();
+  window.__gsmMode = false; window.__nbMode = false;
   applyFilters();
   toast('Filters cleared', 'info');
 }
@@ -4302,7 +4311,7 @@ async function deleteProject(projectId) {
     await loadProjects();
     if (currentProjectId === projectId) {
       currentProjectId = null;
-      await loadCells();
+           await loadCells(false);
     }
   } catch (e) {
     toast('Error: ' + e.message, 'error');
@@ -4538,6 +4547,8 @@ function importParseRows(rows) {
   }
 
   // ═══ اقرأ كل صف ═══
+    const has = v => v !== '' && v !== null && v !== undefined;
+
   importPreviewData = rows.map(row => {
     // 1. اسم الخلية
     const cellName = String(findVal(row, ALIASES_COMMON.cell_name) || '').trim();
@@ -4584,12 +4595,12 @@ function importParseRows(rows) {
       const cpid = findVal(row, ALIASES_3G.cpid);
       const ci = findVal(row, ALIASES_3G.cell_id);
 
-      if (psc) result.psc = parseInt(psc);
-      if (dl) result.downlink_uarfcn = parseInt(dl);
-      if (ul) result.uplink_uarfcn = parseInt(ul);
-      if (rnc) result.rnc_id = parseInt(rnc);
-      if (cpid) result.cpid = parseInt(cpid);
-      if (ci) result.cell_id = parseInt(ci);
+           if (has(psc)) result.psc = parseInt(psc);
+      if (has(dl)) result.downlink_uarfcn = parseInt(dl);
+      if (has(ul)) result.uplink_uarfcn = parseInt(ul);
+      if (has(rnc)) result.rnc_id = parseInt(rnc);
+      if (has(cpid)) result.cpid = parseInt(cpid);
+      if (has(ci)) result.cell_id = parseInt(ci);
 
       console.log('📡 3G:', cellName, '| PSC:', result.psc, '| DL:', result.downlink_uarfcn);
 
@@ -4599,9 +4610,9 @@ function importParseRows(rows) {
       const rsi = findVal(row, ALIASES_LTE.rsi);
       const ci = findVal(row, ALIASES_LTE.cell_id);
 
-      if (pci) result.pci = parseInt(pci);
-      if (rsi) result.rsi = parseInt(rsi);
-      if (ci) result.cell_id = parseInt(ci);
+         if (has(pci)) result.pci = parseInt(pci);
+      if (has(rsi)) result.rsi = parseInt(rsi);
+      if (has(ci)) result.cell_id = parseInt(ci);
 
     } else {
       // ✅ GSM فقط
@@ -4613,13 +4624,13 @@ function importParseRows(rows) {
       const bsc = findVal(row, ALIASES_GSM.bsc);
       const ci = findVal(row, ALIASES_GSM.cell_id);
 
-      if (bcch) result.bcch = parseInt(bcch);
-      if (bsic) result.bsic = String(bsic).trim();
-      if (tch) result.tch = parseInt(tch);
-      if (lac) result.lac = parseInt(lac);
-      if (hsn) result.hsn = parseInt(hsn);
-      if (bsc) result.bsc = String(bsc).trim();
-      if (ci) result.cell_id = parseInt(ci);
+           if (has(bcch)) result.bcch = parseInt(bcch);
+      if (has(bsic)) result.bsic = bsicFormat(bsic);
+      if (has(tch)) result.tch = parseInt(tch);
+      if (has(lac)) result.lac = parseInt(lac);
+      if (has(hsn)) result.hsn = parseInt(hsn);
+      if (has(bsc)) result.bsc = String(bsc).trim();
+      if (has(ci)) result.cell_id = parseInt(ci);
     }
 
     // ═══ 7. حقول NB (لأي نوع) ═══
@@ -4772,12 +4783,18 @@ async function importSaveToSupabase() {
       return obj;
     });
 
-    console.log('📤 Sending ' + cellsWithProject.length + ' cells');
+       console.log('📤 Sending ' + cellsWithProject.length + ' cells');
+
+    const uniq = new Map();
+    cellsWithProject.forEach(c => uniq.set(c.cell_name.toUpperCase() + '|' + c.project_id, c));
+    const rowsToSave = [...uniq.values()];
+    const duplicates = cellsWithProject.length - rowsToSave.length;
+    if (duplicates > 0) toast('⚠️ تم تجاهل ' + duplicates + ' صف مكرر', 'info', 4000);
 
     const BATCH = 500;
     let saved = 0;
-    for (let i = 0; i < cellsWithProject.length; i += BATCH) {
-      const batch = cellsWithProject.slice(i, i + BATCH);
+    for (let i = 0; i < rowsToSave.length; i += BATCH) {
+      const batch = rowsToSave.slice(i, i + BATCH);
      const { error } = await db.from('rf_cells').upsert(batch, {
   onConflict: 'cell_name,project_id',
   ignoreDuplicates: false
@@ -4786,14 +4803,14 @@ async function importSaveToSupabase() {
         console.error('❌ Insert error:', error);
         throw error;
       }
-      saved += batch.length;
-      btn.textContent = 'Saving ' + saved + '/' + cellsWithProject.length + '...';
+            saved += batch.length;
+      btn.textContent = 'Saving ' + saved + '/' + rowsToSave.length + '...';
     }
 
     toast('✅ Saved ' + saved + ' cells', 'success');
     importClearPreview();
     await loadProjects();
-    await loadCells();
+    await loadCells(false);
   } catch (e) {
     console.error('❌ Save error:', e);
     toast('Error: ' + e.message, 'error', 6000);
@@ -5018,7 +5035,7 @@ function isFaceToFace(cell1, cell2, thresholdDeg) {
 
 function findPairsWithin(cells, maxRadiusM) {
   if (cells.length < 2) return [];
-  const bucketDeg = Math.max(maxRadiusM / 111000.0, 0.005);
+  const bucketDeg = Math.max(maxRadiusM / 85000.0, 0.005);
   const buckets = new Map();
   function key(lat, lon) { return Math.floor(lat / bucketDeg) + ',' + Math.floor(lon / bucketDeg); }
 
@@ -5594,9 +5611,11 @@ function searchAndFly() {
    NB TABS — SWITCHER
    ========================================================= */
 function switchNbTab(tabName) {
-  document.querySelectorAll('.nb-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nb-tab-content').forEach(c => c.classList.remove('active'));
-  const btn = document.querySelector('.nb-tab[data-tab="' + tabName + '"]');
+  const root = document.getElementById('page-tool-neighbor');
+  if (!root) return;
+  root.querySelectorAll('.nb-tab').forEach(t => t.classList.remove('active'));
+  root.querySelectorAll('.nb-tab-content').forEach(c => c.classList.remove('active'));
+  const btn = root.querySelector('.nb-tab[data-tab="' + tabName + '"]');
   if (btn) btn.classList.add('active');
   const content = document.getElementById('nb_tab_' + tabName);
   if (content) content.classList.add('active');
@@ -5841,6 +5860,7 @@ async function nbDoAdd() {
     Object.keys(update).forEach(slot => { nbCurrentSource[slot] = update[slot]; });
     nbLog('➕ Added ' + toAdd.length + ' NBs');
     toast('✅ Added ' + toAdd.length + ' neighbors', 'success');
+    persistCellsCache();
     runNeighborAnalysis();
   } catch (e) {
     console.error(e);
@@ -5868,6 +5888,7 @@ async function nbDoRemove() {
     Object.keys(update).forEach(slot => { nbCurrentSource[slot] = null; });
     nbLog('➖ Removed ' + far.length + ' far NBs');
     toast('✅ Removed ' + far.length + ' neighbors', 'success');
+     persistCellsCache();
     runNeighborAnalysis();
   } catch (e) {
     console.error(e);
@@ -6467,6 +6488,7 @@ async function gsmSaveToDatabase() {
     }).eq('id', cell.id);
     if (error) throw error;
     toast('✅ Saved', 'success');
+     persistCellsCache();
     const local = allCells.find(c => c.id === cell.id);
     if (local) { local.bcch = gsmLastResults.bcch; local.bsic = gsmLastResults.bsic; }
   } catch (e) { console.error(e); toast('Save failed: ' + e.message, 'error'); }
@@ -7858,6 +7880,7 @@ async function hsnApplyAll() {
     }
 
     toast('✅ Applied ' + applied + ' HSN updates' + (failed ? ' (' + failed + ' failed)' : ''), 'success', 5000);
+     persistCellsCache();
 
     // Re-run analysis to confirm
     setTimeout(() => runHSNChecker(), 500);
@@ -8253,73 +8276,62 @@ function runPSCChecker() {
 /* 🎯 اقتراح PSC جديدة بتجنب التعارضات */
 function pscSuggestNewCodes(cells, conflicts, pscMin, pscMax, maxDistance) {
   const suggestions = new Map();
-
-  // ترتيب: الخلايا الأكثر تعارضاً أولاً
   const conflictCount = new Map();
   conflicts.forEach(cf => {
     conflictCount.set(cf.cell1.id, (conflictCount.get(cf.cell1.id) || 0) + 1);
     conflictCount.set(cf.cell2.id, (conflictCount.get(cf.cell2.id) || 0) + 1);
   });
 
-  const sorted = cells.slice().sort((a, b) =>
-    (conflictCount.get(b.id) || 0) - (conflictCount.get(a.id) || 0)
-  );
-
-  // تتبّع PSC المستخدمة لكل باند
   const usedByBand = {};
+  const listOf = band => (usedByBand[band] = usedByBand[band] || []);
+
+  // 1) النظيفة تحتفظ بقيمتها وتتسجل أولاً
+  cells.forEach(c => {
+    if (!conflictCount.get(c.id)) {
+      suggestions.set(c.id, c.originalPsc);
+      listOf(c.band).push({ psc: c.originalPsc, lat: c.lat, lon: c.lon });
+    }
+  });
+
+  const globalUsage = {};
+  cells.forEach(c => { globalUsage[c.originalPsc] = (globalUsage[c.originalPsc] || 0) + 1; });
   const allCodes = [];
   for (let i = pscMin; i <= pscMax; i++) allCodes.push(i);
 
-  sorted.forEach(cell => {
-    const band = cell.band;
-    if (!usedByBand[band]) usedByBand[band] = [];
+  // 2) المتعارضة: الأكثر تعارضاً أولاً
+  const conflicted = cells.filter(c => conflictCount.get(c.id))
+    .sort((a, b) => conflictCount.get(b.id) - conflictCount.get(a.id));
 
-    const nearby = usedByBand[band].filter(e =>
-      haversineDistance(cell.lat, cell.lon, e.lat, e.lon) <= maxDistance
+  conflicted.forEach(cell => {
+    const list = listOf(cell.band);
+    const forbidden = new Set(
+      list.filter(e => haversineDistance(cell.lat, cell.lon, e.lat, e.lon) <= maxDistance)
+          .map(e => e.psc)
     );
 
-    const hasConflict = (conflictCount.get(cell.id) || 0) > 0;
-
-    // إذا الخلية نظيفة → احتفظ بـ PSC
-    if (!hasConflict) {
-      suggestions.set(cell.id, cell.originalPsc);
-      usedByBand[band].push({ psc: cell.originalPsc, lat: cell.lat, lon: cell.lon });
-      return;
-    }
-
-    // خلية متعارضة → ابحث عن PSC جديدة
-    const forbidden = new Set(nearby.map(e => e.psc));
-
-    // جرّب PSC موزّعة (تجنب الأولاد المتتالية)
-    const candidates = allCodes.filter(c => !forbidden.has(c));
-
-    let chosen = null;
-    if (candidates.length > 0) {
-      // اختر الأقل استخداماً عالمياً
-      const globalUsage = {};
-      cells.forEach(c => {
-        globalUsage[c.originalPsc] = (globalUsage[c.originalPsc] || 0) + 1;
-      });
-      candidates.sort((a, b) => (globalUsage[a] || 0) - (globalUsage[b] || 0));
-      chosen = candidates[0];
+    let chosen;
+    if (!forbidden.has(cell.originalPsc)) {
+      chosen = cell.originalPsc;
     } else {
-      // ما فيه PSC متاحة → اختر الأبعد جغرافياً
-      let best = cell.originalPsc, bestMin = -1;
-      allCodes.forEach(psc => {
-        if (psc === cell.originalPsc) return;
-        let minDist = Infinity;
-        usedByBand[band].forEach(e => {
-          if (e.psc === psc) {
-            minDist = Math.min(minDist, haversineDistance(cell.lat, cell.lon, e.lat, e.lon));
-          }
+      const candidates = allCodes.filter(c => !forbidden.has(c));
+      if (candidates.length) {
+        candidates.sort((a, b) => (globalUsage[a] || 0) - (globalUsage[b] || 0));
+        chosen = candidates[0];
+      } else {
+        let best = cell.originalPsc, bestMin = -1;
+        allCodes.forEach(psc => {
+          let minDist = Infinity;
+          list.forEach(e => {
+            if (e.psc === psc) minDist = Math.min(minDist, haversineDistance(cell.lat, cell.lon, e.lat, e.lon));
+          });
+          if (minDist > bestMin) { bestMin = minDist; best = psc; }
         });
-        if (minDist > bestMin) { bestMin = minDist; best = psc; }
-      });
-      chosen = best;
+        chosen = best;
+      }
     }
-
     suggestions.set(cell.id, chosen);
-    usedByBand[band].push({ psc: chosen, lat: cell.lat, lon: cell.lon });
+    globalUsage[chosen] = (globalUsage[chosen] || 0) + 1;
+    list.push({ psc: chosen, lat: cell.lat, lon: cell.lon });
   });
 
   return suggestions;
@@ -8587,6 +8599,7 @@ async function pscApplyAll() {
     }
 
     toast('✅ تم تطبيق ' + applied + ' تغيير' + (failed ? ' (' + failed + ' فشل)' : ''), 'success', 5000);
+    persistCellsCache();
     setTimeout(() => runPSCChecker(), 500);
   } catch (e) {
     console.error(e);
@@ -8692,7 +8705,8 @@ function runBSICAnalyzer() {
   }));
 
   // Build spatial index (grid bucket)
-  const bucketDeg = Math.max(analysisRadiusM / 111000, 0.001);
+  const searchRadiusM = Math.max(analysisRadiusM, clashRadiusM);
+  const bucketDeg = Math.max(searchRadiusM / 85000, 0.001);
   const buckets = new Map();
   const key = (lat, lon) => Math.floor(lat / bucketDeg) + ',' + Math.floor(lon / bucketDeg);
   results.forEach((r, idx) => {
@@ -8716,13 +8730,10 @@ function runBSICAnalyzer() {
     uniqueNearby.forEach(j => {
       const o = results[j];
       const dM = haversineDistance(r.lat, r.lon, o.lat, o.lon);
-      if (dM <= analysisRadiusM) {
-        r.neighbors_count++;
-                // 🎯 تعارض = نفس BCCH + نفس BSIC + ضمن المسافة
-        if (r.bcch === o.bcch && r.bsic === o.bsic && dM <= clashRadiusM) {
-          r.same_bsic_nearby++;
-          r.conflict_peers.push({ cell: o.cell_name, distance_m: dM, bsic: o.bsic });
-        }
+          if (dM <= analysisRadiusM) r.neighbors_count++;
+      if (r.bcch === o.bcch && r.bsic === o.bsic && dM <= clashRadiusM) {
+        r.same_bsic_nearby++;
+        r.conflict_peers.push({ cell: o.cell_name, distance_m: dM, bsic: o.bsic });
       }
     });
   });
@@ -8737,8 +8748,7 @@ function runBSICAnalyzer() {
   analysisResults.sort((a, b) => b.same_bsic_nearby - a.same_bsic_nearby || a.cell_name.localeCompare(b.cell_name));
 
   // === Strict-separation BSIC suggestions ===
-  const suggestions = bsicSuggestStrict(analysisResults, clashRadiusKm);
-
+  const suggestions = bsicSuggestStrict(analysisResults, clashRadiusKm, results);
    // Determine changes
   let changeCount = 0;
   let highCount = 0;
@@ -8778,7 +8788,8 @@ function runBSICAnalyzer() {
 // =========================================================
 // Strict-separation BSIC assignment
 // =========================================================
-function bsicSuggestStrict(cells, minDistanceKm) {
+function bsicSuggestStrict(cells, minDistanceKm, universe) {
+  universe = universe || cells;
   const suggestions = new Map();
   const allBsics = bsicAllPossible();
   const assignments = {}; // bsic -> [{lat, lon, cell_id, bcch}]
@@ -8821,7 +8832,7 @@ function bsicSuggestStrict(cells, minDistanceKm) {
     });
 
     // الخلايا الأخرى (بقيمها الأصلية)
-    cells.forEach(other => {
+      universe.forEach(other => {
       if (other.id === cellId) return;
       const d = bsicDistanceKm(lat, lon, other.lat, other.lon);
       // منع نفس BSIC فقط لنفس BCCH
@@ -8854,7 +8865,7 @@ function bsicSuggestStrict(cells, minDistanceKm) {
             minDist = Math.min(minDist, bsicDistanceKm(lat, lon, e.lat, e.lon));
           });
         }
-        cells.forEach(o => {
+              universe.forEach(o => {
           if (o.id === cellId || o.bsic !== bs || o.bcch !== cell.bcch) return;
           minDist = Math.min(minDist, bsicDistanceKm(lat, lon, o.lat, o.lon));
         });
@@ -8981,6 +8992,7 @@ async function bsicApplyAll() {
     }
 
     toast('✅ Applied ' + applied + ' BSIC changes' + (failed ? ' (' + failed + ' failed)' : ''), 'success', 5000);
+     persistCellsCache();
 
     setTimeout(() => runBSICAnalyzer(), 800);
   } catch (e) {
@@ -9185,7 +9197,8 @@ function loadCacheFromDisk() {
   }
 }
 
-function clearCache() {
+async function clearCache() {
+  await CacheDB.clear();
   localStorage.removeItem(CACHE_KEY);
   toast('Cache cleared', 'success');
 }
@@ -9504,6 +9517,7 @@ async function symFixOne(idx) {
     // حدّث الذاكرة المحلية
     neighborCell[slot] = sourceName;
     toast('✅ Added ' + sourceName + ' → ' + item.neighbor, 'success');
+    persistCellsCache();
     runSymmetryChecker();
   } catch (e) {
     console.error(e);
@@ -9618,37 +9632,26 @@ let azoptLastResults = null;
 let azoptMapLayers = [];
 
 function azoptGetBoreForNeighbors(cell, neighbors, radius, weightMethod) {
-  // احسب الزاوية المثالية = المتوسط المرجح لاتجاهات الجيران
-  if (!neighbors.length) return cell.bore;
-
-  let sumSin = 0, sumCos = 0, totalWeight = 0;
+  const WINDOW = 60;       // الجيران اللي هذا القطاع يخدمهم فقط
+  const MAX_SHIFT = 30;    // أقصى تغيير مسموح
+  let sumSin = 0, sumCos = 0, total = 0;
 
   neighbors.forEach(nb => {
-    const bearing = calculateBearing(cell.lat, cell.long, nb.cell.lat, nb.cell.long);
-    let w = 1;
-    if (weightMethod === 'distance') {
-      // كل ما أقرب، وزن أكبر
-      w = 1 / Math.max(nb.distance, 100);
-    }
-    // تحويل إلى راديان
-    const rad = bearing * Math.PI / 180;
-    sumSin += Math.sin(rad) * w;
-    sumCos += Math.cos(rad) * w;
-    totalWeight += w;
+    if (nb.distance < 50) return;                              // نفس الموقع
+    const b = calculateBearing(cell.lat, cell.long, nb.cell.lat, nb.cell.long);
+    if (boreDifference(cell.bore, b) > WINDOW) return;
+    const w = weightMethod === 'distance' ? 1 / Math.max(nb.distance, 100) : 1;
+    sumSin += Math.sin(b * Math.PI / 180) * w;
+    sumCos += Math.cos(b * Math.PI / 180) * w;
+    total += w;
   });
+  if (!total) return cell.bore;
 
-  if (totalWeight === 0) return cell.bore;
-
-  const avgRad = Math.atan2(sumSin, sumCos);
-  let suggested = (avgRad * 180 / Math.PI + 360) % 360;
-
-  // قارن بالزاوية الحالية
-  const diff = boreDifference(cell.bore, suggested);
-
-  // إذا الفرق < 15° → ابقِ الحالية (لا تغيير)
-  if (diff < 15) return cell.bore;
-
-  return Math.round(suggested);
+  const target = (Math.atan2(sumSin, sumCos) * 180 / Math.PI + 360) % 360;
+  let d = ((target - cell.bore + 540) % 360) - 180;            // فرق موقّع
+  if (Math.abs(d) < 15) return cell.bore;
+  d = Math.max(-MAX_SHIFT, Math.min(MAX_SHIFT, d));
+  return Math.round((cell.bore + d + 360) % 360);
 }
 
 function runAzimuthOpt() {
@@ -9688,7 +9691,7 @@ function runAzimuthOpt() {
     const suggested = azoptGetBoreForNeighbors(cell, neighbors, radius, weightMethod);
 
     // احسب الفرق
-    const change = suggested - cell.bore;
+    const change = ((suggested - cell.bore + 540) % 360) - 180;
     const absChange = Math.abs(change);
 
     // احسب "Gain" — كم جار صار في الـ Front بعد التغيير
@@ -9977,6 +9980,7 @@ async function saveComment(cellId) {
     }
 
     toast('✅ Comment saved', 'success');
+    persistCellsCache();
     document.getElementById('commentEditorModal').remove();
 
     // أعد عرض Site Info
@@ -10004,6 +10008,7 @@ async function deleteComment(cellId) {
     }
 
     toast('✅ Comment deleted', 'success');
+    persistCellsCache(); 
     if (cell) showSiteInfo(cell);
   } catch (e) {
     console.error(e);
@@ -11576,13 +11581,10 @@ function nsPlanAll(siteName, lat, lng, height, sectors, sectorAz, siteType, band
 }
 
 function nsGet2GLetter(sector, band) {
-  if (band === '900') {
-    const idx = ['A','B','C','G','H','I'].indexOf(sector);
-    return ['A','B','C','G','H','I'][idx] || sector;
-  } else {
-    const idx = ['A','B','C','D','E','F'].indexOf(sector);
-    return ['D','E','F','J','K','L'][idx] || sector;
-  }
+  const idx = ['A','B','C','D','E','F'].indexOf(sector);
+  if (idx < 0) return sector;
+  return band === '900' ? ['A','B','C','G','H','I'][idx]
+                        : ['D','E','F','J','K','L'][idx];
 }
   function nsGet3GLetter(sector, band) {
   if (band === '2100') return sector;                        // A B C D E F
@@ -12088,7 +12090,7 @@ async function nsSaveToDatabase() {
     }
 
     toast('Added ' + cellsPayload.length + ' cells and ' + nbSaved + ' neighbors', 'success', 5000);
-    await loadCells();
+        await loadCells(false);
     if (typeof threeGLoadNeighbors === 'function') await threeGLoadNeighbors(pid);
   } catch (e) {
     console.error(e);
@@ -12814,10 +12816,12 @@ async function doLogin() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('loginPassword').value = '';
 
-    applyRoleBasedUI();
+       applyRoleBasedUI();
     showApp();
+    if (map) setTimeout(() => map.invalidateSize(), 100);
+    await loadProjects();
+    await loadCells();
     toast('👋 Welcome, ' + (profile.full_name || profile.username) + '!', 'success', 3000);
-
   } catch (e) {
     console.error(e);
     errEl.textContent = '❌ ' + (e.message || 'Login failed');
@@ -12831,6 +12835,7 @@ async function doLogin() {
 // ═══ Logout ═══
 async function doLogout() {
   if (!confirm('Sign out?')) return;
+  try { await CacheDB.clear(); } catch (e) {}
   try {
     await db.auth.signOut();
   } catch (e) { console.error(e); }
@@ -12968,10 +12973,11 @@ async function checkAuthOnLoad() {
         // ═══════════════════════════════════════════════
         // 1️⃣ تحميل الخلايا بعد 500ms
         // ═══════════════════════════════════════════════
-        setTimeout(async () => {
+              setTimeout(async () => {
           if (typeof map !== 'undefined' && map) {
             try { map.invalidateSize(); } catch(err) {}
           }
+          await loadProjects();
           if (typeof loadCells === 'function') {
             await loadCells();
           }
@@ -13268,12 +13274,17 @@ const CacheDB = {
     });
   },
 
-  async get(key) {
+   async get(key, maxAgeMs) {
     const db = await this.init();
     return new Promise((res) => {
       const tx = db.transaction('cache', 'readonly');
       const r = tx.objectStore('cache').get(key);
-      r.onsuccess = () => res(r.result ? r.result.value : null);
+      r.onsuccess = () => {
+        const rec = r.result;
+        if (!rec) return res(null);
+        if (maxAgeMs && Date.now() - rec.savedAt > maxAgeMs) return res(null);
+        res(rec.value);
+      };
       r.onerror = () => res(null);
     });
   },
