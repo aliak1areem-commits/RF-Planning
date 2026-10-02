@@ -14536,38 +14536,60 @@ window.startDemoMode = function(){
 };
 </script>
   <script>
-// 🛡️ Block all Supabase calls before any script loads
-(function(){
-  const blockList = ['supabase.co', 'supabase.in', 'supabase.io'];
-  const origFetch = window.fetch;
-  window.fetch = function(url){
-    if (typeof url === 'string'){
-      for (const b of blockList){
-        if (url.includes(b)) {
-          console.warn('🛡️ Blocked Supabase call:', url);
-          return Promise.resolve(new Response('[]', {status:200}));
-        }
+  // ═══ 3. 🛡️ Block ALL Supabase calls (fetch + XHR + HEAD) ═══
+  if (!window.__demoFetchPatched) {
+    window.__demoFetchPatched = true;
+    const BLOCKED_DOMAINS = ['supabase.co', 'supabase.in', 'supabase.io'];
+
+    // ─── 1. Patch fetch() ───
+    const origFetch = window.fetch;
+    window.fetch = function(input, init) {
+      const url = (typeof input === 'string') ? input :
+                  (input && input.url) ? input.url : String(input);
+      if (BLOCKED_DOMAINS.some(function(d){ return url.indexOf(d) !== -1; })) {
+        console.warn('🛡️ Blocked fetch →', url);
+        // ارجع استجابة فارغة صالحة (مع دعم العدادات HEAD)
+        return Promise.resolve(new Response('[]', {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }));
       }
-    }
-    return origFetch.apply(this, arguments);
-  };
-  // Also block XHR
-  const OrigXHR = window.XMLHttpRequest;
-  window.XMLHttpRequest = function(){
-    const xhr = new OrigXHR();
-    const origOpen = xhr.open;
-    xhr.open = function(method, url){
-      if (typeof url === 'string'){
-        for (const b of blockList){
-          if (url.includes(b)) {
-            console.warn('🛡️ Blocked XHR:', url);
-            throw new Error('Blocked');
-          }
-        }
-      }
-      return origOpen.apply(this, arguments);
+      return origFetch.apply(this, arguments);
     };
-    return xhr;
+
+    // ─── 2. Patch XMLHttpRequest ───
+    const OrigXHR = window.XMLHttpRequest;
+    window.XMLHttpRequest = function() {
+      const xhr = new OrigXHR();
+      const origOpen = xhr.open;
+      const origSend = xhr.send;
+      let blocked = false;
+
+      xhr.open = function(method, url) {
+        if (BLOCKED_DOMAINS.some(function(d){ return url.indexOf(d) !== -1; })) {
+          console.warn('🛡️ Blocked XHR →', url);
+          blocked = true;
+          // نسمح بالفتح لكن نمنع الإرسال الفعلي
+          return origOpen.call(this, method, 'about:blank', true);
+        }
+        return origOpen.apply(this, arguments);
+      };
+
+      xhr.send = function() {
+        if (blocked) {
+          // محاكاة استجابة ناجحة فارغة
+          Object.defineProperty(xhr, 'status', { value: 200, configurable: true });
+          Object.defineProperty(xhr, 'readyState', { value: 4, configurable: true });
+          Object.defineProperty(xhr, 'responseText', { value: '[]', configurable: true });
+          Object.defineProperty(xhr, 'response', { value: '[]', configurable: true });
+          if (xhr.onreadystatechange) xhr.onreadystatechange();
+          if (xhr.onload) xhr.onload();
+          return;
+        }
+        return origSend.apply(this, arguments);
+      };
+
+      return xhr;
   };
 })();
 </script>
