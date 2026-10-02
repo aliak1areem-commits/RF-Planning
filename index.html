@@ -1528,7 +1528,7 @@ body.dark [style*="solid #E9EEF6"],body.dark [style*="solid #D7DEEA"]{border-col
         </div>
 
         <button class="split-close" onclick="closeSplit()"><i data-lucide="x"></i> Close map</button>
-        <!-- 🎨 Tool Legend -->
+           <!-- 🎨 Tool Legend -->
         <div class="tool-legend" id="toolLegend">
           <div class="tool-legend-head">
             <span id="toolLegendIcon">🎯</span>
@@ -1542,29 +1542,14 @@ body.dark [style*="solid #E9EEF6"],body.dark [style*="solid #D7DEEA"]{border-col
             <button onclick="ToolLegend.invert()">↺ Invert</button>
           </div>
         </div>
-                <!-- 🎨 Tool Legend -->
-        <div class="tool-legend" id="toolLegend">
-          <div class="tool-legend-head">
-            <span id="toolLegendIcon">🎯</span>
-            <span id="toolLegendTitle">Legend</span>
-            <button class="close-btn" onclick="ToolLegend.hide()" title="Hide">✕</button>
-          </div>
-          <div id="toolLegendItems"></div>
-          <div class="tool-legend-actions">
-            <button onclick="ToolLegend.toggleAll(true)">✅ All</button>
-            <button onclick="ToolLegend.toggleAll(false)">☐ None</button>
-            <button onclick="ToolLegend.invert()">↺ Invert</button>
+        <div class="loading-overlay" id="loadingOverlay" style="display:none;">
+          <div class="spinner"></div>
+          <div class="text">Loading cells from Supabase...</div>
+          <div style="font-size:11px;color:#94A3B8;margin-top:4px;" id="loadingSubtext">Initializing...</div>
+          <div style="width:240px;height:4px;background:#E9EEF6;border-radius:4px;margin-top:8px;overflow:hidden;">
+            <div id="loadingProgressBar" style="width:0%;height:100%;background:linear-gradient(90deg,#124191,#00A1E0);transition:width .3s;"></div>
           </div>
         </div>
-       <div class="loading-overlay" id="loadingOverlay" style="display:none;">
-  <div class="spinner"></div>
-  <div class="text">Loading cells from Supabase...</div>
-  <div style="font-size:11px;color:#94A3B8;margin-top:4px;" id="loadingSubtext">Initializing...</div>
-  <div style="width:240px;height:4px;background:#E9EEF6;border-radius:4px;margin-top:8px;overflow:hidden;">
-    <div id="loadingProgressBar" style="width:0%;height:100%;background:linear-gradient(90deg,#124191,#00A1E0);transition:width .3s;"></div>
-  </div>
-</div>
-          
       </div>
     </section>
 
@@ -1914,14 +1899,14 @@ body.dark [style*="solid #E9EEF6"],body.dark [style*="solid #D7DEEA"]{border-col
           <div class="tool-desc">Convert RF units: dBm, mW, W, dBi, dBd, km, miles, and more.</div>
           <div class="tool-tag" style="background:#F5F3FF;color:#7C3AED;">Utilities</div>
         </div>
-        <div class="tool-card" onclick="switchView('tool-kml')">
+                <div class="tool-card" onclick="switchView('tool-kml')">
           <div class="tool-icon" style="background:linear-gradient(135deg,#D64545,#DC2626);color:#fff;">🗺️</div>
           <div class="tool-title">Export KML</div>
           <div class="tool-desc">Export all cells as KML file for Google Earth visualization with sectors and labels.</div>
           <div class="tool-tag" style="background:#FCEAEA;color:#B91C1C;">Export</div>
         </div>
-      </div>
-              <div class="tool-card" onclick="switchView('tool-3g-nb')">
+
+        <div class="tool-card" onclick="switchView('tool-3g-nb')">
           <div class="tool-icon"></div>
           <div class="tool-title">3G / IRAT Analyzer</div>
           <div class="tool-desc">Audit 3G intra/inter-frequency neighbors and 3G→2G IRAT relations, import neighbor files, detect duplicates.</div>
@@ -1933,6 +1918,7 @@ body.dark [style*="solid #E9EEF6"],body.dark [style*="solid #D7DEEA"]{border-col
           <div class="tool-desc">Plan BCCH/BSIC/PSC/PCI/RSI for a new site with co-site rules and suggested neighbors.</div>
           <div class="tool-tag">Planning</div>
         </div>
+      </div>   <!-- ← إغلاق tools-grid بعد الكروت -->
     </section>
 
     <!-- PAGE: PCI CHECKER -->
@@ -3425,7 +3411,7 @@ body.dark [style*="solid #E9EEF6"],body.dark [style*="solid #D7DEEA"]{border-col
       <div id="loginError" class="login-error" style="display:none"></div>
       <button type="submit" id="loginBtn" class="btn btn-primary">Sign in</button>
     </form>
-    <div class="login-foot">v2.0</div>
+    <div class="login-foot">v2.0 · Built for Ali Amer · © 2026 MFC</div>
   </div>
 </div>
     <!-- Form -->
@@ -3673,14 +3659,8 @@ document.querySelectorAll('.nav-item').forEach(function(btn) {
 
 function toggleMapSidebar() {
   const sb = document.getElementById('mapSidebar');
-  function toggleMapSidebar() {
-  const sb = document.getElementById('mapSidebar');
   sb.classList.toggle('collapsed');
   const collapsed = sb.classList.contains('collapsed');
-  const legend = document.getElementById('legend');
-  if (legend) legend.style.left = collapsed ? '20px' : '340px';
-  setTimeout(() => { if (map) map.invalidateSize(); }, 300);
-}
   const legend = document.getElementById('legend');
   if (legend) legend.style.left = collapsed ? '20px' : '340px';
   setTimeout(() => { if (map) map.invalidateSize(); }, 300);
