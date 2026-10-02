@@ -24,8 +24,27 @@
     return;
   }
 
+<!-- ═══════════════════════════════════════════════════════════════
+     🛡️ DEMO GUARD — Full protection ONLY in demo mode
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
   // ═══════════════════════════════════════════════════════
-  // 🛡️ DEMO MODE ACTIVE — ابدأ الحماية
+  // 🎯 Detect Demo Mode
+  // ═══════════════════════════════════════════════════════
+  const IS_DEMO = new URLSearchParams(location.search).get('demo') === '1'
+               || location.pathname.includes('demo')
+               || localStorage.getItem('rf_demo_mode') === '1'
+               || window.__demoMode === true;
+
+  if (!IS_DEMO) {
+    console.log('%c✅ Normal mode — All features enabled', 'background:#006C35;color:#fff;padding:6px 12px;border-radius:6px;font-weight:700;font-size:12px');
+    window.__demoGuardActive = false;
+    return;
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // 🛡️ DEMO MODE ACTIVE
   // ═══════════════════════════════════════════════════════
   window.__demoGuardActive = true;
   console.warn('%c🛡️ DEMO MODE ACTIVE — Full protection enabled', 'background:#006C35;color:#fff;padding:10px 20px;border-radius:8px;font-weight:700;font-size:13px');
@@ -35,7 +54,6 @@
   // ─────────────────────────────────────────────────────
   const BLOCKED = ['supabase.co', 'supabase.in', 'supabase.io'];
 
-  // Patch fetch
   const origFetch = window.fetch;
   window.fetch = function(input, init) {
     const url = (typeof input === 'string') ? input :
@@ -50,7 +68,6 @@
     return origFetch.apply(this, arguments);
   };
 
-  // Patch XHR
   const OrigXHR = window.XMLHttpRequest;
   window.XMLHttpRequest = function() {
     const xhr = new OrigXHR();
@@ -92,39 +109,33 @@
   });
 
   // ─────────────────────────────────────────────────────
-  // 3. BLOCK KEYBOARD SHORTCUTS (F12, Ctrl+Shift+I, etc.)
+  // 3. BLOCK KEYBOARD SHORTCUTS
   // ─────────────────────────────────────────────────────
   document.addEventListener('keydown', function(e) {
-    // F12
     if (e.key === 'F12' || e.keyCode === 123) {
       e.preventDefault(); e.stopPropagation();
       showWarning();
       return false;
     }
-    // Ctrl+Shift+I/J/C
     if (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)) {
       e.preventDefault(); e.stopPropagation();
       showWarning();
       return false;
     }
-    // Ctrl+U (View Source)
     if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
       e.preventDefault(); e.stopPropagation();
       showWarning();
       return false;
     }
-    // Ctrl+S (Save)
     if (e.ctrlKey && (e.key === 'S' || e.key === 's')) {
       e.preventDefault(); e.stopPropagation();
       return false;
     }
-    // Mac: Cmd+Option+I/J/C
     if (e.metaKey && e.altKey && ['I','i','J','j','C','c'].includes(e.key)) {
       e.preventDefault(); e.stopPropagation();
       showWarning();
       return false;
     }
-    // Mac: Cmd+Option+U
     if (e.metaKey && e.altKey && (e.key === 'U' || e.key === 'u')) {
       e.preventDefault(); e.stopPropagation();
       return false;
@@ -150,7 +161,7 @@
   }
 
   // ─────────────────────────────────────────────────────
-  // 5. DETECT DEVTOOLS → BLUR CONTENT
+  // 5. DETECT DEVTOOLS → BLUR
   // ─────────────────────────────────────────────────────
   let devtoolsOpen = false;
   const threshold = 160;
