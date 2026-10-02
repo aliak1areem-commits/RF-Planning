@@ -3497,6 +3497,16 @@ body.dark [style*="solid #E9EEF6"],body.dark [style*="solid #D7DEEA"]{border-col
       </div>
     </div>
 
+  <section class="page" id="page-tool-new-site">
+  <div class="tool-page" style="max-width:1600px;">
+    <div class="tool-page-header">
+      <button class="back-btn" onclick="switchView('tools')">←</button>
+      <div>
+        <div class="tool-page-title">🏗️ New Site Planner PRO</div>
+        <div class="tool-page-sub">Auto-plan BCCH/BSIC/PSC/PCI/RSI + Smart Neighbors + Co-site validation</div>
+      </div>
+    </div>
+
     <!-- STEP 1: Site Info -->
     <div class="tool-section">
       <h3>📍 1. Site Information</h3>
@@ -3519,7 +3529,7 @@ body.dark [style*="solid #E9EEF6"],body.dark [style*="solid #D7DEEA"]{border-col
           <input type="number" id="ns_height" value="30" min="5" max="200">
         </div>
       </div>
-   
+      <div class="form-row">
         <div class="form-field">
           <label>Technologies</label>
           <select id="ns_type">
@@ -3584,8 +3594,6 @@ body.dark [style*="solid #E9EEF6"],body.dark [style*="solid #D7DEEA"]{border-col
           <input type="checkbox" id="ns_opt_cosite" checked>
           <span>🔒 منع تكرار BCCH/PSC/PCI على نفس الموقع (Co-site Rules)</span>
         </label>
-      
-       
         <label class="filter-checkbox">
           <input type="checkbox" id="ns_opt_autoNb" checked>
           <span>🔗 اقتراح الجيران تلقائياً</span>
@@ -3696,11 +3704,10 @@ body.dark [style*="solid #E9EEF6"],body.dark [style*="solid #D7DEEA"]{border-col
         </div>
       </div>
 
-    </div>
-  </div>
+    </div><!-- /nsResults -->
+
+  </div><!-- /tool-page -->
 </section>
-  </main>
-</div>
 
 <!-- MODAL: CREATE PROJECT -->
 <div class="modal-backdrop" id="createProjectModal" style="position:fixed;inset:0;background:rgba(12,27,61,.65);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:3000;padding:20px;">
