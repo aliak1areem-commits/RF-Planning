@@ -4,29 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RF Planning Platform</title>
-<!-- ═══════════════════════════════════════════════════════════════
-     🛡️ ANTI-INSPECT + DEVTOOLS BLUR — Demo Mode Only
-     (Admins & logged-in users are EXEMPT)
-     ═══════════════════════════════════════════════════════════════ -->
-<script>
-  // ═══════════════════════════════════════════════════════
-  // 🎯 Detect Demo Mode
-  // ═══════════════════════════════════════════════════════
-  const IS_DEMO = new URLSearchParams(location.search).get('demo') === '1'
-               || location.pathname.includes('demo')
-               || localStorage.getItem('rf_demo_mode') === '1'
-               || window.__demoMode === true;
-
-  if (!IS_DEMO) {
-    console.log('%c✅ Normal mode — All features enabled', 'background:#006C35;color:#fff;padding:6px 12px;border-radius:6px;font-weight:700;font-size:12px');
-    // ☝️ الخروج من السكربت — كل شي عادي
-    window.__demoGuardActive = false;
-    return;
-  }
-
-<!-- ═══════════════════════════════════════════════════════════════
-     🛡️ DEMO GUARD — Full protection ONLY in demo mode
-     ═══════════════════════════════════════════════════════════════ -->
 <script>
 (function(){
   // ═══════════════════════════════════════════════════════
@@ -43,9 +20,6 @@
     return;
   }
 
-  // ═══════════════════════════════════════════════════════
-  // 🛡️ DEMO MODE ACTIVE
-  // ═══════════════════════════════════════════════════════
   window.__demoGuardActive = true;
   console.warn('%c🛡️ DEMO MODE ACTIVE — Full protection enabled', 'background:#006C35;color:#fff;padding:10px 20px;border-radius:8px;font-weight:700;font-size:13px');
 
