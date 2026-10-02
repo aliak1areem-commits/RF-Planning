@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RF Planning Platform</title>
 <script>
+<!-- ═══════════════════════════════════════════════════════════════
+     🛡️ DEMO GUARD — Full protection ONLY in demo mode
+     Auth allowed · Data blocked · Inspect disabled
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
 (function(){
   // ═══════════════════════════════════════════════════════
   // 🎯 Detect Demo Mode
@@ -21,19 +26,37 @@
   }
 
   window.__demoGuardActive = true;
-  console.warn('%c🛡️ DEMO MODE ACTIVE — Full protection enabled', 'background:#006C35;color:#fff;padding:10px 20px;border-radius:8px;font-weight:700;font-size:13px');
+  console.warn('%c🛡️ DEMO MODE ACTIVE', 'background:#006C35;color:#fff;padding:10px 20px;border-radius:8px;font-weight:700;font-size:13px');
 
   // ─────────────────────────────────────────────────────
-  // 1. BLOCK SUPABASE (fetch + XHR)
+  // 1. BLOCK SUPABASE (Data) — لكن Auth مسموح
   // ─────────────────────────────────────────────────────
   const BLOCKED = ['supabase.co', 'supabase.in', 'supabase.io'];
 
+  // 🎯 استثناءات Auth — تسجيل الدخول يمر
+  const AUTH_PATHS = [
+    '/auth/v1/token',
+    '/auth/v1/signup',
+    '/auth/v1/user',
+    '/auth/v1/logout',
+    '/auth/v1/recover',
+    '/auth/v1/otp',
+    '/auth/v1/verify'
+  ];
+
+  function isAuthCall(url) {
+    return AUTH_PATHS.some(p => url.indexOf(p) !== -1);
+  }
+
+  // Patch fetch
   const origFetch = window.fetch;
   window.fetch = function(input, init) {
     const url = (typeof input === 'string') ? input :
                 (input && input.url) ? input.url : String(input);
-    if (BLOCKED.some(d => url.indexOf(d) !== -1)) {
-      console.warn('🛡️ Blocked fetch →', url.substring(0, 80));
+    const isSupabase = BLOCKED.some(d => url.indexOf(d) !== -1);
+
+    if (isSupabase && !isAuthCall(url)) {
+      console.warn('🛡️ Blocked:', url.substring(0, 70));
       return Promise.resolve(new Response('[]', {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
@@ -42,6 +65,7 @@
     return origFetch.apply(this, arguments);
   };
 
+  // Patch XHR
   const OrigXHR = window.XMLHttpRequest;
   window.XMLHttpRequest = function() {
     const xhr = new OrigXHR();
@@ -50,8 +74,8 @@
     let blocked = false;
 
     xhr.open = function(method, url) {
-      if (BLOCKED.some(d => url.indexOf(d) !== -1)) {
-        console.warn('🛡️ Blocked XHR →', url.substring(0, 80));
+      const isSupabase = BLOCKED.some(d => url.indexOf(d) !== -1);
+      if (isSupabase && !isAuthCall(url)) {
         blocked = true;
         return origOpen.call(this, method, 'about:blank', true);
       }
@@ -88,18 +112,15 @@
   document.addEventListener('keydown', function(e) {
     if (e.key === 'F12' || e.keyCode === 123) {
       e.preventDefault(); e.stopPropagation();
-      showWarning();
-      return false;
+      showWarning(); return false;
     }
     if (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)) {
       e.preventDefault(); e.stopPropagation();
-      showWarning();
-      return false;
+      showWarning(); return false;
     }
     if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
       e.preventDefault(); e.stopPropagation();
-      showWarning();
-      return false;
+      showWarning(); return false;
     }
     if (e.ctrlKey && (e.key === 'S' || e.key === 's')) {
       e.preventDefault(); e.stopPropagation();
@@ -107,8 +128,7 @@
     }
     if (e.metaKey && e.altKey && ['I','i','J','j','C','c'].includes(e.key)) {
       e.preventDefault(); e.stopPropagation();
-      showWarning();
-      return false;
+      showWarning(); return false;
     }
     if (e.metaKey && e.altKey && (e.key === 'U' || e.key === 'u')) {
       e.preventDefault(); e.stopPropagation();
@@ -203,7 +223,7 @@
   `;
   document.head.appendChild(selectionStyle);
 
-  console.log('%c🛡️ Demo Guard — Full protection active', 'background:#006C35;color:#fff;padding:8px 16px;border-radius:6px;font-weight:700;font-size:12px');
+  console.log('%c🛡️ Demo Guard — Active (Auth allowed)', 'background:#006C35;color:#fff;padding:8px 16px;border-radius:6px;font-weight:700;font-size:12px');
 })();
 </script>
 </script>
