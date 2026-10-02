@@ -14767,7 +14767,7 @@ window.startDemoMode = function(){
   console.log('%c✅ DEMO MODE READY', 'background:#006C35;color:#fff;padding:10px 20px;border-radius:8px;font-weight:700;font-size:14px');
   console.log('%c→ Riyadh · ' + sitePositions.length + ' sites · ' + demoCells.length + ' cells', 'color:#A89383;font-size:12px');
 };
-     // ═══════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════
 // 🚪 EXIT DEMO MODE
 // ═══════════════════════════════════════════════════════════════
 window.exitDemoMode = function(){
@@ -14778,9 +14778,8 @@ window.exitDemoMode = function(){
   window.__demoMode = false;
   window.__demoGuardActive = false;
 
-  // 2. Go back to normal URL (remove ?demo=1 if present)
-  const cleanURL = location.pathname;
-  location.href = cleanURL;
+  // 2. Go back to normal URL
+  location.href = location.pathname;
 };
 </script>
 
