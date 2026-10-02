@@ -14620,6 +14620,17 @@ if ('serviceWorker' in navigator) {
      ═══════════════════════════════════════════════════════════════ -->
 <script>
 window.startDemoMode = function(){
+  // 🎯 Save demo flag (so F5 keeps demo mode)
+  localStorage.setItem('rf_demo_mode', '1');
+  window.__demoMode = true;
+
+  // 🔄 Reload to activate the guard (إذا الحماية مو مفعّلة)
+  if (!window.__demoGuardActive) {
+    console.log('%c🎭 Activating Demo Mode... Reloading page', 'background:#006C35;color:#fff;padding:10px 20px;border-radius:8px;font-weight:700;font-size:13px');
+    location.reload();
+    return;
+  }
+
   console.log('%c👤 Starting Demo Mode...', 'background:#006C35;color:#fff;padding:8px 16px;border-radius:6px;font-weight:700');
 
   // ═══ 1. Hide login + show app ═══
@@ -14783,6 +14794,21 @@ window.startDemoMode = function(){
 
   console.log('%c✅ DEMO MODE READY', 'background:#006C35;color:#fff;padding:10px 20px;border-radius:8px;font-weight:700;font-size:14px');
   console.log('%c→ Riyadh · ' + sitePositions.length + ' sites · ' + demoCells.length + ' cells', 'color:#A89383;font-size:12px');
+};
+     // ═══════════════════════════════════════════════════════════════
+// 🚪 EXIT DEMO MODE
+// ═══════════════════════════════════════════════════════════════
+window.exitDemoMode = function(){
+  console.log('%c✅ Exiting Demo Mode...', 'background:#00A550;color:#fff;padding:10px 20px;border-radius:8px;font-weight:700;font-size:13px');
+
+  // 1. Clear flags
+  localStorage.removeItem('rf_demo_mode');
+  window.__demoMode = false;
+  window.__demoGuardActive = false;
+
+  // 2. Go back to normal URL (remove ?demo=1 if present)
+  const cleanURL = location.pathname;
+  location.href = cleanURL;
 };
 </script>
 
